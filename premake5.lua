@@ -28,6 +28,14 @@ project "gl_sandbox"
 	includedirs
 	{
 		"%{prj.name}/src",
+		"%{prj.name}/vendor/glfw/include"
+	}
+
+	libdirs { "%{prj.name}/vendor/glfw/lib" }
+
+	links
+	{
+		"glfw3.lib"
 	}
 
 	filter "system:windows"
