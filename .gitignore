@@ -30,3 +30,37 @@
 *.exe
 *.out
 *.app
+
+# build stuff
+bin/*
+bin-int/*
+
+# premake
+.premake/*
+
+# VS
+.vs/*
+*/.vs/*
+*.sln
+*/*.vcxproj
+
+
+
+# Makefiles
+Makefile
+run.sh
+
+#Codelite
+*/.codelite
+.codelite
+*/.ctagsd
+.ctagsd
+*.workspace
+*.project
+compile_flags.txt
+radrenderer.mk
+radrenderer.txt
+pch.h.gch
+
+#General Windows
+*.bat
