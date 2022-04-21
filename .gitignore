@@ -34,6 +34,8 @@
 # build stuff
 bin/*
 bin-int/*
+*/bin/*
+*/bin-int/*
 
 # premake
 .premake/*
@@ -44,6 +46,7 @@ bin-int/*
 *.sln
 */*.vcxproj
 */*.vcxproj.user
+*/*.vcxproj.filters
 
 #GLFW
 */glfw/*
