@@ -18,6 +18,9 @@ project "gl_sandbox"
 	language "C++"
 	cppdialect "C++20"
 
+	pchheader "pch.h"
+	pchsource "gl_sandbox/src/pch.cpp"
+
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -30,6 +33,7 @@ project "gl_sandbox"
 	includedirs
 	{
 		"%{prj.name}/src",
+		"%{prj.name}/src/renderer",
 		"%{prj.name}/vendor/glfw/include",
 		"%{prj.name}/vendor/glad/include"
 	}

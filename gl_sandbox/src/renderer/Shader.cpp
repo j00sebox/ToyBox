@@ -1,8 +1,5 @@
+#include "pch.h"
 #include "Shader.h"
-
-#include <fstream>
-#include <sstream> 
-#include <iostream>
 
 #include <glad/glad.h>
 

@@ -1,9 +1,4 @@
-#include <iostream>
-#include <stdio.h>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <malloc.h>
+#include "pch.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -98,10 +93,10 @@ int main()
 	glEnableVertexAttribArray(a_colour);
 	glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*) (sizeof(float) * 3));
 
-	Shader basic_v("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex);
-	Shader basic_f("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment);
-
-	ShaderProgram basic_shader(basic_v, basic_f);
+	ShaderProgram basic_shader(
+		Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex ), 
+		Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment )
+	);
 
 	basic_shader.bind();
 

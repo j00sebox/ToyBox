@@ -10,9 +10,8 @@ enum class ShaderType
 	Fragment
 };
 
-class Shader
+struct Shader
 {
-public:
 	Shader(std::string&& _path, ShaderType _type) 
 		: file_path(std::move(_path)), type(_type)  {}
 
