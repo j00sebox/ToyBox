@@ -9,6 +9,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include "Shader.h"
+
 extern "C"
 {
 	void glfw_error_callback(int error, const char* description)
@@ -23,34 +25,28 @@ extern "C"
 	}
 }
 
-std::pair<std::string, std::string> load_shader(const std::string& path)
+std::pair<std::string, std::string> load_shader(const std::string& path1, const std::string& path2)
 {
-	std::ifstream stream(path);
+	std::ifstream stream(path1);
 
 	std::string line;
 	std::stringstream ss[2];
 
-	unsigned int index;
+	while (getline(stream, line))
+	{
+		ss[0] << line << "\n";
+	}
+
+	stream.close();
+
+	stream.open(path2);
 
 	while (getline(stream, line))
 	{
-		if (line.find("#shader") != std::string::npos)
-		{
-			if (line.find("vertex") != std::string::npos)
-			{
-				index = 0;
-			}
-
-			if (line.find("fragment") != std::string::npos)
-			{
-				index = 1;
-			}
-		}
-		else
-		{
-			ss[index] << line << "\n";
-		}
+		ss[1] << line << "\n";
 	}
+
+	stream.close();
 
 	return { ss[0].str(), ss[1].str() };
 }
@@ -82,7 +78,12 @@ int main()
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	auto [vertex_shader, fragment_shader] = load_shader("res/shaders/basic.shader");
+	Shader basic_v("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex);
+	Shader basic_f("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment);
+
+	ShaderProgram basic_shader(basic_v, basic_f);
+
+	/*auto [vertex_shader, fragment_shader] = load_shader("res/shaders/basic/basic_vertex.shader", "res/shaders/basic/basic_fragment.shader");
 
 	const char* vs = vertex_shader.c_str();
 
@@ -137,7 +138,7 @@ int main()
 	else
 	{
 		std::cout << "Shader compilation successful!\n";
-	}
+	}*/
 
 	program = glCreateProgram();
 
@@ -161,13 +162,13 @@ int main()
 	glEnableVertexAttribArray(a_colour);
 	glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*) (sizeof(float) * 3));
 
-	glAttachShader(program, basic_shader_v);
-	glAttachShader(program, basic_shader_f);
+	//glAttachShader(program, basic_shader_v);
+	//glAttachShader(program, basic_shader_f);
 
-	glLinkProgram(program);
+	//glLinkProgram(program);
 
-	glDetachShader(program, basic_shader_v);
-	glDetachShader(program, basic_shader_f);
+	//glDetachShader(program, basic_shader_v);
+	//glDetachShader(program, basic_shader_f);
 
 	glUseProgram(program);
 
