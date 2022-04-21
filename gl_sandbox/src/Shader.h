@@ -29,19 +29,24 @@ public:
 	{
 		create_program();
 
-		std::vector<Shader> shaders = { s ... };
+		m_shaders = { s ... };
 
-		for (int i = 0; i < shaders.size(); ++i)
+		for (int i = 0; i < m_shaders.size(); ++i)
 		{
-			std::string src = load_shader(shaders[i]);
+			std::string src = load_shader(m_shaders[i]);
 
-			create_shader(shaders[i], src);
+			create_shader(m_shaders[i], src);
 
-			compile_shader(shaders[i].id);
+			compile_shader(m_shaders[i].id);
 
-			attach_shader(shaders[i].id);
+			attach_shader(m_shaders[i].id);
 		}
+
+		link();
+		delete_shaders();
 	}
+
+	~ShaderProgram();
 
 	void bind() const;
 	void unbind() const;
@@ -53,6 +58,8 @@ private:
 	void compile_shader(unsigned int id);
 	void attach_shader(unsigned int id);
 	void link();
+	void delete_shaders(); // also does a detach
 
 	unsigned int m_program_id;
+	std::vector<Shader> m_shaders;
 };

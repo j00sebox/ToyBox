@@ -78,70 +78,6 @@ int main()
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	Shader basic_v("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex);
-	Shader basic_f("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment);
-
-	ShaderProgram basic_shader(basic_v, basic_f);
-
-	/*auto [vertex_shader, fragment_shader] = load_shader("res/shaders/basic/basic_vertex.shader", "res/shaders/basic/basic_fragment.shader");
-
-	const char* vs = vertex_shader.c_str();
-
-	basic_shader_v = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(basic_shader_v, 1, &vs, nullptr);
-
-	glCompileShader(basic_shader_v);
-
-	int success = 0;
-	glGetShaderiv(basic_shader_v, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		int log_sz;
-		glGetShaderiv(basic_shader_v, GL_INFO_LOG_LENGTH, &log_sz);
-
-		char* info_log = (char*)_malloca(log_sz * sizeof(char));
-		glGetShaderInfoLog(basic_shader_v, log_sz, nullptr, info_log);
-
-		std::cout << info_log << "\n";
-
-		glDeleteShader(basic_shader_v);
-		__debugbreak();
-	}
-	else
-	{
-		std::cout << "Shader compilation successful!\n";
-	}
-
-	const char* fs = fragment_shader.c_str();
-
-	basic_shader_f = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(basic_shader_f, 1, &fs, nullptr);
-
-	glCompileShader(basic_shader_f);
-
-	glGetShaderiv(basic_shader_f, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		int log_sz;
-		glGetShaderiv(basic_shader_f, GL_INFO_LOG_LENGTH, &log_sz);
-
-		char* info_log = (char*)_malloca(log_sz * sizeof(char));
-		glGetShaderInfoLog(basic_shader_f, log_sz, nullptr, info_log);
-
-		std::cout << info_log << "\n";
-
-		glDeleteShader(basic_shader_f);
-		__debugbreak();
-	}
-	else
-	{
-		std::cout << "Shader compilation successful!\n";
-	}*/
-
-	program = glCreateProgram();
-
 	float vertices[] =
 	{
 		-0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f, 1.f,
@@ -162,22 +98,18 @@ int main()
 	glEnableVertexAttribArray(a_colour);
 	glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*) (sizeof(float) * 3));
 
-	//glAttachShader(program, basic_shader_v);
-	//glAttachShader(program, basic_shader_f);
+	Shader basic_v("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex);
+	Shader basic_f("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment);
 
-	//glLinkProgram(program);
+	ShaderProgram basic_shader(basic_v, basic_f);
 
-	//glDetachShader(program, basic_shader_v);
-	//glDetachShader(program, basic_shader_f);
-
-	glUseProgram(program);
+	basic_shader.bind();
 
 	while (!glfwWindowShouldClose(window))
 	{
 		double time = glfwGetTime();
 		//printf("Time: %f\n", time);
 
-		
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwSwapBuffers(window);

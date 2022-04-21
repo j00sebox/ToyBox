@@ -25,6 +25,21 @@ GLenum get_gl_shader_type(ShaderType type)
 	return GL_FALSE;
 }
 
+ShaderProgram::~ShaderProgram()
+{
+	glDeleteProgram(m_program_id);
+}
+
+void ShaderProgram::bind() const
+{
+	glUseProgram(m_program_id);
+}
+
+void ShaderProgram::unbind() const
+{
+	glUseProgram(0);
+}
+
 void ShaderProgram::create_program()
 {
 	m_program_id = glCreateProgram();
@@ -90,4 +105,36 @@ void ShaderProgram::attach_shader(unsigned int id)
 void ShaderProgram::link()
 {
 	glLinkProgram(m_program_id);
+
+	int linked = 0;
+	glGetProgramiv(m_program_id, GL_LINK_STATUS, (int*)&linked);
+	if (!linked)
+	{
+		int log_sz = 0;
+		glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &log_sz);
+
+		char* info_log = new char[log_sz * sizeof(char)];
+		glGetProgramInfoLog(m_program_id, log_sz, nullptr, info_log);
+
+		std::cout << info_log << "\n";
+
+		delete[] info_log;
+		delete_shaders();
+		glDeleteProgram(m_program_id);
+		__debugbreak();
+	}
+}
+
+void ShaderProgram::delete_shaders()
+{
+	if (m_shaders.size() > 0)
+	{
+		for (const auto& s : m_shaders)
+		{
+			glDetachShader(m_program_id, s.id);
+			glDeleteShader(s.id);
+		}
+
+		m_shaders.clear();
+	}	
 }
