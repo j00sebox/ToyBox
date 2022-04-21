@@ -36,6 +36,8 @@ bin/*
 bin-int/*
 */bin/*
 */bin-int/*
+gl_sandbox/vendor/glad/bin/*
+gl_sandbox/vendor/glad/bin-int/*
 
 # premake
 .premake/*
@@ -47,6 +49,7 @@ bin-int/*
 */*.vcxproj
 */*.vcxproj.user
 */*.vcxproj.filters
+gl_sandbox/vendor/glad/*.vcxproj.filters
 
 #GLFW
 */glfw/*

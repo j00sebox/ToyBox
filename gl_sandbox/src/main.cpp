@@ -21,6 +21,9 @@ extern "C"
 
 int main()
 {
+	unsigned int vertex_array, vertex_buffer;
+	unsigned int a_position = 0, a_colour = 1;
+
 	if (!glfwInit())
 		__debugbreak();
 
@@ -43,10 +46,32 @@ int main()
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
+	float vertices[] =
+	{
+		-0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f, 1.f,
+		 0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
+		 0.f,   0.5f, 0.f, 0.f, 0.f, 1.f, 1.f
+	};
+
+	glGenVertexArrays(1, &vertex_array);
+	glBindVertexArray(vertex_array);
+
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(a_position);
+	glVertexAttribPointer(a_position, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)0);
+
+	glEnableVertexAttribArray(a_colour);
+	glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*) (sizeof(float) * 3));
+
 	while (!glfwWindowShouldClose(window))
 	{
 		double time = glfwGetTime();
 		printf("Time: %f\n", time);
+
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
