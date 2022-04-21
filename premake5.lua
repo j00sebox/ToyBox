@@ -10,6 +10,8 @@ workspace "gl_sandbox"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+include "gl_sandbox/vendor/glad"
+
 project "gl_sandbox"
 	location "gl_sandbox"
 	kind "ConsoleApp"
@@ -28,14 +30,16 @@ project "gl_sandbox"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/glfw/include"
+		"%{prj.name}/vendor/glfw/include",
+		"%{prj.name}/vendor/glad/include"
 	}
 
 	libdirs { "%{prj.name}/vendor/glfw/lib" }
 
 	links
 	{
-		"glfw3.lib"
+		"glfw3.lib",
+		"GLAD"
 	}
 
 	filter "system:windows"
