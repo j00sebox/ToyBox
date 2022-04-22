@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Shader.h"
 
+#include "GLError.h"
+
 #include <glad/glad.h>
 
 GLenum get_gl_shader_type(ShaderType type)
@@ -24,22 +26,22 @@ GLenum get_gl_shader_type(ShaderType type)
 
 ShaderProgram::~ShaderProgram()
 {
-	glDeleteProgram(m_program_id);
+	GL_CALL(glDeleteProgram(m_program_id));
 }
 
 void ShaderProgram::bind() const
 {
-	glUseProgram(m_program_id);
+	GL_CALL(glUseProgram(m_program_id));
 }
 
 void ShaderProgram::unbind() const
 {
-	glUseProgram(0);
+	GL_CALL(glUseProgram(0));
 }
 
 void ShaderProgram::create_program()
 {
-	m_program_id = glCreateProgram();
+	GL_CALL(m_program_id = glCreateProgram());
 }
 
 std::string ShaderProgram::load_shader(const Shader& s) const
@@ -63,29 +65,29 @@ void ShaderProgram::create_shader(Shader& s, const std::string& src) const
 {
 	const char* shader_src = src.c_str();
 
-	s.id = glCreateShader(get_gl_shader_type(s.type));
-	glShaderSource(s.id, 1, &shader_src, nullptr);
+	GL_CALL(s.id = glCreateShader(get_gl_shader_type(s.type)));
+	GL_CALL(glShaderSource(s.id, 1, &shader_src, nullptr));
 }
 
 void ShaderProgram::compile_shader(unsigned int id) const
 {
-	glCompileShader(id);
+	GL_CALL(glCompileShader(id));
 
 	int success = 0;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+	GL_CALL(glGetShaderiv(id, GL_COMPILE_STATUS, &success));
 
 	if (!success)
 	{
 		int log_sz;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_sz);
+		GL_CALL(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_sz));
 
 		char* info_log = new char[log_sz * sizeof(char)];
-		glGetShaderInfoLog(id, log_sz, nullptr, info_log);
+		GL_CALL(glGetShaderInfoLog(id, log_sz, nullptr, info_log));
 
 		std::cout << info_log << "\n";
 
 		delete[] info_log;
-		glDeleteShader(id);
+		GL_CALL(glDeleteShader(id));
 		ASSERT(false);
 	}
 	else
@@ -96,28 +98,28 @@ void ShaderProgram::compile_shader(unsigned int id) const
 
 void ShaderProgram::attach_shader(unsigned int id) const
 {
-	glAttachShader(m_program_id, id);
+	GL_CALL(glAttachShader(m_program_id, id));
 }
 
 void ShaderProgram::link()
 {
-	glLinkProgram(m_program_id);
+	GL_CALL(glLinkProgram(m_program_id));
 
 	int linked = 0;
-	glGetProgramiv(m_program_id, GL_LINK_STATUS, (int*)&linked);
+	GL_CALL(glGetProgramiv(m_program_id, GL_LINK_STATUS, (int*)&linked));
 	if (!linked)
 	{
 		int log_sz = 0;
-		glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &log_sz);
+		GL_CALL(glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &log_sz));
 
 		char* info_log = new char[log_sz * sizeof(char)];
-		glGetProgramInfoLog(m_program_id, log_sz, nullptr, info_log);
+		GL_CALL(glGetProgramInfoLog(m_program_id, log_sz, nullptr, info_log));
 
 		std::cout << info_log << "\n";
 
 		delete[] info_log;
 		delete_shaders();
-		glDeleteProgram(m_program_id);
+		GL_CALL(glDeleteProgram(m_program_id));
 		ASSERT(false);
 	}
 }
@@ -128,8 +130,8 @@ void ShaderProgram::delete_shaders()
 	{
 		for (const auto& s : m_shaders)
 		{
-			glDetachShader(m_program_id, s.id);
-			glDeleteShader(s.id);
+			GL_CALL(glDetachShader(m_program_id, s.id));
+			GL_CALL(glDeleteShader(s.id));
 		}
 
 		m_shaders.clear();

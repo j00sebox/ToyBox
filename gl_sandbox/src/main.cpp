@@ -48,43 +48,46 @@ int main()
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	float vertices[] =
+	// render scope
 	{
-		-0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f, 1.f,
-		 0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
-		 0.f,   0.5f, 0.f, 0.f, 0.f, 1.f, 1.f
-	};
+		float vertices[] =
+		{
+			-0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f, 1.f,
+			 0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
+			 0.f,   0.5f, 0.f, 0.f, 0.f, 1.f, 1.f
+		};
 
-	glGenVertexArrays(1, &vertex_array);
-	glBindVertexArray(vertex_array);
+		glGenVertexArrays(1, &vertex_array);
+		glBindVertexArray(vertex_array);
 
-	VertexBuffer vb;
-	vb.add_data(vertices, sizeof(vertices));
+		VertexBuffer vb;
+		vb.add_data(vertices, sizeof(vertices));
 
-	glEnableVertexAttribArray(a_position);
-	glVertexAttribPointer(a_position, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)0);
+		glEnableVertexAttribArray(a_position);
+		glVertexAttribPointer(a_position, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)0);
 
-	glEnableVertexAttribArray(a_colour);
-	glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*) (sizeof(float) * 3));
+		glEnableVertexAttribArray(a_colour);
+		glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 3));
 
-	ShaderProgram basic_shader(
-		Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex),
-		Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment)
-	);
+		ShaderProgram basic_shader(
+			Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex),
+			Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment)
+		);
 
-	basic_shader.bind();
+		basic_shader.bind();
 
-	while (!glfwWindowShouldClose(window))
-	{
-		double time = glfwGetTime();
-		//printf("Time: %f\n", time);
+		while (!glfwWindowShouldClose(window))
+		{
+			double time = glfwGetTime();
+			//printf("Time: %f\n", time);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+		}
 	}
-
+	
 	glfwDestroyWindow(window);
 	
 	glfwTerminate();
