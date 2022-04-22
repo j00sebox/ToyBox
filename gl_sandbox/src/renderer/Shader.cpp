@@ -86,7 +86,7 @@ void ShaderProgram::compile_shader(unsigned int id) const
 
 		delete[] info_log;
 		glDeleteShader(id);
-		__debugbreak();
+		ASSERT(false);
 	}
 	else
 	{
@@ -118,7 +118,7 @@ void ShaderProgram::link()
 		delete[] info_log;
 		delete_shaders();
 		glDeleteProgram(m_program_id);
-		__debugbreak();
+		ASSERT(false);
 	}
 }
 

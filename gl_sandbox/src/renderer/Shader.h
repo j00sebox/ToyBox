@@ -1,8 +1,6 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <concepts>
+#include "Log.h"
 
 enum class ShaderType
 {
