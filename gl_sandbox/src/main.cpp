@@ -6,6 +6,7 @@
 
 #include "Shader.h"
 #include "Buffer.h"
+#include "VertexArray.h"
 
 extern "C"
 {
@@ -57,23 +58,24 @@ int main()
 			 0.f,   0.5f, 0.f, 0.f, 0.f, 1.f, 1.f
 		};
 
-		glGenVertexArrays(1, &vertex_array);
-		glBindVertexArray(vertex_array);
+		VertexArray va;
 
 		VertexBuffer vb;
 		vb.add_data(vertices, sizeof(vertices));
 
-		glEnableVertexAttribArray(a_position);
-		glVertexAttribPointer(a_position, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)0);
+		BufferLayout layout = {
+			{a_position, 3, GL_FLOAT, false},
+			{a_colour, 4, GL_FLOAT, false}
+		};
 
-		glEnableVertexAttribArray(a_colour);
-		glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 3));
+		va.set_layout(vb, layout);
 
 		ShaderProgram basic_shader(
 			Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex),
 			Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment)
 		);
 
+		va.bind();
 		basic_shader.bind();
 
 		while (!glfwWindowShouldClose(window))
