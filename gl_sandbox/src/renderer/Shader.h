@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <concepts>
 
 enum class ShaderType
 {
@@ -12,7 +13,7 @@ enum class ShaderType
 
 struct Shader
 {
-	Shader(std::string&& _path, ShaderType _type) 
+	Shader(const char* _path, ShaderType _type) 
 		: file_path(std::move(_path)), type(_type)  {}
 
 	unsigned int id = 0;
@@ -20,10 +21,13 @@ struct Shader
 	ShaderType type;
 };
 
+template<typename T>
+concept is_shader = std::convertible_to<T, Shader>;
+
 class ShaderProgram
 {
 public:
-	template<class ... Shaders>
+	template<is_shader ... Shaders>
 	ShaderProgram(Shaders ... s)
 	{
 		create_program();
@@ -52,10 +56,10 @@ public:
 
 private:
 	void create_program();
-	std::string load_shader(const Shader& s);
-	void create_shader(Shader& s, const std::string& src);
-	void compile_shader(unsigned int id);
-	void attach_shader(unsigned int id);
+	std::string load_shader(const Shader& s) const;
+	void create_shader(Shader& s, const std::string& src) const;
+	void compile_shader(unsigned int id) const;
+	void attach_shader(unsigned int id) const;
 	void link();
 	void delete_shaders(); // also does a detach
 

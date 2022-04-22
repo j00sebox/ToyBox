@@ -42,7 +42,7 @@ void ShaderProgram::create_program()
 	m_program_id = glCreateProgram();
 }
 
-std::string ShaderProgram::load_shader(const Shader& s)
+std::string ShaderProgram::load_shader(const Shader& s) const
 {
 	std::string line;
 	std::ifstream stream(s.file_path);
@@ -59,7 +59,7 @@ std::string ShaderProgram::load_shader(const Shader& s)
 	return ss.str();
 }
 
-void ShaderProgram::create_shader(Shader& s, const std::string& src)
+void ShaderProgram::create_shader(Shader& s, const std::string& src) const
 {
 	const char* shader_src = src.c_str();
 
@@ -67,7 +67,7 @@ void ShaderProgram::create_shader(Shader& s, const std::string& src)
 	glShaderSource(s.id, 1, &shader_src, nullptr);
 }
 
-void ShaderProgram::compile_shader(unsigned int id)
+void ShaderProgram::compile_shader(unsigned int id) const
 {
 	glCompileShader(id);
 
@@ -94,7 +94,7 @@ void ShaderProgram::compile_shader(unsigned int id)
 	}
 }
 
-void ShaderProgram::attach_shader(unsigned int id)
+void ShaderProgram::attach_shader(unsigned int id) const
 {
 	glAttachShader(m_program_id, id);
 }
@@ -122,7 +122,7 @@ void ShaderProgram::link()
 	}
 }
 
-void ShaderProgram::delete_shaders()
+void ShaderProgram::delete_shaders() 
 {
 	if (m_shaders.size() > 0)
 	{

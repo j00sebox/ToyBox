@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 
 #include "Shader.h"
+#include "Buffer.h"
 
 extern "C"
 {
@@ -18,32 +19,6 @@ extern "C"
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
-}
-
-std::pair<std::string, std::string> load_shader(const std::string& path1, const std::string& path2)
-{
-	std::ifstream stream(path1);
-
-	std::string line;
-	std::stringstream ss[2];
-
-	while (getline(stream, line))
-	{
-		ss[0] << line << "\n";
-	}
-
-	stream.close();
-
-	stream.open(path2);
-
-	while (getline(stream, line))
-	{
-		ss[1] << line << "\n";
-	}
-
-	stream.close();
-
-	return { ss[0].str(), ss[1].str() };
 }
 
 int main()
@@ -94,8 +69,8 @@ int main()
 	glVertexAttribPointer(a_colour, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*) (sizeof(float) * 3));
 
 	ShaderProgram basic_shader(
-		Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex ), 
-		Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment )
+		Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex),
+		Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment)
 	);
 
 	basic_shader.bind();
