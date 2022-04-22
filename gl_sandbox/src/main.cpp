@@ -58,9 +58,8 @@ int main()
 	glGenVertexArrays(1, &vertex_array);
 	glBindVertexArray(vertex_array);
 
-	glGenBuffers(1, &vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	VertexBuffer vb;
+	vb.add_data(vertices, sizeof(vertices));
 
 	glEnableVertexAttribArray(a_position);
 	glVertexAttribPointer(a_position, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)0);
