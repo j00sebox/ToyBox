@@ -8,6 +8,8 @@
 #include "Buffer.h"
 #include "VertexArray.h"
 
+#include "GLError.h"
+
 extern "C"
 {
 	void glfw_error_callback(int error, const char* description)
@@ -24,8 +26,8 @@ extern "C"
 
 int main()
 {
-	unsigned int vertex_array, vertex_buffer, program, basic_shader_v, basic_shader_f;
 	unsigned int a_position = 0, a_colour = 1;
+	unsigned int index_buffer;
 
 	if (!glfwInit())
 		__debugbreak();
@@ -54,8 +56,14 @@ int main()
 		float vertices[] =
 		{
 			-0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f, 1.f,
+			 0.5f,  0.5f, 0.f, 0.f, 0.f, 1.f, 1.f,
+			-0.5f,  0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
 			 0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
-			 0.f,   0.5f, 0.f, 0.f, 0.f, 1.f, 1.f
+		};
+
+		unsigned int indices[] = {
+			0, 1, 2,
+			0, 3, 1
 		};
 
 		VertexArray va;
@@ -70,12 +78,15 @@ int main()
 
 		va.set_layout(vb, layout);
 
+		IndexBuffer ib(indices, sizeof(indices));
+
 		ShaderProgram basic_shader(
 			Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex),
 			Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment)
 		);
 
 		va.bind();
+		ib.bind();
 		basic_shader.bind();
 
 		while (!glfwWindowShouldClose(window))
@@ -83,7 +94,7 @@ int main()
 			double time = glfwGetTime();
 			//printf("Time: %f\n", time);
 
-			glDrawArrays(GL_TRIANGLES, 0, 3);
+			GL_CALL(glDrawElements(GL_TRIANGLES, ib.get_count(), GL_UNSIGNED_INT, nullptr));
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
