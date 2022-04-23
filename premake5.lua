@@ -27,13 +27,16 @@ project "gl_sandbox"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/vendor/stb/**.h",
+		"%{prj.name}/vendor/stb/**.cpp",
 	}
 
 	includedirs
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/src/renderer",
+		"%{prj.name}/vendor/stb",
 		"%{prj.name}/vendor/glfw/include",
 		"%{prj.name}/vendor/glad/include"
 	}

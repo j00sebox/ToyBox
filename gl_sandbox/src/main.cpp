@@ -10,6 +10,8 @@
 
 #include "GLError.h"
 
+#include <stb_image.h>
+
 extern "C"
 {
 	void glfw_error_callback(int error, const char* description)
@@ -26,8 +28,9 @@ extern "C"
 
 int main()
 {
-	unsigned int a_position = 0, a_colour = 1;
-	unsigned int index_buffer;
+	unsigned int a_position = 0, a_tex_coord = 1;//a_colour = 1;
+	unsigned int texutre;
+	int tex_width, tex_height, bpp;
 
 	if (!glfwInit())
 		__debugbreak();
@@ -51,14 +54,27 @@ int main()
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
+	stbi_set_flip_vertically_on_load(1);
+	unsigned char* local_buffer = stbi_load("res/textures/enderpearl.png", &tex_width, &tex_height, &bpp, 4);
+
 	// render scope
 	{
+		glGenTextures(1, &texutre);
+		glBindTexture(GL_TEXTURE_2D, texutre);
+		
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, local_buffer));
+		
 		float vertices[] =
 		{
-			-0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f, 1.f,
-			 0.5f,  0.5f, 0.f, 0.f, 0.f, 1.f, 1.f,
-			-0.5f,  0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
-			 0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
+			-0.5f, -0.5f, 0.f, 0.f, 0.f,	// 1.f, 0.f, 0.f, 1.f,
+			 0.5f,  0.5f, 0.f, 1.f, 1.f,  	// 0.f, 0.f, 1.f, 1.f,
+			-0.5f,  0.5f, 0.f, 0.f, 1.f,	// 0.f, 1.f, 0.f, 1.f,
+			 0.5f, -0.5f, 0.f, 1.f, 0.f		// 0.f, 1.f, 0.f, 1.f,
 		};
 
 		unsigned int indices[] = {
@@ -73,7 +89,8 @@ int main()
 
 		BufferLayout layout = {
 			{a_position, 3, GL_FLOAT, false},
-			{a_colour, 4, GL_FLOAT, false}
+			{a_tex_coord, 2, GL_FLOAT, false}
+			//{a_colour, 4, GL_FLOAT, false}
 		};
 
 		va.set_layout(vb, layout);
@@ -81,18 +98,20 @@ int main()
 		IndexBuffer ib(indices, sizeof(indices));
 
 		ShaderProgram basic_shader(
-			Shader("res/shaders/basic/basic_vertex.shader", ShaderType::Vertex),
-			Shader("res/shaders/basic/basic_fragment.shader", ShaderType::Fragment)
+			Shader("res/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
+			Shader("res/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 		);
 
 		va.bind();
 		ib.bind();
 		basic_shader.bind();
 
+		GL_CALL(glActiveTexture(GL_TEXTURE0));
+		GL_CALL(glBindTexture(GL_TEXTURE_2D, texutre));
+
 		while (!glfwWindowShouldClose(window))
 		{
 			double time = glfwGetTime();
-			//printf("Time: %f\n", time);
 
 			GL_CALL(glDrawElements(GL_TRIANGLES, ib.get_count(), GL_UNSIGNED_INT, nullptr));
 
