@@ -7,10 +7,9 @@
 #include "Shader.h"
 #include "Buffer.h"
 #include "VertexArray.h"
+#include "Texture.h"
 
 #include "GLError.h"
-
-#include <stb_image.h>
 
 extern "C"
 {
@@ -54,21 +53,10 @@ int main()
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	stbi_set_flip_vertically_on_load(1);
-	unsigned char* local_buffer = stbi_load("res/textures/enderpearl.png", &tex_width, &tex_height, &bpp, 4);
+	Texture2D lava_texture("res/textures/lava.png");
 
 	// render scope
-	{
-		glGenTextures(1, &texutre);
-		glBindTexture(GL_TEXTURE_2D, texutre);
-		
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-
-		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, local_buffer));
-		
+	{	
 		float vertices[] =
 		{
 			-0.5f, -0.5f, 0.f, 0.f, 0.f,	// 1.f, 0.f, 0.f, 1.f,
@@ -104,10 +92,8 @@ int main()
 
 		va.bind();
 		ib.bind();
+		lava_texture.bind(0);
 		basic_shader.bind();
-
-		GL_CALL(glActiveTexture(GL_TEXTURE0));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, texutre));
 
 		while (!glfwWindowShouldClose(window))
 		{
