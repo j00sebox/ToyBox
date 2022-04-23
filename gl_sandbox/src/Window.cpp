@@ -45,6 +45,8 @@ Window::Window(int width, int height)
 
 	glViewport(0, 0, width, height);
 
+	m_renderer.reset(new Renderer());
+
 	main_loop();
 }
 
@@ -62,10 +64,10 @@ void Window::main_loop()
 	
 	float vertices[] =
 	{
-		-0.5f, -0.5f, 0.f, 0.f, 0.f,	// 1.f, 0.f, 0.f, 1.f,
-			0.5f,  0.5f, 0.f, 1.f, 1.f,  	// 0.f, 0.f, 1.f, 1.f,
-		-0.5f,  0.5f, 0.f, 0.f, 1.f,	// 0.f, 1.f, 0.f, 1.f,
-			0.5f, -0.5f, 0.f, 1.f, 0.f		// 0.f, 1.f, 0.f, 1.f,
+	   -0.5f, -0.5f, 0.f, 0.f, 0.f,	// 1.f, 0.f, 0.f, 1.f,
+		0.5f,  0.5f, 0.f, 1.f, 1.f,  	// 0.f, 0.f, 1.f, 1.f,
+	   -0.5f,  0.5f, 0.f, 0.f, 1.f,	// 0.f, 1.f, 0.f, 1.f,
+		0.5f, -0.5f, 0.f, 1.f, 0.f		// 0.f, 1.f, 0.f, 1.f,
 	};
 
 	unsigned int indices[] = {
@@ -93,17 +95,14 @@ void Window::main_loop()
 		Shader("res/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 	);
 
-	va.bind();
-	ib.bind();
 	lava_texture.bind(0);
-	basic_shader.bind();
 
 	while (!glfwWindowShouldClose(m_window_handle))
 	{
 		double time = glfwGetTime();
 
-		GL_CALL(glDrawElements(GL_TRIANGLES, ib.get_count(), GL_UNSIGNED_INT, nullptr));
-
+		m_renderer->draw(va, ib, basic_shader);
+		
 		glfwSwapBuffers(m_window_handle);
 		glfwPollEvents();
 	}
