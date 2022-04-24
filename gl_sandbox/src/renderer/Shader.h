@@ -2,6 +2,11 @@
 
 #include "Log.h"
 
+#include "math/Matrix.h"
+
+#include <string>
+#include <unordered_map>
+
 enum class ShaderType
 {
 	None = 0,
@@ -49,12 +54,14 @@ public:
 
 	~ShaderProgram();
 
-	void set_uniform_1f(const char* name, float x);
-	void set_uniform_2f(const char* name, float x, float y);
-	void set_uniform_3f(const char* name, float x, float y, float z);
-	void set_uniform_4f(const char* name, float x, float y, float z, float w);
+	void set_uniform_1f(const std::string& name, float x);
+	void set_uniform_2f(const std::string& name, float x, float y);
+	void set_uniform_3f(const std::string& name, float x, float y, float z);
+	void set_uniform_4f(const std::string& name, float x, float y, float z, float w);
 
-	int get_uniform_loaction(const char* name) const;
+	void set_uniform_mat4f(const std::string& name, int num, const math::Mat4& mat);
+
+	int get_uniform_loaction(const std::string& name);
 
 	void bind() const;
 	void unbind() const;
@@ -70,4 +77,6 @@ private:
 
 	unsigned int m_program_id;
 	std::vector<Shader> m_shaders;
+	std::unordered_map<std::string, int> m_uniform_location_cache;
 };
+

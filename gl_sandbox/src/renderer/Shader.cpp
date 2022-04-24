@@ -29,17 +29,6 @@ ShaderProgram::~ShaderProgram()
 	GL_CALL(glDeleteProgram(m_program_id));
 }
 
-int ShaderProgram::get_uniform_loaction(const char* name) const
-{
-	int location = -1;
-	GL_CALL(location = glGetUniformLocation(m_program_id, name));
-
-	if (location == -1)
-		ASSERT(false);
-
-	return location;
-}
-
 void ShaderProgram::bind() const
 {
 	GL_CALL(glUseProgram(m_program_id));
@@ -149,22 +138,43 @@ void ShaderProgram::delete_shaders()
 	}	
 }
 
-void ShaderProgram::set_uniform_1f(const char* name, float x)
+int ShaderProgram::get_uniform_loaction(const std::string& name)
+{
+	if (m_uniform_location_cache.find(name) != m_uniform_location_cache.end())
+		return m_uniform_location_cache[name];
+
+	GL_CALL(int location = glGetUniformLocation(m_program_id, name.c_str()));
+
+	if (location == -1)
+		ASSERT(false);
+
+	m_uniform_location_cache[name] = location;
+
+	return location;
+}
+
+void ShaderProgram::set_uniform_1f(const std::string& name, float x)
 {
 	GL_CALL(glUniform1f(get_uniform_loaction(name), x));
 }
 
-void ShaderProgram::set_uniform_2f(const char* name, float x, float y)
+void ShaderProgram::set_uniform_2f(const std::string& name, float x, float y)
 {
 	GL_CALL(glUniform2f(get_uniform_loaction(name), x, y));
 }
 
-void ShaderProgram::set_uniform_3f(const char* name, float x, float y, float z)
+void ShaderProgram::set_uniform_3f(const std::string& name, float x, float y, float z)
 {
 	GL_CALL(glUniform3f(get_uniform_loaction(name), x, y, z));
 }
 
-void ShaderProgram::set_uniform_4f(const char* name, float x, float y, float z, float w)
+void ShaderProgram::set_uniform_4f(const std::string& name, float x, float y, float z, float w)
 {
 	GL_CALL(glUniform4f(get_uniform_loaction(name), x, y, z, w));
+}
+
+void ShaderProgram::set_uniform_mat4f(const std::string& name, int num, const math::Mat4& mat)
+{
+	bind();
+	GL_CALL(glUniformMatrix4fv(get_uniform_loaction(name), num, GL_FALSE, &mat.mat[0][0]));
 }

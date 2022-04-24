@@ -8,6 +8,8 @@
 
 #include "GLError.h"
 
+#include "math/Matrix.h"
+
 extern "C"
 {
 	void glfw_error_callback(int error, const char* description)
@@ -60,6 +62,14 @@ void Window::main_loop()
 {
 	unsigned int a_position = 0, a_tex_coord = 1;
 
+	// move square up 0.25 units
+	math::Mat4 square_move(
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		0.f, 0.f, 1.f, 0.f,
+		0.f, 0.25f, 0.f, 1.f
+	);
+
 	Texture2D lava_texture("res/textures/lava.png");
 	
 	float vertices[] =
@@ -96,6 +106,8 @@ void Window::main_loop()
 	);
 
 	lava_texture.bind(0);
+
+	basic_shader.set_uniform_mat4f("u_translate", 1, square_move);
 
 	while (!glfwWindowShouldClose(m_window_handle))
 	{
