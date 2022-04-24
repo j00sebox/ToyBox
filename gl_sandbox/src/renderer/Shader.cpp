@@ -29,6 +29,17 @@ ShaderProgram::~ShaderProgram()
 	GL_CALL(glDeleteProgram(m_program_id));
 }
 
+int ShaderProgram::get_uniform_loaction(const char* name) const
+{
+	int location = -1;
+	GL_CALL(location = glGetUniformLocation(m_program_id, name));
+
+	if (location == -1)
+		ASSERT(false);
+
+	return location;
+}
+
 void ShaderProgram::bind() const
 {
 	GL_CALL(glUseProgram(m_program_id));
@@ -136,4 +147,24 @@ void ShaderProgram::delete_shaders()
 
 		m_shaders.clear();
 	}	
+}
+
+void ShaderProgram::set_uniform_1f(const char* name, float x)
+{
+	GL_CALL(glUniform1f(get_uniform_loaction(name), x));
+}
+
+void ShaderProgram::set_uniform_2f(const char* name, float x, float y)
+{
+	GL_CALL(glUniform2f(get_uniform_loaction(name), x, y));
+}
+
+void ShaderProgram::set_uniform_3f(const char* name, float x, float y, float z)
+{
+	GL_CALL(glUniform3f(get_uniform_loaction(name), x, y, z));
+}
+
+void ShaderProgram::set_uniform_4f(const char* name, float x, float y, float z, float w)
+{
+	GL_CALL(glUniform4f(get_uniform_loaction(name), x, y, z, w));
 }

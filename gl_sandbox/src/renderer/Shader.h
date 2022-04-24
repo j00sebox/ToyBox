@@ -26,7 +26,7 @@ class ShaderProgram
 {
 public:
 	template<is_shader ... Shaders>
-	ShaderProgram(Shaders ... s)
+	ShaderProgram(const Shaders& ... s)
 	{
 		create_program();
 
@@ -48,6 +48,13 @@ public:
 	}
 
 	~ShaderProgram();
+
+	void set_uniform_1f(const char* name, float x);
+	void set_uniform_2f(const char* name, float x, float y);
+	void set_uniform_3f(const char* name, float x, float y, float z);
+	void set_uniform_4f(const char* name, float x, float y, float z, float w);
+
+	int get_uniform_loaction(const char* name) const;
 
 	void bind() const;
 	void unbind() const;
