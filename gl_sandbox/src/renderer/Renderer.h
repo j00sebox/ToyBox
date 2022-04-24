@@ -28,5 +28,6 @@ private:
 
 	VertexBuffer m_vb;
 	Texture2D m_lava_texure;
+	math::Mat4 m_perspective;
 };
 

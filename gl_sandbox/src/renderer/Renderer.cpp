@@ -11,19 +11,34 @@ Renderer::Renderer(int width, int height)
 	m_lava_texure("res/textures/lava.png")
 {
 
-	glViewport(0, 0, width, height);
+	GL_CALL(glViewport(0, 0, width, height));
 
 	// bind events
 	EventList::e_camera_move.bind_function(std::bind(&Renderer::update_camera_pos, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	
+	m_camera->set_pos({ 0.f, 0.f, 0.f });
+
 	unsigned int a_position = 0, a_tex_coord = 1;
 
-	// move square up 0.25 units
+	float scaling_factor = 1.0f / tanf(90.f * 0.5f);
+	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
+
+	float q = 1000.f / (1000.f - 0.1f);
+
+	// create projection matrix
+	m_perspective.set(
+		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
+		0.f, scaling_factor, 0.f, 0.f,
+		0.f, 0.f, q, 1.f,
+		0.f, 0.f, -0.1f * q, 0.f
+	);
+
+	// move square
 	math::Mat4 square_move(
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
 		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.5f, 0.f, 1.f
+		0.f, 0.1f, 0.5f, 1.f
 	);
 
 	float vertices[] =
@@ -59,12 +74,15 @@ Renderer::Renderer(int width, int height)
 		Shader("res/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 	));
 
-
+	m_shader->set_uniform_mat4f("u_proj", m_perspective);
+	m_shader->set_uniform_mat4f("u_view", m_camera->get_transform().inverse());
 	m_shader->set_uniform_mat4f("u_translate", square_move);
 }
 
 void Renderer::update(float elpased_time)
 {
+	m_shader->set_uniform_mat4f("u_view", m_camera->get_transform().inverse());
+
 	m_lava_texure.bind(0);
 
 	draw();
@@ -73,11 +91,12 @@ void Renderer::update(float elpased_time)
 void Renderer::update_camera_pos(float x, float y, float z)
 {
 	math::Vec3 current_pos = m_camera->get_pos();
-	m_camera->set_pos(current_pos + math::Vec3{ x, y, z });
+	m_camera->set_pos(current_pos + ( math::Vec3{ x, y, z } ));
 }
 
 void Renderer::draw()
 {
+	GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 	m_va->bind();
 	m_ib->bind();
 	m_shader->bind();

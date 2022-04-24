@@ -17,7 +17,7 @@ extern "C"
 
 		if (key == GLFW_KEY_W && action == GLFW_PRESS)
 		{
-			EventList::e_camera_move.execute_function(0.f, 0.f, 1.f);
+			EventList::e_camera_move.execute_function(0.f, 0.f, -0.25f);
 		}
 	}
 }
