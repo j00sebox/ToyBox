@@ -60,60 +60,11 @@ Window::~Window()
 
 void Window::main_loop()
 {
-	unsigned int a_position = 0, a_tex_coord = 1;
-
-	// move square up 0.25 units
-	math::Mat4 square_move(
-		1.f, 0.f, 0.f, 0.f,
-		0.f, 1.f, 0.f, 0.f,
-		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.5f, 0.f, 1.f
-	);
-
-	Texture2D lava_texture("res/textures/lava.png");
-	
-	float vertices[] =
-	{
-	   -0.5f, -0.5f, 0.f, 0.f, 0.f,		// 1.f, 0.f, 0.f, 1.f,
-		0.5f,  0.5f, 0.f, 1.f, 1.f,  	// 0.f, 0.f, 1.f, 1.f,
-	   -0.5f,  0.5f, 0.f, 0.f, 1.f,		// 0.f, 1.f, 0.f, 1.f,
-		0.5f, -0.5f, 0.f, 1.f, 0.f		// 0.f, 1.f, 0.f, 1.f,
-	};
-
-	unsigned int indices[] = {
-		0, 1, 2,
-		0, 3, 1
-	};
-
-	VertexArray va;
-
-	VertexBuffer vb;
-	vb.add_data(vertices, sizeof(vertices));
-
-	BufferLayout layout = {
-		{a_position, 3, GL_FLOAT, false},
-		{a_tex_coord, 2, GL_FLOAT, false}
-		//{a_colour, 4, GL_FLOAT, false}
-	};
-
-	va.set_layout(vb, layout);
-
-	IndexBuffer ib(indices, sizeof(indices));
-
-	ShaderProgram basic_shader(
-		Shader("res/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
-		Shader("res/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
-	);
-
-	lava_texture.bind(0);
-
-	basic_shader.set_uniform_mat4f("u_translate", square_move);
-
 	while (!glfwWindowShouldClose(m_window_handle))
 	{
 		double time = glfwGetTime();
 
-		m_renderer->draw(va, ib, basic_shader);
+		m_renderer->update(0.f);
 		
 		glfwSwapBuffers(m_window_handle);
 		glfwPollEvents();
