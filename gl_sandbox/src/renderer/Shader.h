@@ -59,7 +59,7 @@ public:
 	void set_uniform_3f(const std::string& name, float x, float y, float z);
 	void set_uniform_4f(const std::string& name, float x, float y, float z, float w);
 
-	void set_uniform_mat4f(const std::string& name, int num, const math::Mat4& mat);
+	void set_uniform_mat4f(const std::string& name, const math::Mat4& mat);
 
 	int get_uniform_loaction(const std::string& name);
 

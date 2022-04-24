@@ -67,16 +67,16 @@ void Window::main_loop()
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
 		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.25f, 0.f, 1.f
+		0.f, 0.5f, 0.f, 1.f
 	);
 
 	Texture2D lava_texture("res/textures/lava.png");
 	
 	float vertices[] =
 	{
-	   -0.5f, -0.5f, 0.f, 0.f, 0.f,	// 1.f, 0.f, 0.f, 1.f,
+	   -0.5f, -0.5f, 0.f, 0.f, 0.f,		// 1.f, 0.f, 0.f, 1.f,
 		0.5f,  0.5f, 0.f, 1.f, 1.f,  	// 0.f, 0.f, 1.f, 1.f,
-	   -0.5f,  0.5f, 0.f, 0.f, 1.f,	// 0.f, 1.f, 0.f, 1.f,
+	   -0.5f,  0.5f, 0.f, 0.f, 1.f,		// 0.f, 1.f, 0.f, 1.f,
 		0.5f, -0.5f, 0.f, 1.f, 0.f		// 0.f, 1.f, 0.f, 1.f,
 	};
 
@@ -107,7 +107,7 @@ void Window::main_loop()
 
 	lava_texture.bind(0);
 
-	basic_shader.set_uniform_mat4f("u_translate", 1, square_move);
+	basic_shader.set_uniform_mat4f("u_translate", square_move);
 
 	while (!glfwWindowShouldClose(m_window_handle))
 	{
