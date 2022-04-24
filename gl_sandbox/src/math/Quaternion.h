@@ -7,9 +7,9 @@ namespace math
 	class Quaternion
 	{
 	public:
-		// initial rotation of 0 degrees around x-axis
+		// equivalent of identity matrix
 		Quaternion() 
-			: q(0.f), i(1.f), j(0.f), k(0.f) {}
+			: q(1.f), i(0.f), j(0.f), k(0.f) {}
 
 		Quaternion(float _q, float _i, float _j, float _k)
 			: q(_q), i(_i), j(_j), k(_k) {}

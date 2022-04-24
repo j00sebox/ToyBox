@@ -7,12 +7,21 @@
 
 #include "Camera.h"
 
+#include "math/Quaternion.h"
+
+struct RendererUpdates
+{
+	float dx, dy;
+	math::Vec3 pos;
+};
+
 class Renderer
 {
 public:
 	Renderer(int width, int height);
 	void update(float elpased_time);
 
+	void update_camera_pos(const math::Vec3& pos);
 	void update_camera_pos(float x, float y, float z);
 	
 private:
@@ -21,6 +30,7 @@ private:
 	int m_screen_width, m_screen_height;
 
 	std::unique_ptr<Camera> m_camera = std::make_unique<Camera>();
+	math::Quaternion m_camera_rot;
 
 	std::shared_ptr<VertexArray> m_va;
 	std::shared_ptr<ShaderProgram> m_shader;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 
+#include "Input.h"
 #include "events/EventList.h"
 
 extern "C"
@@ -15,10 +16,19 @@ extern "C"
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 
-		if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		/*if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		{
+			EventList::e_camera_move.execute_function(0.f, 0.f, 0.25f);
+		}
+
+		if (key == GLFW_KEY_S && action == GLFW_PRESS)
 		{
 			EventList::e_camera_move.execute_function(0.f, 0.f, -0.25f);
-		}
+		}*/
+	}
+
+	void glfw_mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+	{
 	}
 }
 
@@ -42,6 +52,7 @@ Window::Window(int width, int height)
 	// setup callbacks
 	glfwSetErrorCallback(glfw_error_callback);
 	glfwSetKeyCallback(m_window_handle, glfw_key_callback);
+	glfwSetMouseButtonCallback(m_window_handle, glfw_mouse_button_callback);
 
 	m_renderer.reset(new Renderer(width, height));
 
@@ -61,7 +72,19 @@ void Window::main_loop()
 	{
 		double time = glfwGetTime() * 1000.0;
 
-		m_renderer->update((float)(time - prev_time));
+		float delta_time = (float)(time - prev_time);
+
+		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_W))
+		{
+			m_renderer->update_camera_pos(math::Vec3(0.f, 0.f, 0.001f) * delta_time);
+		}
+
+		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_S))
+		{
+			m_renderer->update_camera_pos(math::Vec3(0.f, 0.f, -0.001f) * delta_time);
+		}
+
+		m_renderer->update(delta_time);
 
 		prev_time = time;
 		
