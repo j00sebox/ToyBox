@@ -7,4 +7,5 @@ class Input
 public:
 	static bool is_key_pressed(GLFWwindow* window_handle, int key_code);
 	static bool is_button_pressed(GLFWwindow* window_handle, int button_code);
+	static std::pair<float, float> get_mouse_pos(GLFWwindow* window_handle);
 };

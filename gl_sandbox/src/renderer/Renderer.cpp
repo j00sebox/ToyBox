@@ -36,7 +36,7 @@ Renderer::Renderer(int width, int height)
 	);
 
 	// move square
-	math::Mat4 square_move(
+	m_square_move = math::Mat4(
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
 		0.f, 0.f, 1.f, 0.f,
@@ -103,16 +103,28 @@ Renderer::Renderer(int width, int height)
 	));
 
 	m_shader->set_uniform_mat4f("u_proj", m_perspective);
-	m_shader->set_uniform_mat4f("u_translate", square_move);
+	
 }
 
 void Renderer::update(float elpased_time)
 {
-	m_shader->set_uniform_mat4f("u_view", m_camera->get_transform().inverse());
+	m_object_transform = m_square_move * m_qrot.convert_to_mat();
+	m_shader->set_uniform_mat4f("u_translate", m_object_transform);
+	m_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 
 	m_lava_texure.bind(0);
 
 	draw();
+}
+
+void Renderer::update_camera_rot(float dx, float dy)
+{
+	math::Quaternion qx(dy, { 1.f, 0.f, 0.f });
+	math::Quaternion qy(dx, { 0.f, 1.f, 0.f });
+
+	m_qrot = m_qrot * qx * qy;
+	/*m_camera->rotate(qx);
+	m_camera->rotate(qy);*/
 }
 
 void Renderer::update_camera_pos(const math::Vec3& pos)

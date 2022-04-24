@@ -21,6 +21,7 @@ public:
 	Renderer(int width, int height);
 	void update(float elpased_time);
 
+	void update_camera_rot(float dx, float dy);
 	void update_camera_pos(const math::Vec3& pos);
 	void update_camera_pos(float x, float y, float z);
 	
@@ -39,5 +40,8 @@ private:
 	VertexBuffer m_vb;
 	Texture2D m_lava_texure;
 	math::Mat4 m_perspective;
+	math::Mat4 m_object_transform;
+	math::Mat4 m_square_move;
+	math::Quaternion m_qrot;
 };
 

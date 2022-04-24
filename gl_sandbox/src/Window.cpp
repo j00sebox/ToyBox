@@ -66,10 +66,16 @@ Window::~Window()
 	glfwTerminate();
 }
 
+#define DEG_TO_RAD(x) (x / 180.f) * 3.141f
+
 void Window::main_loop()
 {
+	auto [prev_x, prev_y] = Input::get_mouse_pos(m_window_handle);
+	bool mouse_down = false;
+
 	while (!glfwWindowShouldClose(m_window_handle))
 	{
+		float dx = 0.f, dy = 0.f;
 		double time = glfwGetTime() * 1000.0;
 
 		float delta_time = (float)(time - prev_time);
@@ -83,6 +89,38 @@ void Window::main_loop()
 		{
 			m_renderer->update_camera_pos(math::Vec3(0.f, 0.f, -0.001f) * delta_time);
 		}
+
+		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_A))
+		{
+			m_renderer->update_camera_pos(math::Vec3(-0.001f, 0.f, 0.f) * delta_time);
+		}
+
+		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_D))
+		{
+			m_renderer->update_camera_pos(math::Vec3(0.001f, 0.f, 0.f) * delta_time);
+		}
+
+		if (Input::is_button_pressed(m_window_handle, GLFW_MOUSE_BUTTON_1))
+		{
+			if (!mouse_down)
+			{
+				std::pair<float, float> xy = Input::get_mouse_pos(m_window_handle);
+
+				prev_x = xy.first;
+				prev_y = xy.second;
+
+				mouse_down = true;
+			}
+
+			auto [x, y] = Input::get_mouse_pos(m_window_handle);
+
+			dx = DEG_TO_RAD((x - prev_x) * delta_time * 0.001f);
+			dy = DEG_TO_RAD((y - prev_y) * delta_time * 0.001f);
+
+			m_renderer->update_camera_rot(dx, dy);
+		}
+		else
+			mouse_down = false;
 
 		m_renderer->update(delta_time);
 
