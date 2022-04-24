@@ -6,9 +6,13 @@
 
 #include <glad/glad.h>
 
-Renderer::Renderer()
-	: m_lava_texure("res/textures/lava.png")
+Renderer::Renderer(int width, int height)
+	: m_screen_width(width), m_screen_height(height),
+	m_lava_texure("res/textures/lava.png")
 {
+
+	glViewport(0, 0, width, height);
+
 	// bind events
 	EventList::e_camera_move.bind_function(std::bind(&Renderer::update_camera_pos, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	

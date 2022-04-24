@@ -1,15 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 
-#include "Shader.h"
-#include "Buffer.h"
-#include "VertexArray.h"
-#include "Texture.h"
-
-#include "GLError.h"
 #include "events/EventList.h"
-
-#include "math/Matrix.h"
 
 extern "C"
 {
@@ -29,7 +21,6 @@ extern "C"
 		}
 	}
 }
-
 
 Window::Window(int width, int height)
 	: m_width(width), m_height(height)
@@ -52,7 +43,7 @@ Window::Window(int width, int height)
 	glfwSetErrorCallback(glfw_error_callback);
 	glfwSetKeyCallback(m_window_handle, glfw_key_callback);
 
-	m_renderer.reset(new Renderer());
+	m_renderer.reset(new Renderer(width, height));
 
 	main_loop();
 }
@@ -70,7 +61,7 @@ void Window::main_loop()
 	{
 		double time = glfwGetTime() * 1000.0;
 
-		m_renderer->update(time - prev_time);
+		m_renderer->update((float)(time - prev_time));
 
 		prev_time = time;
 		

@@ -10,13 +10,15 @@
 class Renderer
 {
 public:
-	Renderer();
+	Renderer(int width, int height);
 	void update(float elpased_time);
 
 	void update_camera_pos(float x, float y, float z);
 	
 private:
 	void draw();
+
+	int m_screen_width, m_screen_height;
 
 	std::unique_ptr<Camera> m_camera = std::make_unique<Camera>();
 
