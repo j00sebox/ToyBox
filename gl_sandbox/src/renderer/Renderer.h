@@ -12,6 +12,8 @@ class Renderer
 public:
 	Renderer();
 	void update(float elpased_time);
+
+	void update_camera_pos(float x, float y, float z);
 	
 private:
 	void draw();

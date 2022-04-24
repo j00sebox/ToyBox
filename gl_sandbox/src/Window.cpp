@@ -7,6 +7,7 @@
 #include "Texture.h"
 
 #include "GLError.h"
+#include "events/EventList.h"
 
 #include "math/Matrix.h"
 
@@ -21,8 +22,14 @@ extern "C"
 	{
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+		if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		{
+			EventList::e_camera_move.execute_function(0.f, 0.f, 1.f);
+		}
 	}
 }
+
 
 Window::Window(int width, int height)
 	: m_width(width), m_height(height)
@@ -45,8 +52,6 @@ Window::Window(int width, int height)
 	glfwSetErrorCallback(glfw_error_callback);
 	glfwSetKeyCallback(m_window_handle, glfw_key_callback);
 
-	glViewport(0, 0, width, height);
-
 	m_renderer.reset(new Renderer());
 
 	main_loop();
@@ -54,6 +59,7 @@ Window::Window(int width, int height)
 
 Window::~Window()
 {
+	m_renderer.release();
 	glfwDestroyWindow(m_window_handle);
 	glfwTerminate();
 }
@@ -62,9 +68,11 @@ void Window::main_loop()
 {
 	while (!glfwWindowShouldClose(m_window_handle))
 	{
-		double time = glfwGetTime();
+		double time = glfwGetTime() * 1000.0;
 
-		m_renderer->update(0.f);
+		m_renderer->update(time - prev_time);
+
+		prev_time = time;
 		
 		glfwSwapBuffers(m_window_handle);
 		glfwPollEvents();

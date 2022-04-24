@@ -16,6 +16,7 @@ public:
 
 private:
 	int m_width, m_height;
+	double prev_time = 0.0;
 	GLFWwindow* m_window_handle;
 	std::unique_ptr<Renderer> m_renderer;
 };

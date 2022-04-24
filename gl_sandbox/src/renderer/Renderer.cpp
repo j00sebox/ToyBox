@@ -2,12 +2,16 @@
 #include "Renderer.h"
 
 #include "GLError.h"
+#include "events/EventList.h"
 
 #include <glad/glad.h>
 
 Renderer::Renderer()
 	: m_lava_texure("res/textures/lava.png")
 {
+	// bind events
+	EventList::e_camera_move.bind_function(std::bind(&Renderer::update_camera_pos, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	
 	unsigned int a_position = 0, a_tex_coord = 1;
 
 	// move square up 0.25 units
@@ -60,6 +64,12 @@ void Renderer::update(float elpased_time)
 	m_lava_texure.bind(0);
 
 	draw();
+}
+
+void Renderer::update_camera_pos(float x, float y, float z)
+{
+	math::Vec3 current_pos = m_camera->get_pos();
+	m_camera->set_pos(current_pos + math::Vec3{ x, y, z });
 }
 
 void Renderer::draw()
