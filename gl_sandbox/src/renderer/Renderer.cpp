@@ -25,25 +25,25 @@ Renderer::Renderer(int width, int height)
 	float scaling_factor = 1.0f / tanf(90.f * 0.5f);
 	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
 
-	float q = 1000.f / (1000.f - 0.1f);
+	float q = m_far / (m_far - m_near);
 
 	// create projection matrix
 	m_perspective.set(
 		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
 		0.f, scaling_factor, 0.f, 0.f,
 		0.f, 0.f, q, 1.f,
-		0.f, 0.f, -0.1f * q, 0.f
+		0.f, 0.f, -m_near * q, 0.f
 	);
 
-	math::Mat4 m_orthographic(
+	m_orthographic.set(
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
-		0.f, 0.f, 1.f / (1000.f - 0.1f), -0.1f / (1000.f - 0.1f),
+		0.f, 0.f, 1.f / (m_far - 0.1f), -m_near / (m_far - m_near),
 		0.f, 0.f, 0.f, 1.f
 	);
 
 	// move square
-	m_square_move = math::Mat4(
+	math::Mat4 square_move(
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
 		0.f, 0.f, 1.f, 0.f,
@@ -109,13 +109,12 @@ Renderer::Renderer(int width, int height)
 		Shader("res/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 	));
 
+	m_shader->set_uniform_mat4f("u_translate", square_move);
 	m_shader->set_uniform_mat4f("u_proj", m_perspective * m_orthographic);
 }
 
 void Renderer::update(float elpased_time)
 {
-	m_object_transform = m_square_move * m_qrot.convert_to_mat();
-	m_shader->set_uniform_mat4f("u_translate", m_object_transform);
 	m_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 
 	m_lava_texure.bind(0);

@@ -34,8 +34,9 @@ private:
 
 	int m_screen_width, m_screen_height;
 
+	float m_near = 0.1f, m_far = 1000.f;
+
 	std::unique_ptr<Camera> m_camera = std::make_unique<Camera>();
-	math::Quaternion m_camera_rot;
 
 	std::shared_ptr<VertexArray> m_va;
 	std::shared_ptr<ShaderProgram> m_shader;
@@ -44,8 +45,6 @@ private:
 	VertexBuffer m_vb;
 	Texture2D m_lava_texure;
 	math::Mat4 m_perspective;
-	math::Mat4 m_object_transform;
-	math::Mat4 m_square_move;
-	math::Quaternion m_qrot;
+	math::Mat4 m_orthographic;
 };
 
