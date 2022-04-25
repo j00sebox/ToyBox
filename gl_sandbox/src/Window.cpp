@@ -119,10 +119,13 @@ void Window::main_loop()
 
 			auto [x, y] = Input::get_mouse_pos(m_window_handle);
 
-			dx = DEG_TO_RAD((x - prev_x) * delta_time * 0.001f);
-			dy = DEG_TO_RAD((y - prev_y) * delta_time * 0.001f);
+			dx = x - prev_x;
+			dy = y - prev_y;
 
-			m_renderer->update_camera_rot(dx, -dy);
+			prev_x += dx;
+			prev_y += dy;
+
+			m_renderer->update_camera_rot(-DEG_TO_RAD(dx * delta_time * 0.01f), -DEG_TO_RAD(dy * delta_time * 0.01f));
 		}
 		else
 			mouse_down = false;

@@ -24,12 +24,19 @@ Renderer::Renderer(int width, int height)
 
 	unsigned int a_position = 0, a_tex_coord = 1;
 
-	float scaling_factor = 1.0f / tanf(90.f * 0.5f);
+	float scaling_factor = 1.0f / tanf(45.f * 0.5f);
 	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
 
 	float q = m_far / (m_far - m_near);
 
 	// create projection matrix
+	/*m_perspective.set(
+		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
+		0.f, scaling_factor, 0.f, 0.f,
+		0.f, 0.f, q, 1.f,
+		0.f, 0.f, -m_near * q, 0.f
+	);*/
+
 	m_perspective.set(
 		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
 		0.f, scaling_factor, 0.f, 0.f,
@@ -103,7 +110,7 @@ Renderer::Renderer(int width, int height)
 		Shader("resources/shaders/skybox/skybox_fragment.shader", ShaderType::Fragment)
 	));
 
-	m_skybox_shader->set_uniform_mat4f("u_projection", m_orthographic);
+	m_skybox_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
 
 	float vertices[] =
 	{
