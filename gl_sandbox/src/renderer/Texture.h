@@ -5,15 +5,9 @@
 class TextureBase
 {
 public:
-	int get_width() const { return m_width; }
-	int get_height() const { return m_height; }
 
 	virtual void bind(int slot = 0) const = 0;
 	virtual void unbind() const = 0;
-
-protected:
-	unsigned int m_id;
-	int m_width, m_height;
 };
 
 class Texture2D : public TextureBase
@@ -25,7 +19,26 @@ public:
 	void bind(int slot = 0) const override;
 	void unbind() const override;
 
+	int get_width() const { return m_width; }
+	int get_height() const { return m_height; }
+
 private:
-	unsigned char* m_data;
+	unsigned int m_id;
+	int m_width, m_height;
 	int m_bpp;
+	unsigned char* m_data;
+};
+
+class CubeMap : public TextureBase
+{
+public:
+	CubeMap(const std::string& dir);
+	~CubeMap();
+
+	void bind(int slot = 0) const override;
+	void unbind() const override;
+
+private:
+	unsigned int m_id;
+	std::string m_faces[6];
 };

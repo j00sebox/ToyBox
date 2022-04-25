@@ -19,6 +19,16 @@ math::Mat4 Camera::camera_look_at()
 	return m_transform.inverse();
 }
 
+math::Mat4 Camera::look_at_no_translate()
+{
+	// Set up camera direction matrix
+	m_transform(0, 0) = m_right.x;			m_transform(0, 1) = m_right.y;			m_transform(0, 2) = m_right.z;	
+	m_transform(1, 0) = m_up.x;				m_transform(1, 1) = m_up.y;				m_transform(1, 2) = m_up.z;			
+	m_transform(2, 0) = m_forward.x;		m_transform(2, 1) = m_forward.y;		m_transform(2, 2) = m_forward.z;
+
+	return m_transform.inverse();
+}
+
 void Camera::rotate(math::Quaternion q)
 {
 	math::Mat4 rotation = q.convert_to_mat();

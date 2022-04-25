@@ -10,6 +10,7 @@ public:
 	~Camera() {}
 
 	math::Mat4 camera_look_at();
+	math::Mat4 look_at_no_translate();
 
 	void rotate(math::Quaternion q);
 	void move_forward(float f);

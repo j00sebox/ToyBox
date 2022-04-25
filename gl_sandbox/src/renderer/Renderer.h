@@ -38,13 +38,24 @@ private:
 
 	std::unique_ptr<Camera> m_camera = std::make_unique<Camera>();
 
-	std::shared_ptr<VertexArray> m_va;
-	std::shared_ptr<ShaderProgram> m_shader;
-	std::shared_ptr<IndexBuffer> m_ib;
+	std::shared_ptr<VertexArray> m_cube_va;
+	std::shared_ptr<ShaderProgram> m_cube_shader;
+	std::shared_ptr<IndexBuffer> m_cube_ib;
+	VertexBuffer m_cube_vb;
 
-	VertexBuffer m_vb;
+	std::shared_ptr<VertexArray> m_skybox_va;
+	std::shared_ptr<ShaderProgram> m_skybox_shader;
+	std::shared_ptr<IndexBuffer> m_skybox_ib;
+	VertexBuffer m_skybox_vb;
+
 	Texture2D m_lava_texure;
+	CubeMap m_skybox_texture;
+	
 	math::Mat4 m_perspective;
 	math::Mat4 m_orthographic;
+
+	//test
+	unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+	unsigned int cubemapTexture;
 };
 
