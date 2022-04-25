@@ -82,25 +82,30 @@ void Window::main_loop()
 
 		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_W))
 		{
-			m_renderer->update_camera_pos(math::Vec3(0.f, 0.f, 0.001f) * delta_time);
+			m_renderer->move_cam_forward(0.001f * delta_time);
 		}
 
 		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_S))
 		{
-			m_renderer->update_camera_pos(math::Vec3(0.f, 0.f, -0.001f) * delta_time);
+			m_renderer->move_cam_forward(-0.001f * delta_time);
 		}
 
 		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_A))
 		{
-			m_renderer->update_camera_pos(math::Vec3(-0.001f, 0.f, 0.f) * delta_time);
+			m_renderer->move_cam_right(-0.001f * delta_time);
 		}
 
 		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_D))
 		{
-			m_renderer->update_camera_pos(math::Vec3(0.001f, 0.f, 0.f) * delta_time);
+			m_renderer->move_cam_right(0.001f * delta_time);
 		}
 
-		if (Input::is_button_pressed(m_window_handle, GLFW_MOUSE_BUTTON_1))
+		if (Input::is_key_pressed(m_window_handle, GLFW_KEY_R))
+		{
+			m_renderer->reset_view();
+		}
+
+		if (Input::is_button_pressed(m_window_handle, GLFW_MOUSE_BUTTON_2))
 		{
 			if (!mouse_down)
 			{
@@ -117,7 +122,7 @@ void Window::main_loop()
 			dx = DEG_TO_RAD((x - prev_x) * delta_time * 0.001f);
 			dy = DEG_TO_RAD((y - prev_y) * delta_time * 0.001f);
 
-			m_renderer->update_camera_rot(dx, dy);
+			m_renderer->update_camera_rot(dx, -dy);
 		}
 		else
 			mouse_down = false;

@@ -4,7 +4,7 @@
 
 int main()
 {
-	Window window(640, 480);
+	Window window(1280, 960);
 	
 	return 0;
 }

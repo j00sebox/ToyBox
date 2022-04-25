@@ -35,6 +35,13 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, -0.1f * q, 0.f
 	);
 
+	math::Mat4 m_orthographic(
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		0.f, 0.f, 1.f / (1000.f - 0.1f), -0.1f / (1000.f - 0.1f),
+		0.f, 0.f, 0.f, 1.f
+	);
+
 	// move square
 	m_square_move = math::Mat4(
 		1.f, 0.f, 0.f, 0.f,
@@ -102,8 +109,7 @@ Renderer::Renderer(int width, int height)
 		Shader("res/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 	));
 
-	m_shader->set_uniform_mat4f("u_proj", m_perspective);
-	
+	m_shader->set_uniform_mat4f("u_proj", m_perspective * m_orthographic);
 }
 
 void Renderer::update(float elpased_time)
@@ -122,9 +128,18 @@ void Renderer::update_camera_rot(float dx, float dy)
 	math::Quaternion qx(dy, { 1.f, 0.f, 0.f });
 	math::Quaternion qy(dx, { 0.f, 1.f, 0.f });
 
-	m_qrot = m_qrot * qx * qy;
-	/*m_camera->rotate(qx);
-	m_camera->rotate(qy);*/
+	m_camera->rotate(qx);
+	m_camera->rotate(qy);
+}
+
+void Renderer::move_cam_forward(float f)
+{
+	m_camera->move_forward(f);
+}
+
+void Renderer::move_cam_right(float r)
+{
+	m_camera->move_right(r);
 }
 
 void Renderer::update_camera_pos(const math::Vec3& pos)
@@ -136,6 +151,11 @@ void Renderer::update_camera_pos(float x, float y, float z)
 {
 	math::Vec3 current_pos = m_camera->get_pos();
 	m_camera->set_pos(current_pos + ( math::Vec3{ x, y, z } ));
+}
+
+void Renderer::reset_view()
+{
+	m_camera->reset();
 }
 
 void Renderer::draw()
