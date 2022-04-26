@@ -61,7 +61,8 @@ CubeMap::CubeMap(const std::string& dir)
 	for (int i = 0; i < 6; ++i)
 	{
 		int width, height, num_channels;
-		unsigned char* data = stbi_load(m_faces[0].c_str(), &width, &height, &num_channels, 4);
+		unsigned char* data = stbi_load(m_faces[i].c_str(), &width, &height, &num_channels, 4);
+		stbi_set_flip_vertically_on_load(0);
 
 		if (!data)
 			ASSERT(false);
