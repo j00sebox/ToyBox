@@ -5,7 +5,8 @@
 
 #define DEG_TO_RAD(x) (x / 180.f) * 3.1415f
 
-Camera::Camera()
+Camera::Camera(int width, int height)
+	: m_screen_width(width), m_screen_height(height)
 {
 	m_position = { 0.f, 0.f, 0.f };
 
@@ -48,22 +49,22 @@ void Camera::update(float elapsed_time)
 {
 	if (Input::is_key_pressed(GLFW_KEY_W))
 	{
-		move_forward(0.001f * elapsed_time);
+		move_forward(m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_S))
 	{
-		move_forward(-0.001f * elapsed_time);
+		move_forward(-m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_A))
 	{
-		move_right(-0.001f * elapsed_time);
+		move_right(-m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_D))
 	{
-		move_right(0.001f * elapsed_time);
+		move_right(m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_R))
@@ -75,28 +76,30 @@ void Camera::update(float elapsed_time)
 	{
 		if (!m_mouse_down)
 		{
-			Input::set_mouse_pos((1280 / 2), (960 / 2));
+			Input::show_cursor(false);
+			Input::set_mouse_pos((m_screen_width / 2), (960 / 2));
 
 			m_mouse_down = true;
 		}
 
 		auto [x, y] = Input::get_mouse_pos();
 
-		float rotX = elapsed_time * m_sensitivity * (float)(y - (960 / 2)) / 1280;
-		float rotY = elapsed_time * m_sensitivity * (float)(x - (1280 / 2)) / 960;
+		float rotX = elapsed_time * m_sensitivity * (float)(y - (m_screen_height / 2)) / m_screen_width;
+		float rotY = elapsed_time * m_sensitivity * (float)(x - (m_screen_width / 2)) / m_screen_height;
 
 		math::Quaternion qx(-DEG_TO_RAD(rotX), m_right);
 		math::Quaternion qy(-DEG_TO_RAD(rotY), m_up);
 
 		rotate(qx * qy);
 
-		Input::set_mouse_pos((1280 / 2), (960 / 2));
+		Input::set_mouse_pos((m_screen_width / 2), (m_screen_height / 2));
 	}
 	else
 	{
 		m_mouse_down = false;
-	}
 
+		Input::show_cursor(true);
+	}
 }
 
 void Camera::rotate(math::Quaternion q)
@@ -108,19 +111,16 @@ void Camera::rotate(math::Quaternion q)
 
 	float diff = new_forward.dot(m_up);
 
-	if(diff < 0.05f)
+	if(diff < 0.04f && diff > -0.04f)
 	{
 		m_forward = new_forward;
 
 		m_right = rotation * m_right;
 		m_right.normalize();
 
-		m_up = rotation * m_up;
+		m_up = m_forward.cross(m_right);
 		m_up.normalize();
 	}
-
-	/*m_up = m_forward.cross(m_right);
-	m_up.normalize();*/
 }
 
 void Camera::move_forward(float f)

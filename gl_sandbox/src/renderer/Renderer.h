@@ -24,7 +24,7 @@ private:
 
 	float m_near = 0.1f, m_far = 1000.f;
 
-	std::unique_ptr<Camera> m_camera = std::make_unique<Camera>();
+	std::unique_ptr<Camera> m_camera;
 
 	std::shared_ptr<VertexArray> m_cube_va;
 	std::shared_ptr<ShaderProgram> m_cube_shader;

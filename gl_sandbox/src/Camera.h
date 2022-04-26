@@ -6,7 +6,7 @@
 class Camera
 {
 public:
-	Camera();
+	Camera(int width, int height);
 	~Camera() {}
 
 	math::Mat4 camera_look_at();
@@ -31,7 +31,8 @@ private:
 	math::Vec3 m_forward, m_up, m_right;
 	math::Mat4 m_transform;
 
+	int m_screen_width, m_screen_height;
+	float m_speed = 0.001f;
 	float m_sensitivity = 50.f;
 	bool m_mouse_down = false;
-	float prev_x = 0.f, prev_y = 0.f;
 };

@@ -19,6 +19,8 @@ Renderer::Renderer(int width, int height)
 	glDepthFunc(GL_LEQUAL);
 	glFrontFace(GL_CCW);
 
+	m_camera = std::unique_ptr<Camera>(new Camera(width, height));
+
 	// bind events
 	//EventList::e_camera_move.bind_function(std::bind(&Renderer::update_camera_pos, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
