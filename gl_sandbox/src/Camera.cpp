@@ -97,21 +97,14 @@ void Camera::rotate(math::Quaternion q)
 {
 	math::Mat4 rotation = q.convert_to_mat();
 
-	math::Vec3 new_forward = rotation * m_forward;
+	m_forward = rotation * m_forward;
 	m_forward.normalize();
 
-	float diff = new_forward.dot(m_up);
+	m_right = rotation * m_right;
+	m_right.normalize();
 
-	if(diff < 0.04f && diff > -0.04f)
-	{
-		m_forward = new_forward;
-
-		m_right = rotation * m_right;
-		m_right.normalize();
-
-		m_up = m_forward.cross(m_right);
-		m_up.normalize();
-	}
+	m_up = m_forward.cross(m_right);
+	m_up.normalize();
 }
 
 void Camera::move_forward(float f)
