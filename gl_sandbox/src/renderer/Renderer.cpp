@@ -51,20 +51,20 @@ Renderer::Renderer(int width, int height)
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
 		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.1f, 0.5f, 1.f 
+		0.f, 0.1f, -4.f, 1.f 
 	);
 
 	float skybox_verts[] =
 	{
 		//   Coordinates
-		-3.0f, -3.0f,  3.0f,	//        7--------6
-		 3.0f, -3.0f,  3.0f,	//       /|       /|
-		 3.0f, -3.0f, -3.0f,	//      4--------5 |
-		-3.0f, -3.0f, -3.0f,	//      | |      | | 
-		-3.0f,  3.0f,  3.0f,	//      | 3------|-2
-		 3.0f,  3.0f,  3.0f,	//      |/       |/
-		 3.0f,  3.0f, -3.0f,	//      0--------1
-		-3.0f,  3.0f, -3.0f
+		-1.0f, -1.0f,  1.0f,	//        7--------6
+		 1.0f, -1.0f,  1.0f,	//       /|       /|
+		 1.0f, -1.0f, -1.0f,	//      4--------5 |
+		-1.0f, -1.0f, -1.0f,	//      | |      | | 
+		-1.0f,  1.0f,  1.0f,	//      | 3------|-2
+		 1.0f,  1.0f,  1.0f,	//      |/       |/
+		 1.0f,  1.0f, -1.0f,	//      0--------1
+		-1.0f,  1.0f, -1.0f
 	};
 
 	unsigned int skybox_indices[] =
@@ -172,10 +172,10 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::update(float elpased_time)
 {
+	m_camera->update(elpased_time);
+
 	m_cube_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 	m_skybox_shader->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
-
-	m_camera->update(elpased_time);
 
 	draw();
 }
@@ -184,12 +184,14 @@ void Renderer::draw()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+	GL_CALL(glDepthMask(GL_FALSE));
 	m_skybox_va->bind();
 	m_skybox_ib->bind();
 	m_skybox_shader->bind();
 	m_skybox_texture.bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_skybox_ib->get_count(), GL_UNSIGNED_INT, nullptr));
 
+	GL_CALL(glDepthMask(GL_TRUE));
 	m_cube_va->bind();
 	m_cube_ib->bind();
 	m_lava_texure.bind(0);

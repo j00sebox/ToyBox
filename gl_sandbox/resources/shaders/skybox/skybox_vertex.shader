@@ -9,7 +9,6 @@ out vec3 v_tex_coords;
 
 void main()
 {
-	vec4 pos = u_projection * u_view * vec4(a_position, 1);
-	gl_Position = vec4(pos.x, pos.y, pos.w, pos.w);
+	gl_Position = u_projection * u_view * vec4(a_position, 1);
 	v_tex_coords = vec3(a_position.x, a_position.y, -a_position.z);
 }

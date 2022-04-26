@@ -17,44 +17,35 @@ Camera::Camera(int width, int height)
 
 math::Mat4 Camera::camera_look_at()
 {
-	// Set up camera direction matrix
-	m_transform(0, 0) = m_right.x;			m_transform(0, 1) = m_right.y;			m_transform(0, 2) = m_right.z;			m_transform(0, 3) = 0.0f;
-	m_transform(1, 0) = m_up.x;				m_transform(1, 1) = m_up.y;				m_transform(1, 2) = m_up.z;				m_transform(1, 3) = 0.0f;
-	m_transform(2, 0) = m_forward.x;		m_transform(2, 1) = m_forward.y;		m_transform(2, 2) = m_forward.z;		m_transform(2, 3) = 0.0f;
-	m_transform(3, 0) = m_position.x;		m_transform(3, 1) = m_position.y;		m_transform(3, 2) = m_position.z;		m_transform(3, 3) = 1.0f;
+	math::Mat4 result;
+	result(0, 0) = m_right.x;					result(0, 1) = m_up.x;					result(0, 2) = -m_forward.x;
+	result(1, 0) = m_right.y;					result(1, 1) = m_up.y;					result(1, 2) = -m_forward.y;
+	result(2, 0) = m_right.z;					result(2, 1) = m_up.z;					result(2, 2) = -m_forward.z;
+	result(3, 0) = -m_right.dot(m_position);	result(3, 1) = -m_up.dot(m_position);	result(3, 2) = m_forward.dot(m_position);
 
-	return m_transform.inverse();
+	return result;
 }
 
 math::Mat4 Camera::look_at_no_translate()
 {
-	math::Vec3 f(m_position - m_forward);
-	f.normalize();
-	math::Vec3 s(f.cross(m_up));
-	s.normalize();
-	math::Vec3 u(s.cross(f));
+	math::Mat4 result;
+	result(0, 0) = m_right.x;					result(0, 1) = m_up.x;					result(0, 2) = -m_forward.x;
+	result(1, 0) = m_right.y;					result(1, 1) = m_up.y;					result(1, 2) = -m_forward.y;
+	result(2, 0) = m_right.z;					result(2, 1) = m_up.z;					result(2, 2) = -m_forward.z;
 
-	math::Mat4 Result;
-	Result(0,0) = s.x;
-	Result(1,0) = s.y;
-	Result(2,0) = s.z;
-	Result(0,1) = u.x;
-	Result(1,1) = u.y;
-	Result(2,1) = u.z;
-
-	return Result;
+	return result;
 }
 
 void Camera::update(float elapsed_time)
 {
 	if (Input::is_key_pressed(GLFW_KEY_W))
 	{
-		move_forward(m_speed * elapsed_time);
+		move_forward(-m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_S))
 	{
-		move_forward(-m_speed * elapsed_time);
+		move_forward(m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_A))
@@ -77,7 +68,7 @@ void Camera::update(float elapsed_time)
 		if (!m_mouse_down)
 		{
 			Input::show_cursor(false);
-			Input::set_mouse_pos((m_screen_width / 2), (960 / 2));
+			Input::set_mouse_pos((m_screen_width / 2), (m_screen_height / 2));
 
 			m_mouse_down = true;
 		}
@@ -87,8 +78,8 @@ void Camera::update(float elapsed_time)
 		float rotX = elapsed_time * m_sensitivity * (float)(y - (m_screen_height / 2)) / m_screen_width;
 		float rotY = elapsed_time * m_sensitivity * (float)(x - (m_screen_width / 2)) / m_screen_height;
 
-		math::Quaternion qx(-DEG_TO_RAD(rotX), m_right);
-		math::Quaternion qy(-DEG_TO_RAD(rotY), m_up);
+		math::Quaternion qx(DEG_TO_RAD(rotX), m_right);
+		math::Quaternion qy(DEG_TO_RAD(rotY), m_up);
 
 		rotate(qx * qy);
 
