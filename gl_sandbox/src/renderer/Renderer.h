@@ -9,24 +9,12 @@
 
 #include "math/Quaternion.h"
 
-struct RendererUpdates
-{
-	float dx, dy;
-	math::Vec3 pos;
-};
-
 class Renderer
 {
 public:
 	Renderer(int width, int height);
+	
 	void update(float elpased_time);
-
-	void move_cam_forward(float f);
-	void move_cam_right(float r);
-	void update_camera_rot(float dx, float dy);
-	void update_camera_pos(const math::Vec3& pos);
-	void update_camera_pos(float x, float y, float z);
-
 	void reset_view();
 	
 private:

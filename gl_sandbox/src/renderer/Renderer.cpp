@@ -5,7 +5,8 @@
 #include "events/EventList.h"
 
 #include <glad/glad.h>
-#include <stb_image.h>
+
+#define DEG_TO_RAD(x) (x / 180.f) * 3.1415f
 
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height),
@@ -16,27 +17,19 @@ Renderer::Renderer(int width, int height)
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glFrontFace(GL_CCW);
 
 	// bind events
 	//EventList::e_camera_move.bind_function(std::bind(&Renderer::update_camera_pos, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	
-	m_camera->set_pos({ 0.f, 0.f, 0.f });
 
 	unsigned int a_position = 0, a_tex_coord = 1;
 
-	float scaling_factor = 1.0f / tanf(45.f * 0.5f);
+	float scaling_factor = 1.0f / tanf(DEG_TO_RAD(45.f) * 0.5f);
 	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
 
 	float q = m_far / (m_far - m_near);
 
 	// create projection matrix
-	/*m_perspective.set(
-		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
-		0.f, scaling_factor, 0.f, 0.f,
-		0.f, 0.f, q, 1.f,
-		0.f, 0.f, -m_near * q, 0.f
-	);*/
-
 	m_perspective.set(
 		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
 		0.f, scaling_factor, 0.f, 0.f,
@@ -56,20 +49,20 @@ Renderer::Renderer(int width, int height)
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
 		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.1f, 0.5f, 1.f
+		0.f, 0.1f, 0.5f, 1.f 
 	);
 
 	float skybox_verts[] =
 	{
 		//   Coordinates
-		-2.0f, -2.0f,  2.0f,	//        7--------6
-		 2.0f, -2.0f,  2.0f,	//       /|       /|
-		 2.0f, -2.0f, -2.0f,	//      4--------5 |
-		-2.0f, -2.0f, -2.0f,	//      | |      | | 
-		-2.0f,  2.0f,  2.0f,	//      | 3------|-2
-		 2.0f,  2.0f,  2.0f,	//      |/       |/
-		 2.0f,  2.0f, -2.0f,	//      0--------1
-		-2.0f,  2.0f, -2.0f
+		-3.0f, -3.0f,  3.0f,	//        7--------6
+		 3.0f, -3.0f,  3.0f,	//       /|       /|
+		 3.0f, -3.0f, -3.0f,	//      4--------5 |
+		-3.0f, -3.0f, -3.0f,	//      | |      | | 
+		-3.0f,  3.0f,  3.0f,	//      | 3------|-2
+		 3.0f,  3.0f,  3.0f,	//      |/       |/
+		 3.0f,  3.0f, -3.0f,	//      0--------1
+		-3.0f,  3.0f, -3.0f
 	};
 
 	unsigned int skybox_indices[] =
@@ -178,8 +171,9 @@ Renderer::Renderer(int width, int height)
 void Renderer::update(float elpased_time)
 {
 	m_cube_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-	//m_skybox_shader->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
-	m_skybox_shader->set_uniform_mat4f("u_view", math::Mat4());
+	m_skybox_shader->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
+
+	m_camera->update(elpased_time);
 
 	draw();
 }
@@ -199,36 +193,6 @@ void Renderer::draw()
 	m_lava_texure.bind(0);
 	m_cube_shader->bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_cube_ib->get_count(), GL_UNSIGNED_INT, nullptr));
-}
-
-void Renderer::update_camera_rot(float dx, float dy)
-{
-	math::Quaternion qx(dy, { 1.f, 0.f, 0.f });
-	math::Quaternion qy(dx, { 0.f, 1.f, 0.f });
-
-	m_camera->rotate(qx);
-	m_camera->rotate(qy);
-}
-
-void Renderer::move_cam_forward(float f)
-{
-	m_camera->move_forward(f);
-}
-
-void Renderer::move_cam_right(float r)
-{
-	m_camera->move_right(r);
-}
-
-void Renderer::update_camera_pos(const math::Vec3& pos)
-{
-	m_camera->set_pos(m_camera->get_pos() + pos);
-}
-
-void Renderer::update_camera_pos(float x, float y, float z)
-{
-	math::Vec3 current_pos = m_camera->get_pos();
-	m_camera->set_pos(current_pos + ( math::Vec3{ x, y, z } ));
 }
 
 void Renderer::reset_view()

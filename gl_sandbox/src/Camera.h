@@ -12,6 +12,8 @@ public:
 	math::Mat4 camera_look_at();
 	math::Mat4 look_at_no_translate();
 
+	void update(float elapsed_time);
+
 	void rotate(math::Quaternion q);
 	void move_forward(float f);
 	void move_right(float r);
@@ -28,4 +30,8 @@ private:
 	math::Vec3 m_position;
 	math::Vec3 m_forward, m_up, m_right;
 	math::Mat4 m_transform;
+
+	float m_sensitivity = 50.f;
+	bool m_mouse_down = false;
+	float prev_x = 0.f, prev_y = 0.f;
 };
