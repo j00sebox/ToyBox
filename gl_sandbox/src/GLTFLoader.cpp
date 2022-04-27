@@ -59,8 +59,8 @@ GLTFLoader::GLTFLoader(const char* path)
 	json materials = m_json["materials"][0];
 
 	m_bc_tex_ind = materials["pbrMetallicRoughness"]["baseColorTexture"]["index"];
-	m_norm_tex_ind = materials["normalTexture"]["index"];
-	m_occ_tex_ind = materials["occlusionTexture"]["index"];
+	/*m_norm_tex_ind = materials["normalTexture"]["index"];
+	m_occ_tex_ind = materials["occlusionTexture"]["index"];*/
 }
 
 std::vector<float> GLTFLoader::get_positions()

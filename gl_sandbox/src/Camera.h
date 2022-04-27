@@ -32,7 +32,7 @@ private:
 	math::Mat4 m_transform;
 
 	int m_screen_width, m_screen_height;
-	float m_speed = 0.001f;
+	float m_speed = 0.1f;
 	float m_sensitivity = 50.f;
 	bool m_mouse_down = false;
 };

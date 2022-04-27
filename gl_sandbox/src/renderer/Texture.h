@@ -25,7 +25,7 @@ public:
 private:
 	unsigned int m_id;
 	int m_width, m_height;
-	int m_bpp;
+	int m_colour_channels;
 	unsigned char* m_data;
 };
 
