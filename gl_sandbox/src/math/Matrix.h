@@ -237,13 +237,9 @@ namespace math {
 
 		inline void operator*= (const Mat4& other_mat)
 		{
-			for (int i = 0; i < 4; i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					mat[i][j] = mat[i][j] * other_mat.mat[i][j];
-				}
-			}
+			Mat4 temp = *this * other_mat;
+
+			*this = temp;
 		}
 
 		void clear()

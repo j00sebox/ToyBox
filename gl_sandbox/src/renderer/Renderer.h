@@ -7,6 +7,7 @@
 
 #include "Camera.h"
 #include "Geometry.h"
+#include "Skybox.h"
 
 #include "math/Quaternion.h"
 
@@ -28,18 +29,11 @@ private:
 	std::unique_ptr<Camera> m_camera;
 
 	Object cube;
-
-	//std::shared_ptr<VertexArray> m_cube_va;
 	std::shared_ptr<ShaderProgram> m_cube_shader;
-	/*std::shared_ptr<IndexBuffer> m_cube_ib;
-	VertexBuffer m_cube_vb;*/
-
-	std::shared_ptr<VertexArray> m_skybox_va;
-	std::shared_ptr<ShaderProgram> m_skybox_shader;
-	std::shared_ptr<IndexBuffer> m_skybox_ib;
-	VertexBuffer m_skybox_vb;
-
 	Texture2D m_lava_texure;
+
+	Skybox m_skybox;
+	std::shared_ptr<ShaderProgram> m_skybox_shader;
 	CubeMap m_skybox_texture;
 	
 	math::Mat4 m_perspective;

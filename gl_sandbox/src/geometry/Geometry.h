@@ -2,8 +2,6 @@
 
 #include "VertexArray.h"
 #include "Buffer.h"
-#include "Shader.h"
-#include "Texture.h"
 
 #include "math/Matrix.h"
 
@@ -25,6 +23,8 @@ public:
 
 	virtual void draw() const override;
 	virtual void translate(const math::Vec3& pos) override;
+
+	math::Mat4 get_transform() const { return m_model_transform; }
 
 protected:
 	std::unique_ptr<VertexArray> m_va;

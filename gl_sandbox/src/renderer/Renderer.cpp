@@ -47,64 +47,15 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, 0.f, 1.f
 	);
 
-	// move square
-	math::Mat4 square_move(
-		1.f, 0.f, 0.f, 0.f,
-		0.f, 1.f, 0.f, 0.f,
-		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.1f, -4.f, 1.f 
-	);
+	cube.translate({ 0.f, 0.1f, -4.f });
 
 	m_cube_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
 		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 	));
 
-	float skybox_verts[] =
-	{
-		//   Coordinates
-		-1.0f, -1.0f,  1.0f,	//        7--------6
-		 1.0f, -1.0f,  1.0f,	//       /|       /|
-		 1.0f, -1.0f, -1.0f,	//      4--------5 |
-		-1.0f, -1.0f, -1.0f,	//      | |      | | 
-		-1.0f,  1.0f,  1.0f,	//      | 3------|-2
-		 1.0f,  1.0f,  1.0f,	//      |/       |/
-		 1.0f,  1.0f, -1.0f,	//      0--------1
-		-1.0f,  1.0f, -1.0f
-	};
-
-	unsigned int skybox_indices[] =
-	{
-		// Right
-		1, 2, 6,
-		6, 5, 1,
-		// Left
-		0, 4, 7,
-		7, 3, 0,
-		// Top
-		4, 5, 6,
-		6, 7, 4,
-		// Bottom
-		0, 3, 2,
-		2, 1, 0,
-		// Back
-		0, 1, 5,
-		5, 4, 0,
-		// Front
-		3, 7, 6,
-		6, 2, 3
-	};
-
-	m_skybox_va.reset(new VertexArray());
-
-	m_skybox_vb = VertexBuffer();
-	m_skybox_vb.add_data(skybox_verts, sizeof(skybox_verts));
-
-	BufferLayout sb_layout = { {0, 3, GL_FLOAT, false} };
-
-	m_skybox_va->set_layout(m_skybox_vb, sb_layout);
-
-	m_skybox_ib.reset(new IndexBuffer(skybox_indices, sizeof(skybox_indices)));
+	m_cube_shader->set_uniform_mat4f("u_model", cube.get_transform());
+	m_cube_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
 
 	m_skybox_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/skybox/skybox_vertex.shader", ShaderType::Vertex),
@@ -112,9 +63,6 @@ Renderer::Renderer(int width, int height)
 	));
 
 	m_skybox_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
-
-	m_cube_shader->set_uniform_mat4f("u_translate", square_move);
-	m_cube_shader->set_uniform_mat4f("u_proj", m_perspective * m_orthographic);
 }
 
 void Renderer::update(float elpased_time)
@@ -131,14 +79,10 @@ void Renderer::draw()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	GL_CALL(glDepthMask(GL_FALSE));
-	m_skybox_va->bind();
-	m_skybox_ib->bind();
+	m_skybox_texture.bind(0);
 	m_skybox_shader->bind();
-	m_skybox_texture.bind();
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_skybox_ib->get_count(), GL_UNSIGNED_INT, nullptr));
+	m_skybox.draw();
 
-	GL_CALL(glDepthMask(GL_TRUE));
 	m_lava_texure.bind(0);
 	m_cube_shader->bind();
 	cube.draw();
