@@ -48,7 +48,7 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, 0.f, 1.f
 	);
 
-	cube.translate({ 0.f, 0.1f, -4.f });
+	cube.translate({ 0.f, 0.1f, -100.f });
 
 	m_cube_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
@@ -86,7 +86,7 @@ void Renderer::draw()
 
 	m_lava_texure.bind(0);
 	m_cube_shader->bind();
-	cube.draw();
+	airplane.draw();
 }
 
 void Renderer::reset_view()

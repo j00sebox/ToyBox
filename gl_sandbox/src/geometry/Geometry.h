@@ -8,6 +8,12 @@
 #include <memory>
 #include <vector>
 
+struct Vertex
+{
+	math::Vec3 positon;
+	math::Vec2<float> st;
+};
+
 class Geometry
 {
 public:
@@ -27,6 +33,9 @@ public:
 	math::Mat4 get_transform() const { return m_model_transform; }
 
 protected:
+	std::vector<math::Vec3> floats_to_vec3(const std::vector<float>& flts);
+	std::vector<math::Vec2<float>> floats_to_vec2(const std::vector<float>& flts);
+
 	std::unique_ptr<VertexArray> m_va;
 	VertexBuffer m_vb;
 	std::unique_ptr<IndexBuffer> m_ib;

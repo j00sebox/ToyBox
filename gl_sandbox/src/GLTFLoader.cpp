@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GLTFLoader.h"
 
+#include "Log.h"
+
 std::string file_to_string(const char* file_path)
 {
 	std::string line;
@@ -16,6 +18,20 @@ std::string file_to_string(const char* file_path)
 	stream.close();
 
 	return ss.str();
+}
+
+int get_num_verts(const std::string& type)
+{
+	if (type == "SCALAR")
+		return 1;
+	else if (type == "VEC2")
+		return 2;
+	else if (type == "VEC3")
+		return 3;
+	else if (type == "VEC4")
+		return 4;
+	
+	ASSERT(false);
 }
 
 GLTFLoader::GLTFLoader(const char* path)
@@ -72,44 +88,47 @@ std::vector<unsigned int> GLTFLoader::get_indices()
 
 	json buffer = m_json["bufferViews"][index];
 	unsigned int buffer_byte_offset = buffer.value("byteOffset", 0) + byte_offset;
-	unsigned int length = buffer["byteLength"];
+	
 
 	switch (component_type)
 	{
 	case 5125:
+
+		unsigned int length = count * 4;
+
 		for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
 		{
 			unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
-			float val;
+			unsigned int val;
 
 			std::memcpy(&val, byte, sizeof(unsigned int));
 
 			indices.push_back(val);
 		}
 		break;
-	case 5123:
-		for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
-		{
-			unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
-			float val;
+		/*case 5123:
+			for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
+			{
+				unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
+				float val;
 
-			std::memcpy(&val, byte, sizeof(unsigned short));
+				std::memcpy(&val, byte, sizeof(unsigned short));
 
-			indices.push_back(val);
+				indices.push_back(val);
+			}
+			break;
+		case 5122:
+			for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
+			{
+				unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
+				float val;
+
+				std::memcpy(&val, byte, sizeof(short));
+
+				indices.push_back(val);
+			}
+			break;*/
 		}
-		break;
-	case 5122:
-		for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
-		{
-			unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
-			float val;
-
-			std::memcpy(&val, byte, sizeof(short));
-
-			indices.push_back(val);
-		}
-		break;
-	}
 
 	return indices;
 }
@@ -139,7 +158,7 @@ void GLTFLoader::extract_floats(const json& accessor, std::vector<float>& flts)
 
 	json buffer = m_json["bufferViews"][index];
 	unsigned int buffer_byte_offset = buffer["byteOffset"] + byte_offset;
-	unsigned int length = buffer["byteLength"];
+	unsigned int length = count * get_num_verts(type) * 4;
 
 	for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
 	{

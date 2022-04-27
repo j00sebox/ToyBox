@@ -10,7 +10,7 @@ Object::Object(const std::string& file_path)
 {
 	if (file_path.empty())
 	{
-		float vertices[] =
+		std::vector<float> vertices =
 		{
 		   -0.5f, -0.5f, 0.f, 0.f, 0.f,
 			0.5f,  0.5f, 0.f, 1.f, 1.f,
@@ -52,7 +52,7 @@ Object::Object(const std::string& file_path)
 		m_va.reset(new VertexArray());
 
 		m_vb = VertexBuffer();
-		m_vb.add_data(vertices, sizeof(vertices));
+		m_vb.add_data(vertices.data(), vertices.size() * sizeof(float));
 
 		m_ib.reset(new IndexBuffer(indices, sizeof(indices)));
 
@@ -67,12 +67,45 @@ Object::Object(const std::string& file_path)
 	{
 		GLTFLoader loader(file_path.c_str());
 
-		std::vector<float> positions = loader.get_positions();
-		std::vector<float> tex_coords = loader.get_tex_coords();
+		std::vector<math::Vec3> positions = floats_to_vec3(loader.get_positions());
+		std::vector<math::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
-		std::vector<float> vertices;
+		std::vector<Vertex> vertices;
+
+		for (unsigned int i = 0; i < positions.size(); i++)
+		{
+			vertices.push_back({
+					positions[i],
+					tex_coords[i]
+				});
+		}
 
 		std::vector<unsigned int> indices = loader.get_indices();
+
+		std::vector<float> verts;
+
+		for (unsigned int i = 0; i < vertices.size(); ++i)
+		{
+			verts.push_back(vertices[i].positon.x);
+			verts.push_back(vertices[i].positon.y);
+			verts.push_back(vertices[i].positon.z);
+			verts.push_back(vertices[i].st.x);
+			verts.push_back(vertices[i].st.y);
+		}
+
+		m_va.reset(new VertexArray());
+		
+		m_vb = VertexBuffer();
+		m_vb.add_data(verts.data(), verts.size() * sizeof(float));
+
+		m_ib.reset(new IndexBuffer(indices.data(), indices.size() * sizeof(unsigned int)));
+
+		BufferLayout layout = {
+			{0, 3, GL_FLOAT, false},
+			{1, 2, GL_FLOAT, false}
+		};
+
+		m_va->set_layout(m_vb, layout);
 	}
 }
 
@@ -89,4 +122,26 @@ void Object::translate(const math::Vec3& pos)
 	t(3, 0) = pos.x;	t(3, 1) = pos.y;	t(3, 2) = pos.z;
 
 	m_model_transform *= t;
+}
+
+std::vector<math::Vec3> Object::floats_to_vec3(const std::vector<float>& flts)
+{
+	std::vector<math::Vec3> vec;
+	for (unsigned int i = 0; i < flts.size();)
+	{
+		vec.push_back({ flts[i++], flts[i++], flts[i++] });
+	}
+
+	return vec;
+}
+
+std::vector<math::Vec2<float>> Object::floats_to_vec2(const std::vector<float>& flts)
+{
+	std::vector<math::Vec2<float>> vec;
+	for (unsigned int i = 0; i < flts.size();)
+	{
+		vec.push_back({ flts[i++], flts[i++] });
+	}
+
+	return vec;
 }
