@@ -2,6 +2,7 @@
 
 #include "VertexArray.h"
 #include "Buffer.h"
+#include "Texture.h"
 
 #include "math/Matrix.h"
 
@@ -37,8 +38,10 @@ protected:
 	std::vector<math::Vec2<float>> floats_to_vec2(const std::vector<float>& flts);
 
 	std::unique_ptr<VertexArray> m_va;
-	VertexBuffer m_vb;
 	std::unique_ptr<IndexBuffer> m_ib;
+	std::unique_ptr<Texture2D> m_texture;
+	VertexBuffer m_vb;
+	
 
 	math::Mat4 m_model_transform;
 };

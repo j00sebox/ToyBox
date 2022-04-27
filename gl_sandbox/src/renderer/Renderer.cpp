@@ -84,7 +84,7 @@ void Renderer::draw()
 	m_skybox_shader->bind();
 	m_skybox.draw();
 
-	m_lava_texure.bind(0);
+	//m_lava_texure.bind(0);
 	m_cube_shader->bind();
 	airplane.draw();
 }

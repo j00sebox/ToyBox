@@ -40,18 +40,27 @@ GLTFLoader::GLTFLoader(const char* path)
 
 	m_json = json::parse(src);
 
-	m_uri = m_json["buffers"][0]["uri"];
+	std::string uri = m_json["buffers"][0]["uri"];
 
 	std::string p(path);
-	std::string bin_path = p.substr(0, (p.find_last_of('/') + 1)) + m_uri;
+	m_base_dir = p.substr(0, (p.find_last_of('/') + 1));
+	std::string bin_path = m_base_dir + uri;
 
 	load_bin(bin_path.c_str());
+
+	
 
 	json attributes = m_json["meshes"][0]["primitives"][0]["attributes"];
 
 	m_postion_ind = attributes["POSITION"];
 	m_tex_coord_ind = attributes["TEXCOORD_0"];
 	m_indices_ind = m_json["meshes"][0]["primitives"][0]["indices"];
+
+	json materials = m_json["materials"][0];
+
+	m_bc_tex_ind = materials["pbrMetallicRoughness"]["baseColorTexture"]["index"];
+	m_norm_tex_ind = materials["normalTexture"]["index"];
+	m_occ_tex_ind = materials["occlusionTexture"]["index"];
 }
 
 std::vector<float> GLTFLoader::get_positions()
@@ -89,7 +98,6 @@ std::vector<unsigned int> GLTFLoader::get_indices()
 	json buffer = m_json["bufferViews"][index];
 	unsigned int buffer_byte_offset = buffer.value("byteOffset", 0) + byte_offset;
 	
-
 	switch (component_type)
 	{
 	case 5125:
@@ -131,6 +139,24 @@ std::vector<unsigned int> GLTFLoader::get_indices()
 		}
 
 	return indices;
+}
+
+std::string GLTFLoader::get_base_color_texture()
+{
+	json uri = m_json["images"][m_bc_tex_ind];
+	std::string image = uri["uri"];
+
+	return m_base_dir + image;
+}
+
+std::string GLTFLoader::get_normal_texture()
+{
+	return std::string();
+}
+
+std::string GLTFLoader::get_occlusion_texture()
+{
+	return std::string();
 }
 
 void GLTFLoader::load_bin(const char* file_path)

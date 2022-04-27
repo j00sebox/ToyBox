@@ -70,6 +70,8 @@ Object::Object(const std::string& file_path)
 		std::vector<math::Vec3> positions = floats_to_vec3(loader.get_positions());
 		std::vector<math::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
+		m_texture.reset(new Texture2D(loader.get_base_color_texture()));
+
 		std::vector<Vertex> vertices;
 
 		for (unsigned int i = 0; i < positions.size(); i++)
@@ -113,6 +115,7 @@ void Object::draw() const
 {
 	m_va->bind();
 	m_ib->bind();
+	m_texture->bind(0);
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_ib->get_count(), GL_UNSIGNED_INT, nullptr));
 }
 
