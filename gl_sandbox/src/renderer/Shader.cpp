@@ -173,7 +173,7 @@ void ShaderProgram::set_uniform_4f(const std::string& name, float x, float y, fl
 	GL_CALL(glUniform4f(get_uniform_loaction(name), x, y, z, w));
 }
 
-void ShaderProgram::set_uniform_mat4f(const std::string& name, const math::Mat4& mat)
+void ShaderProgram::set_uniform_mat4f(const std::string& name, const mathz::Mat4& mat)
 {
 	bind();
 	GL_CALL(glUniformMatrix4fv(get_uniform_loaction(name), 1, GL_FALSE, &mat.mat[0][0]));

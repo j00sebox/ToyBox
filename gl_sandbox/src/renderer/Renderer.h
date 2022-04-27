@@ -9,7 +9,7 @@
 #include "Geometry.h"
 #include "Skybox.h"
 
-#include "math/Quaternion.h"
+#include "mathz/Quaternion.h"
 
 class Renderer
 {
@@ -36,7 +36,7 @@ private:
 	std::shared_ptr<ShaderProgram> m_skybox_shader;
 	CubeMap m_skybox_texture;
 	
-	math::Mat4 m_perspective;
-	math::Mat4 m_orthographic;
+	mathz::Mat4 m_perspective;
+	mathz::Mat4 m_orthographic;
 };
 

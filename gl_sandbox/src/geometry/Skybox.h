@@ -8,7 +8,7 @@ public:
 	Skybox();
 
 	virtual void draw() const override;
-	virtual void translate(const math::Vec3& pos) override {}
+	virtual void translate(const mathz::Vec3& pos) override {}
 
 private:
 	std::shared_ptr<VertexArray> m_skybox_va;

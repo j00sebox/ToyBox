@@ -67,8 +67,8 @@ Object::Object(const std::string& file_path)
 	{
 		GLTFLoader loader(file_path.c_str());
 
-		std::vector<math::Vec3> positions = floats_to_vec3(loader.get_positions());
-		std::vector<math::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
+		std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
+		std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
 		m_texture.reset(new Texture2D(loader.get_base_color_texture()));
 
@@ -119,17 +119,17 @@ void Object::draw() const
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_ib->get_count(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Object::translate(const math::Vec3& pos)
+void Object::translate(const mathz::Vec3& pos)
 {
-	math::Mat4 t;
+	mathz::Mat4 t;
 	t(3, 0) = pos.x;	t(3, 1) = pos.y;	t(3, 2) = pos.z;
 
 	m_model_transform *= t;
 }
 
-std::vector<math::Vec3> Object::floats_to_vec3(const std::vector<float>& flts)
+std::vector<mathz::Vec3> Object::floats_to_vec3(const std::vector<float>& flts)
 {
-	std::vector<math::Vec3> vec;
+	std::vector<mathz::Vec3> vec;
 	for (unsigned int i = 0; i < flts.size();)
 	{
 		vec.push_back({ flts[i++], flts[i++], flts[i++] });
@@ -138,9 +138,9 @@ std::vector<math::Vec3> Object::floats_to_vec3(const std::vector<float>& flts)
 	return vec;
 }
 
-std::vector<math::Vec2<float>> Object::floats_to_vec2(const std::vector<float>& flts)
+std::vector<mathz::Vec2<float>> Object::floats_to_vec2(const std::vector<float>& flts)
 {
-	std::vector<math::Vec2<float>> vec;
+	std::vector<mathz::Vec2<float>> vec;
 	for (unsigned int i = 0; i < flts.size();)
 	{
 		vec.push_back({ flts[i++], flts[i++] });
