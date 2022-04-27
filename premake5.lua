@@ -36,6 +36,8 @@ project "gl_sandbox"
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/src/renderer",
+		"%{prj.name}/src/geometry",
+		"%{prj.name}/src/events",
 		"%{prj.name}/vendor/stb",
 		"%{prj.name}/vendor/glfw/include",
 		"%{prj.name}/vendor/glad/include"

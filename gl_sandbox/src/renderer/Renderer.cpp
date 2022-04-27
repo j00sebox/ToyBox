@@ -10,6 +10,7 @@
 
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height),
+	cube(""),
 	m_lava_texure("resources/textures/lava.png"),
 	m_skybox_texture("resources/skyboxes/above_the_clouds/")
 {
@@ -53,6 +54,11 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, 1.f, 0.f,
 		0.f, 0.1f, -4.f, 1.f 
 	);
+
+	m_cube_shader.reset(new ShaderProgram(
+		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
+		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
+	));
 
 	float skybox_verts[] =
 	{
@@ -107,65 +113,6 @@ Renderer::Renderer(int width, int height)
 
 	m_skybox_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
 
-	float vertices[] =
-	{
-	   -0.5f, -0.5f, 0.f, 0.f, 0.f,	
-		0.5f,  0.5f, 0.f, 1.f, 1.f,  	
-	   -0.5f,  0.5f, 0.f, 0.f, 1.f,		
-		0.5f, -0.5f, 0.f, 1.f, 0.f,	
-
-	   -0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f,  0.5f, 1.f, 1.f, 1.f,
-	   -0.5f,  0.5f, 1.f, 0.f, 1.f,
-		0.5f, -0.5f, 1.f, 1.f, 0.f,
-	};
-
-	unsigned int indices[] = {
-		// front
-		0, 1, 2,
-		0, 3, 1,
-
-		// back
-		4, 5, 6,
-		4, 7, 5,
-
-		// top
-		1, 6, 2,
-		1, 5, 6,
-
-		// bottom
-		0, 3, 4,
-		3, 7, 4,
-
-		// left
-		0, 2, 6,
-		0, 6, 4,
-
-		//right
-		3, 5, 1,
-		3, 5, 7
-	};
-
-	m_cube_va.reset(new VertexArray());
-
-	m_cube_vb = VertexBuffer();
-	m_cube_vb.add_data(vertices, sizeof(vertices));
-
-	BufferLayout layout = {
-		{a_position, 3, GL_FLOAT, false},
-		{a_tex_coord, 2, GL_FLOAT, false}
-		//{a_colour, 4, GL_FLOAT, false}
-	};
-
-	m_cube_va->set_layout(m_cube_vb, layout);
-
-	m_cube_ib.reset(new IndexBuffer(indices, sizeof(indices)));
-
-	m_cube_shader.reset(new ShaderProgram(
-		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
-		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
-	));
-
 	m_cube_shader->set_uniform_mat4f("u_translate", square_move);
 	m_cube_shader->set_uniform_mat4f("u_proj", m_perspective * m_orthographic);
 }
@@ -192,11 +139,9 @@ void Renderer::draw()
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_skybox_ib->get_count(), GL_UNSIGNED_INT, nullptr));
 
 	GL_CALL(glDepthMask(GL_TRUE));
-	m_cube_va->bind();
-	m_cube_ib->bind();
 	m_lava_texure.bind(0);
 	m_cube_shader->bind();
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_cube_ib->get_count(), GL_UNSIGNED_INT, nullptr));
+	cube.draw();
 }
 
 void Renderer::reset_view()

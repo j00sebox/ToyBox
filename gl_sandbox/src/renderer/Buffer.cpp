@@ -21,6 +21,12 @@ void VertexBuffer::add_data(const float* vertices, const unsigned int size) cons
 	GL_CALL(glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW));
 }
 
+void VertexBuffer::add_data(const std::vector<float>& vertices) const
+{
+	bind();
+	GL_CALL(glBufferData(GL_ARRAY_BUFFER, vertices.size(), vertices.data(), GL_STATIC_DRAW));
+}
+
 void VertexBuffer::bind() const
 {
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_id));

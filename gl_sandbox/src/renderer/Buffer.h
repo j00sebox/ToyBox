@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 class VertexBuffer
 {
 public:
@@ -7,6 +9,7 @@ public:
 	~VertexBuffer();
 
 	void add_data(const float* vertices, const unsigned int size) const;
+	void add_data(const std::vector<float>& vertices) const;
 
 	void bind() const;
 	void unbind() const;
