@@ -11,6 +11,7 @@
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height),
 	cube(""),
+	airplane("resources/models/airplane_biplane/scene.gltf"),
 	m_lava_texure("resources/textures/lava.png"),
 	m_skybox_texture("resources/skyboxes/above_the_clouds/")
 {

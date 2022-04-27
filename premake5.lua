@@ -30,6 +30,7 @@ project "gl_sandbox"
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/stb/**.h",
 		"%{prj.name}/vendor/stb/**.cpp",
+		"%{prj.name}/vendor/json/json.hpp",
 	}
 
 	includedirs
@@ -38,6 +39,7 @@ project "gl_sandbox"
 		"%{prj.name}/src/renderer",
 		"%{prj.name}/src/geometry",
 		"%{prj.name}/src/events",
+		"%{prj.name}/vendor",
 		"%{prj.name}/vendor/stb",
 		"%{prj.name}/vendor/glfw/include",
 		"%{prj.name}/vendor/glad/include"

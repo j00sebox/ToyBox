@@ -2,63 +2,78 @@
 #include "Geometry.h"
 
 #include "GLError.h"
+#include "GLTFLoader.h"
 
 #include <glad/glad.h>
 
 Object::Object(const std::string& file_path)
 {
-	float vertices[] =
+	if (file_path.empty())
 	{
-	   -0.5f, -0.5f, 0.f, 0.f, 0.f,
-		0.5f,  0.5f, 0.f, 1.f, 1.f,
-	   -0.5f,  0.5f, 0.f, 0.f, 1.f,
-		0.5f, -0.5f, 0.f, 1.f, 0.f,
+		float vertices[] =
+		{
+		   -0.5f, -0.5f, 0.f, 0.f, 0.f,
+			0.5f,  0.5f, 0.f, 1.f, 1.f,
+		   -0.5f,  0.5f, 0.f, 0.f, 1.f,
+			0.5f, -0.5f, 0.f, 1.f, 0.f,
 
-	   -0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f,  0.5f, 1.f, 1.f, 1.f,
-	   -0.5f,  0.5f, 1.f, 0.f, 1.f,
-		0.5f, -0.5f, 1.f, 1.f, 0.f,
-	};
+		   -0.5f, -0.5f, 1.f, 0.f, 0.f,
+			0.5f,  0.5f, 1.f, 1.f, 1.f,
+		   -0.5f,  0.5f, 1.f, 0.f, 1.f,
+			0.5f, -0.5f, 1.f, 1.f, 0.f,
+		};
 
-	unsigned int indices[] = {
-		// front
-		0, 1, 2,
-		0, 3, 1,
+		unsigned int indices[] = {
+			// front
+			0, 1, 2,
+			0, 3, 1,
 
-		// back
-		4, 5, 6,
-		4, 7, 5,
+			// back
+			4, 5, 6,
+			4, 7, 5,
 
-		// top
-		1, 6, 2,
-		1, 5, 6,
+			// top
+			1, 6, 2,
+			1, 5, 6,
 
-		// bottom
-		0, 3, 4,
-		3, 7, 4,
+			// bottom
+			0, 3, 4,
+			3, 7, 4,
 
-		// left
-		0, 2, 6,
-		0, 6, 4,
+			// left
+			0, 2, 6,
+			0, 6, 4,
 
-		//right
-		3, 5, 1,
-		3, 5, 7
-	};
+			//right
+			3, 5, 1,
+			3, 5, 7
+		};
 
-	m_va.reset(new VertexArray());
+		m_va.reset(new VertexArray());
 
-	m_vb = VertexBuffer();
-	m_vb.add_data(vertices, sizeof(vertices));
+		m_vb = VertexBuffer();
+		m_vb.add_data(vertices, sizeof(vertices));
 
-	BufferLayout layout = {
-		{0, 3, GL_FLOAT, false},
-		{1, 2, GL_FLOAT, false}
-	};
+		m_ib.reset(new IndexBuffer(indices, sizeof(indices)));
 
-	m_va->set_layout(m_vb, layout);
+		BufferLayout layout = {
+			{0, 3, GL_FLOAT, false},
+			{1, 2, GL_FLOAT, false}
+		};
 
-	m_ib.reset(new IndexBuffer(indices, sizeof(indices)));
+		m_va->set_layout(m_vb, layout);
+	}
+	else
+	{
+		GLTFLoader loader(file_path.c_str());
+
+		std::vector<float> positions = loader.get_positions();
+		std::vector<float> tex_coords = loader.get_tex_coords();
+
+		std::vector<float> vertices;
+
+		std::vector<unsigned int> indices = loader.get_indices();
+	}
 }
 
 void Object::draw() const
