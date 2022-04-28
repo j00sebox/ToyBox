@@ -8,114 +8,32 @@
 
 Object::Object(const std::string& file_path)
 {
-	if (file_path.empty())
-	{
-		std::vector<float> vertices =
-		{
-		   -0.5f, -0.5f, 0.f, 0.f, 0.f,
-			0.5f,  0.5f, 0.f, 1.f, 1.f,
-		   -0.5f,  0.5f, 0.f, 0.f, 1.f,
-			0.5f, -0.5f, 0.f, 1.f, 0.f,
+	load_mesh(file_path);
 
-		   -0.5f, -0.5f, 1.f, 0.f, 0.f,
-			0.5f,  0.5f, 1.f, 1.f, 1.f,
-		   -0.5f,  0.5f, 1.f, 0.f, 1.f,
-			0.5f, -0.5f, 1.f, 1.f, 0.f,
-		};
+	m_va.reset(new VertexArray());
 
-		unsigned int indices[] = {
-			// front
-			0, 1, 2,
-			0, 3, 1,
+	std::vector<float> vertices = m_meshes[0].get_vertices();
 
-			// back
-			4, 5, 6,
-			4, 7, 5,
+	m_vb = VertexBuffer();
+	m_vb.add_data(vertices.data(), vertices.size() * sizeof(float));
 
-			// top
-			1, 6, 2,
-			1, 5, 6,
+	std::vector<unsigned int> indices = m_meshes[0].get_indices();
 
-			// bottom
-			0, 3, 4,
-			3, 7, 4,
+	m_ib.reset(new IndexBuffer(indices.data(), indices.size() * sizeof(unsigned int)));
 
-			// left
-			0, 2, 6,
-			0, 6, 4,
+	BufferLayout layout = {
+		{0, 3, GL_FLOAT, false},
+		{1, 2, GL_FLOAT, false}
+	};
 
-			//right
-			3, 5, 1,
-			3, 5, 7
-		};
-
-		m_va.reset(new VertexArray());
-
-		m_vb = VertexBuffer();
-		m_vb.add_data(vertices.data(), vertices.size() * sizeof(float));
-
-		m_ib.reset(new IndexBuffer(indices, sizeof(indices)));
-
-		BufferLayout layout = {
-			{0, 3, GL_FLOAT, false},
-			{1, 2, GL_FLOAT, false}
-		};
-
-		m_va->set_layout(m_vb, layout);
-	}
-	else
-	{
-		GLTFLoader loader(file_path.c_str());
-
-		std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
-		std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
-
-		m_texture.reset(new Texture2D(loader.get_base_color_texture()));
-
-		std::vector<Vertex> vertices;
-
-		for (unsigned int i = 0; i < positions.size(); i++)
-		{
-			vertices.push_back({
-					positions[i],
-					tex_coords[i]
-				});
-		}
-
-		std::vector<unsigned int> indices = loader.get_indices();
-
-		std::vector<float> verts;
-
-		for (unsigned int i = 0; i < vertices.size(); ++i)
-		{
-			verts.push_back(vertices[i].positon.x);
-			verts.push_back(vertices[i].positon.y);
-			verts.push_back(vertices[i].positon.z);
-			verts.push_back(vertices[i].st.x);
-			verts.push_back(vertices[i].st.y);
-		}
-
-		m_va.reset(new VertexArray());
-		
-		m_vb = VertexBuffer();
-		m_vb.add_data(verts.data(), verts.size() * sizeof(float));
-
-		m_ib.reset(new IndexBuffer(indices.data(), indices.size() * sizeof(unsigned int)));
-
-		BufferLayout layout = {
-			{0, 3, GL_FLOAT, false},
-			{1, 2, GL_FLOAT, false}
-		};
-
-		m_va->set_layout(m_vb, layout);
-	}
+	m_va->set_layout(m_vb, layout);
 }
 
 void Object::draw() const
 {
 	m_va->bind();
 	m_ib->bind();
-	m_texture->bind(0);
+	m_meshes[0].get_texture()->bind(0);
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_ib->get_count(), GL_UNSIGNED_INT, nullptr));
 }
 
@@ -127,24 +45,9 @@ void Object::translate(const mathz::Vec3& pos)
 	m_model_transform *= t;
 }
 
-std::vector<mathz::Vec3> Object::floats_to_vec3(const std::vector<float>& flts)
+void Object::load_mesh(const std::string& file_path)
 {
-	std::vector<mathz::Vec3> vec;
-	for (unsigned int i = 0; i < flts.size();)
-	{
-		vec.push_back({ flts[i++], flts[i++], flts[i++] });
-	}
-
-	return vec;
+	m_meshes.push_back(Mesh(file_path));
 }
 
-std::vector<mathz::Vec2<float>> Object::floats_to_vec2(const std::vector<float>& flts)
-{
-	std::vector<mathz::Vec2<float>> vec;
-	for (unsigned int i = 0; i < flts.size();)
-	{
-		vec.push_back({ flts[i++], flts[i++] });
-	}
 
-	return vec;
-}

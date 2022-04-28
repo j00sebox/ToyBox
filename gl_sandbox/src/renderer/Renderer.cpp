@@ -10,7 +10,6 @@
 
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height),
-	cube(""),
 	airplane("resources/models/airplane_biplane/scene.gltf"),
 	scroll("resources/models/scroll_of_smithing/scene.gltf"),
 	m_lava_texure("resources/textures/lava.png"),
@@ -49,7 +48,6 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, 0.f, 1.f
 	);
 
-	cube.translate({ 0.f, 0.f, -100.f });
 	airplane.translate({ 0.f, 0.1f, -100.f });
 	scroll.translate({ 50.f, 0.f, -20.f });
 
@@ -58,7 +56,7 @@ Renderer::Renderer(int width, int height)
 		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 	));
 
-	m_cube_shader->set_uniform_mat4f("u_model", cube.get_transform());
+	m_cube_shader->set_uniform_mat4f("u_model", airplane.get_transform());
 	m_cube_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
 
 	m_skybox_shader.reset(new ShaderProgram(
