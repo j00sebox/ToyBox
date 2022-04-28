@@ -10,8 +10,6 @@
 
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height),
-	airplane("resources/models/airplane_biplane/scene.gltf"),
-	scroll("resources/models/scroll_of_smithing/scene.gltf"),
 	m_lava_texure("resources/textures/lava.png"),
 	m_skybox_texture("resources/skyboxes/above_the_clouds/")
 {
@@ -48,8 +46,9 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, 0.f, 1.f
 	);
 
+	airplane.load_mesh("resources/models/airplane_biplane/scene.gltf");
+
 	airplane.translate({ 0.f, 0.1f, -100.f });
-	scroll.translate({ 50.f, 0.f, -20.f });
 
 	m_cube_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),

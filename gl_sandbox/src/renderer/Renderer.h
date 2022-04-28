@@ -6,7 +6,7 @@
 #include "Texture.h"
 
 #include "Camera.h"
-#include "Geometry.h"
+#include "Model.h"
 #include "Skybox.h"
 
 #include "mathz/Quaternion.h"
@@ -28,7 +28,7 @@ private:
 
 	std::unique_ptr<Camera> m_camera;
 
-	Object airplane, scroll;
+	Model airplane, scroll;
 	std::shared_ptr<ShaderProgram> m_cube_shader;
 	Texture2D m_lava_texure;
 

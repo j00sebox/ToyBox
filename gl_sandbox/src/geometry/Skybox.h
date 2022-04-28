@@ -1,14 +1,13 @@
 #pragma once
 
-#include "Geometry.h"
+#include "Model.h"
 
-class Skybox : public Geometry
+class Skybox : public Model
 {
 public:
 	Skybox();
 
 	virtual void draw() const override;
-	virtual void translate(const mathz::Vec3& pos) override {}
 
 private:
 	std::shared_ptr<VertexArray> m_skybox_va;

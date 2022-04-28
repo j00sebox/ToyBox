@@ -7,26 +7,19 @@
 
 #include "mathz/Matrix.h"
 
-class Geometry
+class Model
 {
 public:
-	virtual void draw() const = 0;
-	virtual void translate(const mathz::Vec3& pos) = 0;
-};
+	Model();
 
-class Object : public Geometry
-{
-public:
-	Object(const std::string& file_path);
+	virtual void draw() const;
+	void translate(const mathz::Vec3& pos);
 
-	virtual void draw() const override;
-	virtual void translate(const mathz::Vec3& pos) override;
+	void load_mesh(const std::string& file_path);
 
 	mathz::Mat4 get_transform() const { return m_model_transform; }
 
 private:
-	void load_mesh(const std::string& file_path);
-
 	std::vector<Mesh> m_meshes;
 
 	std::unique_ptr<VertexArray> m_va;
