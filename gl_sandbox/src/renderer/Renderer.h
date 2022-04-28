@@ -29,12 +29,11 @@ private:
 	std::unique_ptr<Camera> m_camera;
 
 	Skybox m_skybox;
+	std::shared_ptr<ShaderProgram> m_skybox_shader;
+
 	Model m_airplane, m_scroll;
 	std::shared_ptr<ShaderProgram> m_airplane_shader, m_scroll_shader;
 
-	std::shared_ptr<ShaderProgram> m_skybox_shader;
-	CubeMap m_skybox_texture;
-	
 	mathz::Mat4 m_perspective;
 	mathz::Mat4 m_orthographic;
 };

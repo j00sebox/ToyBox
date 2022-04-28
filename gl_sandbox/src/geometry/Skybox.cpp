@@ -5,7 +5,8 @@
 
 #include <glad/glad.h>
 
-Skybox::Skybox()
+Skybox::Skybox(const std::string& texture_path)
+	: m_skybox_texture(texture_path)
 {
 	std::vector<float> skybox_verts =
 	{
@@ -66,6 +67,13 @@ void Skybox::draw() const
 {
 	GL_CALL(glDepthMask(GL_FALSE));
 	m_skybox_va.bind();
+	m_skybox_texture.bind(0);
+	m_skybox_shader->bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 	GL_CALL(glDepthMask(GL_TRUE));
+}
+
+void Skybox::attach_shader(std::shared_ptr<ShaderProgram> shader)
+{
+	m_skybox_shader = shader;
 }

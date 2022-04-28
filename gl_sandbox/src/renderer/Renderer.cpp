@@ -10,7 +10,7 @@
 
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height),
-	m_skybox_texture("resources/skyboxes/above_the_clouds/")
+	m_skybox("resources/skyboxes/above_the_clouds/")
 {
 	GL_CALL(glViewport(0, 0, width, height));
 
@@ -81,6 +81,8 @@ Renderer::Renderer(int width, int height)
 		Shader("resources/shaders/skybox/skybox_fragment.shader", ShaderType::Fragment)
 	));
 
+	m_skybox.attach_shader(m_skybox_shader);
+
 	m_skybox_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
 }
 
@@ -99,8 +101,6 @@ void Renderer::draw()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	m_skybox_texture.bind(0);
-	m_skybox_shader->bind();
 	m_skybox.draw();
 
 	m_airplane.draw();
