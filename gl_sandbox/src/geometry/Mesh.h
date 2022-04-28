@@ -3,7 +3,6 @@
 #include <string>
 
 #include "Texture.h"
-#include "Mesh.h"
 #include "VertexArray.h"
 #include "Buffer.h"
 

@@ -45,18 +45,37 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, 0.f, 1.f
 	);
 
-	airplane.load_mesh("resources/models/airplane_biplane/scene.gltf");
+	// airplane setup
+	m_airplane.load_mesh("resources/models/airplane_biplane/scene.gltf");
 
-	airplane.translate({ 0.f, 0.1f, -100.f });
+	m_airplane.translate({ 0.f, 0.1f, -100.f });
 
-	m_cube_shader.reset(new ShaderProgram(
+	m_airplane_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
 		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
 	));
 
-	m_cube_shader->set_uniform_mat4f("u_model", airplane.get_transform());
-	m_cube_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+	m_airplane.attach_shader(m_airplane_shader);
 
+	m_airplane_shader->set_uniform_mat4f("u_model", m_airplane.get_transform());
+	m_airplane_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+
+	// scroll setup
+	m_scroll.load_mesh("resources/models/scroll_of_smithing/scene.gltf");
+
+	m_scroll.translate({ 200.f, 0.f, -100.f });
+
+	m_scroll_shader.reset(new ShaderProgram(
+		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
+		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
+	));
+
+	m_scroll.attach_shader(m_scroll_shader);
+
+	m_scroll_shader->set_uniform_mat4f("u_model", m_scroll.get_transform());
+	m_scroll_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+
+	// skybox
 	m_skybox_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/skybox/skybox_vertex.shader", ShaderType::Vertex),
 		Shader("resources/shaders/skybox/skybox_fragment.shader", ShaderType::Fragment)
@@ -69,7 +88,8 @@ void Renderer::update(float elpased_time)
 {
 	m_camera->update(elpased_time);
 
-	m_cube_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+	m_airplane_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+	m_scroll_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 	m_skybox_shader->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
 
 	draw();
@@ -83,11 +103,8 @@ void Renderer::draw()
 	m_skybox_shader->bind();
 	m_skybox.draw();
 
-	m_cube_shader->bind();
-	airplane.draw();
-
-	/*m_cube_shader->bind();
-	scroll.draw();*/
+	m_airplane.draw();
+	m_scroll.draw();
 }
 
 void Renderer::reset_view()

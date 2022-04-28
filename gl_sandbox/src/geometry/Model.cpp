@@ -8,6 +8,7 @@
 
 void Model::draw() const
 {
+	m_shader->bind();
 	for (const Mesh& m : m_meshes)
 	{
 		m.draw();
@@ -25,6 +26,11 @@ void Model::translate(const mathz::Vec3& pos)
 void Model::load_mesh(const std::string& file_path)
 {
 	m_meshes.push_back(Mesh(file_path));
+}
+
+void Model::attach_shader(std::shared_ptr<ShaderProgram> shader)
+{
+	m_shader = shader;
 }
 
 
