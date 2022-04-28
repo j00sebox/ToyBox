@@ -6,6 +6,14 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
+Texture2D::Texture2D()
+{
+	m_id = 0;
+	m_width = 0, m_height = 0;
+	m_colour_channels = 0;
+	m_data = nullptr;
+}
+
 Texture2D::Texture2D(const std::string& file_name)
 {
 	stbi_set_flip_vertically_on_load(0);
@@ -43,6 +51,11 @@ Texture2D::Texture2D(const std::string& file_name)
 	unbind();
 }
 
+Texture2D::Texture2D(Texture2D&& t) noexcept
+{
+	move_members(std::move(t));
+}
+
 Texture2D::~Texture2D()
 {
 	GL_CALL(glDeleteTextures(1, &m_id));
@@ -57,6 +70,22 @@ void Texture2D::bind(int slot /* = 0 */) const
 void Texture2D::unbind() const
 {
 	GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+}
+
+void Texture2D::operator=(Texture2D&& t) noexcept
+{
+	move_members(std::move(t));
+}
+
+void Texture2D::move_members(Texture2D&& t) noexcept
+{
+	m_id = t.m_id;
+	t.m_id = 0;
+	m_width = t.m_width;
+	m_height = t.m_height;
+	m_colour_channels = t.m_colour_channels;
+	m_data = t.m_data;
+	t.m_data = nullptr;
 }
 
 CubeMap::CubeMap(const std::string& dir)

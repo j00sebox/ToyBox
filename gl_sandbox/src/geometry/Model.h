@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Mesh.h"
 
 #include "mathz/Matrix.h"
@@ -8,8 +7,6 @@
 class Model
 {
 public:
-	Model();
-
 	virtual void draw() const;
 	void translate(const mathz::Vec3& pos);
 

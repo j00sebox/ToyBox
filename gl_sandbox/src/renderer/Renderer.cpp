@@ -10,14 +10,13 @@
 
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height),
-	m_lava_texure("resources/textures/lava.png"),
 	m_skybox_texture("resources/skyboxes/above_the_clouds/")
 {
 	GL_CALL(glViewport(0, 0, width, height));
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glFrontFace(GL_CCW);
+	GL_CALL(glEnable(GL_DEPTH_TEST));
+	GL_CALL(glDepthFunc(GL_LEQUAL));
+	GL_CALL(glFrontFace(GL_CCW));
 
 	m_camera = std::unique_ptr<Camera>(new Camera(width, height));
 

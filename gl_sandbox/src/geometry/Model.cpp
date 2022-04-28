@@ -6,16 +6,11 @@
 
 #include <glad/glad.h>
 
-Model::Model()
-{
-	
-}
-
 void Model::draw() const
 {
-	for (unsigned int i = 0; i < m_meshes.size(); ++i)
+	for (const Mesh& m : m_meshes)
 	{
-		m_meshes[i].draw();
+		m.draw();
 	}
 }
 

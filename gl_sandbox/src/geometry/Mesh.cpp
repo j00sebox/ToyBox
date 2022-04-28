@@ -14,7 +14,7 @@ Mesh::Mesh(const std::string& file_path)
 	std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
 	std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
-	m_texture.reset(new Texture2D(loader.get_base_color_texture()));
+	m_texture = Texture2D(loader.get_base_color_texture());
 
 	std::vector<Vertex> vertices;
 
@@ -58,10 +58,17 @@ Mesh::Mesh(const std::string& file_path)
 	vb.unbind();
 }
 
+Mesh::Mesh(Mesh&& mesh) noexcept
+	: m_texture(std::move(mesh.m_texture))
+{
+	m_va = std::move(mesh.m_va);
+	m_indices_count = mesh.m_indices_count;
+}
+
 void Mesh::draw() const
 {
 	m_va.bind();
-	m_texture->bind(0);
+	m_texture.bind(0);
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 }
 

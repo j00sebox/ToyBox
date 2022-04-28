@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <memory>
 
 #include "Texture.h"
 #include "Mesh.h"
@@ -20,17 +19,9 @@ class Mesh
 {
 public:
 	Mesh(const std::string& fname);
-
-	Mesh(Mesh&& mesh) noexcept
-	{
-		m_va = std::move(mesh.m_va);
-		m_texture = mesh.m_texture; 
-		m_indices_count = mesh.m_indices_count;
-	}
+	Mesh(Mesh&& mesh) noexcept;
 
 	void draw() const;
-
-	const std::shared_ptr<Texture2D> get_texture() const { return m_texture; }
 
 private:
 	std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts) const;
@@ -38,6 +29,6 @@ private:
 
 	unsigned int m_indices_count;
 	VertexArray m_va;
-	std::shared_ptr<Texture2D> m_texture;
+	Texture2D m_texture;
 };
 
