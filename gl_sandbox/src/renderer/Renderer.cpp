@@ -4,6 +4,8 @@
 #include "GLError.h"
 #include "events/EventList.h"
 
+#include "mathz/Quaternion.h";
+
 #include <glad/glad.h>
 
 #define DEG_TO_RAD(x) (x / 180.f) * 3.1415f
@@ -49,6 +51,7 @@ Renderer::Renderer(int width, int height)
 	m_airplane.load_mesh("resources/models/airplane_biplane/scene.gltf");
 
 	m_airplane.translate({ 0.f, 0.1f, -100.f });
+	m_airplane.scale(2.f);
 
 	m_airplane_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
@@ -65,6 +68,10 @@ Renderer::Renderer(int width, int height)
 	m_scroll.load_mesh("resources/models/scroll_of_smithing/scene.gltf");
 
 	m_scroll.translate({ 200.f, 0.f, -100.f });
+
+	mathz::Quaternion q1(DEG_TO_RAD(90.f), { 0.f, 1.f, 0.f });
+	mathz::Quaternion q2(DEG_TO_RAD(90.f), { 0.f, 0.f, 1.f });
+	m_scroll.rotate(q1 * q2);
 
 	m_scroll_shader.reset(new ShaderProgram(
 		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
