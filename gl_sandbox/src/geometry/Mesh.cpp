@@ -16,21 +16,35 @@ Mesh::Mesh(const std::string& file_path)
 
 	m_texture.reset(new Texture2D(loader.get_base_color_texture()));
 
+	std::vector<Vertex> vertices;
+
 	for (unsigned int i = 0; i < positions.size(); i++)
 	{
-		m_vertices.push_back({
+		vertices.push_back({
 				positions[i],
 				tex_coords[i]
 			});
 	}
 
-	std::vector<float> vertices = get_vertices();
+	std::vector<float> verts;
+
+	for (unsigned int i = 0; i < vertices.size(); ++i)
+	{
+		verts.push_back(vertices[i].positon.x);
+		verts.push_back(vertices[i].positon.y);
+		verts.push_back(vertices[i].positon.z);
+		verts.push_back(vertices[i].st.x);
+		verts.push_back(vertices[i].st.y);
+	}
+
 	std::vector<unsigned int> indices = loader.get_indices();
 
-	VertexBuffer vb = VertexBuffer();
-	vb.add_data(vertices.data(), vertices.size() * sizeof(float));
+	m_indices_count = indices.size();
 
-	m_ib.reset(new IndexBuffer(indices.data(), indices.size() * sizeof(unsigned int)));
+	m_va.bind();
+
+	VertexBuffer vb(verts);
+	IndexBuffer ib(indices);
 
 	BufferLayout layout = {
 		{0, 3, GL_FLOAT, false},
@@ -40,32 +54,15 @@ Mesh::Mesh(const std::string& file_path)
 	m_va.set_layout(vb, layout);
 
 	m_va.unbind();
-	m_ib->unbind();
+	ib.unbind();
 	vb.unbind();
 }
 
 void Mesh::draw() const
 {
 	m_va.bind();
-	m_ib->bind();
 	m_texture->bind(0);
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_ib->get_count(), GL_UNSIGNED_INT, nullptr));
-}
-
-std::vector<float> Mesh::get_vertices() const
-{
-	std::vector<float> verts;
-
-	for (unsigned int i = 0; i < m_vertices.size(); ++i)
-	{
-		verts.push_back(m_vertices[i].positon.x);
-		verts.push_back(m_vertices[i].positon.y);
-		verts.push_back(m_vertices[i].positon.z);
-		verts.push_back(m_vertices[i].st.x);
-		verts.push_back(m_vertices[i].st.y);
-	}
-
-	return verts;
+	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 }
 
 std::vector<mathz::Vec3> Mesh::floats_to_vec3(const std::vector<float>& flts) const

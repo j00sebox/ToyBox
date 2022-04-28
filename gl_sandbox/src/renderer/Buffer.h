@@ -5,10 +5,8 @@
 class VertexBuffer
 {
 public:
-	VertexBuffer();
+	VertexBuffer(const std::vector<float>& buffer);
 	~VertexBuffer();
-
-	void add_data(const float* vertices, const unsigned int size) const;
 
 	void bind() const;
 	void unbind() const;
@@ -20,7 +18,7 @@ private:
 class IndexBuffer
 {
 public:
-	IndexBuffer(const unsigned int* indices, const unsigned int size);
+	IndexBuffer(const std::vector<unsigned int>& buffer);
 	~IndexBuffer();
 
 	unsigned int get_count() const { return m_count; }

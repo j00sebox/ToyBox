@@ -10,8 +10,8 @@ public:
 	virtual void draw() const override;
 
 private:
+	unsigned int m_indices_count;
 	VertexArray m_skybox_va;
-	std::shared_ptr<IndexBuffer> m_skybox_ib;
-	VertexBuffer m_skybox_vb;
+	
 };
 

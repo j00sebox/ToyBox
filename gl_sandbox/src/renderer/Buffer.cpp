@@ -5,20 +5,16 @@
 
 #include <glad/glad.h>
 
-VertexBuffer::VertexBuffer()
+VertexBuffer::VertexBuffer(const std::vector<float>& buffer)
 {
 	GL_CALL(glGenBuffers(1, &m_id));
+	bind();
+	GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), GL_STATIC_DRAW));
 }
 
 VertexBuffer::~VertexBuffer()
 {
 	GL_CALL(glDeleteBuffers(1, &m_id));
-}
-
-void VertexBuffer::add_data(const float* vertices, const unsigned int size) const
-{
-	bind();
-	GL_CALL(glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW));
 }
 
 void VertexBuffer::bind() const
@@ -31,13 +27,13 @@ void VertexBuffer::unbind() const
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
 
-IndexBuffer::IndexBuffer(const unsigned int* indices, const unsigned int size)
+IndexBuffer::IndexBuffer(const std::vector<unsigned int>& buffer)
 {
-	m_count = size / sizeof(unsigned int);
+	m_count = buffer.size();
 
 	GL_CALL(glGenBuffers(1, &m_id));
 	bind();
-	GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW));
+	GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned int), buffer.data(), GL_STATIC_DRAW));
 }
 
 IndexBuffer::~IndexBuffer()

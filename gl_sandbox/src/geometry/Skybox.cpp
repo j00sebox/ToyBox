@@ -7,9 +7,8 @@
 
 Skybox::Skybox()
 {
-	float skybox_verts[] =
+	std::vector<float> skybox_verts =
 	{
-		//   Coordinates
 		-1.0f, -1.0f,  1.0f,	//        7--------6
 		 1.0f, -1.0f,  1.0f,	//       /|       /|
 		 1.0f, -1.0f, -1.0f,	//      4--------5 |
@@ -20,42 +19,53 @@ Skybox::Skybox()
 		-1.0f,  1.0f, -1.0f
 	};
 
-	unsigned int skybox_indices[] =
+	std::vector<unsigned int> skybox_indices =
 	{
-		// Right
+		// right
 		1, 2, 6,
 		6, 5, 1,
-		// Left
+
+		// left
 		0, 4, 7,
 		7, 3, 0,
-		// Top
+
+		// top
 		4, 5, 6,
 		6, 7, 4,
-		// Bottom
+
+		// bottom
 		0, 3, 2,
 		2, 1, 0,
-		// Back
+
+		// back
 		0, 1, 5,
 		5, 4, 0,
-		// Front
+
+		// front
 		3, 7, 6,
 		6, 2, 3
 	};
 
-	m_skybox_vb.add_data(skybox_verts, sizeof(skybox_verts));
+	m_skybox_va.bind();
+
+	VertexBuffer skybox_vb(skybox_verts);
+	IndexBuffer skybox_ib(skybox_indices);
+
+	m_indices_count = skybox_ib.get_count();
 
 	BufferLayout sb_layout = { {0, 3, GL_FLOAT, false} };
 
-	m_skybox_va.set_layout(m_skybox_vb, sb_layout);
+	m_skybox_va.set_layout(skybox_vb, sb_layout);
 
-	m_skybox_ib.reset(new IndexBuffer(skybox_indices, sizeof(skybox_indices)));
+	m_skybox_va.unbind();
+	skybox_ib.unbind();
+	skybox_vb.unbind();
 }
 
 void Skybox::draw() const
 {
 	GL_CALL(glDepthMask(GL_FALSE));
 	m_skybox_va.bind();
-	m_skybox_ib->bind();
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_skybox_ib->get_count(), GL_UNSIGNED_INT, nullptr));
+	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 	GL_CALL(glDepthMask(GL_TRUE));
 }
