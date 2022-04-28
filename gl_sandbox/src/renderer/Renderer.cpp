@@ -18,6 +18,8 @@ Renderer::Renderer(int width, int height)
 	GL_CALL(glDepthFunc(GL_LEQUAL));
 	GL_CALL(glFrontFace(GL_CCW));
 
+	m_directional_light.normalize();
+
 	m_camera = std::unique_ptr<Camera>(new Camera(width, height));
 
 	// bind events
@@ -59,6 +61,7 @@ Renderer::Renderer(int width, int height)
 
 	m_airplane_shader->set_uniform_mat4f("u_model", m_airplane.get_transform());
 	m_airplane_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+	m_airplane_shader->set_uniform_3f("u_light", m_directional_light);
 
 	// scroll setup
 	m_scroll.load_mesh("resources/models/scroll_of_smithing/scene.gltf");
@@ -74,6 +77,7 @@ Renderer::Renderer(int width, int height)
 
 	m_scroll_shader->set_uniform_mat4f("u_model", m_scroll.get_transform());
 	m_scroll_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+	m_scroll_shader->set_uniform_3f("u_light", m_directional_light);
 
 	// skybox
 	m_skybox_shader.reset(new ShaderProgram(

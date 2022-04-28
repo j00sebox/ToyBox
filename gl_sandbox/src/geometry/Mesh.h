@@ -11,6 +11,7 @@
 struct Vertex
 {
 	mathz::Vec3 positon;
+	mathz::Vec3 normal;
 	mathz::Vec2<float> st;
 };
 

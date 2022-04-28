@@ -36,5 +36,7 @@ private:
 
 	mathz::Mat4 m_perspective;
 	mathz::Mat4 m_orthographic;
+
+	mathz::Vec3 m_directional_light = { 0.f, 10.f, -1.f };
 };
 

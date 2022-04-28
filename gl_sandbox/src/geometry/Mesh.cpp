@@ -12,6 +12,7 @@ Mesh::Mesh(const std::string& file_path)
 	GLTFLoader loader(file_path.c_str());
 
 	std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
+	std::vector<mathz::Vec3> normals = floats_to_vec3(loader.get_normals());
 	std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
 	m_texture = Texture2D(loader.get_base_color_texture());
@@ -22,6 +23,7 @@ Mesh::Mesh(const std::string& file_path)
 	{
 		vertices.push_back({
 				positions[i],
+				normals[i],
 				tex_coords[i]
 			});
 	}
@@ -33,6 +35,9 @@ Mesh::Mesh(const std::string& file_path)
 		verts.push_back(vertices[i].positon.x);
 		verts.push_back(vertices[i].positon.y);
 		verts.push_back(vertices[i].positon.z);
+		verts.push_back(vertices[i].normal.x);
+		verts.push_back(vertices[i].normal.y);
+		verts.push_back(vertices[i].normal.z);
 		verts.push_back(vertices[i].st.x);
 		verts.push_back(vertices[i].st.y);
 	}
@@ -48,7 +53,8 @@ Mesh::Mesh(const std::string& file_path)
 
 	BufferLayout layout = {
 		{0, 3, GL_FLOAT, false},
-		{1, 2, GL_FLOAT, false}
+		{1, 3, GL_FLOAT, false},
+		{2, 2, GL_FLOAT, false}
 	};
 
 	m_va.set_layout(vb, layout);

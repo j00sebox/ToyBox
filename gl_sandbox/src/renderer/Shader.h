@@ -56,7 +56,7 @@ public:
 
 	void set_uniform_1f(const std::string& name, float x);
 	void set_uniform_2f(const std::string& name, float x, float y);
-	void set_uniform_3f(const std::string& name, float x, float y, float z);
+	void set_uniform_3f(const std::string& name, const mathz::Vec3& vec);
 	void set_uniform_4f(const std::string& name, float x, float y, float z, float w);
 
 	void set_uniform_mat4f(const std::string& name, const mathz::Mat4& mat);

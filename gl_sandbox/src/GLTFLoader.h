@@ -10,6 +10,7 @@ public:
 	GLTFLoader(const char* path);
 
 	std::vector<float> get_positions();
+	std::vector<float> get_normals();
 	std::vector<float> get_tex_coords();
 	std::vector<unsigned int> get_indices();
 
