@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "Mesh.h"
 
+#include "GLError.h"
 #include "GLTFLoader.h"
 #include "mathz/Matrix.h"
+
+#include <glad/glad.h>
 
 Mesh::Mesh(const std::string& file_path)
 {
@@ -21,7 +24,32 @@ Mesh::Mesh(const std::string& file_path)
 			});
 	}
 
-	m_indices = loader.get_indices();
+	std::vector<float> vertices = get_vertices();
+	std::vector<unsigned int> indices = loader.get_indices();
+
+	VertexBuffer vb = VertexBuffer();
+	vb.add_data(vertices.data(), vertices.size() * sizeof(float));
+
+	m_ib.reset(new IndexBuffer(indices.data(), indices.size() * sizeof(unsigned int)));
+
+	BufferLayout layout = {
+		{0, 3, GL_FLOAT, false},
+		{1, 2, GL_FLOAT, false}
+	};
+
+	m_va.set_layout(vb, layout);
+
+	m_va.unbind();
+	m_ib->unbind();
+	vb.unbind();
+}
+
+void Mesh::draw() const
+{
+	m_va.bind();
+	m_ib->bind();
+	m_texture->bind(0);
+	GL_CALL(glDrawElements(GL_TRIANGLES, m_ib->get_count(), GL_UNSIGNED_INT, nullptr));
 }
 
 std::vector<float> Mesh::get_vertices() const

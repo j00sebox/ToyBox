@@ -51,6 +51,12 @@ void VertexArray::unbind() const
 	GL_CALL(glBindVertexArray(0));
 }
 
+void VertexArray::operator= (VertexArray&& va) noexcept
+{
+	m_id = va.m_id;
+	va.m_id = 0;
+}
+
 BufferLayout::BufferLayout(std::initializer_list<VertexAttribute> attribs)
 	: m_layout(attribs)
 {

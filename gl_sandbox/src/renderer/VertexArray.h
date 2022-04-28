@@ -43,6 +43,8 @@ public:
 	void bind() const;
 	void unbind() const;
 
+	void operator= (VertexArray&& va) noexcept;
+
 private:
 	unsigned int m_id;
 	

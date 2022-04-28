@@ -13,10 +13,10 @@ Model::Model()
 
 void Model::draw() const
 {
-	m_va->bind();
-	m_ib->bind();
-	m_meshes[0].get_texture()->bind(0);
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_ib->get_count(), GL_UNSIGNED_INT, nullptr));
+	for (unsigned int i = 0; i < m_meshes.size(); ++i)
+	{
+		m_meshes[i].draw();
+	}
 }
 
 void Model::translate(const mathz::Vec3& pos)
@@ -29,27 +29,7 @@ void Model::translate(const mathz::Vec3& pos)
 
 void Model::load_mesh(const std::string& file_path)
 {
-	Mesh mesh(file_path);
-
-	m_va.reset(new VertexArray());
-
-	std::vector<float> vertices = mesh.get_vertices();
-
-	m_vb = VertexBuffer();
-	m_vb.add_data(vertices.data(), vertices.size() * sizeof(float));
-
-	std::vector<unsigned int> indices = mesh.get_indices();
-
-	m_ib.reset(new IndexBuffer(indices.data(), indices.size() * sizeof(unsigned int)));
-
-	BufferLayout layout = {
-		{0, 3, GL_FLOAT, false},
-		{1, 2, GL_FLOAT, false}
-	};
-
-	m_va->set_layout(m_vb, layout);
-
-	m_meshes.push_back(mesh);
+	m_meshes.push_back(Mesh(file_path));
 }
 
 
