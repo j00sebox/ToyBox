@@ -25,8 +25,6 @@ Renderer::Renderer(int width, int height)
 	// bind events
 	//EventList::e_camera_move.bind_function(std::bind(&Renderer::update_camera_pos, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-	unsigned int a_position = 0, a_tex_coord = 1;
-
 	float scaling_factor = 1.0f / tanf(DEG_TO_RAD(45.f) * 0.5f);
 	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
 
@@ -60,7 +58,7 @@ Renderer::Renderer(int width, int height)
 	m_airplane.attach_shader(m_airplane_shader);
 
 	m_airplane_shader->set_uniform_mat4f("u_model", m_airplane.get_transform());
-	m_airplane_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+	m_airplane_shader->set_uniform_mat4f("u_projection", m_perspective);
 	m_airplane_shader->set_uniform_3f("u_light", m_directional_light);
 
 	// scroll setup
@@ -76,7 +74,7 @@ Renderer::Renderer(int width, int height)
 	m_scroll.attach_shader(m_scroll_shader);
 
 	m_scroll_shader->set_uniform_mat4f("u_model", m_scroll.get_transform());
-	m_scroll_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+	m_scroll_shader->set_uniform_mat4f("u_projection", m_perspective);
 	m_scroll_shader->set_uniform_3f("u_light", m_directional_light);
 
 	// skybox
@@ -87,7 +85,7 @@ Renderer::Renderer(int width, int height)
 
 	m_skybox.attach_shader(m_skybox_shader);
 
-	m_skybox_shader->set_uniform_mat4f("u_projection", m_perspective * m_orthographic);
+	m_skybox_shader->set_uniform_mat4f("u_projection", m_perspective);
 }
 
 void Renderer::update(float elpased_time)
