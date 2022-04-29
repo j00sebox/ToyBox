@@ -15,7 +15,8 @@ Mesh::Mesh(const std::string& file_path)
 	std::vector<mathz::Vec3> normals = floats_to_vec3(loader.get_normals());
 	std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
-	m_texture = Texture2D(loader.get_base_color_texture());
+	m_textures.emplace_back(Texture2D(loader.get_base_color_texture()));
+	m_textures.emplace_back(Texture2D(loader.get_specular_color_texture()));
 
 	std::vector<Vertex> vertices;
 
@@ -30,16 +31,16 @@ Mesh::Mesh(const std::string& file_path)
 
 	std::vector<float> verts;
 
-	for (unsigned int i = 0; i < vertices.size(); ++i)
+	for (const Vertex& v : vertices)
 	{
-		verts.push_back(vertices[i].positon.x);
-		verts.push_back(vertices[i].positon.y);
-		verts.push_back(vertices[i].positon.z);
-		verts.push_back(vertices[i].normal.x);
-		verts.push_back(vertices[i].normal.y);
-		verts.push_back(vertices[i].normal.z);
-		verts.push_back(vertices[i].st.x);
-		verts.push_back(vertices[i].st.y);
+		verts.push_back(v.positon.x);
+		verts.push_back(v.positon.y);
+		verts.push_back(v.positon.z);
+		verts.push_back(v.normal.x);
+		verts.push_back(v.normal.y);
+		verts.push_back(v.normal.z);
+		verts.push_back(v.st.x);
+		verts.push_back(v.st.y);
 	}
 
 	std::vector<unsigned int> indices = loader.get_indices();
@@ -65,16 +66,19 @@ Mesh::Mesh(const std::string& file_path)
 }
 
 Mesh::Mesh(Mesh&& mesh) noexcept
-	: m_texture(std::move(mesh.m_texture))
 {
 	m_va = std::move(mesh.m_va);
 	m_indices_count = mesh.m_indices_count;
+	m_textures = std::move(mesh.m_textures);
 }
 
 void Mesh::draw() const
 {
 	m_va.bind();
-	m_texture.bind(0);
+	for (unsigned int i = 0; i < m_textures.size(); ++i)
+	{
+		m_textures[i].bind(i);
+	}
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 }
 

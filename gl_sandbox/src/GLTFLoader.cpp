@@ -42,6 +42,7 @@ GLTFLoader::GLTFLoader(const char* path)
 	json materials = m_json["materials"][0];
 
 	m_bc_tex_ind = materials["pbrMetallicRoughness"]["baseColorTexture"]["index"];
+	m_spec_tex_ind = materials["pbrMetallicRoughness"]["metallicRoughnessTexture"]["index"];
 	/*m_norm_tex_ind = materials["normalTexture"]["index"];
 	m_occ_tex_ind = materials["occlusionTexture"]["index"];*/
 }
@@ -137,6 +138,14 @@ std::vector<unsigned int> GLTFLoader::get_indices()
 std::string GLTFLoader::get_base_color_texture()
 {
 	json uri = m_json["images"][m_bc_tex_ind];
+	std::string image = uri["uri"];
+
+	return m_base_dir + image;
+}
+
+std::string GLTFLoader::get_specular_color_texture()
+{
+	json uri = m_json["images"][m_spec_tex_ind];
 	std::string image = uri["uri"];
 
 	return m_base_dir + image;

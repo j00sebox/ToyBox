@@ -15,6 +15,7 @@ public:
 	std::vector<unsigned int> get_indices();
 
 	std::string get_base_color_texture();
+	std::string get_specular_color_texture();
 	std::string get_normal_texture();
 	std::string get_occlusion_texture();
 
@@ -32,6 +33,7 @@ private:
 	unsigned int m_indices_ind;
 
 	unsigned int m_bc_tex_ind;
+	unsigned int m_spec_tex_ind;
 	unsigned int m_norm_tex_ind;
 	unsigned int m_occ_tex_ind;
 };

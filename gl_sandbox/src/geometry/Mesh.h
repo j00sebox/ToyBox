@@ -29,6 +29,6 @@ private:
 
 	unsigned int m_indices_count;
 	VertexArray m_va;
-	Texture2D m_texture;
+	std::vector<Texture2D> m_textures;
 };
 

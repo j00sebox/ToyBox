@@ -1,0 +1,11 @@
+Model Information:
+* title:	Magikarp Shiny Pokemon
+* source:	https://sketchfab.com/3d-models/magikarp-shiny-pokemon-4399bbc2ce3747e9ac9d977681304016
+* author:	paolavalenciamu (https://sketchfab.com/paolavalenciamu)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Magikarp Shiny Pokemon" (https://sketchfab.com/3d-models/magikarp-shiny-pokemon-4399bbc2ce3747e9ac9d977681304016) by paolavalenciamu (https://sketchfab.com/paolavalenciamu) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

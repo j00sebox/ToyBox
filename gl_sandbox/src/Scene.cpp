@@ -10,6 +10,9 @@ Scene::Scene()
 
 void Scene::load(const char* scene)
 {
+	if (scene == "")
+		return;
+
 	std::string src = file_to_string(scene);
 
 	m_json = json::parse(src);
@@ -83,6 +86,7 @@ void Scene::load(const char* scene)
 
 void Scene::init()
 {
+
 	if (m_skybox)
 	{
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
