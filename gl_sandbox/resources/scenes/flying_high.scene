@@ -1,18 +1,20 @@
 {
+	"camera": {
+		"position": [
+			0.0, 0.0, 0.0
+		]
+	},
 	"skybox": "resources/skyboxes/above_the_clouds/",
 	"model_count": 1,
-	"models": 
-	[
+	"models": [
 		{
 			"mesh_count": 1,
-			"meshes":
-			[
+			"meshes": [
 				{
-					"path" : "resources/models/airplane_biplane/scene.gltf"
+					"path": "resources/models/airplane_biplane/scene.gltf"
 				}
 			],
-			"shaders":
-			{
+			"shaders": {
 				"vertex": "resources/shaders/texture2D/texture2D_vertex.shader",
 				"fragment": "resources/shaders/texture2D/texture2D_fragment.shader"
 			}

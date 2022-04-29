@@ -25,17 +25,8 @@ private:
 
 	int m_screen_width, m_screen_height;
 
-	float m_near = 0.1f, m_far = 1000.f;
-
-	std::unique_ptr<Camera> m_camera;
-
+	std::shared_ptr<Camera> m_camera;
 	Scene m_scene;
-
-	Skybox m_skybox;
-	std::shared_ptr<ShaderProgram> m_skybox_shader;
-
-	Model m_airplane, m_scroll;
-	std::shared_ptr<ShaderProgram> m_airplane_shader, m_scroll_shader;
 
 	mathz::Mat4 m_perspective;
 	mathz::Mat4 m_orthographic;

@@ -5,8 +5,8 @@
 
 #define DEG_TO_RAD(x) (x / 180.f) * 3.1415f
 
-Camera::Camera(int width, int height)
-	: m_screen_width(width), m_screen_height(height)
+Camera::Camera()
+	: m_screen_width(0), m_screen_height(0)
 {
 	m_position = { 0.f, 0.f, 0.f };
 
@@ -34,6 +34,31 @@ mathz::Mat4 Camera::look_at_no_translate()
 	result(2, 0) = m_right.z;					result(2, 1) = m_up.z;					result(2, 2) = -m_forward.z;
 
 	return result;
+}
+
+void Camera::resize(int width, int height)
+{
+	m_screen_width = width; m_screen_height = height;
+
+	float scaling_factor = 1.0f / tanf(DEG_TO_RAD(m_fov) * 0.5f);
+	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
+
+	float q = m_far / (m_far - m_near);
+
+	// create projection matrices
+	m_perspective.set(
+		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
+		0.f, scaling_factor, 0.f, 0.f,
+		0.f, 0.f, q, 1.f,
+		0.f, 0.f, -m_near * q, 0.f
+	);
+
+	m_orthographic.set(
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		0.f, 0.f, 1.f / (m_far - 0.1f), -m_near / (m_far - m_near),
+		0.f, 0.f, 0.f, 1.f
+	);
 }
 
 void Camera::update(float elapsed_time)

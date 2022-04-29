@@ -11,5 +11,5 @@ out vec4 colour;
 
 void main()
 {
-	colour = texture(tex, v_tex_coord) * dot(v_normal, u_light);
+	colour = texture(tex, v_tex_coord) * -dot(v_normal, u_light);
 }

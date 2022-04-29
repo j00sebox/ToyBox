@@ -6,7 +6,7 @@
 class Camera
 {
 public:
-	Camera(int width, int height);
+	Camera();
 	~Camera() {}
 
 	mathz::Mat4 camera_look_at();
@@ -23,7 +23,10 @@ public:
 
 	inline const mathz::Vec3& get_forward() { return m_forward; }
 	inline const mathz::Mat4& get_transform() { return m_transform; }
+	inline const mathz::Mat4& get_perspective() { return m_perspective; }
+	inline const mathz::Mat4& get_orthographic() { return m_orthographic; }
 
+	void resize(int width, int height);
 	void reset();
 
 private:
@@ -31,7 +34,12 @@ private:
 	mathz::Vec3 m_forward, m_up, m_right;
 	mathz::Mat4 m_transform;
 
+	mathz::Mat4 m_perspective;
+	mathz::Mat4 m_orthographic;
+
 	int m_screen_width, m_screen_height;
+	float m_near = 0.1f, m_far = 1000.f;
+	float m_fov = 90.f;
 	float m_speed = 0.1f;
 	float m_sensitivity = 50.f;
 	bool m_mouse_down = false;
