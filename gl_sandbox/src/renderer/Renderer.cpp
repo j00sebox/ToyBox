@@ -24,6 +24,7 @@ Renderer::Renderer(int width, int height)
 	m_scene.load("resources/scenes/flying_high.scene");
 	m_camera = std::shared_ptr<Camera>(m_scene.get_camera());
 	m_camera->resize(width, height);
+	m_scene.init();
 }
 
 void Renderer::update(float elapsed_time)

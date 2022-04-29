@@ -77,6 +77,23 @@ void Scene::load(const char* scene)
 	}
 }
 
+void Scene::init()
+{
+	if (m_skybox)
+	{
+		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+	}
+
+	m_models[0].translate(mathz::Vec3{ 0.f, 200.f, -100.f });
+
+	for (const Model& model : m_models)
+	{
+		model.get_shader()->set_uniform_mat4f("u_model", model.get_transform());
+		model.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+		model.get_shader()->set_uniform_3f("u_light", mathz::Vec3({ 0.f, 0.f, -1.f }));
+	}
+}
+
 void Scene::update(float elapsed_time)
 {
 	m_camera->update(elapsed_time);
@@ -93,10 +110,7 @@ void Scene::draw()
 
 	for (const Model& model : m_models)
 	{
-		model.get_shader()->set_uniform_mat4f("u_model", model.get_transform());
 		model.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-		model.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-		model.get_shader()->set_uniform_3f("u_light", mathz::Vec3({ 0.f, 0.f, -1.f }));
 		model.draw();
 	}
 }

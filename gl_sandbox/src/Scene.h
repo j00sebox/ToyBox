@@ -14,6 +14,7 @@ public:
 	Scene();
 
 	void load(const char* scene);
+	void init();
 	void update(float elapsed_time);
 	void draw();
 	Camera* get_camera() { return m_camera.get(); }
