@@ -31,6 +31,8 @@ project "gl_sandbox"
 		"%{prj.name}/vendor/stb/**.h",
 		"%{prj.name}/vendor/stb/**.cpp",
 		"%{prj.name}/vendor/json/json.hpp",
+		"%{prj.name}/vendor/imgui/**.h",
+		"%{prj.name}/vendor/imgui/**.cpp"
 	}
 
 	includedirs
@@ -42,7 +44,8 @@ project "gl_sandbox"
 		"%{prj.name}/vendor",
 		"%{prj.name}/vendor/stb",
 		"%{prj.name}/vendor/glfw/include",
-		"%{prj.name}/vendor/glad/include"
+		"%{prj.name}/vendor/glad/include",
+		"%{prj.name}/vendor/imgui"
 	}
 
 	libdirs { "%{prj.name}/vendor/glfw/lib" }
