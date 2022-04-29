@@ -8,6 +8,18 @@
 	"model_count": 1,
 	"models": [
 		{
+			"translate": [
+				0.0,
+				0.0,
+				-100.0
+			],
+			"rotation": [
+				1.0,
+				0.0,
+				0.0,
+				0.0
+			],
+			"scale": 2.0,
 			"mesh_count": 1,
 			"meshes": [
 				{

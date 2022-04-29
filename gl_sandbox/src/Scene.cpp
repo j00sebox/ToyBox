@@ -53,6 +53,14 @@ void Scene::load(const char* scene)
 			m.load_mesh(meshes[j]["path"]);
 		}
 
+		json translate = model["translate"];
+		m.translate(mathz::Vec3({ translate[0], translate[1], translate[2] }));
+
+		json rotation = model["rotation"];
+		m.rotate(mathz::Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]));
+
+		m.scale(model["scale"]);
+
 		json shaders = model["shaders"];
 
 		std::string vertex_src = shaders["vertex"];
