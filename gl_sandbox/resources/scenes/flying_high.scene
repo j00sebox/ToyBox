@@ -1,9 +1,16 @@
 {
 	"camera": {
 		"position": [
-			0.0, 0.0, 0.0
+			0.0,
+			0.0,
+			0.0
 		]
 	},
+	"directional_light": [
+		0.0,
+		20.0,
+		-1.0
+	],
 	"skybox": "resources/skyboxes/above_the_clouds/",
 	"model_count": 1,
 	"models": [

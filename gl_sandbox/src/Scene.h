@@ -24,6 +24,7 @@ private:
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<Model> m_models;
+	mathz::Vec3 m_directional_light;
 	mathz::Mat4 m_perspective;
 };
 

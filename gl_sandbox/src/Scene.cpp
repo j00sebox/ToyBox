@@ -19,6 +19,10 @@ void Scene::load(const char* scene)
 
 	m_camera->set_pos(mathz::Vec3({camera_pos[0], camera_pos[1], camera_pos[2]}));
 
+	json directional_light = m_json["directional_light"];
+	m_directional_light = mathz::Vec3({ directional_light[0], directional_light[1], directional_light[2] });
+	m_directional_light.normalize();
+
 	std::string skybox_src = m_json.value("skybox", "");
 
 	if (!skybox_src.empty())
@@ -84,13 +88,11 @@ void Scene::init()
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 
-	m_models[0].translate(mathz::Vec3{ 0.f, 200.f, -100.f });
-
 	for (const Model& model : m_models)
 	{
 		model.get_shader()->set_uniform_mat4f("u_model", model.get_transform());
 		model.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-		model.get_shader()->set_uniform_3f("u_light", mathz::Vec3({ 0.f, 0.f, -1.f }));
+		model.get_shader()->set_uniform_3f("u_light", m_directional_light);
 	}
 }
 
