@@ -10,7 +10,7 @@ Camera::Camera()
 {
 	m_position = { 0.f, 0.f, 0.f };
 
-	m_forward = { 0.f, 0.f, 1.f };
+	m_forward = { 0.f, 0.f, -1.f };
 	m_up = { 0.f, 1.f, 0.f };
 	m_right = { 1.f, 0.f, 0.f };
 }
@@ -43,14 +43,14 @@ void Camera::resize(int width, int height)
 	float scaling_factor = 1.0f / tanf(DEG_TO_RAD(m_fov) * 0.5f);
 	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
 
-	float q = m_far / (m_far - m_near);
+	float q = -1.f / (m_far - m_near);
 
 	// create projection matrices
 	m_perspective.set(
-		aspect_ratio * scaling_factor, 0.f, 0.f, 0.f,
-		0.f, scaling_factor, 0.f, 0.f,
-		0.f, 0.f, q, 1.f,
-		0.f, 0.f, -m_near * q, 0.f
+		aspect_ratio * scaling_factor,	0.f,			0.f,									0.f,
+		0.f,							scaling_factor, 0.f,									0.f,
+		0.f,							0.f,			(m_far + m_near) * q,				   -1.f,
+		0.f,							0.f,			2.f * m_near * m_far * q,				0.f
 	);
 
 	m_orthographic.set(
@@ -65,12 +65,12 @@ void Camera::update(float elapsed_time)
 {
 	if (Input::is_key_pressed(GLFW_KEY_W))
 	{
-		move_forward(-m_speed * elapsed_time);
+		move_forward(m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_S))
 	{
-		move_forward(m_speed * elapsed_time);
+		move_forward(-m_speed * elapsed_time);
 	}
 
 	if (Input::is_key_pressed(GLFW_KEY_A))
@@ -128,7 +128,7 @@ void Camera::rotate(mathz::Quaternion q)
 	m_right = rotation * m_right;
 	m_right.normalize();
 
-	m_up = m_forward.cross(m_right);
+	m_up = m_right.cross(m_forward);
 	m_up.normalize();
 }
 
