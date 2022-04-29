@@ -47,61 +47,43 @@ Renderer::Renderer(int width, int height)
 		0.f, 0.f, 0.f, 1.f
 	);
 
+	m_scene.set_perspective(m_perspective);
+	m_scene.load("resources/scenes/flying_high.scene");
+
 	// airplane setup
-	m_airplane.load_mesh("resources/models/airplane_biplane/scene.gltf");
+	//m_airplane.load_mesh("resources/models/airplane_biplane/scene.gltf");
 
-	m_airplane.translate({ 0.f, 0.1f, -100.f });
-	m_airplane.scale(2.f);
+	//m_airplane.translate({ 0.f, 0.1f, -100.f });
+	//m_airplane.scale(2.f);
 
-	m_airplane_shader.reset(new ShaderProgram(
-		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
-		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
-	));
+	//m_airplane_shader.reset(new ShaderProgram(
+	//	Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
+	//	Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
+	//));
 
-	m_airplane.attach_shader(m_airplane_shader);
+	////m_airplane.attach_shader(m_airplane_shader);
 
-	m_airplane_shader->set_uniform_mat4f("u_model", m_airplane.get_transform());
-	m_airplane_shader->set_uniform_mat4f("u_projection", m_perspective);
-	m_airplane_shader->set_uniform_3f("u_light", m_directional_light);
+	//m_airplane_shader->set_uniform_mat4f("u_model", m_airplane.get_transform());
+	//m_airplane_shader->set_uniform_mat4f("u_projection", m_perspective);
+	//m_airplane_shader->set_uniform_3f("u_light", m_directional_light);
 
-	// scroll setup
-	m_scroll.load_mesh("resources/models/scroll_of_smithing/scene.gltf");
+	//// skybox
+	//m_skybox_shader.reset(new ShaderProgram(
+	//	Shader("resources/shaders/skybox/skybox_vertex.shader", ShaderType::Vertex),
+	//	Shader("resources/shaders/skybox/skybox_fragment.shader", ShaderType::Fragment)
+	//));
 
-	m_scroll.translate({ 200.f, 0.f, -100.f });
+	//m_skybox.attach_shader(m_skybox_shader);
 
-	mathz::Quaternion q1(DEG_TO_RAD(90.f), { 0.f, 1.f, 0.f });
-	mathz::Quaternion q2(DEG_TO_RAD(90.f), { 0.f, 0.f, 1.f });
-	m_scroll.rotate(q1 * q2);
-
-	m_scroll_shader.reset(new ShaderProgram(
-		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
-		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
-	));
-
-	m_scroll.attach_shader(m_scroll_shader);
-
-	m_scroll_shader->set_uniform_mat4f("u_model", m_scroll.get_transform());
-	m_scroll_shader->set_uniform_mat4f("u_projection", m_perspective);
-	m_scroll_shader->set_uniform_3f("u_light", m_directional_light);
-
-	// skybox
-	m_skybox_shader.reset(new ShaderProgram(
-		Shader("resources/shaders/skybox/skybox_vertex.shader", ShaderType::Vertex),
-		Shader("resources/shaders/skybox/skybox_fragment.shader", ShaderType::Fragment)
-	));
-
-	m_skybox.attach_shader(m_skybox_shader);
-
-	m_skybox_shader->set_uniform_mat4f("u_projection", m_perspective);
+	
 }
 
 void Renderer::update(float elpased_time)
 {
 	m_camera->update(elpased_time);
 
-	m_airplane_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-	m_scroll_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-	m_skybox_shader->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
+	//m_airplane_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+	//m_skybox_shader->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
 
 	draw();
 }
@@ -110,10 +92,7 @@ void Renderer::draw()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	m_skybox.draw();
-
-	m_airplane.draw();
-	m_scroll.draw();
+	m_scene.draw(m_camera->camera_look_at(), m_camera->look_at_no_translate());
 }
 
 void Renderer::reset_view()

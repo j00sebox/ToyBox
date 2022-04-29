@@ -63,6 +63,14 @@ Skybox::Skybox(const std::string& texture_path)
 	skybox_vb.unbind();
 }
 
+Skybox::Skybox(Skybox&& sb) noexcept
+	: m_skybox_texture(std::move(sb.m_skybox_texture))
+{
+	m_indices_count = sb.m_indices_count;
+	m_skybox_va = std::move(sb.m_skybox_va);
+	m_skybox_shader = sb.m_skybox_shader;
+}
+
 void Skybox::draw() const
 {
 	GL_CALL(glDepthMask(GL_FALSE));
@@ -73,7 +81,15 @@ void Skybox::draw() const
 	GL_CALL(glDepthMask(GL_TRUE));
 }
 
-void Skybox::attach_shader(std::shared_ptr<ShaderProgram> shader)
+void Skybox::attach_shader_program(ShaderProgram&& sp)
 {
-	m_skybox_shader = shader;
+	m_skybox_shader = std::make_shared<ShaderProgram>(std::move(sp));
+}
+
+void Skybox::operator=(Skybox&& sb) noexcept
+{
+	m_indices_count = sb.m_indices_count;
+	m_skybox_va = std::move(sb.m_skybox_va);
+	m_skybox_texture = std::move(sb.m_skybox_texture);
+	m_skybox_shader = sb.m_skybox_shader;
 }

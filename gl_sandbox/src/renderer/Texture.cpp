@@ -126,6 +126,12 @@ CubeMap::CubeMap(const std::string& dir)
 	
 }
 
+CubeMap::CubeMap(CubeMap&& cb) noexcept
+{
+	m_id = cb.m_id;
+	cb.m_id = 0;
+}
+
 CubeMap::~CubeMap()
 {
 	GL_CALL(glDeleteTextures(1, &m_id));
@@ -140,4 +146,10 @@ void CubeMap::bind(int slot) const
 void CubeMap::unbind() const
 {
 	GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
+}
+
+void CubeMap::operator=(CubeMap&& cb) noexcept
+{
+	m_id = cb.m_id;
+	cb.m_id = 0;
 }

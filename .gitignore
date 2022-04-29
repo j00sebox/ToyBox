@@ -70,5 +70,3 @@ radrenderer.mk
 radrenderer.txt
 pch.h.gch
 
-#General Windows
-*.bat

@@ -39,10 +39,13 @@ class CubeMap : public TextureBase
 {
 public:
 	CubeMap(const std::string& dir);
+	CubeMap(CubeMap&& cb) noexcept;
 	~CubeMap();
 
 	void bind(int slot = 0) const override;
 	void unbind() const override;
+
+	void operator= (CubeMap&& cb) noexcept;
 
 private:
 	unsigned int m_id;

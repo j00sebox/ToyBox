@@ -2,23 +2,7 @@
 #include "GLTFLoader.h"
 
 #include "Log.h"
-
-std::string file_to_string(const char* file_path)
-{
-	std::string line;
-	std::ifstream stream(file_path);
-
-	std::stringstream ss;
-
-	while (getline(stream, line))
-	{
-		ss << line << "\n";
-	}
-
-	stream.close();
-
-	return ss.str();
-}
+#include "ParseFile.h"
 
 int get_num_verts(const std::string& type)
 {

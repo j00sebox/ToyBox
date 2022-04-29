@@ -17,7 +17,7 @@ enum class ShaderType
 struct Shader
 {
 	Shader(const char* _path, ShaderType _type) 
-		: file_path(std::move(_path)), type(_type)  {}
+		: file_path(_path), type(_type)  {}
 
 	unsigned int id = 0;
 	std::string file_path;
@@ -52,6 +52,7 @@ public:
 		delete_shaders();
 	}
 
+	ShaderProgram(ShaderProgram&& sp) noexcept;
 	~ShaderProgram();
 
 	void set_uniform_1f(const std::string& name, float x);
@@ -73,7 +74,8 @@ private:
 	void compile_shader(unsigned int id) const;
 	void attach_shader(unsigned int id) const;
 	void link();
-	void delete_shaders(); // also does a detach
+	// also does a detach
+	void delete_shaders(); 
 
 	unsigned int m_program_id;
 	std::vector<Shader> m_shaders;

@@ -2,13 +2,17 @@
 
 #include "Model.h"
 
-class Skybox : public Model
+class Skybox
 {
 public:
 	Skybox(const std::string& texture_path);
+	Skybox(Skybox&& sb) noexcept;
 
-	virtual void draw() const override;
-	void attach_shader(std::shared_ptr<ShaderProgram> shader);
+	void draw() const;
+	void attach_shader_program(ShaderProgram&& sp);
+	std::shared_ptr<ShaderProgram> get_shader() const { return m_skybox_shader; }
+
+	void operator= (Skybox&& sb) noexcept;
 
 private:
 	unsigned int m_indices_count;

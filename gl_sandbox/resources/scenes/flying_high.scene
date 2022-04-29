@@ -1,0 +1,21 @@
+{
+	"skybox": "resources/skyboxes/above_the_clouds/",
+	"model_count": 1,
+	"models": 
+	[
+		{
+			"mesh_count": 1,
+			"meshes":
+			[
+				{
+					"path" : "resources/models/airplane_biplane/scene.gltf"
+				}
+			],
+			"shaders":
+			{
+				"vertex": "resources/shaders/texture2D/texture2D_vertex.shader",
+				"fragment": "resources/shaders/texture2D/texture2D_fragment.shader"
+			}
+		}
+	]
+}

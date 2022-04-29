@@ -8,7 +8,7 @@
 
 void Model::draw() const
 {
-	m_shader->bind();
+	m_shader_program->bind();
 	for (const Mesh& m : m_meshes)
 	{
 		m.draw();
@@ -35,9 +35,9 @@ void Model::load_mesh(const std::string& file_path)
 	m_meshes.emplace_back(Mesh(file_path));
 }
 
-void Model::attach_shader(std::shared_ptr<ShaderProgram> shader)
+void Model::attach_shader_program(ShaderProgram&& sp)
 {
-	m_shader = shader;
+	m_shader_program = std::make_shared<ShaderProgram>(std::move(sp));
 }
 
 mathz::Mat4 Model::get_transform() const

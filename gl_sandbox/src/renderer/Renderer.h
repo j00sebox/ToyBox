@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "Skybox.h"
+#include "Scene.h"
 
 #include "mathz/Quaternion.h"
 
@@ -27,6 +28,8 @@ private:
 	float m_near = 0.1f, m_far = 1000.f;
 
 	std::unique_ptr<Camera> m_camera;
+
+	Scene m_scene;
 
 	Skybox m_skybox;
 	std::shared_ptr<ShaderProgram> m_skybox_shader;

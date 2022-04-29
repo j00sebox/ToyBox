@@ -24,9 +24,15 @@ GLenum get_gl_shader_type(ShaderType type)
 	return GL_FALSE;
 }
 
+ShaderProgram::ShaderProgram(ShaderProgram&& sp) noexcept
+{
+	m_program_id = sp.m_program_id;
+	sp.m_program_id = 0;
+}
+
 ShaderProgram::~ShaderProgram()
 {
-	GL_CALL(glDeleteProgram(m_program_id));
+	GL_CALL(glDeleteProgram(m_program_id));	
 }
 
 void ShaderProgram::bind() const
@@ -175,10 +181,12 @@ void ShaderProgram::set_uniform_4f(const std::string& name, float x, float y, fl
 {
 	bind();
 	GL_CALL(glUniform4f(get_uniform_loaction(name), x, y, z, w));
+	unbind();
 }
 
 void ShaderProgram::set_uniform_mat4f(const std::string& name, const mathz::Mat4& mat)
 {
 	bind();
 	GL_CALL(glUniformMatrix4fv(get_uniform_loaction(name), 1, GL_FALSE, &mat.mat[0][0]));
+	unbind();
 }
