@@ -19,9 +19,11 @@ Renderer::Renderer(int width, int height)
 	GL_CALL(glDepthFunc(GL_LEQUAL));
 	GL_CALL(glFrontFace(GL_CCW));
 
+	GL_CALL(glClearColor(0.4f, 0.3f, 0.5f, 1.f));
+
 	m_directional_light.normalize();
 
-	m_scene.load("resources/scenes/flying_high.scene");
+	m_scene.load("");
 	m_camera = std::shared_ptr<Camera>(m_scene.get_camera());
 	m_camera->resize(width, height);
 	m_scene.init();

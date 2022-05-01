@@ -3,8 +3,12 @@
 
 #include "ParseFile.h"
 
+#include "lights/PointLight.h"
+
 Scene::Scene()
 {
+	m_directional_light = { 2.f, -1.f, -1.f };
+	m_directional_light.normalize();
 	m_camera = std::make_shared<Camera>();
 }
 
@@ -86,17 +90,37 @@ void Scene::load(const char* scene)
 
 void Scene::init()
 {
-
 	if (m_skybox)
 	{
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 
+	PointLight point_light(2.f);
+
+	Model floor;
+	floor.load_mesh("resources/models/wooden_floor/scene.gltf");
+
+	floor.translate({ 100.f, 0.f, -200.f });
+
+	floor.rotate(mathz::Quaternion(90.f, { 1.f, 0.f, 0.f }));
+
+	ShaderProgram sp(
+		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
+		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
+	);
+
+	floor.attach_shader_program(std::move(sp));
+
+	m_models.emplace_back(std::move(floor));
+
 	for (const Model& model : m_models)
 	{
 		model.get_shader()->set_uniform_mat4f("u_model", model.get_transform());
 		model.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-		model.get_shader()->set_uniform_3f("u_light", m_directional_light);
+		model.get_shader()->set_uniform_3f("u_pl_pos", point_light.get_postion());
+		model.get_shader()->set_uniform_4f("u_pl_col", point_light.get_colour());
+		model.get_shader()->set_uniform_1f("u_pl_rad", 0.2f);
+		//model.get_shader()->set_uniform_3f("u_light", m_directional_light);
 	}
 }
 
