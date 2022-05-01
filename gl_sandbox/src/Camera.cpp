@@ -18,10 +18,10 @@ Camera::Camera()
 mathz::Mat4 Camera::camera_look_at()
 {
 	mathz::Mat4 result;
-	result(0, 0) = m_right.x;					result(0, 1) = m_up.x;					result(0, 2) = -m_forward.x;
-	result(1, 0) = m_right.y;					result(1, 1) = m_up.y;					result(1, 2) = -m_forward.y;
-	result(2, 0) = m_right.z;					result(2, 1) = m_up.z;					result(2, 2) = -m_forward.z;
-	result(3, 0) = -m_right.dot(m_position);	result(3, 1) = -m_up.dot(m_position);	result(3, 2) = m_forward.dot(m_position);
+	result[0][0] = m_right.x;					result[0][1] = m_up.x;					result[0][2] = -m_forward.x;
+	result[1][0] = m_right.y;					result[1][1] = m_up.y;					result[1][2] = -m_forward.y;
+	result[2][0] = m_right.z;					result[2][1] = m_up.z;					result[2][2] = -m_forward.z;
+	result[3][0] = -m_right.dot(m_position);	result[3][1] = -m_up.dot(m_position);	result[3][2] = m_forward.dot(m_position);
 
 	return result;
 }
@@ -29,9 +29,9 @@ mathz::Mat4 Camera::camera_look_at()
 mathz::Mat4 Camera::look_at_no_translate()
 {
 	mathz::Mat4 result;
-	result(0, 0) = m_right.x;					result(0, 1) = m_up.x;					result(0, 2) = -m_forward.x;
-	result(1, 0) = m_right.y;					result(1, 1) = m_up.y;					result(1, 2) = -m_forward.y;
-	result(2, 0) = m_right.z;					result(2, 1) = m_up.z;					result(2, 2) = -m_forward.z;
+	result[0][0] = m_right.x;					result[0][1] = m_up.x;					result[0][2] = -m_forward.x;
+	result[1][0] = m_right.y;					result[1][1] = m_up.y;					result[1][2] = -m_forward.y;
+	result[2][0] = m_right.z;					result[2][1] = m_up.z;					result[2][2] = -m_forward.z;
 
 	return result;
 }

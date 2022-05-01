@@ -17,12 +17,12 @@ void Model::draw() const
 
 void Model::translate(const mathz::Vec3& pos)
 {
-	m_translate(3, 0) = pos.x;	m_translate(3, 1) = pos.y;	m_translate(3, 2) = pos.z;
+	m_translate[3][0] = pos.x;	m_translate[3][1] = pos.y;	m_translate[3][2] = pos.z;
 }
 
 void Model::scale(float s)
 {
-	m_scale(0, 0) = s; m_scale(1, 1) = s; m_scale(2, 2) = s;
+	m_scale[0][0] = s; m_scale[1][1] = s; m_scale[2][2] = s;
 }
 
 void Model::rotate(const mathz::Quaternion& q)
