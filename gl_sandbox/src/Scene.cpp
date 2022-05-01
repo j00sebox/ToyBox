@@ -95,14 +95,20 @@ void Scene::init()
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 
-	PointLight point_light(2.f);
+	m_point_light_shader = m_point_light.get_shader();
+
+	m_point_light.translate({ 0.f, 0.f, -9.f });
+
+	m_point_light_shader->set_uniform_mat4f("u_model", m_point_light.get_translate());
+	m_point_light_shader->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+	m_point_light_shader->set_uniform_4f("u_light_colour", m_point_light.get_colour());
 
 	Model floor;
 	floor.load_mesh("resources/models/wooden_floor/scene.gltf");
 
+	floor.scale(0.05f);
 	floor.translate({ 100.f, 0.f, -200.f });
-
-	floor.rotate(mathz::Quaternion(90.f, { 1.f, 0.f, 0.f }));
+	//floor.rotate(mathz::Quaternion(90.f, { 1.f, 0.f, 0.f }));
 
 	ShaderProgram sp(
 		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
@@ -117,10 +123,10 @@ void Scene::init()
 	{
 		model.get_shader()->set_uniform_mat4f("u_model", model.get_transform());
 		model.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-		model.get_shader()->set_uniform_3f("u_pl_pos", point_light.get_postion());
-		model.get_shader()->set_uniform_4f("u_pl_col", point_light.get_colour());
-		model.get_shader()->set_uniform_1f("u_pl_rad", 0.2f);
-		//model.get_shader()->set_uniform_3f("u_light", m_directional_light);
+		model.get_shader()->set_uniform_3f("u_pl_pos", m_point_light.get_postion());
+	//	model.get_shader()->set_uniform_4f("u_pl_col", m_point_light.get_colour());
+	//	model.get_shader()->set_uniform_1f("u_pl_rad", 50.f);
+	//	model.get_shader()->set_uniform_3f("u_directional_light", m_directional_light);
 	}
 }
 
@@ -137,6 +143,10 @@ void Scene::draw()
 		m_skybox->get_shader()->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
 		m_skybox->draw();
 	}
+
+	m_point_light_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+//	m_point_light_shader->set_uniform_3f("u_camera_position", m_camera->get_pos());
+	m_point_light.draw();
 
 	for (const Model& model : m_models)
 	{
