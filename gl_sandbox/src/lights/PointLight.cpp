@@ -54,12 +54,9 @@ PointLight::PointLight(float radius)
 
 	m_va.set_layout(vb, layout);
 
-	m_shader = std::make_shared<ShaderProgram>(
-		ShaderProgram(
-			Shader("resources/shaders/point_light/point_light_vertex.shader", ShaderType::Vertex),
-			Shader("resources/shaders/point_light/point_light_fragment.shader", ShaderType::Fragment)
-		)
-	);
+	// TODO: remove later
+	set_name("point light");
+	set_shader("point_light");
 
 	m_va.unbind();
 	ib.unbind();
@@ -69,16 +66,10 @@ PointLight::PointLight(float radius)
 void PointLight::draw() const
 {
 	m_va.bind();
-	m_shader->bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 }
 
-void PointLight::set_postion(const mathz::Vec3 position)
-{
-	m_position = position;
-}
-
-void PointLight::set_colour(const mathz::Vec4 colour)
+void PointLight::set_colour(const mathz::Vec4& colour)
 {
 	m_colour = colour;
 }

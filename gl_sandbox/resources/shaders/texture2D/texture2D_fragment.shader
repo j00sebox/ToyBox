@@ -32,11 +32,11 @@ vec4 point_light()
 	vec3 direction = normalize(light_vec);
 	float diffuse = max(dot(normal, direction), 0.f);
 	
-	return texture(diffuse_t, v_tex_coord) * (diffuse * attenuation + ambient);
+	return texture(diffuse_t, v_tex_coord) * (diffuse * attenuation * u_pl_col + ambient);
 }
 
 void main()
 {
-	//colour = point_light();
-	colour = texture(diffuse_t, v_tex_coord);
+	colour = point_light();
+	//colour = texture(diffuse_t, v_tex_coord);
 }

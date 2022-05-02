@@ -1,0 +1,52 @@
+{
+  "camera": {
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "directional_light": [
+    0.0,
+    20.0,
+    -1.0
+  ],
+  "shader_count": 2,
+  "shaders": [
+    {
+      "name": "texture2D",
+      "vertex": "resources/shaders/texture2D/texture2D_vertex.shader",
+      "fragment": "resources/shaders/texture2D/texture2D_fragment.shader"
+    },
+    {
+      "name": "point_light",
+      "vertex": "resources/shaders/point_light/point_light_vertex.shader",
+      "fragment": "resources/shaders/point_light/point_light_fragment.shader"
+    }
+  ],
+  "model_count": 1,
+  "models": [
+    {
+      "name": "floor",
+      "shader": "texture2D",
+      "translate": [
+        0.0,
+        0.0,
+        -100.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 0.01,
+      "mesh_count": 1,
+      "meshes": [
+        {
+          "path": "resources/models/wooden_floor/scene.gltf"
+        }
+      ]
+    }
+  ]
+}

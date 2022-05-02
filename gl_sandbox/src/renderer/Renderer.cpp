@@ -8,8 +8,6 @@
 
 #include <glad/glad.h>
 
-#define DEG_TO_RAD(x) (x / 180.f) * 3.1415f
-
 Renderer::Renderer(int width, int height)
 	: m_screen_width(width), m_screen_height(height)
 {
@@ -19,11 +17,11 @@ Renderer::Renderer(int width, int height)
 	GL_CALL(glDepthFunc(GL_LEQUAL));
 	GL_CALL(glFrontFace(GL_CCW));
 
-	GL_CALL(glClearColor(0.4f, 0.3f, 0.5f, 1.f));
+	GL_CALL(glClearColor(0.2f, 0.0f, 0.3f, 1.f));
 
 	m_directional_light.normalize();
 
-	m_scene.load("resources/scenes/flying_high.scene");
+	m_scene.load("resources/scenes/spooky.scene");
 	m_camera = std::shared_ptr<Camera>(m_scene.get_camera());
 	m_camera->resize(width, height);
 	m_scene.init();

@@ -100,7 +100,7 @@ void Scene::load(const char* scene)
 
 		m.scale(model["scale"]);
 
-		m_models.emplace_back(std::move(m));
+		m_objects.emplace_back(std::make_unique<Model>(std::move(m)));
 	}
 }
 
@@ -110,10 +110,13 @@ void Scene::init()
 	{
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
+	
+	m_objects.emplace_back(std::make_unique<PointLight>());
+	m_shader_lib.get("point_light")->set_uniform_4f("u_light_colour", { { 1.f, 1.f, 1.f }, 1.f });
 
-	for (const Model& model : m_models)
+	for (unsigned int i = 0; i < m_objects.size(); ++i)
 	{
-		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 }
 
@@ -133,23 +136,23 @@ void Scene::draw()
 
 	ImGui::Begin("Models");
 	
-	for (Model& model : m_models)
+	for (unsigned int i = 0; i < m_objects.size(); ++i)
 	{
 		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
 		{
 			bool selected = false;
-			ImGui::Selectable(model.get_name().c_str(), &selected);
+			ImGui::Selectable(m_objects[i]->get_name().c_str(), &selected);
 			if (selected)
 			{
-				m_selected_model = &model;
+				m_selected_object = m_objects[i].get();
 			}
 		}
 		ImGui::EndChild();
 
-		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_model", model.get_transform());
-		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-		m_shader_lib.get(model.get_shader())->bind();
-		model.draw();
+		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_model", m_objects[i]->get_transform());
+		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+		m_shader_lib.get(m_objects[i]->get_shader())->bind();
+		m_objects[i]->draw();
 	}
 
 	{
@@ -160,26 +163,26 @@ void Scene::draw()
 
 	ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
 	{
-		if (m_selected_model)
+		if (m_selected_object)
 		{
-			ImGui::Text(m_selected_model->get_name().c_str());
+			ImGui::Text(m_selected_object->get_name().c_str());
 			
-			mathz::Vec3 position = m_selected_model->get_position();
+			mathz::Vec3 position = m_selected_object->get_position();
 			ImGui::Text("\nPosition: ");
 			ImGui::InputFloat("x", &position.x);
 			ImGui::InputFloat("y", &position.y);
 			ImGui::InputFloat("z", &position.z);
-			m_selected_model->translate(position);
+			m_selected_object->translate(position);
 			
-			float angle = m_selected_model->get_rotate_angle();
-			mathz::Vec3 axis = m_selected_model->get_rotate_axis();
+			float angle = m_selected_object->get_rotate_angle();
+			mathz::Vec3 axis = m_selected_object->get_rotate_axis();
 			ImGui::Text("\nRotation: ");
 			ImGui::InputFloat("angle", &angle);
 			ImGui::SliderFloat("i", &axis.x, -1.f, 1.f);
 			ImGui::SliderFloat("j", &axis.y, -1.f, 1.f);
 			ImGui::SliderFloat("k", &axis.z, -1.f, 1.f);
 			axis.normalize();
-			m_selected_model->rotate(angle, axis);
+			m_selected_object->rotate(angle, axis);
 		}
 	}
 	ImGui::EndChild();
