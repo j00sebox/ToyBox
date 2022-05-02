@@ -53,7 +53,7 @@ Window::Window(int width, int height)
 
 	// setup callbacks
 	glfwSetErrorCallback(glfw_error_callback);
-	glfwSetKeyCallback(m_window_handle, glfw_key_callback);
+	//glfwSetKeyCallback(m_window_handle, glfw_key_callback); // this was messing up imgui callback
 
 	m_renderer.reset(new Renderer(width, height));
 
@@ -77,6 +77,11 @@ void Window::main_loop()
 {
 	while (!glfwWindowShouldClose(m_window_handle))
 	{
+		if (Input::is_key_pressed(GLFW_KEY_ESCAPE))
+		{
+			glfwSetWindowShouldClose(m_window_handle, GLFW_TRUE);
+		}
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -86,8 +91,6 @@ void Window::main_loop()
 		ImGui::Text("Avg. %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
 
-		ImGui::Render();
-
 		float dx = 0.f, dy = 0.f;
 		double time = glfwGetTime() * 1000.0;
 
@@ -96,6 +99,8 @@ void Window::main_loop()
 		m_renderer->update(delta_time);
 
 		prev_time = time;
+
+		ImGui::Render();
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		

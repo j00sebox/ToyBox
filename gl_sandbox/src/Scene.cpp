@@ -5,6 +5,9 @@
 
 #include "lights/PointLight.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+
 Scene::Scene()
 {
 	m_directional_light = { 2.f, -1.f, -1.f };
@@ -73,6 +76,9 @@ void Scene::load(const char* scene)
 		Model m;
 
 		json model = models[i];
+		
+		m.set_name(model.value("name", "no_name"));
+
 		unsigned int mesh_count = model["mesh_count"];
 		
 		json meshes = model["meshes"];
@@ -123,11 +129,46 @@ void Scene::draw()
 		m_skybox->draw();
 	}
 
-	for (const Model& model : m_models)
+	ImGui::Begin("Models");
+	
+	for (Model& model : m_models)
 	{
+		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
+		{
+			bool selected = false;
+			ImGui::Selectable(model.get_name().c_str(), &selected);
+			if (selected)
+			{
+				m_selected_model = &model;
+			}
+		}
+		ImGui::EndChild();
+
 		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_model", model.get_transform());
 		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 		m_shader_lib.get(model.get_shader())->bind();
 		model.draw();
 	}
+
+	{
+		ImGui::SameLine(0);
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+		ImGui::SameLine();
+	}
+
+	ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
+	{
+		if (m_selected_model)
+		{
+			mathz::Vec3 position = m_selected_model->get_position();
+			ImGui::Text(m_selected_model->get_name().c_str());
+			ImGui::InputFloat("x", &position.x);
+			ImGui::InputFloat("y", &position.y);
+			ImGui::InputFloat("z", &position.z);
+			m_selected_model->translate(position);
+		}
+	}
+	ImGui::EndChild();
+
+	ImGui::End();
 }

@@ -20,9 +20,10 @@
 		}
 	],
 	"skybox": "resources/skyboxes/above_the_clouds/",
-	"model_count": 1,
+	"model_count": 2,
 	"models": [
 		{
+			"name": "airplane",
 			"shader": "texture2D",
 			"translate": [
 				0.0,
@@ -40,6 +41,28 @@
 			"meshes": [
 				{
 					"path": "resources/models/airplane_biplane/scene.gltf"
+				}
+			]
+		},
+		{
+			"name": "green_airplane",
+			"shader": "texture2D",
+			"translate": [
+				1000.0,
+				0.0,
+				-100.0
+			],
+			"rotation": [
+				1.0,
+				0.0,
+				0.0,
+				0.0
+			],
+			"scale": 0.4,
+			"mesh_count": 1,
+			"meshes": [
+				{
+					"path": "resources/models/green_airplane/scene.gltf"
 				}
 			]
 		}

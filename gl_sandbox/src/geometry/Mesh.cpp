@@ -16,7 +16,7 @@ Mesh::Mesh(const std::string& file_path)
 	std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
 	m_textures.emplace_back(Texture2D(loader.get_base_color_texture()));
-	m_textures.emplace_back(Texture2D(loader.get_specular_color_texture()));
+	//m_textures.emplace_back(Texture2D(loader.get_specular_color_texture()));
 
 	std::vector<Vertex> vertices;
 

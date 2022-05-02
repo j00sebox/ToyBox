@@ -18,12 +18,18 @@ public:
 	void set_shader(const std::string& name);
 	const std::string& get_shader() const { return m_shader_name; }
 
+	void set_name(const std::string& name);
+	const std::string& get_name() const { return m_name; }
+
+	const mathz::Vec3& get_position() const { return m_postion; }
 	mathz::Mat4 get_transform() const;
 
 private:
+	std::string m_name;
+	mathz::Vec3 m_postion;
 	std::vector<Mesh> m_meshes;
 	std::string m_shader_name;
-	
+
 	mathz::Mat4 m_scale;
 	mathz::Mat4 m_rotation;
 	mathz::Mat4 m_translate;

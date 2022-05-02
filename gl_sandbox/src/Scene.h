@@ -30,5 +30,8 @@ private:
 	std::shared_ptr<ShaderProgram> m_point_light_shader;
 	mathz::Vec3 m_directional_light;
 	mathz::Mat4 m_perspective;
+
+	// imgui stuff
+	Model* m_selected_model = nullptr;
 };
 
