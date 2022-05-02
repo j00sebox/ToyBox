@@ -22,11 +22,13 @@ public:
 	const std::string& get_name() const { return m_name; }
 
 	const mathz::Vec3& get_position() const { return m_postion; }
+	const mathz::Quaternion& get_rotation() const { return m_quat; }
 	mathz::Mat4 get_transform() const;
 
 private:
 	std::string m_name;
 	mathz::Vec3 m_postion;
+	mathz::Quaternion m_quat;
 	std::vector<Mesh> m_meshes;
 	std::string m_shader_name;
 

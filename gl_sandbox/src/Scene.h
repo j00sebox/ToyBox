@@ -33,5 +33,9 @@ private:
 
 	// imgui stuff
 	Model* m_selected_model = nullptr;
+
+	// TODO: remove later
+	float m_angle = 0.f;
+	mathz::Vec3 m_axis;
 };
 

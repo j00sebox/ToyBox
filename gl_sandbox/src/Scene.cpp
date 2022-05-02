@@ -161,11 +161,21 @@ void Scene::draw()
 		if (m_selected_model)
 		{
 			mathz::Vec3 position = m_selected_model->get_position();
+			mathz::Quaternion rotation = m_selected_model->get_rotation();
 			ImGui::Text(m_selected_model->get_name().c_str());
+
+			ImGui::Text("\nPosition: ");
 			ImGui::InputFloat("x", &position.x);
 			ImGui::InputFloat("y", &position.y);
 			ImGui::InputFloat("z", &position.z);
 			m_selected_model->translate(position);
+			
+			ImGui::Text("\nRotation: ");
+			ImGui::InputFloat("angle", &m_angle);
+			ImGui::SliderFloat("i", &m_axis.x, -1.f, 1.f);
+			ImGui::SliderFloat("j", &m_axis.y, -1.f, 1.f);
+			ImGui::SliderFloat("k", &m_axis.z, -1.f, 1.f);
+			m_selected_model->rotate(mathz::Quaternion(m_angle, m_axis));
 		}
 	}
 	ImGui::EndChild();
