@@ -5,6 +5,8 @@
 
 #include "lights/PointLight.h"
 
+#include "mathz/Misc.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -94,7 +96,7 @@ void Scene::load(const char* scene)
 		m.translate(mathz::Vec3({ translate[0], translate[1], translate[2] }));
 
 		json rotation = model["rotation"];
-		m.rotate(mathz::Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]));
+		m.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
 
 		m.scale(model["scale"]);
 
@@ -160,22 +162,24 @@ void Scene::draw()
 	{
 		if (m_selected_model)
 		{
-			mathz::Vec3 position = m_selected_model->get_position();
-			mathz::Quaternion rotation = m_selected_model->get_rotation();
 			ImGui::Text(m_selected_model->get_name().c_str());
-
+			
+			mathz::Vec3 position = m_selected_model->get_position();
 			ImGui::Text("\nPosition: ");
 			ImGui::InputFloat("x", &position.x);
 			ImGui::InputFloat("y", &position.y);
 			ImGui::InputFloat("z", &position.z);
 			m_selected_model->translate(position);
 			
+			float angle = m_selected_model->get_rotate_angle();
+			mathz::Vec3 axis = m_selected_model->get_rotate_axis();
 			ImGui::Text("\nRotation: ");
-			ImGui::InputFloat("angle", &m_angle);
-			ImGui::SliderFloat("i", &m_axis.x, -1.f, 1.f);
-			ImGui::SliderFloat("j", &m_axis.y, -1.f, 1.f);
-			ImGui::SliderFloat("k", &m_axis.z, -1.f, 1.f);
-			m_selected_model->rotate(mathz::Quaternion(m_angle, m_axis));
+			ImGui::InputFloat("angle", &angle);
+			ImGui::SliderFloat("i", &axis.x, -1.f, 1.f);
+			ImGui::SliderFloat("j", &axis.y, -1.f, 1.f);
+			ImGui::SliderFloat("k", &axis.z, -1.f, 1.f);
+			axis.normalize();
+			m_selected_model->rotate(angle, axis);
 		}
 	}
 	ImGui::EndChild();

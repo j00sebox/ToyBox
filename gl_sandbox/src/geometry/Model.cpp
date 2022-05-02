@@ -4,6 +4,8 @@
 #include "GLError.h"
 #include "GLTFLoader.h"
 
+#include "mathz/Misc.h"
+
 #include <glad/glad.h>
 
 void Model::draw() const
@@ -25,8 +27,11 @@ void Model::scale(float s)
 	m_scale[0][0] = s; m_scale[1][1] = s; m_scale[2][2] = s;
 }
 
-void Model::rotate(const mathz::Quaternion& q)
+void Model::rotate(float angle, const mathz::Vec3& axis)
 {
+	m_rotate_angle = angle;
+	m_rotate_axis = axis;
+	mathz::Quaternion q(mathz::radians(angle), axis);
 	m_rotation = q.convert_to_mat();
 }
 
