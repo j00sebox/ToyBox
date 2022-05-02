@@ -8,7 +8,6 @@
 
 void Model::draw() const
 {
-	m_shader_program->bind();
 	for (const Mesh& m : m_meshes)
 	{
 		m.draw();
@@ -35,9 +34,9 @@ void Model::load_mesh(const std::string& file_path)
 	m_meshes.emplace_back(Mesh(file_path));
 }
 
-void Model::attach_shader_program(ShaderProgram&& sp)
+void Model::set_shader(const std::string& name)
 {
-	m_shader_program = std::make_shared<ShaderProgram>(std::move(sp));
+	m_shader_name = name;
 }
 
 mathz::Mat4 Model::get_transform() const

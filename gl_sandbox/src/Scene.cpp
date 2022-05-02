@@ -24,7 +24,7 @@ void Scene::load(const char* scene)
 	json camera = m_json["camera"];
 	json camera_pos = camera["position"];
 
-	m_camera->set_pos(mathz::Vec3({camera_pos[0], camera_pos[1], camera_pos[2]}));
+	m_camera->set_pos(mathz::Vec3({ camera_pos[0], camera_pos[1], camera_pos[2] }));
 
 	json directional_light = m_json["directional_light"];
 	m_directional_light = mathz::Vec3({ directional_light[0], directional_light[1], directional_light[2] });
@@ -42,8 +42,26 @@ void Scene::load(const char* scene)
 		);
 
 		sb.attach_shader_program(std::move(sp));
-		
+
 		m_skybox = std::make_unique<Skybox>(std::move(sb));
+	}
+
+	json shaders = m_json["shaders"];
+	unsigned int shader_count = m_json["shader_count"];
+
+	for (unsigned int s = 0; s < shader_count; ++s)
+	{
+		// TODO: add support for other shader types
+		std::string vertex_src = shaders[s]["vertex"];
+		Shader vertex_shader(vertex_src.c_str(), ShaderType::Vertex);
+
+		std::string fragment_src = shaders[s]["fragment"];
+		Shader fragment_shader(fragment_src.c_str(), ShaderType::Fragment);
+
+		ShaderProgram shader_program(vertex_shader, fragment_shader);
+
+		std::string shader_name = shaders[s]["name"];
+		m_shader_lib.add(shader_name, std::move(shader_program));
 	}
 
 	unsigned int model_count = m_json["model_count"];
@@ -64,6 +82,8 @@ void Scene::load(const char* scene)
 			m.load_mesh(meshes[j]["path"]);
 		}
 
+		m.set_shader(model["shader"]);
+
 		json translate = model["translate"];
 		m.translate(mathz::Vec3({ translate[0], translate[1], translate[2] }));
 
@@ -71,18 +91,6 @@ void Scene::load(const char* scene)
 		m.rotate(mathz::Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]));
 
 		m.scale(model["scale"]);
-
-		json shaders = model["shaders"];
-
-		std::string vertex_src = shaders["vertex"];
-		Shader vertex_shader(vertex_src.c_str(), ShaderType::Vertex);
-
-		std::string fragment_src = shaders["fragment"];
-		Shader fragment_shader(fragment_src.c_str(), ShaderType::Fragment);
-
-		ShaderProgram shader_program(vertex_shader, fragment_shader);
-
-		m.attach_shader_program(std::move(shader_program));
 
 		m_models.emplace_back(std::move(m));
 	}
@@ -95,38 +103,9 @@ void Scene::init()
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 
-	m_point_light_shader = m_point_light.get_shader();
-
-	m_point_light.translate({ 0.f, 0.f, -9.f });
-
-	m_point_light_shader->set_uniform_mat4f("u_model", m_point_light.get_translate());
-	m_point_light_shader->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-	m_point_light_shader->set_uniform_4f("u_light_colour", m_point_light.get_colour());
-
-	Model floor;
-	floor.load_mesh("resources/models/wooden_floor/scene.gltf");
-
-	floor.scale(0.05f);
-	floor.translate({ 100.f, 0.f, -200.f });
-	//floor.rotate(mathz::Quaternion(90.f, { 1.f, 0.f, 0.f }));
-
-	ShaderProgram sp(
-		Shader("resources/shaders/texture2D/texture2D_vertex.shader", ShaderType::Vertex),
-		Shader("resources/shaders/texture2D/texture2D_fragment.shader", ShaderType::Fragment)
-	);
-
-	floor.attach_shader_program(std::move(sp));
-
-	m_models.emplace_back(std::move(floor));
-
 	for (const Model& model : m_models)
 	{
-		model.get_shader()->set_uniform_mat4f("u_model", model.get_transform());
-		model.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-		model.get_shader()->set_uniform_3f("u_pl_pos", m_point_light.get_postion());
-	//	model.get_shader()->set_uniform_4f("u_pl_col", m_point_light.get_colour());
-	//	model.get_shader()->set_uniform_1f("u_pl_rad", 50.f);
-	//	model.get_shader()->set_uniform_3f("u_directional_light", m_directional_light);
+		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 }
 
@@ -144,13 +123,11 @@ void Scene::draw()
 		m_skybox->draw();
 	}
 
-	m_point_light_shader->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-//	m_point_light_shader->set_uniform_3f("u_camera_position", m_camera->get_pos());
-	m_point_light.draw();
-
 	for (const Model& model : m_models)
 	{
-		model.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_model", model.get_transform());
+		m_shader_lib.get(model.get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+		m_shader_lib.get(model.get_shader())->bind();
 		model.draw();
 	}
 }

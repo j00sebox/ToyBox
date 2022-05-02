@@ -37,15 +37,15 @@ public:
 
 		m_shaders = { s ... };
 
-		for (int i = 0; i < m_shaders.size(); ++i)
+		for (Shader& shader : m_shaders)
 		{
-			std::string src = load_shader(m_shaders[i]);
+			std::string src = load_shader(shader);
 
-			create_shader(m_shaders[i], src);
+			create_shader(shader, src);
 
-			compile_shader(m_shaders[i].id);
+			compile_shader(shader.id);
 
-			attach_shader(m_shaders[i].id);
+			attach_shader(shader.id);
 		}
 
 		link();
@@ -82,3 +82,13 @@ private:
 	std::unordered_map<std::string, int> m_uniform_location_cache;
 };
 
+class ShaderLibrary
+{
+public:
+	void add(const std::string& name, ShaderProgram&& sp);
+	std::shared_ptr<ShaderProgram> get(const std::string& name);
+	bool exists(const std::string& name);
+
+private:
+	std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;
+};

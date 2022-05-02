@@ -37,6 +37,6 @@ vec4 point_light()
 
 void main()
 {
-	colour = point_light();
-	//colour = texture(diffuse_t, v_tex_coord) ;
+	//colour = point_light();
+	colour = texture(diffuse_t, v_tex_coord);
 }

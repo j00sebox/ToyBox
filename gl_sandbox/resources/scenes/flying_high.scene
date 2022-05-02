@@ -11,10 +11,19 @@
 		20.0,
 		-1.0
 	],
+	"shader_count": 1,
+	"shaders": [
+		{
+			"name": "texture2D",
+			"vertex": "resources/shaders/texture2D/texture2D_vertex.shader",
+			"fragment": "resources/shaders/texture2D/texture2D_fragment.shader"
+		}
+	],
 	"skybox": "resources/skyboxes/above_the_clouds/",
 	"model_count": 1,
 	"models": [
 		{
+			"shader": "texture2D",
 			"translate": [
 				0.0,
 				0.0,
@@ -32,11 +41,7 @@
 				{
 					"path": "resources/models/airplane_biplane/scene.gltf"
 				}
-			],
-			"shaders": {
-				"vertex": "resources/shaders/texture2D/texture2D_vertex.shader",
-				"fragment": "resources/shaders/texture2D/texture2D_fragment.shader"
-			}
+			]
 		}
 	]
 }

@@ -193,3 +193,24 @@ void ShaderProgram::set_uniform_mat4f(const std::string& name, const mathz::Mat4
 	GL_CALL(glUniformMatrix4fv(get_uniform_loaction(name), 1, GL_FALSE, &mat.mat[0][0]));
 	unbind();
 }
+
+void ShaderLibrary::add(const std::string& name, ShaderProgram&& sp)
+{
+	m_shaders[name] = std::make_shared<ShaderProgram>(std::move(sp));
+}
+
+std::shared_ptr<ShaderProgram> ShaderLibrary::get(const std::string& name)
+{
+	if (exists(name))
+	{
+		return m_shaders[name];
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+bool ShaderLibrary::exists(const std::string& name)
+{
+	return (m_shaders.find(name) != m_shaders.end());
+}
