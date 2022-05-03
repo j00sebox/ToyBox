@@ -7,6 +7,8 @@
 class Transform : public IComponent
 {
 public:
+	Transform();
+
 	void translate(const mathz::Vec3& pos);
 	void scale(float s);
 	void rotate(float angle, const mathz::Vec3& axis);
@@ -15,6 +17,8 @@ public:
 	[[nodiscard]] const mathz::Vec3& get_rotate_axis() const { return m_rotate_axis; }
 	[[nodiscard]] float get_rotate_angle() const { return m_rotate_angle; }
 	[[nodiscard]] mathz::Mat4 get_transform() const;
+
+	void imgui_render() override;
 
 private:
 	mathz::Vec3 m_postion;

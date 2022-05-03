@@ -177,23 +177,7 @@ void Scene::draw()
 			ImGui::Text(m_selected_entity->get_name().c_str());
 
 			Transform& t = m_selected_entity->get<Transform>();
-			
-			mathz::Vec3 position = t.get_position();
-			ImGui::Text("\nPosition: ");
-			ImGui::InputFloat("x", &position.x);
-			ImGui::InputFloat("y", &position.y);
-			ImGui::InputFloat("z", &position.z);
-			t.translate(position);
-			
-			float angle = t.get_rotate_angle();
-			mathz::Vec3 axis = t.get_rotate_axis();
-			ImGui::Text("\nRotation: ");
-			ImGui::InputFloat("angle", &angle);
-			ImGui::SliderFloat("i", &axis.x, -1.f, 1.f);
-			ImGui::SliderFloat("j", &axis.y, -1.f, 1.f);
-			ImGui::SliderFloat("k", &axis.z, -1.f, 1.f);
-			axis.normalize();
-			t.rotate(angle, axis);
+			t.imgui_render();
 		}
 	}
 	ImGui::EndChild();

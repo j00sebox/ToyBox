@@ -4,6 +4,14 @@
 #include "mathz/Quaternion.h"
 #include "mathz/Misc.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+
+Transform::Transform()
+{
+	set_name("Transform");
+}
+
 void Transform::translate(const mathz::Vec3& pos)
 {
 	m_postion = pos;
@@ -26,4 +34,24 @@ void Transform::rotate(float angle, const mathz::Vec3& axis)
 mathz::Mat4 Transform::get_transform() const
 {
 	return  m_rotation * m_scale * m_translate;
+}
+
+void Transform::imgui_render()
+{
+	mathz::Vec3 position = get_position();
+	ImGui::Text("\nPosition: ");
+	ImGui::InputFloat("x", &position.x);
+	ImGui::InputFloat("y", &position.y);
+	ImGui::InputFloat("z", &position.z);
+	translate(position);
+
+	float angle = get_rotate_angle();
+	mathz::Vec3 axis = get_rotate_axis();
+	ImGui::Text("\nRotation: ");
+	ImGui::InputFloat("angle", &angle);
+	ImGui::SliderFloat("i", &axis.x, -1.f, 1.f);
+	ImGui::SliderFloat("j", &axis.y, -1.f, 1.f);
+	ImGui::SliderFloat("k", &axis.z, -1.f, 1.f);
+	axis.normalize();
+	rotate(angle, axis);
 }

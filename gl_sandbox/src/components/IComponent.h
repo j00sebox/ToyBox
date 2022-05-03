@@ -8,6 +8,8 @@ public:
 	void set_name(const char* name) { m_name = name; }
 	[[nodiscard]] const char* get_name() const { m_name; }
 
+	virtual void imgui_render() = 0;
+
 private:
 	const char* m_name;
 };
