@@ -5,6 +5,8 @@
 
 #include "lights/PointLight.h"
 
+#include "components/Transform.h"
+
 #include "mathz/Misc.h"
 
 #include <imgui.h>
@@ -92,13 +94,17 @@ void Scene::load(const char* scene)
 
 		m.set_shader(model["shader"]);
 
+		m.attach(Transform());
+
+		Transform& t = *m.get<Transform>();
+
 		json translate = model["translate"];
-		m.translate(mathz::Vec3({ translate[0], translate[1], translate[2] }));
+		t.translate(mathz::Vec3({ translate[0], translate[1], translate[2] }));
 
 		json rotation = model["rotation"];
-		m.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
+		t.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
 
-		m.scale(model["scale"]);
+		t.scale(model["scale"]);
 
 		m_objects.emplace_back(std::make_unique<Model>(std::move(m)));
 	}
@@ -112,6 +118,7 @@ void Scene::init()
 	}
 	
 	m_objects.emplace_back(std::make_unique<PointLight>());
+	m_objects[1]->attach(Transform());
 	m_shader_lib.get("point_light")->set_uniform_4f("u_light_colour", { { 1.f, 1.f, 1.f }, 1.f });
 
 	for (unsigned int i = 0; i < m_objects.size(); ++i)
@@ -149,7 +156,9 @@ void Scene::draw()
 		}
 		ImGui::EndChild();
 
-		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_model", m_objects[i]->get_transform());
+		Transform& t = *m_objects[i]->get<Transform>();
+
+		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_model", t.get_transform());
 		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 		m_shader_lib.get(m_objects[i]->get_shader())->bind();
 		m_objects[i]->draw();
@@ -166,23 +175,25 @@ void Scene::draw()
 		if (m_selected_object)
 		{
 			ImGui::Text(m_selected_object->get_name().c_str());
+
+			Transform& t = *m_selected_object->get<Transform>();
 			
-			mathz::Vec3 position = m_selected_object->get_position();
+			mathz::Vec3 position = t.get_position();
 			ImGui::Text("\nPosition: ");
 			ImGui::InputFloat("x", &position.x);
 			ImGui::InputFloat("y", &position.y);
 			ImGui::InputFloat("z", &position.z);
-			m_selected_object->translate(position);
+			t.translate(position);
 			
-			float angle = m_selected_object->get_rotate_angle();
-			mathz::Vec3 axis = m_selected_object->get_rotate_axis();
+			float angle = t.get_rotate_angle();
+			mathz::Vec3 axis = t.get_rotate_axis();
 			ImGui::Text("\nRotation: ");
 			ImGui::InputFloat("angle", &angle);
 			ImGui::SliderFloat("i", &axis.x, -1.f, 1.f);
 			ImGui::SliderFloat("j", &axis.y, -1.f, 1.f);
 			ImGui::SliderFloat("k", &axis.z, -1.f, 1.f);
 			axis.normalize();
-			m_selected_object->rotate(angle, axis);
+			t.rotate(angle, axis);
 		}
 	}
 	ImGui::EndChild();

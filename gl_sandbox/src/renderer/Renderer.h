@@ -6,8 +6,8 @@
 #include "Texture.h"
 
 #include "Camera.h"
-#include "Model.h"
-#include "Skybox.h"
+#include "entities/Model.h"
+#include "entities/Skybox.h"
 #include "Scene.h"
 
 #include "mathz/Quaternion.h"

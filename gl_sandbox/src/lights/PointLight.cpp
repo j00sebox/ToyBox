@@ -10,7 +10,6 @@
 PointLight::PointLight(float radius)
 	: m_radius(radius)
 {
-	m_position = { 0.f, 0.f, 0.f };
 	m_colour = { { 1.f, 1.f, 1.f }, 1.f }; // temporary
 
 	std::vector<float> light_vertices =

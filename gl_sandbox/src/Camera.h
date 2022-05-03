@@ -40,7 +40,7 @@ private:
 	int m_screen_width, m_screen_height;
 	float m_near = 0.1f, m_far = 1000.f;
 	float m_fov = 90.f;
-	float m_speed = 0.1f;
-	float m_sensitivity = 50.f;
+	float m_speed = 0.01f;
+	float m_sensitivity = 30.f;
 	bool m_mouse_down = false;
 };

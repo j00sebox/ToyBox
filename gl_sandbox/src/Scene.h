@@ -25,12 +25,12 @@ private:
 	ShaderLibrary m_shader_lib;
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
-	std::vector<std::unique_ptr<SceneObject>> m_objects;
+	std::vector<std::unique_ptr<Entity>> m_objects;
 	PointLight m_point_light;
 	mathz::Vec3 m_directional_light;
 	mathz::Mat4 m_perspective;
 
 	// imgui stuff
-	SceneObject* m_selected_object = nullptr;
+	Entity* m_selected_object = nullptr;
 };
 
