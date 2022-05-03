@@ -96,7 +96,7 @@ void Scene::load(const char* scene)
 
 		m.attach(Transform());
 
-		Transform& t = *m.get<Transform>();
+		Transform& t = m.get<Transform>();
 
 		json translate = model["translate"];
 		t.translate(mathz::Vec3({ translate[0], translate[1], translate[2] }));
@@ -106,7 +106,7 @@ void Scene::load(const char* scene)
 
 		t.scale(model["scale"]);
 
-		m_objects.emplace_back(std::make_unique<Model>(std::move(m)));
+		m_entities.emplace_back(std::make_unique<Model>(std::move(m)));
 	}
 }
 
@@ -117,13 +117,13 @@ void Scene::init()
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 	
-	m_objects.emplace_back(std::make_unique<PointLight>());
-	m_objects[1]->attach(Transform());
+	m_entities.emplace_back(std::make_unique<PointLight>());
+	m_entities[1]->attach(Transform());
 	m_shader_lib.get("point_light")->set_uniform_4f("u_light_colour", { { 1.f, 1.f, 1.f }, 1.f });
 
-	for (unsigned int i = 0; i < m_objects.size(); ++i)
+	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{
-		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 }
 
@@ -143,25 +143,25 @@ void Scene::draw()
 
 	ImGui::Begin("Models");
 	
-	for (unsigned int i = 0; i < m_objects.size(); ++i)
+	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{
 		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
 		{
 			bool selected = false;
-			ImGui::Selectable(m_objects[i]->get_name().c_str(), &selected);
+			ImGui::Selectable(m_entities[i]->get_name().c_str(), &selected);
 			if (selected)
 			{
-				m_selected_object = m_objects[i].get();
+				m_selected_entity = m_entities[i].get();
 			}
 		}
 		ImGui::EndChild();
 
-		Transform& t = *m_objects[i]->get<Transform>();
+		Transform& t = m_entities[i]->get<Transform>();
 
-		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_model", t.get_transform());
-		m_shader_lib.get(m_objects[i]->get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-		m_shader_lib.get(m_objects[i]->get_shader())->bind();
-		m_objects[i]->draw();
+		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_model", t.get_transform());
+		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+		m_shader_lib.get(m_entities[i]->get_shader())->bind();
+		m_entities[i]->draw();
 	}
 
 	{
@@ -172,11 +172,11 @@ void Scene::draw()
 
 	ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
 	{
-		if (m_selected_object)
+		if (m_selected_entity)
 		{
-			ImGui::Text(m_selected_object->get_name().c_str());
+			ImGui::Text(m_selected_entity->get_name().c_str());
 
-			Transform& t = *m_selected_object->get<Transform>();
+			Transform& t = m_selected_entity->get<Transform>();
 			
 			mathz::Vec3 position = t.get_position();
 			ImGui::Text("\nPosition: ");

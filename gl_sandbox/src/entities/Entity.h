@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 
+#include "Log.h"
 #include "components/IComponent.h"
 
 #include "mathz/Matrix.h"
@@ -10,8 +11,8 @@ class Entity
 public:
 	virtual void draw() const = 0;
 
-	virtual void set_name(const std::string& name);
-	virtual void set_shader(const std::string& shader_name);
+	virtual void set_name(const std::string& name) { m_name = name; }
+	virtual void set_shader(const std::string& shader_name) { m_shader_name = shader_name; }
 	[[nodiscard]] const std::string& get_name() const { return m_name; }
 	[[nodiscard]] const std::string& get_shader() const { return m_shader_name; }
 
@@ -27,16 +28,16 @@ public:
 	}
 
 	template<class T>
-	std::shared_ptr<T> get()
+	T& get()
 	{
 		const char* type_name = typeid(T).name();
 		if (m_type_map.find(type_name) == m_type_map.end())
 		{
 			fprintf(stderr, "Component does not exist!\n");
-			return nullptr;
+			ASSERT(false);
 		}
 
-		return std::static_pointer_cast<T>(m_components[m_type_map[type_name]]);
+		return *std::static_pointer_cast<T>(m_components[m_type_map[type_name]]).get();
 	}
 
 protected:

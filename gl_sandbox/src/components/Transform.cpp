@@ -25,5 +25,5 @@ void Transform::rotate(float angle, const mathz::Vec3& axis)
 
 mathz::Mat4 Transform::get_transform() const
 {
-	return m_translate * m_rotation * m_scale;
+	return  m_rotation * m_scale * m_translate;
 }
