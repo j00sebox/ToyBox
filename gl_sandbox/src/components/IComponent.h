@@ -10,6 +10,6 @@ public:
 
 	virtual void imgui_render() = 0;
 
-private:
+protected:
 	const char* m_name;
 };

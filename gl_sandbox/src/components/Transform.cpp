@@ -38,6 +38,8 @@ mathz::Mat4 Transform::get_transform() const
 
 void Transform::imgui_render()
 {
+	ImGui::Text(m_name);
+
 	mathz::Vec3 position = get_position();
 	ImGui::Text("\nPosition: ");
 	ImGui::InputFloat("x", &position.x);

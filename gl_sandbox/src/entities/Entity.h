@@ -37,7 +37,15 @@ public:
 			ASSERT(false);
 		}
 
-		return *std::static_pointer_cast<T>(m_components[m_type_map[type_name]]).get();
+		return *std::static_pointer_cast<T>(m_components[m_type_map[type_name]]);
+	}
+
+	void render_components()
+	{
+		for (const std::shared_ptr<IComponent>& component : m_components)
+		{
+			component->imgui_render();
+		}
 	}
 
 protected:

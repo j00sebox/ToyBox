@@ -176,8 +176,7 @@ void Scene::draw()
 		{
 			ImGui::Text(m_selected_entity->get_name().c_str());
 
-			Transform& t = m_selected_entity->get<Transform>();
-			t.imgui_render();
+			m_selected_entity->render_components();
 		}
 	}
 	ImGui::EndChild();
