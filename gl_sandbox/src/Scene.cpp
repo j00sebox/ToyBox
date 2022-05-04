@@ -72,7 +72,6 @@ void Scene::load(const char* scene)
 	}
 
 	unsigned int model_count = m_json["model_count"];
-
 	json models = m_json["models"];
 
 	for (unsigned int i = 0; i < model_count; ++i)
@@ -84,7 +83,6 @@ void Scene::load(const char* scene)
 		m.set_name(model.value("name", "no_name"));
 
 		unsigned int mesh_count = model["mesh_count"];
-		
 		json meshes = model["meshes"];
 
 		for (unsigned int j = 0; j < mesh_count; ++j)
@@ -94,17 +92,20 @@ void Scene::load(const char* scene)
 
 		m.set_shader(model["shader"]);
 
-		m.attach(Transform());
+		unsigned int component_count = model["component_count"];
+		json components = model["components"];
 
-		Transform& t = m.get<Transform>();
-
-		json translate = model["translate"];
-		t.translate(mathz::Vec3({ translate[0], translate[1], translate[2] }));
-
-		json rotation = model["rotation"];
-		t.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
-
-		t.scale(model["scale"]);
+		for (unsigned int i = 0; i < model_count; ++i)
+		{
+			std::string type = components[i]["type"];
+			
+			if (type == "transform")
+			{
+				Transform t{};
+				t.parse(components[i]);
+				m.attach(t);
+			}
+		}
 
 		m_entities.emplace_back(std::make_unique<Model>(std::move(m)));
 	}

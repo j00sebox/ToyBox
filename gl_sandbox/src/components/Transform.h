@@ -18,6 +18,7 @@ public:
 	[[nodiscard]] float get_rotate_angle() const { return m_rotate_angle; }
 	[[nodiscard]] mathz::Mat4 get_transform() const;
 
+	void parse(json info) override;
 	void imgui_render() override;
 
 private:
