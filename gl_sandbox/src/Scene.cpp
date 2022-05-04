@@ -3,9 +3,8 @@
 
 #include "ParseFile.h"
 
-#include "lights/PointLight.h"
-
 #include "components/Transform.h"
+#include "components/Light.h"
 
 #include "mathz/Misc.h"
 
@@ -118,9 +117,14 @@ void Scene::init()
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
 	
-	m_entities.emplace_back(std::make_unique<PointLight>());
+	// TODO: move to scene file
+	m_entities.emplace_back(std::make_unique<Model>());
 	m_entities[1]->attach(Transform());
-	m_shader_lib.get("point_light")->set_uniform_4f("u_light_colour", { { 1.f, 1.f, 1.f }, 1.f });
+	m_entities[1]->attach(PointLight());
+	m_entities[1]->set_shader("point_light");
+	m_entities[1]->set_name("point light");
+	PointLight& pl = m_entities[1]->get<PointLight>();
+	m_shader_lib.get("point_light")->set_uniform_4f("u_light_colour", pl.get_colour());
 
 	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{

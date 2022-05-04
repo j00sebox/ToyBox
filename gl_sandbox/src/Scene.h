@@ -3,7 +3,9 @@
 #include "Model.h"
 #include "Skybox.h"
 #include "Camera.h"
-#include "lights/PointLight.h"
+
+// TODO: remove later
+#include "components/Light.h"
 
 #include <json/json.hpp>
 
@@ -26,11 +28,11 @@ private:
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<std::unique_ptr<Entity>> m_entities;
-	PointLight m_point_light;
 	mathz::Vec3 m_directional_light;
 	mathz::Mat4 m_perspective;
 
 	// imgui stuff
 	Entity* m_selected_entity = nullptr;
+	PointLight* m_point_light = nullptr;
 };
 
