@@ -24,20 +24,20 @@
       "fragment": "resources/shaders/point_light/point_light_fragment.shader"
     }
   ],
-  "model_count": 1,
+  "model_count": 2,
   "models": [
     {
-      "name": "floor",
+      "name": "Floor",
       "shader": "texture2D",
       "transform": {
         "translate": [
           0.0,
-          0.0,
-          -1.0
+          -1.0,
+          -2.0
         ],
         "rotation": [
-          0.0,
-          0.0,
+          90.0,
+          1.0,
           0.0,
           0.0
         ],
@@ -45,6 +45,33 @@
       },
       "gltf": {
         "path": "resources/models/wooden_floor/scene.gltf"
+      }
+    },
+    {
+      "name": "Point Light",
+      "light": {
+        "type": "point_light",
+        "colour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "radius": 1.0
+      },
+      "transform": {
+        "translate": [
+          -0.5,
+          -0.2,
+          -0.5
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": 1.0
       }
     }
   ]

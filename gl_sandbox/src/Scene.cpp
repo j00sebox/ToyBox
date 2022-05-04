@@ -88,6 +88,21 @@ void Scene::load(const char* scene)
 		t.parse(model["transform"]);
 		m.attach(std::move(t));
 
+		if (!model["light"].is_null())
+		{
+			std::string type = model["light"]["type"];
+
+			if (type == "point_light")
+			{
+				PointLight pl;
+
+				json colour = model["light"]["colour"];
+				pl.set_colour(mathz::Vec4({ {colour[0], colour[1], colour[2]}, colour[3] }));
+
+				m.attach(std::move(pl));
+			}
+		}
+
 		if (!model["gltf"].is_null())
 		{
 			GLTFLoader loader = m.load_gltf(model["gltf"]["path"]);
@@ -114,10 +129,10 @@ void Scene::init()
 	}
 	
 	// TODO: move to scene file
-	m_entities.emplace_back(std::make_unique<Model>());
+	/*m_entities.emplace_back(std::make_unique<Model>());
 	m_entities[1]->attach(Transform());
 	m_entities[1]->attach(PointLight());
-	m_entities[1]->set_name("point light");
+	m_entities[1]->set_name("point light");*/
 
 	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{
@@ -126,7 +141,6 @@ void Scene::init()
 			auto& material = m_entities[i]->get<Material>();
 			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 		}
-		
 	}
 }
 
