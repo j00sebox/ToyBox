@@ -5,9 +5,29 @@
 #include "GLTFLoader.h"
 #include "mathz/Matrix.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+
 #include <glad/glad.h>
 
-Mesh::Mesh(const std::string& file_path)
+Mesh::Mesh(Mesh&& mesh) noexcept
+{
+	m_va = std::move(mesh.m_va);
+	m_indices_count = mesh.m_indices_count;
+	m_textures = std::move(mesh.m_textures);
+}
+
+void Mesh::draw() const
+{
+	m_va.bind();
+	for (unsigned int i = 0; i < m_textures.size(); ++i)
+	{
+		m_textures[i].bind(i);
+	}
+	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
+}
+
+void Mesh::load(const std::string& file_path)
 {
 	GLTFLoader loader(file_path.c_str());
 
@@ -65,21 +85,16 @@ Mesh::Mesh(const std::string& file_path)
 	vb.unbind();
 }
 
-Mesh::Mesh(Mesh&& mesh) noexcept
+void Mesh::parse(json mesh)
 {
-	m_va = std::move(mesh.m_va);
-	m_indices_count = mesh.m_indices_count;
-	m_textures = std::move(mesh.m_textures);
+	m_path = mesh["path"];
+	load(m_path);
 }
 
-void Mesh::draw() const
+void Mesh::imgui_render()
 {
-	m_va.bind();
-	for (unsigned int i = 0; i < m_textures.size(); ++i)
-	{
-		m_textures[i].bind(i);
-	}
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
+	ImGui::Text("Mesh\n");
+	ImGui::Text(m_path.c_str());
 }
 
 std::vector<mathz::Vec3> Mesh::floats_to_vec3(const std::vector<float>& flts) const

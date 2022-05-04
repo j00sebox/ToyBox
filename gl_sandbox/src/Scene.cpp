@@ -5,6 +5,7 @@
 
 #include "components/Transform.h"
 #include "components/Light.h"
+#include "components/Mesh.h"
 
 #include "mathz/Misc.h"
 
@@ -81,13 +82,10 @@ void Scene::load(const char* scene)
 		
 		m.set_name(model.value("name", "no_name"));
 
-		unsigned int mesh_count = model["mesh_count"];
-		json meshes = model["meshes"];
+		Mesh mesh;
 
-		for (unsigned int j = 0; j < mesh_count; ++j)
-		{
-			m.load_mesh(meshes[j]["path"]);
-		}
+		mesh.parse(model["mesh"]);
+		m.attach(std::move(mesh));
 
 		m.set_shader(model["shader"]);
 
@@ -102,7 +100,7 @@ void Scene::load(const char* scene)
 			{
 				Transform t{};
 				t.parse(components[i]);
-				m.attach(t);
+				m.attach(std::move(t));
 			}
 		}
 

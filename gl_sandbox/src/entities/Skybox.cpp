@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Skybox.h"
 
+#include "Buffer.h"
 #include "GLError.h"
 
 #include <glad/glad.h>

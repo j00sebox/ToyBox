@@ -47,12 +47,9 @@
           "scale": 0.01
         }
       ],
-      "mesh_count": 1,
-      "meshes": [
-        {
-          "path": "resources/models/wooden_floor/scene.gltf"
-        }
-      ]
+      "mesh": {
+        "path": "resources/models/wooden_floor/scene.gltf"
+      }
     }
   ]
 }

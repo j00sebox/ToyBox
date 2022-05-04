@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Model.h"
+#include "Shader.h"
+#include "VertexArray.h"
+#include "Texture.h"
 
 class Skybox
 {

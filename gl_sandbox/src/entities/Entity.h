@@ -17,18 +17,18 @@ public:
 	[[nodiscard]] const std::string& get_shader() const { return m_shader_name; }
 
 	template<class T>
-	void attach(T component)
+	void attach(T&& component)
 	{
 		const char* type_name = typeid(T).name();
 		if (m_type_map.find(type_name) == m_type_map.end())
 		{
-			m_components.emplace_back(std::make_shared<T>(component));
+			m_components.emplace_back(std::make_shared<T>(std::forward<T>(component)));
 			m_type_map[type_name] = m_components.size() - 1;
 		}
 	}
 
 	template<class T>
-	T& get()
+	T& get() const
 	{
 		const char* type_name = typeid(T).name();
 		if (m_type_map.find(type_name) == m_type_map.end())
@@ -37,7 +37,13 @@ public:
 			ASSERT(false);
 		}
 
-		return *std::static_pointer_cast<T>(m_components[m_type_map[type_name]]);
+		return *std::static_pointer_cast<T>(m_components[m_type_map.at(type_name)]);
+	}
+	
+	template<class T>
+	bool has() const
+	{
+		return (m_type_map.find(typeid(T).name()) != m_type_map.end());
 	}
 
 	void render_components()

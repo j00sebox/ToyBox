@@ -8,3 +8,5 @@
 #include <vector>
 #include <concepts>
 #include <functional>
+#include <memory>
+#include <unordered_map>
