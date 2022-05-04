@@ -7,8 +7,6 @@
 class Transform : public IComponent
 {
 public:
-	Transform();
-
 	void translate(const mathz::Vec3& pos);
 	void scale(float s);
 	void rotate(float angle, const mathz::Vec3& axis);

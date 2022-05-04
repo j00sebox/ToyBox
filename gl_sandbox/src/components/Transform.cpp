@@ -7,11 +7,6 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-Transform::Transform()
-{
-	set_name("Transform");
-}
-
 void Transform::translate(const mathz::Vec3& pos)
 {
 	m_postion = pos;
@@ -49,7 +44,7 @@ void Transform::parse(json info)
 
 void Transform::imgui_render()
 {
-	ImGui::Text(m_name);
+	ImGui::Text("\nTransform\n");
 
 	mathz::Vec3 position = get_position();
 	ImGui::Text("\nPosition: ");

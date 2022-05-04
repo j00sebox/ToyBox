@@ -6,7 +6,6 @@
 
 Light::Light()
 {
-	m_name = "Light";
 	m_colour = { {1.f, 1.f, 1.f}, 1.f };
 }
 
@@ -17,9 +16,7 @@ void Light::parse(json info)
 
 void Light::imgui_render()
 {
-	ImGui::Text("\n");
-	ImGui::Text(m_name);
-	ImGui::Text("\n");
+	ImGui::Text("\nLight\n");
 
 	float colour[4] = {
 		m_colour.x,

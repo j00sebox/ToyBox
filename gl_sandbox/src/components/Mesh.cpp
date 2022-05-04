@@ -15,6 +15,7 @@ Mesh::Mesh(Mesh&& mesh) noexcept
 	m_va = std::move(mesh.m_va);
 	m_indices_count = mesh.m_indices_count;
 	m_textures = std::move(mesh.m_textures);
+	m_path = std::move(mesh.m_path);
 }
 
 void Mesh::draw() const
@@ -93,7 +94,7 @@ void Mesh::parse(json mesh)
 
 void Mesh::imgui_render()
 {
-	ImGui::Text("Mesh\n");
+	ImGui::Text("\nMesh\n");
 	ImGui::Text(m_path.c_str());
 }
 
