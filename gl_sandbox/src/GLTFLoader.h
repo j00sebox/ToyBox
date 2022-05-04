@@ -9,19 +9,19 @@ class GLTFLoader
 public:
 	GLTFLoader(const char* path);
 
-	std::vector<float> get_positions();
-	std::vector<float> get_normals();
-	std::vector<float> get_tex_coords();
-	std::vector<unsigned int> get_indices();
+	[[nodiscard]] std::vector<float> get_positions() const;
+	[[nodiscard]] std::vector<float> get_normals() const;
+	[[nodiscard]] std::vector<float> get_tex_coords() const;
+	[[nodiscard]] std::vector<unsigned int> get_indices() const;
 
-	std::string get_base_color_texture();
-	std::string get_specular_color_texture();
-	std::string get_normal_texture();
-	std::string get_occlusion_texture();
+	[[nodiscard]] std::string get_base_color_texture() const;
+	[[nodiscard]] std::string get_specular_color_texture() const;
+	[[nodiscard]] std::string get_normal_texture() const;
+	[[nodiscard]] std::string get_occlusion_texture() const;
 
 private:
 	void load_bin(const char* file_path);
-	void extract_floats(const json& accessor, std::vector<float>& flts);
+	void extract_floats(const json& accessor, std::vector<float>& flts) const;
 
 	json m_json;
 	std::string m_base_dir;

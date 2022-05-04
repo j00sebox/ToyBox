@@ -47,7 +47,7 @@ GLTFLoader::GLTFLoader(const char* path)
 	m_occ_tex_ind = materials["occlusionTexture"]["index"];*/
 }
 
-std::vector<float> GLTFLoader::get_positions()
+std::vector<float> GLTFLoader::get_positions() const
 {
 	json accessor = m_json["accessors"][m_postion_ind];
 	
@@ -57,7 +57,7 @@ std::vector<float> GLTFLoader::get_positions()
 	return positions;
 }
 
-std::vector<float> GLTFLoader::get_normals()
+std::vector<float> GLTFLoader::get_normals() const
 {
 	json accessor = m_json["accessors"][m_norm_tex_ind];
 
@@ -67,7 +67,7 @@ std::vector<float> GLTFLoader::get_normals()
 	return normals;
 }
 
-std::vector<float> GLTFLoader::get_tex_coords()
+std::vector<float> GLTFLoader::get_tex_coords() const
 {
 	json accessor = m_json["accessors"][m_tex_coord_ind];
 
@@ -77,7 +77,7 @@ std::vector<float> GLTFLoader::get_tex_coords()
 	return tex_coords;
 }
 
-std::vector<unsigned int> GLTFLoader::get_indices()
+std::vector<unsigned int> GLTFLoader::get_indices() const
 {
 	json accessor = m_json["accessors"][m_indices_ind];
 
@@ -135,7 +135,7 @@ std::vector<unsigned int> GLTFLoader::get_indices()
 	return indices;
 }
 
-std::string GLTFLoader::get_base_color_texture()
+std::string GLTFLoader::get_base_color_texture() const
 {
 	json uri = m_json["images"][m_bc_tex_ind];
 	std::string image = uri["uri"];
@@ -143,7 +143,7 @@ std::string GLTFLoader::get_base_color_texture()
 	return m_base_dir + image;
 }
 
-std::string GLTFLoader::get_specular_color_texture()
+std::string GLTFLoader::get_specular_color_texture() const
 {
 	json uri = m_json["images"][m_spec_tex_ind];
 	std::string image = uri["uri"];
@@ -151,12 +151,12 @@ std::string GLTFLoader::get_specular_color_texture()
 	return m_base_dir + image;
 }
 
-std::string GLTFLoader::get_normal_texture()
+std::string GLTFLoader::get_normal_texture() const
 {
 	return std::string();
 }
 
-std::string GLTFLoader::get_occlusion_texture()
+std::string GLTFLoader::get_occlusion_texture() const
 {
 	return std::string();
 }
@@ -177,7 +177,7 @@ void GLTFLoader::load_bin(const char* file_path)
 	file.read((char*)&m_data[0], file_size);
 }
 
-void GLTFLoader::extract_floats(const json& accessor, std::vector<float>& flts)
+void GLTFLoader::extract_floats(const json& accessor, std::vector<float>& flts) const
 {
 	unsigned int index = accessor.value("bufferView", 0);
 	unsigned int byte_offset = accessor.value("byteOffset", 0);

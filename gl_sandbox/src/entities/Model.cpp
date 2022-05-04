@@ -14,9 +14,12 @@ void Model::draw() const
 {
 	if (has<Mesh>())
 	{
-		Mesh& m = get<Mesh>();
-
-		m.draw();
+		auto& mesh = get<Mesh>();
+		mesh.draw();
 	}
+}
+
+void Model::load_gltf(const std::string& file_path)
+{
 }
 
