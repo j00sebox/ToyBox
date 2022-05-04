@@ -33,6 +33,5 @@ private:
 
 	// imgui stuff
 	Entity* m_selected_entity = nullptr;
-	PointLight* m_point_light = nullptr;
 };
 

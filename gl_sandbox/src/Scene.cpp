@@ -113,8 +113,6 @@ void Scene::init()
 	m_entities[1]->attach(PointLight());
 	m_entities[1]->set_shader("point_light");
 	m_entities[1]->set_name("point light");
-	m_point_light = &m_entities[1]->get<PointLight>();
-	m_shader_lib.get("point_light")->set_uniform_4f("u_light_colour", m_point_light->get_colour());
 
 	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{
@@ -151,13 +149,17 @@ void Scene::draw()
 		}
 		ImGui::EndChild();
 
-		Transform& t = m_entities[i]->get<Transform>();
+		if (m_entities[i]->has<PointLight>())
+		{
+			auto& point_light = m_entities[i]->get<PointLight>();
+			auto& pl_t = m_entities[i]->get<Transform>();
+			mathz::Vec3 pos = pl_t.get_transform() * pl_t.get_position();
 
-		Transform& pl_t = m_entities[1]->get<Transform>();
-		mathz::Vec3 pos = pl_t.get_transform() * pl_t.get_position();
+			m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
+			m_shader_lib.get("texture2D")->set_uniform_3f("u_pl_pos", pos);
+		}
 
-		m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", m_point_light->get_colour());
-		m_shader_lib.get("texture2D")->set_uniform_3f("u_pl_pos", pos);
+		auto& t = m_entities[i]->get<Transform>();
 		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_model", t.get_transform());
 		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 		m_shader_lib.get(m_entities[i]->get_shader())->bind();
