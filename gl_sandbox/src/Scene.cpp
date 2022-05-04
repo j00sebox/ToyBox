@@ -2,6 +2,7 @@
 #include "Scene.h"
 
 #include "ParseFile.h"
+#include "GLTFLoader.h"
 
 #include "components/Transform.h"
 #include "components/Light.h"
@@ -79,31 +80,22 @@ void Scene::load(const char* scene)
 		Model m;
 
 		json model = models[i];
-		
+
 		m.set_name(model.value("name", "no_name"));
-
-		Mesh mesh;
-
-		mesh.parse(model["mesh"]);
-		m.attach(std::move(mesh));
-
 		m.set_shader(model["shader"]);
 
-		unsigned int component_count = model["component_count"];
-		json components = model["components"];
+		Transform t{};
+		t.parse(model["transform"]);
+		m.attach(std::move(t));
 
-		for (unsigned int i = 0; i < model_count; ++i)
+		if (!model["mesh"].is_null())
 		{
-			std::string type = components[i]["type"];
-			
-			if (type == "transform")
-			{
-				Transform t{};
-				t.parse(components[i]);
-				m.attach(std::move(t));
-			}
-		}
+			Mesh mesh;
 
+			mesh.parse(model["mesh"]);
+			m.attach(std::move(mesh));
+		}
+	
 		m_entities.emplace_back(std::make_unique<Model>(std::move(m)));
 	}
 }

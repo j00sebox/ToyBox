@@ -50,6 +50,8 @@ public:
 
 		link();
 		delete_shaders();
+
+		get_active_uniforms();
 	}
 
 	ShaderProgram(ShaderProgram&& sp) noexcept;
@@ -59,10 +61,9 @@ public:
 	void set_uniform_2f(const std::string& name, float x, float y);
 	void set_uniform_3f(const std::string& name, const mathz::Vec3& vec);
 	void set_uniform_4f(const std::string& name, const mathz::Vec4& vec);
-
 	void set_uniform_mat4f(const std::string& name, const mathz::Mat4& mat);
 
-	int get_uniform_loaction(const std::string& name);
+	[[nodiscard]] int get_uniform_loaction(const std::string& name);
 
 	void bind() const;
 	void unbind() const;
@@ -76,6 +77,7 @@ private:
 	void link();
 	// also does a detach
 	void delete_shaders(); 
+	void get_active_uniforms();
 
 	unsigned int m_program_id;
 	std::vector<Shader> m_shaders;

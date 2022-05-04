@@ -144,6 +144,21 @@ void ShaderProgram::delete_shaders()
 	}	
 }
 
+void ShaderProgram::get_active_uniforms()
+{
+	int num_uniforms;
+	glGetProgramiv(m_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms);
+	char uniform_name[25];
+	int length;
+	int size;
+	unsigned int type;
+
+	for (int i = 0; i < num_uniforms; ++i)
+	{
+		glGetActiveUniform(m_program_id, i, sizeof(uniform_name), &length, &size, &type, uniform_name);
+	}
+}
+
 int ShaderProgram::get_uniform_loaction(const std::string& name)
 {
 	if (m_uniform_location_cache.find(name) != m_uniform_location_cache.end())

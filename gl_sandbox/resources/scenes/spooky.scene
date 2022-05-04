@@ -29,24 +29,20 @@
     {
       "name": "floor",
       "shader": "texture2D",
-      "component_count": 1,
-      "components": [
-        {
-          "type": "transform",
-          "translate": [
-            0.0,
-            0.0,
-            -1.0
-          ],
-          "rotation": [
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "scale": 0.01
-        }
-      ],
+      "transform": {
+        "translate": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": 0.01
+      },
       "mesh": {
         "path": "resources/models/wooden_floor/scene.gltf"
       }
