@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "VertexArray.h"
 #include "Buffer.h"
+#include "GLTFLoader.h"
 
 #include "components/IComponent.h"
 
@@ -24,9 +25,9 @@ public:
 	Mesh(Mesh&& mesh) noexcept;
 
 	void draw() const;
-	void load(const std::string& fname);
+	void load(GLTFLoader loader);
 
-	void parse(json mesh) override;
+	void parse(json mesh) override {};
 	void imgui_render() override;
 
 private:

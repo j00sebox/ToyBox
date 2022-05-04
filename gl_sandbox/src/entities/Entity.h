@@ -12,9 +12,7 @@ public:
 	virtual void draw() const = 0;
 
 	virtual void set_name(const std::string& name) { m_name = name; }
-	virtual void set_shader(const std::string& shader_name) { m_shader_name = shader_name; }
 	[[nodiscard]] const std::string& get_name() const { return m_name; }
-	[[nodiscard]] const std::string& get_shader() const { return m_shader_name; }
 
 	template<class T>
 	void attach(T&& component)
@@ -56,7 +54,6 @@ public:
 
 protected:
 	std::string m_name;
-	std::string m_shader_name;
 	std::unordered_map<const char*, int> m_type_map;
 	std::vector<std::shared_ptr<IComponent>> m_components;
 };

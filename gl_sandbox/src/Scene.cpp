@@ -7,6 +7,7 @@
 #include "components/Transform.h"
 #include "components/Light.h"
 #include "components/Mesh.h"
+#include "components/Material.h"
 
 #include "mathz/Misc.h"
 
@@ -82,18 +83,23 @@ void Scene::load(const char* scene)
 		json model = models[i];
 
 		m.set_name(model.value("name", "no_name"));
-		m.set_shader(model["shader"]);
 
 		Transform t{};
 		t.parse(model["transform"]);
 		m.attach(std::move(t));
 
-		if (!model["mesh"].is_null())
+		if (!model["gltf"].is_null())
 		{
-			Mesh mesh;
+			GLTFLoader loader = m.load_gltf(model["gltf"]["path"]);
 
-			mesh.parse(model["mesh"]);
+			Mesh mesh;
+			mesh.load(loader);
 			m.attach(std::move(mesh));
+
+			Material material;
+			material.load(loader);
+			material.set_shader(m_shader_lib.get(model["shader"]));
+			m.attach(std::move(material));
 		}
 	
 		m_entities.emplace_back(std::make_unique<Model>(std::move(m)));
@@ -111,12 +117,16 @@ void Scene::init()
 	m_entities.emplace_back(std::make_unique<Model>());
 	m_entities[1]->attach(Transform());
 	m_entities[1]->attach(PointLight());
-	m_entities[1]->set_shader("point_light");
 	m_entities[1]->set_name("point light");
 
 	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{
-		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+		if (m_entities[i]->has<Material>())
+		{
+			auto& material = m_entities[i]->get<Material>();
+			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+		}
+		
 	}
 }
 
@@ -149,21 +159,25 @@ void Scene::draw()
 		}
 		ImGui::EndChild();
 
+		auto& transform = m_entities[i]->get<Transform>();
+
 		if (m_entities[i]->has<PointLight>())
 		{
 			auto& point_light = m_entities[i]->get<PointLight>();
-			auto& pl_t = m_entities[i]->get<Transform>();
-			mathz::Vec3 pos = pl_t.get_transform() * pl_t.get_position();
+			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
 			m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
 			m_shader_lib.get("texture2D")->set_uniform_3f("u_pl_pos", pos);
 		}
 
-		auto& t = m_entities[i]->get<Transform>();
-		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_model", t.get_transform());
-		m_shader_lib.get(m_entities[i]->get_shader())->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-		m_shader_lib.get(m_entities[i]->get_shader())->bind();
-		m_entities[i]->draw();
+		if (m_entities[i]->has<Material>())
+		{
+			auto& material = m_entities[i]->get<Material>();
+
+			material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
+			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+			m_entities[i]->draw();
+		}
 	}
 
 	{

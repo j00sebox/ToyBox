@@ -2,7 +2,7 @@
 #include "Mesh.h"
 
 #include "GLError.h"
-#include "GLTFLoader.h"
+
 #include "mathz/Matrix.h"
 
 #include <imgui.h>
@@ -21,23 +21,14 @@ Mesh::Mesh(Mesh&& mesh) noexcept
 void Mesh::draw() const
 {
 	m_va.bind();
-	for (unsigned int i = 0; i < m_textures.size(); ++i)
-	{
-		m_textures[i].bind(i);
-	}
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 }
 
-void Mesh::load(const std::string& file_path)
+void Mesh::load(GLTFLoader loader)
 {
-	GLTFLoader loader(file_path.c_str());
-
 	std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
 	std::vector<mathz::Vec3> normals = floats_to_vec3(loader.get_normals());
 	std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
-
-	m_textures.emplace_back(Texture2D(loader.get_base_color_texture()));
-	//m_textures.emplace_back(Texture2D(loader.get_specular_color_texture()));
 
 	std::vector<Vertex> vertices;
 
@@ -84,12 +75,6 @@ void Mesh::load(const std::string& file_path)
 	m_va.unbind();
 	ib.unbind();
 	vb.unbind();
-}
-
-void Mesh::parse(json mesh)
-{
-	m_path = mesh["path"];
-	load(m_path);
 }
 
 void Mesh::imgui_render()

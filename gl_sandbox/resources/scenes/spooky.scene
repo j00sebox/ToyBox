@@ -43,7 +43,7 @@
         ],
         "scale": 0.01
       },
-      "mesh": {
+      "gltf": {
         "path": "resources/models/wooden_floor/scene.gltf"
       }
     }

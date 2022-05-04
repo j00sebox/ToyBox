@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Entity.h"
 #include "Shader.h"
-#include "entities/Entity.h"
+#include "GLTFLoader.h"
 
 #include "mathz/Matrix.h"
 #include "mathz/Quaternion.h"
@@ -10,6 +11,6 @@ class Model : public Entity
 {
 public:
 	void draw() const override;
-	void load_gltf(const std::string& file_path);
+	GLTFLoader load_gltf(const std::string& file_path);
 
 };
