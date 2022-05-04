@@ -127,12 +127,6 @@ void Scene::init()
 	{
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 	}
-	
-	// TODO: move to scene file
-	/*m_entities.emplace_back(std::make_unique<Model>());
-	m_entities[1]->attach(Transform());
-	m_entities[1]->attach(PointLight());
-	m_entities[1]->set_name("point light");*/
 
 	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{

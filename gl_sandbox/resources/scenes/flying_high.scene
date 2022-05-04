@@ -23,48 +23,46 @@
 	"model_count": 2,
 	"models": [
 		{
-			"name": "airplane",
+			"name": "Biplane",
 			"shader": "texture2D",
-			"translate": [
-				0.0,
-				0.0,
-				-100.0
-			],
-			"rotation": [
-				0.0,
-				0.0,
-				0.0,
-				0.0
-			],
-			"scale": 2.0,
-			"mesh_count": 1,
-			"meshes": [
-				{
-					"path": "resources/models/airplane_biplane/scene.gltf"
-				}
-			]
+			"transform": {
+				"translate": [
+					0.0,
+					0.0,
+					-100.0
+				],
+				"rotation": [
+					0.0,
+					0.0,
+					0.0,
+					0.0
+				],
+				"scale": 2.0
+			},
+			"gltf": {
+				"path": "resources/models/airplane_biplane/scene.gltf"
+			}
 		},
 		{
-			"name": "green_airplane",
+			"name": "Green Airplane",
 			"shader": "texture2D",
-			"translate": [
-				1000.0,
-				0.0,
-				-100.0
-			],
-			"rotation": [
-				0.0,
-				0.0,
-				0.0,
-				0.0
-			],
-			"scale": 0.4,
-			"mesh_count": 1,
-			"meshes": [
-				{
-					"path": "resources/models/green_airplane/scene.gltf"
-				}
-			]
+			"transform": {
+				"translate": [
+					1000.0,
+					0.0,
+					-100.0
+				],
+				"rotation": [
+					0.0,
+					0.0,
+					0.0,
+					0.0
+				],
+				"scale": 0.4
+			},
+			"gltf": {
+				"path": "resources/models/green_airplane/scene.gltf"
+			}
 		}
 	]
 }
