@@ -53,13 +53,10 @@ Window::Window(int width, int height)
 
 	// setup callbacks
 	glfwSetErrorCallback(glfw_error_callback);
-	//glfwSetKeyCallback(m_window_handle, glfw_key_callback); // this was messing up imgui callback
 
 	m_renderer.reset(new Renderer(width, height));
 
 	Input::m_window_handle = m_window_handle;
-
-	main_loop();
 }
 
 Window::~Window()
@@ -73,38 +70,43 @@ Window::~Window()
 	glfwTerminate();
 }
 
-void Window::main_loop()
+void Window::update()
 {
-	while (!glfwWindowShouldClose(m_window_handle))
-	{
-		if (Input::is_key_pressed(GLFW_KEY_ESCAPE))
-		{
-			glfwSetWindowShouldClose(m_window_handle, GLFW_TRUE);
-		}
+	
+}
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+void Window::begin_frame()
+{
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
 
-		ImGui::Begin("FPS");
+	ImGui::Begin("FPS");
 
-		ImGui::Text("Avg. %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::End();
+	ImGui::Text("Avg. %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	ImGui::End();
+}
 
-		float dx = 0.f, dy = 0.f;
-		double time = glfwGetTime() * 1000.0;
+void Window::end_frame()
+{
+	ImGui::Render();
 
-		auto delta_time = (float)(time - prev_time);
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		m_renderer->update(delta_time);
+	glfwSwapBuffers(m_window_handle);
+	glfwPollEvents();
+}
 
-		prev_time = time;
+float Window::get_delta_time()
+{
+	float dx = 0.f, dy = 0.f;
+	double time = glfwGetTime() * 1000.0;
 
-		ImGui::Render();
+	auto delta_time = (float)(time - prev_time);
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		
-		glfwSwapBuffers(m_window_handle);
-		glfwPollEvents();
-	}
+	m_renderer->update(delta_time);
+
+	prev_time = time;
+
+	return delta_time;
 }

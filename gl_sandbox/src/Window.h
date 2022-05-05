@@ -12,7 +12,10 @@ public:
 	Window(int width, int height);
 	~Window();
 
-	void main_loop();
+	void update();
+	void begin_frame();
+	void end_frame();
+	float get_delta_time();
 
 private:
 	int m_width, m_height;

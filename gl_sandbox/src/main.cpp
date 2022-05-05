@@ -1,10 +1,11 @@
 #include "pch.h"
 
-#include "Window.h"
+#include "Application.h"
 
 int main()
 {
-	Window window(1280, 960);
+	Application app;
+	app.start();
 	
 	return 0;
 }
