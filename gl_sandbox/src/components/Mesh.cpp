@@ -18,12 +18,6 @@ Mesh::Mesh(Mesh&& mesh) noexcept
 	m_path = std::move(mesh.m_path);
 }
 
-void Mesh::draw() const
-{
-	m_va.bind();
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
-}
-
 void Mesh::load(GLTFLoader loader)
 {
 	std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
@@ -75,6 +69,11 @@ void Mesh::load(GLTFLoader loader)
 	m_va.unbind();
 	ib.unbind();
 	vb.unbind();
+}
+
+void Mesh::bind() const
+{
+	m_va.bind();
 }
 
 void Mesh::imgui_render()

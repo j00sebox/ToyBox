@@ -2,14 +2,17 @@
 #include "Renderer.h"
 
 #include "GLError.h"
+#include "Texture.h"
+#include "Shader.h"
+#include "VertexArray.h"
+
 #include "events/EventList.h"
 
 #include "mathz/Quaternion.h";
 
 #include <glad/glad.h>
 
-Renderer::Renderer(int width, int height)
-	: m_screen_width(width), m_screen_height(height)
+void Renderer::init(int width, int height)
 {
 	GL_CALL(glViewport(0, 0, width, height));
 
@@ -18,32 +21,14 @@ Renderer::Renderer(int width, int height)
 	GL_CALL(glFrontFace(GL_CCW));
 
 	GL_CALL(glClearColor(0.2f, 0.0f, 0.3f, 1.f));
-
-	m_directional_light.normalize();
-
-	m_scene.load("resources/scenes/spooky.scene");
-	m_camera = std::shared_ptr<Camera>(m_scene.get_camera());
-	m_camera->resize(width, height);
-	m_scene.init();
 }
 
-void Renderer::update(float elapsed_time)
+void Renderer::draw_elements(unsigned count)
 {
-	m_scene.update(elapsed_time);
-
-	draw();
+	GL_CALL(glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::draw()
+void Renderer::clear()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-	m_scene.draw();
 }
-
-void Renderer::reset_view()
-{
-	m_camera->reset();
-}
-
-

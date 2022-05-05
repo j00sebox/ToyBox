@@ -154,7 +154,7 @@ const mathz::Vec3& Camera::get_pos() const
 
 void Camera::reset()
 {
-	m_forward = { 0.f, 0.f, 1.f };
+	m_forward = { 0.f, 0.f, -1.f };
 	m_up = { 0.f, 1.f, 0.f };
 	m_right = { 1.f, 0.f, 0.f };
 

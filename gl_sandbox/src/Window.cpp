@@ -54,8 +54,6 @@ Window::Window(int width, int height)
 	// setup callbacks
 	glfwSetErrorCallback(glfw_error_callback);
 
-	m_renderer.reset(new Renderer(width, height));
-
 	Input::m_window_handle = m_window_handle;
 }
 
@@ -65,14 +63,8 @@ Window::~Window()
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-	m_renderer.release();
 	glfwDestroyWindow(m_window_handle);
 	glfwTerminate();
-}
-
-void Window::update()
-{
-	
 }
 
 void Window::begin_frame()
@@ -103,8 +95,6 @@ float Window::get_delta_time()
 	double time = glfwGetTime() * 1000.0;
 
 	auto delta_time = (float)(time - prev_time);
-
-	m_renderer->update(delta_time);
 
 	prev_time = time;
 

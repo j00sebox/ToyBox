@@ -1,36 +1,10 @@
 #pragma once
 
-#include "Shader.h"
-#include "Buffer.h"
-#include "VertexArray.h"
-#include "Texture.h"
-
-#include "Camera.h"
-#include "entities/Model.h"
-#include "entities/Skybox.h"
-#include "Scene.h"
-
-#include "mathz/Quaternion.h"
-
 class Renderer
 {
 public:
-	Renderer(int width, int height);
-	
-	void update(float elpased_time);
-	void reset_view();
-	
-private:
-	void draw();
-
-	int m_screen_width, m_screen_height;
-
-	std::shared_ptr<Camera> m_camera;
-	Scene m_scene;
-
-	mathz::Mat4 m_perspective;
-	mathz::Mat4 m_orthographic;
-
-	mathz::Vec3 m_directional_light = { 0.f, 10.f, -1.f };
+	static void init(int width, int height);
+	static void draw_elements(unsigned count);
+	static void clear();
 };
 

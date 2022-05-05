@@ -10,7 +10,6 @@
 class Model : public Entity
 {
 public:
-	void draw() const override;
 	GLTFLoader load_gltf(const std::string& file_path);
 
 };

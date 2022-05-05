@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Window.h"
+#include "Scene.h"
 
 class Application
 {
@@ -10,6 +11,7 @@ public:
 
 private:
 	Window m_window;
+	Scene m_current_scene;
 	bool m_running = false;
 };
 

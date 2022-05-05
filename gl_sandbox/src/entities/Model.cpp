@@ -10,17 +10,6 @@
 
 #include <glad/glad.h>
 
-void Model::draw() const
-{
-	if (has<Mesh>())
-	{
-		auto& mesh = get<Mesh>();
-		auto& material = get<Material>();
-		material.bind();
-		mesh.draw();
-	}
-}
-
 GLTFLoader Model::load_gltf(const std::string& file_path)
 {
 	GLTFLoader loader(file_path.c_str());

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Scene.h"
 
+#include "Renderer.h"
 #include "ParseFile.h"
 #include "GLTFLoader.h"
 
@@ -121,8 +122,10 @@ void Scene::load(const char* scene)
 	}
 }
 
-void Scene::init()
+void Scene::init(int width, int height)
 {
+	m_camera->resize(width, height);
+
 	if (m_skybox)
 	{
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
@@ -140,11 +143,10 @@ void Scene::init()
 
 void Scene::update(float elapsed_time)
 {
-	m_camera->update(elapsed_time);
-}
+	Renderer::clear();
 
-void Scene::draw()
-{
+	m_camera->update(elapsed_time);
+
 	if (m_skybox)
 	{
 		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
@@ -182,10 +184,13 @@ void Scene::draw()
 		if (m_entities[i]->has<Material>())
 		{
 			auto& material = m_entities[i]->get<Material>();
+			auto& mesh = m_entities[i]->get<Mesh>();
 
 			material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
 			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-			m_entities[i]->draw();
+			material.bind();
+			mesh.bind();
+			Renderer::draw_elements(mesh.get_index_count());
 		}
 	}
 
@@ -208,3 +213,9 @@ void Scene::draw()
 
 	ImGui::End();
 }
+
+void Scene::reset_view()
+{
+	m_camera->reset();
+}
+

@@ -24,8 +24,9 @@ public:
 	Mesh() = default;
 	Mesh(Mesh&& mesh) noexcept;
 
-	void draw() const;
 	void load(GLTFLoader loader);
+	void bind() const;
+	[[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
 
 	void parse(json mesh) override {};
 	void imgui_render() override;

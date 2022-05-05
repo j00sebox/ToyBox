@@ -17,9 +17,9 @@ public:
 	Scene();
 
 	void load(const char* scene);
-	void init();
+	void init(int width, int height);
 	void update(float elapsed_time);
-	void draw();
+	void reset_view();
 	Camera* get_camera() { return m_camera.get(); }
 
 private:

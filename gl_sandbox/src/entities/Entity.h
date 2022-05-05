@@ -9,8 +9,6 @@
 class Entity
 {
 public:
-	virtual void draw() const = 0;
-
 	virtual void set_name(const std::string& name) { m_name = name; }
 	[[nodiscard]] const std::string& get_name() const { return m_name; }
 
