@@ -15,8 +15,15 @@ void Material::bind() const
 
 void Material::load(const GLTFLoader& loader)
 {
-	m_textures.emplace_back(Texture2D(loader.get_base_color_texture()));
-	//m_textures.emplace_back(Texture2D(loader.get_specular_color_texture()));
+	std::vector<std::string> strs = loader.get_textures();
+
+	for (auto& s : strs)
+	{
+		if (!s.empty())
+		{
+			m_textures.emplace_back(Texture2D(s));
+		}
+	}
 }
 
 void Material::imgui_render()

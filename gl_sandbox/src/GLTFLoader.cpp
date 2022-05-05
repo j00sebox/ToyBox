@@ -42,7 +42,11 @@ GLTFLoader::GLTFLoader(const char* path)
 	json materials = m_json["materials"][0];
 
 	m_bc_tex_ind = materials["pbrMetallicRoughness"]["baseColorTexture"]["index"];
-	//m_spec_tex_ind = materials["occlusionTexture"]["index"];
+
+	if (!materials["pbrMetallicRoughness"]["metallicRoughnessTexture"].is_null())
+	{
+		m_spec_tex_ind = materials["pbrMetallicRoughness"]["metallicRoughnessTexture"]["index"];
+	}
 	/*m_norm_tex_ind = materials["normalTexture"]["index"];
 	m_occ_tex_ind = materials["occlusionTexture"]["index"];*/
 }
@@ -108,6 +112,7 @@ std::vector<unsigned int> GLTFLoader::get_indices() const
 			indices.push_back(val);
 		}
 		break;
+		// TODO: add the other types
 		/*case 5123:
 			for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
 			{
@@ -133,6 +138,18 @@ std::vector<unsigned int> GLTFLoader::get_indices() const
 		}
 
 	return indices;
+}
+
+std::vector<std::string> GLTFLoader::get_textures() const
+{
+	std::vector<std::string> vec;
+
+	vec.emplace_back(get_base_color_texture());
+	vec.emplace_back(get_specular_color_texture());
+	vec.emplace_back(get_normal_texture());
+	vec.emplace_back(get_occlusion_texture());
+	
+	return vec;
 }
 
 std::string GLTFLoader::get_base_color_texture() const

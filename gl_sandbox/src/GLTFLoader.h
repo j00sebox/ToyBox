@@ -14,6 +14,7 @@ public:
 	[[nodiscard]] std::vector<float> get_tex_coords() const;
 	[[nodiscard]] std::vector<unsigned int> get_indices() const;
 
+	[[nodiscard]] std::vector<std::string> get_textures() const;
 	[[nodiscard]] std::string get_base_color_texture() const;
 	[[nodiscard]] std::string get_specular_color_texture() const;
 	[[nodiscard]] std::string get_normal_texture() const;
