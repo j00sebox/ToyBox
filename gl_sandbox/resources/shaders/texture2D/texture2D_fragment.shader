@@ -8,12 +8,14 @@ in vec3 v_normal;
 in vec2 v_tex_coord;
 
 uniform vec3 u_directional_light;
-uniform vec3 u_camera_position;
+uniform vec3 u_cam_pos;
 
 // point light stuff
 uniform vec3 u_pl_pos;
 uniform vec4 u_pl_col;
 uniform float u_pl_rad;
+
+int glossiness = 4;
 
 out vec4 colour;
 
@@ -31,8 +33,14 @@ vec4 point_light()
 	vec3 normal = normalize(v_normal);
 	vec3 direction = normalize(light_vec);
 	float diffuse = max(dot(normal, direction), 0.f);
+
+	// specular
+	float ks = 1.f;
+	vec3 viewing_dir = normalize(u_cam_pos - u_pl_pos);
+	vec3 perfect_reflect = reflect(-direction, normal);
+	float specular = pow(max(dot(perfect_reflect, viewing_dir), 0.0), glossiness);
 	
-	return texture(diffuse_t, v_tex_coord) * (diffuse * attenuation * u_pl_col + ambient);
+	return texture(diffuse_t, v_tex_coord) * (diffuse * attenuation + ambient) + texture(specular_t, v_tex_coord).r * specular * ks * u_pl_col;
 }
 
 void main()

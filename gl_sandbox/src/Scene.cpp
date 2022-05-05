@@ -176,6 +176,7 @@ void Scene::draw()
 
 			m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
 			m_shader_lib.get("texture2D")->set_uniform_3f("u_pl_pos", pos);
+			m_shader_lib.get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 		}
 
 		if (m_entities[i]->has<Material>())
