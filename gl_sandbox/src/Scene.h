@@ -19,6 +19,7 @@ public:
 	void load(const char* scene);
 	void init(int width, int height);
 	void update(float elapsed_time);
+	void render_components();
 	void reset_view();
 	Camera* get_camera() { return m_camera.get(); }
 

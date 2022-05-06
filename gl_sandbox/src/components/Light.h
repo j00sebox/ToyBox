@@ -9,6 +9,7 @@ class Light : public IComponent
 public:
 	Light();
 
+	const char* get_type() const override { return typeid(Light).name(); }
 	void parse(json info) override;
 	void imgui_render() override;
 
@@ -22,6 +23,7 @@ protected:
 class PointLight : public Light
 {
 public:
+	const char* get_type() const override { return typeid(PointLight).name(); }
 	void parse(json info) override;
 	void imgui_render() override;
 

@@ -6,6 +6,9 @@
 
 #include "mathz/Matrix.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+
 class Entity
 {
 public:
@@ -20,6 +23,26 @@ public:
 		{
 			m_components.emplace_back(std::make_shared<T>(std::forward<T>(component)));
 			m_type_map[type_name] = m_components.size() - 1;
+		}
+	}
+
+	template<class T>
+	void remove(const T& component)
+	{
+		if (m_type_map.find(component.get_type()) != m_type_map.end())
+		{
+			int index = m_type_map.at(component.get_type());
+
+			m_components.erase(m_components.begin() + index);
+
+			m_type_map.erase(component.get_type());
+
+			for (auto& [key, value] : m_type_map) {
+				if (value > index)
+				{
+					--value;
+				}
+			}
 		}
 	}
 
@@ -42,13 +65,7 @@ public:
 		return (m_type_map.find(typeid(T).name()) != m_type_map.end());
 	}
 
-	void render_components()
-	{
-		for (const std::shared_ptr<IComponent>& component : m_components)
-		{
-			component->imgui_render();
-		}
-	}
+	[[nodiscard]] std::vector<std::shared_ptr<IComponent>>& get_components() { return m_components; }
 
 protected:
 	std::string m_name;

@@ -18,6 +18,7 @@ public:
 	void bind() const;
 	void load(const GLTFLoader& loader);
 
+	const char* get_type() const override { return typeid(Material).name(); }
 	void parse(json info) override {};
 	void imgui_render() override;
 

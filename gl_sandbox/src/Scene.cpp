@@ -180,6 +180,10 @@ void Scene::update(float elapsed_time)
 			m_shader_lib.get("texture2D")->set_uniform_3f("u_pl_pos", pos);
 			m_shader_lib.get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 		}
+		else
+		{
+			m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", mathz::Vec4({{ 0.f, 0.f, 0.f }, 0.f}));
+		}
 
 		if (m_entities[i]->has<Material>())
 		{
@@ -206,12 +210,47 @@ void Scene::update(float elapsed_time)
 		{
 			ImGui::Text(m_selected_entity->get_name().c_str());
 
-			m_selected_entity->render_components();
+			render_components();
 		}
 	}
 	ImGui::EndChild();
 
 	ImGui::End();
+}
+
+void Scene::render_components()
+{
+	std::vector<std::shared_ptr<IComponent>> components = m_selected_entity->get_components();
+
+	for (unsigned int i = 0; i < components.size();)
+	{
+		bool remove_component = false;
+
+		if (ImGui::Button("+"))
+		{
+			ImGui::OpenPopup("ComponentSettings");
+		}
+
+		if (ImGui::BeginPopup("ComponentSettings"))
+		{
+			if (ImGui::MenuItem("Remove component"))
+			{
+				remove_component = true;
+			}
+
+			ImGui::EndPopup();
+		}
+
+
+		if (remove_component)
+		{
+			m_selected_entity->remove(*components[i]);
+		}
+		else
+		{
+			components[i++]->imgui_render();
+		}
+	}
 }
 
 void Scene::reset_view()

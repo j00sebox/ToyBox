@@ -28,6 +28,7 @@ public:
 	void bind() const;
 	[[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
 
+	const char* get_type() const override { return typeid(Mesh).name(); }
 	void parse(json mesh) override {};
 	void imgui_render() override;
 
