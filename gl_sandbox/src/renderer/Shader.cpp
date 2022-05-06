@@ -174,6 +174,13 @@ int ShaderProgram::get_uniform_loaction(const std::string& name)
 	return location;
 }
 
+void ShaderProgram::set_uniform_1i(const std::string& name, int i)
+{
+	bind();
+	GL_CALL(glUniform1i(get_uniform_loaction(name), i));
+	unbind();
+}
+
 void ShaderProgram::set_uniform_1f(const std::string& name, float x)
 {
 	bind();
@@ -209,6 +216,8 @@ void ShaderProgram::set_uniform_mat4f(const std::string& name, const mathz::Mat4
 	unbind();
 }
 
+std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary::m_shaders;
+
 void ShaderLibrary::add(const std::string& name, ShaderProgram&& sp)
 {
 	m_shaders[name] = std::make_shared<ShaderProgram>(std::move(sp));
@@ -228,4 +237,9 @@ std::shared_ptr<ShaderProgram> ShaderLibrary::get(const std::string& name)
 bool ShaderLibrary::exists(const std::string& name)
 {
 	return (m_shaders.find(name) != m_shaders.end());
+}
+
+void ShaderLibrary::release()
+{
+	m_shaders.clear();
 }

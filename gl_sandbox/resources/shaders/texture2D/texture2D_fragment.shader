@@ -7,6 +7,7 @@ in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_tex_coord;
 
+uniform int u_use_pl;
 uniform vec3 u_directional_light;
 uniform vec3 u_cam_pos;
 
@@ -45,6 +46,12 @@ vec4 point_light()
 
 void main()
 {
-	colour = point_light();
-	//colour = texture(diffuse_t, v_tex_coord);
+	if (u_use_pl == 1)
+	{
+		colour = point_light();
+	}
+	else
+	{
+		colour = texture(diffuse_t, v_tex_coord);
+	}
 }

@@ -57,6 +57,7 @@ public:
 	ShaderProgram(ShaderProgram&& sp) noexcept;
 	~ShaderProgram();
 
+	void set_uniform_1i(const std::string& name, int i);
 	void set_uniform_1f(const std::string& name, float x);
 	void set_uniform_2f(const std::string& name, float x, float y);
 	void set_uniform_3f(const std::string& name, const mathz::Vec3& vec);
@@ -90,7 +91,8 @@ public:
 	void add(const std::string& name, ShaderProgram&& sp);
 	std::shared_ptr<ShaderProgram> get(const std::string& name);
 	bool exists(const std::string& name);
+	void release();
 
 private:
-	std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;
+	static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;
 };

@@ -9,6 +9,7 @@ class Light : public IComponent
 public:
 	Light();
 
+	virtual void on_remove() override {};
 	const char* get_type() const override { return typeid(Light).name(); }
 	void parse(json info) override;
 	void imgui_render() override;
@@ -23,6 +24,8 @@ protected:
 class PointLight : public Light
 {
 public:
+
+	void on_remove() override;
 	const char* get_type() const override { return typeid(PointLight).name(); }
 	void parse(json info) override;
 	void imgui_render() override;

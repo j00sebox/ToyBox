@@ -15,6 +15,7 @@ class Scene
 {
 public:
 	Scene();
+	~Scene();
 
 	void load(const char* scene);
 	void init(int width, int height);

@@ -22,6 +22,11 @@ Scene::Scene()
 	m_camera = std::make_shared<Camera>();
 }
 
+Scene::~Scene()
+{
+	m_shader_lib.release();
+}
+
 void Scene::load(const char* scene)
 {
 	if (scene == "")
@@ -176,16 +181,13 @@ void Scene::update(float elapsed_time)
 			auto& point_light = m_entities[i]->get<PointLight>();
 			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
+			m_shader_lib.get("texture2D")->set_uniform_1i("u_use_pl", 1);
 			m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
 			m_shader_lib.get("texture2D")->set_uniform_3f("u_pl_pos", pos);
 			m_shader_lib.get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 		}
-		else
-		{
-			m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", mathz::Vec4({{ 0.f, 0.f, 0.f }, 0.f}));
-		}
 
-		if (m_entities[i]->has<Material>())
+		if (m_entities[i]->has<Mesh>())
 		{
 			auto& material = m_entities[i]->get<Material>();
 			auto& mesh = m_entities[i]->get<Mesh>();
@@ -222,16 +224,27 @@ void Scene::render_components()
 {
 	std::vector<std::shared_ptr<IComponent>> components = m_selected_entity->get_components();
 
-	for (unsigned int i = 0; i < components.size();)
+	ImGui::SameLine();
+	ImGui::PushItemWidth(-1);
+
+	for (unsigned int i = 0; i < components.size(); ++i)
 	{
 		bool remove_component = false;
 
-		if (ImGui::Button("+"))
+		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImGui::PopStyleVar();
+
+		ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+
+		if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
 		{
-			ImGui::OpenPopup("ComponentSettings");
+			ImGui::OpenPopup("component_settings");
 		}
 
-		if (ImGui::BeginPopup("ComponentSettings"))
+		if (ImGui::BeginPopup("component_settings"))
 		{
 			if (ImGui::MenuItem("Remove component"))
 			{
@@ -241,14 +254,12 @@ void Scene::render_components()
 			ImGui::EndPopup();
 		}
 
+		components[i]->imgui_render();
+
 
 		if (remove_component)
 		{
-			m_selected_entity->remove(*components[i]);
-		}
-		else
-		{
-			components[i++]->imgui_render();
+			m_selected_entity->remove(*components[i--]);
 		}
 	}
 }

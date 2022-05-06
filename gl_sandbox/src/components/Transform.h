@@ -16,6 +16,7 @@ public:
 	[[nodiscard]] float get_rotate_angle() const { return m_rotate_angle; }
 	[[nodiscard]] mathz::Mat4 get_transform() const;
 
+	virtual void on_remove() override {};
 	const char* get_type() const override { return typeid(Transform).name(); }
 	void parse(json info) override;
 	void imgui_render() override;

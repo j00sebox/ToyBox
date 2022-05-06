@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Light.h"
 
+#include "Shader.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -31,6 +33,12 @@ void Light::imgui_render()
 	m_colour.y = colour[1];
 	m_colour.z = colour[2];
 	m_colour.w = colour[3];
+}
+
+void PointLight::on_remove()
+{
+	ShaderLibrary shader_lib;
+	shader_lib.get("texture2D")->set_uniform_1i("u_use_pl", 0);
 }
 
 void PointLight::parse(json info)
