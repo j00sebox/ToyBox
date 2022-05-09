@@ -16,4 +16,3 @@ GLTFLoader Model::load_gltf(const std::string& file_path)
 
 	return loader;
 }
-

@@ -15,8 +15,8 @@ public:
 	void set_shader(const std::shared_ptr<ShaderProgram>& shader) { m_shader = shader; }
 	[[nodiscard]] const std::shared_ptr<ShaderProgram>& get_shader() const { return m_shader; }
 
-	void bind() const;
 	void load(const GLTFLoader& loader);
+	void bind() const;
 
 	virtual void on_remove() override {};
 	const char* get_type() const override { return typeid(Material).name(); }

@@ -15,8 +15,11 @@ uniform vec3 u_cam_pos;
 uniform vec3 u_pl_pos;
 uniform vec4 u_pl_col;
 uniform float u_pl_rad;
+uniform float u_pl_range;
 
 int glossiness = 4;
+// ambient light
+float ambient = 0.2f;
 
 out vec4 colour;
 
@@ -24,16 +27,19 @@ vec4 point_light()
 {
 	vec3 light_vec = u_pl_pos - v_position;
 	float distance = length(light_vec);
-	float attenuation = 1.f / (distance * distance);
-    //float attenuation = 2.f / (distance * distance + u_pl_rad * u_pl_rad + distance * sqrt(distance * distance + u_pl_rad * u_pl_rad));
 
-	// ambient light
-	float ambient = 0.2f;
+	/*if (distance > u_pl_range)
+	{
+		return texture(diffuse_t, v_tex_coord) * ambient;
+	}*/
+
+	//float attenuation = 1.f / (distance * distance);
+    float attenuation = 2.f / (distance * distance + u_pl_rad * u_pl_rad + distance * sqrt(distance * distance + u_pl_rad * u_pl_rad));
 
 	// diffuse 
 	vec3 normal = normalize(v_normal);
 	vec3 direction = normalize(light_vec);
-	float diffuse = max(dot(normal, direction), 0.f);
+	float diffuse = abs(dot(normal, direction));
 
 	// specular
 	float ks = 1.f;
@@ -41,7 +47,7 @@ vec4 point_light()
 	vec3 perfect_reflect = reflect(-direction, normal);
 	float specular = pow(max(dot(perfect_reflect, viewing_dir), 0.0), glossiness);
 	
-	return texture(diffuse_t, v_tex_coord) * (diffuse * attenuation + ambient) + texture(specular_t, v_tex_coord).r * specular * ks * u_pl_col;
+	return texture(diffuse_t, v_tex_coord) * (diffuse * attenuation * u_pl_col + ambient); // +texture(specular_t, v_tex_coord).r * specular * ks * u_pl_col;
 }
 
 void main()
@@ -52,6 +58,6 @@ void main()
 	}
 	else
 	{
-		colour = texture(diffuse_t, v_tex_coord);
+		colour = texture(diffuse_t, v_tex_coord) * ambient;
 	}
 }

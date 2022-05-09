@@ -51,4 +51,5 @@ void PointLight::imgui_render()
 	ImGui::Text("\n");
 
 	ImGui::InputFloat("radius", &m_radius);
+	ImGui::InputFloat("range", &m_range);
 }

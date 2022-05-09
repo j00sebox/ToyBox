@@ -111,7 +111,7 @@ void Scene::load(const char* scene)
 
 		if (!model["gltf"].is_null())
 		{
-			GLTFLoader loader = m.load_gltf(model["gltf"]["path"]);
+			GLTFLoader loader = m.load_gltf(model["gltf"]["path"]); 
 
 			Mesh mesh;
 			mesh.load(loader);
@@ -121,6 +121,10 @@ void Scene::load(const char* scene)
 			material.load(loader);
 			material.set_shader(ShaderLib::get(model["shader"]));
 			m.attach(std::move(material));
+		}
+		else if (!model["primitive"].is_null())
+		{
+
 		}
 	
 		m_entities.emplace_back(std::make_unique<Model>(std::move(m)));
@@ -173,7 +177,7 @@ void Scene::update(float elapsed_time)
 			}
 		}
 		ImGui::EndChild();
-
+		
 		auto& transform = m_entities[i]->get<Transform>();
 
 		if (m_entities[i]->has<PointLight>())
@@ -184,6 +188,7 @@ void Scene::update(float elapsed_time)
 			ShaderLib::get("texture2D")->set_uniform_1i("u_use_pl", 1);
 			ShaderLib::get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
 			ShaderLib::get("texture2D")->set_uniform_3f("u_pl_pos", pos);
+			ShaderLib::get("texture2D")->set_uniform_1f("u_pl_range", point_light.get_range());
 			ShaderLib::get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 		}
 

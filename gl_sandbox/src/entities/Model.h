@@ -11,5 +11,4 @@ class Model : public Entity
 {
 public:
 	GLTFLoader load_gltf(const std::string& file_path);
-
 };

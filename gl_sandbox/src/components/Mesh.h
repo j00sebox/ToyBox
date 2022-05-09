@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "VertexArray.h"
 #include "Buffer.h"
+#include "Primitives.h"
 #include "GLTFLoader.h"
 
 #include "components/Component.h"
@@ -25,6 +26,7 @@ public:
 	Mesh(Mesh&& mesh) noexcept;
 
 	void load(GLTFLoader loader);
+	void load_primitive(PrimitiveTypes primitive);
 	void bind() const;
 	[[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
 

@@ -71,6 +71,10 @@ void Mesh::load(GLTFLoader loader)
 	vb.unbind();
 }
 
+void Mesh::load_primitive(PrimitiveTypes primitive)
+{
+}
+
 void Mesh::bind() const
 {
 	m_va.bind();

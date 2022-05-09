@@ -24,6 +24,10 @@ protected:
 class PointLight : public Light
 {
 public:
+	void set_radius(float rad) { m_radius = rad; }
+	void set_range(float range) { m_range = range; }
+	[[nodiscard]] float get_radius() const { return m_range; }
+	[[nodiscard]] float get_range() const { return m_radius; }
 
 	void on_remove() override;
 	const char* get_type() const override { return typeid(PointLight).name(); }
@@ -31,5 +35,6 @@ public:
 	void imgui_render() override;
 
 private:
-	float m_radius = 0.f;
+	float m_radius = 1.f;
+	float m_range = 10.f;
 };
