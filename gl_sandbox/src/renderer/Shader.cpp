@@ -216,14 +216,14 @@ void ShaderProgram::set_uniform_mat4f(const std::string& name, const mathz::Mat4
 	unbind();
 }
 
-std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary::m_shaders;
+std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLib::m_shaders;
 
-void ShaderLibrary::add(const std::string& name, ShaderProgram&& sp)
+void ShaderLib::add(const std::string& name, ShaderProgram&& sp)
 {
 	m_shaders[name] = std::make_shared<ShaderProgram>(std::move(sp));
 }
 
-std::shared_ptr<ShaderProgram> ShaderLibrary::get(const std::string& name)
+std::shared_ptr<ShaderProgram> ShaderLib::get(const std::string& name)
 {
 	if (exists(name))
 	{
@@ -234,12 +234,12 @@ std::shared_ptr<ShaderProgram> ShaderLibrary::get(const std::string& name)
 	return nullptr;
 }
 
-bool ShaderLibrary::exists(const std::string& name)
+bool ShaderLib::exists(const std::string& name)
 {
 	return (m_shaders.find(name) != m_shaders.end());
 }
 
-void ShaderLibrary::release()
+void ShaderLib::release()
 {
 	m_shaders.clear();
 }

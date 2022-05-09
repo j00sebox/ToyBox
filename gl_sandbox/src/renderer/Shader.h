@@ -85,13 +85,13 @@ private:
 	std::unordered_map<std::string, int> m_uniform_location_cache;
 };
 
-class ShaderLibrary
+class ShaderLib
 {
 public:
-	void add(const std::string& name, ShaderProgram&& sp);
-	std::shared_ptr<ShaderProgram> get(const std::string& name);
-	bool exists(const std::string& name);
-	void release();
+	static void add(const std::string& name, ShaderProgram&& sp);
+	static std::shared_ptr<ShaderProgram> get(const std::string& name);
+	static bool exists(const std::string& name);
+	static void release();
 
 private:
 	static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;

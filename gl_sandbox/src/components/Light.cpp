@@ -37,8 +37,7 @@ void Light::imgui_render()
 
 void PointLight::on_remove()
 {
-	ShaderLibrary shader_lib;
-	shader_lib.get("texture2D")->set_uniform_1i("u_use_pl", 0);
+	ShaderLib::get("texture2D")->set_uniform_1i("u_use_pl", 0);
 }
 
 void PointLight::parse(json info)

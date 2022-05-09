@@ -26,7 +26,6 @@ public:
 
 private:
 	json m_json;
-	ShaderLibrary m_shader_lib;
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<std::unique_ptr<Entity>> m_entities;

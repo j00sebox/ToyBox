@@ -24,7 +24,7 @@ Scene::Scene()
 
 Scene::~Scene()
 {
-	m_shader_lib.release();
+	ShaderLib::release();
 }
 
 void Scene::load(const char* scene)
@@ -76,7 +76,7 @@ void Scene::load(const char* scene)
 		ShaderProgram shader_program(vertex_shader, fragment_shader);
 
 		std::string shader_name = shaders[s]["name"];
-		m_shader_lib.add(shader_name, std::move(shader_program));
+		ShaderLib::add(shader_name, std::move(shader_program));
 	}
 
 	unsigned int model_count = m_json["model_count"];
@@ -119,7 +119,7 @@ void Scene::load(const char* scene)
 
 			Material material;
 			material.load(loader);
-			material.set_shader(m_shader_lib.get(model["shader"]));
+			material.set_shader(ShaderLib::get(model["shader"]));
 			m.attach(std::move(material));
 		}
 	
@@ -181,10 +181,10 @@ void Scene::update(float elapsed_time)
 			auto& point_light = m_entities[i]->get<PointLight>();
 			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
-			m_shader_lib.get("texture2D")->set_uniform_1i("u_use_pl", 1);
-			m_shader_lib.get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
-			m_shader_lib.get("texture2D")->set_uniform_3f("u_pl_pos", pos);
-			m_shader_lib.get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+			ShaderLib::get("texture2D")->set_uniform_1i("u_use_pl", 1);
+			ShaderLib::get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
+			ShaderLib::get("texture2D")->set_uniform_3f("u_pl_pos", pos);
+			ShaderLib::get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 		}
 
 		if (m_entities[i]->has<Mesh>())
