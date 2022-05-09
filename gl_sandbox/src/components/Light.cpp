@@ -8,7 +8,7 @@
 
 Light::Light()
 {
-	m_colour = { {1.f, 1.f, 1.f}, 1.f };
+	m_colour = { 1.f, 1.f, 1.f, 1.f };
 }
 
 void Light::parse(json info)
