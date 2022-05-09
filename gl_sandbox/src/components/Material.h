@@ -4,12 +4,12 @@
 #include "Shader.h"
 #include "GLTFLoader.h"
 
-#include "components/IComponent.h"
+#include "components/Component.h"
 
 #include <vector>
 #include <memory>
 
-class Material : public IComponent
+class Material : public Component
 {
 public:
 	void set_shader(const std::shared_ptr<ShaderProgram>& shader) { m_shader = shader; }

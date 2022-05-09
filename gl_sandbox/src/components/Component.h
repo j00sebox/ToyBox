@@ -4,10 +4,10 @@
 
 using json = nlohmann::json;
 
-class IComponent
+class Component
 {
 public:
-	virtual ~IComponent() = default;
+	virtual ~Component() = default;
 
 	virtual void on_remove() = 0;
 	virtual const char* get_type() const = 0;

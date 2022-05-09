@@ -1,10 +1,10 @@
 #pragma once
 
-#include "IComponent.h"
+#include "Component.h"
 
 #include "mathz/Vector.h"
 
-class Light : public IComponent
+class Light : public Component
 {
 public:
 	Light();

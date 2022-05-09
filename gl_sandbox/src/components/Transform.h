@@ -1,10 +1,10 @@
 #pragma once
 
-#include "IComponent.h"
+#include "Component.h"
 
 #include "mathz/Matrix.h"
 
-class Transform : public IComponent
+class Transform : public Component
 {
 public:
 	void translate(const mathz::Vec3& pos);

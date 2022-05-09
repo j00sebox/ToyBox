@@ -2,7 +2,7 @@
 #include "pch.h"
 
 #include "Log.h"
-#include "components/IComponent.h"
+#include "components/Component.h"
 
 #include "mathz/Matrix.h"
 
@@ -67,11 +67,11 @@ public:
 		return (m_type_map.find(typeid(T).name()) != m_type_map.end());
 	}
 
-	[[nodiscard]] std::vector<std::shared_ptr<IComponent>>& get_components() { return m_components; }
+	[[nodiscard]] std::vector<std::shared_ptr<Component>>& get_components() { return m_components; }
 
 protected:
 	std::string m_name;
 	std::unordered_map<const char*, int> m_type_map;
-	std::vector<std::shared_ptr<IComponent>> m_components;
+	std::vector<std::shared_ptr<Component>> m_components;
 };
 

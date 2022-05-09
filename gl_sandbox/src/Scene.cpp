@@ -222,7 +222,7 @@ void Scene::update(float elapsed_time)
 
 void Scene::render_components()
 {
-	std::vector<std::shared_ptr<IComponent>> components = m_selected_entity->get_components();
+	std::vector<std::shared_ptr<Component>> components = m_selected_entity->get_components();
 
 	ImGui::SameLine();
 	ImGui::PushItemWidth(-1);

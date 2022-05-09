@@ -7,7 +7,7 @@
 #include "Buffer.h"
 #include "GLTFLoader.h"
 
-#include "components/IComponent.h"
+#include "components/Component.h"
 
 #include "mathz/Vector.h"
 
@@ -18,7 +18,7 @@ struct Vertex
 	mathz::Vec2<float> st;
 };
 
-class Mesh : public IComponent
+class Mesh : public Component
 {
 public:
 	Mesh() = default;
