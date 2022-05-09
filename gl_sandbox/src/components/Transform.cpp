@@ -15,6 +15,7 @@ void Transform::translate(const mathz::Vec3& pos)
 
 void Transform::scale(float s)
 {
+	m_uniform_scale = s;
 	m_scale[0][0] = s; m_scale[1][1] = s; m_scale[2][2] = s;
 }
 
@@ -46,15 +47,15 @@ void Transform::imgui_render()
 {
 	ImGui::Text("\nTransform\n");
 
-	mathz::Vec3 position = get_position();
+	mathz::Vec3 position = m_postion;
 	ImGui::Text("\nPosition: ");
 	ImGui::InputFloat("x", &position.x);
 	ImGui::InputFloat("y", &position.y);
 	ImGui::InputFloat("z", &position.z);
 	translate(position);
 
-	float angle = get_rotate_angle();
-	mathz::Vec3 axis = get_rotate_axis();
+	float angle = m_rotate_angle;
+	mathz::Vec3 axis = m_rotate_axis;
 	ImGui::Text("\nRotation: ");
 	ImGui::InputFloat("angle", &angle);
 	ImGui::SliderFloat("i", &axis.x, -1.f, 1.f);
@@ -62,4 +63,9 @@ void Transform::imgui_render()
 	ImGui::SliderFloat("k", &axis.z, -1.f, 1.f);
 	axis.normalize();
 	rotate(angle, axis);
+
+	float uniform_scale = m_uniform_scale;
+	ImGui::Text("\nScale: ");
+	ImGui::InputFloat("uniform scale", &uniform_scale);
+	scale(uniform_scale);
 }
