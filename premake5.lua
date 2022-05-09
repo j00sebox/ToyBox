@@ -10,7 +10,7 @@ workspace "gl_sandbox"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-include "gl_sandbox/vendor/glad"
+include "gl_sandbox/external/glad"
 
 project "gl_sandbox"
 	location "gl_sandbox"
@@ -28,11 +28,11 @@ project "gl_sandbox"
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/vendor/stb/**.h",
-		"%{prj.name}/vendor/stb/**.cpp",
-		"%{prj.name}/vendor/json/json.hpp",
-		"%{prj.name}/vendor/imgui/**.h",
-		"%{prj.name}/vendor/imgui/**.cpp"
+		"%{prj.name}/external/stb/**.h",
+		"%{prj.name}/external/stb/**.cpp",
+		"%{prj.name}/external/json/json.hpp",
+		"%{prj.name}/external/imgui/**.h",
+		"%{prj.name}/external/imgui/**.cpp"
 	}
 
 	includedirs
@@ -42,14 +42,14 @@ project "gl_sandbox"
 		"%{prj.name}/src/geometry",
 		"%{prj.name}/src/events",
 		"%{prj.name}/src/entities",
-		"%{prj.name}/vendor",
-		"%{prj.name}/vendor/stb",
-		"%{prj.name}/vendor/glfw/include",
-		"%{prj.name}/vendor/glad/include",
-		"%{prj.name}/vendor/imgui"
+		"%{prj.name}/external",
+		"%{prj.name}/external/stb",
+		"%{prj.name}/external/glfw/include",
+		"%{prj.name}/external/glad/include",
+		"%{prj.name}/external/imgui"
 	}
 
-	libdirs { "%{prj.name}/vendor/glfw/lib" }
+	libdirs { "%{prj.name}/external/glfw/lib" }
 
 	links
 	{
