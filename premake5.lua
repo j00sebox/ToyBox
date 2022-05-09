@@ -46,6 +46,7 @@ project "gl_sandbox"
 		"%{prj.name}/external/stb",
 		"%{prj.name}/external/glfw/include",
 		"%{prj.name}/external/glad/include",
+		"%{prj.name}/external/mathz/include",
 		"%{prj.name}/external/imgui"
 	}
 
