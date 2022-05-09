@@ -26,8 +26,8 @@ class PointLight : public Light
 public:
 	void set_radius(float rad) { m_radius = rad; }
 	void set_range(float range) { m_range = range; }
-	[[nodiscard]] float get_radius() const { return m_range; }
-	[[nodiscard]] float get_range() const { return m_radius; }
+	[[nodiscard]] float get_radius() const { return m_radius; }
+	[[nodiscard]] float get_range() const { return m_range; }
 
 	void on_remove() override;
 	const char* get_type() const override { return typeid(PointLight).name(); }

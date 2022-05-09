@@ -28,15 +28,25 @@ out vec4 colour;
 
 vec4 point_light()
 {
+	vec4 base_colour;
+
+	if (u_use_colour == 1)
+	{
+		base_colour = u_flat_colour;
+	}
+	else
+	{
+		base_colour = texture(diffuse_t, v_tex_coord);
+	}
+
 	vec3 light_vec = u_pl_pos - v_position;
 	float distance = length(light_vec);
 
-	/*if (distance > u_pl_range)
+	if (distance > u_pl_range)
 	{
-		return texture(diffuse_t, v_tex_coord) * ambient;
-	}*/
-
-	//float attenuation = 1.f / (distance * distance);
+		return base_colour * ambient;
+	}
+	
     float attenuation = 2.f / (distance * distance + u_pl_rad * u_pl_rad + distance * sqrt(distance * distance + u_pl_rad * u_pl_rad));
 
 	// diffuse 
@@ -50,17 +60,6 @@ vec4 point_light()
 	vec3 perfect_reflect = reflect(-direction, normal);
 	float specular = pow(max(dot(perfect_reflect, viewing_dir), 0.0), glossiness);
 
-	vec4 base_colour;
-
-	if (u_use_colour == 1)
-	{
-		base_colour = u_flat_colour;
-	}
-	else
-	{
-		base_colour = texture(diffuse_t, v_tex_coord);
-	}
-	
 	return  base_colour * (diffuse * attenuation * u_pl_col + ambient); // +texture(specular_t, v_tex_coord).r * specular * ks * u_pl_col;
 }
 
