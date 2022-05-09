@@ -55,8 +55,8 @@ Cube::Cube()
 
 	BufferLayout sb_layout = { 
 		{0, 3, GL_FLOAT, false},
-		//{0, 2, GL_FLOAT, false},
-		//{0, 3, GL_FLOAT, false}
+		/*{1, 2, GL_FLOAT, false},
+		{2, 3, GL_FLOAT, false}*/
 	};
 
 	m_cube_va.set_layout(cube_vb, sb_layout);
