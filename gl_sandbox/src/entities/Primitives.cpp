@@ -9,14 +9,14 @@ Cube::Cube()
 {
 	std::vector<float> vertices =
 	{
-		-1.0f, -1.0f,  1.0f,	//        7--------6
-		 1.0f, -1.0f,  1.0f,	//       /|       /|
-		 1.0f, -1.0f, -1.0f,	//      4--------5 |
-		-1.0f, -1.0f, -1.0f,	//      | |      | | 
-		-1.0f,  1.0f,  1.0f,	//      | 3------|-2
-		 1.0f,  1.0f,  1.0f,	//      |/       |/
-		 1.0f,  1.0f, -1.0f,	//      0--------1
-		-1.0f,  1.0f, -1.0f
+		-1.0f, -1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//        7--------6
+		 1.0f, -1.0f,  1.0f, //1.f, 0.f, 0.f, 0.f, 1.f,   //       /|       /|
+		 1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      4--------5 |
+		-1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      | |      | | 
+		-1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      | 3------|-2
+		 1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      |/       |/
+		 1.0f,  1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      0--------1
+		-1.0f,  1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f
 	};
 
 	std::vector<unsigned int> indices =
@@ -53,7 +53,11 @@ Cube::Cube()
 
 	m_index_count = cube_ib.get_count();
 
-	BufferLayout sb_layout = { {0, 3, GL_FLOAT, false} };
+	BufferLayout sb_layout = { 
+		{0, 3, GL_FLOAT, false},
+		//{0, 2, GL_FLOAT, false},
+		//{0, 3, GL_FLOAT, false}
+	};
 
 	m_cube_va.set_layout(cube_vb, sb_layout);
 

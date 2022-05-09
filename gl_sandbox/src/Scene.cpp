@@ -120,11 +120,23 @@ void Scene::load(const char* scene)
 			Material material;
 			material.load(loader);
 			material.set_shader(ShaderLib::get(model["shader"]));
+			
 			m.attach(std::move(material));
 		}
 		else if (!model["primitive"].is_null())
 		{
+			if (model["primitive"] == "cube")
+			{
+				Mesh mesh;
+				mesh.load_primitive(PrimitiveTypes::Cube);
+				m.attach(std::move(mesh));
 
+				Material material;
+				material.set_shader(ShaderLib::get(model["shader"]));
+				
+				ShaderLib::get(model["shader"])->set_uniform_4f("u_flat_colour", {1.f, 1.f, 1.f, 1.f});
+				m.attach(std::move(material));
+			}
 		}
 	
 		m_entities.emplace_back(std::make_unique<Model>(std::move(m)));
@@ -190,6 +202,12 @@ void Scene::update(float elapsed_time)
 			ShaderLib::get("texture2D")->set_uniform_3f("u_pl_pos", pos);
 			ShaderLib::get("texture2D")->set_uniform_1f("u_pl_range", point_light.get_range());
 			ShaderLib::get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+
+			ShaderLib::get("texture2D")->set_uniform_1i("u_use_colour", 1);
+		}
+		else
+		{
+			ShaderLib::get("texture2D")->set_uniform_1i("u_use_colour", 0);
 		}
 
 		if (m_entities[i]->has<Mesh>())

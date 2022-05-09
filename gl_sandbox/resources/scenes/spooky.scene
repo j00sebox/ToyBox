@@ -66,8 +66,10 @@
           0.0,
           0.0
         ],
-        "scale": 1.0
-      }
+        "scale": 0.01
+      },
+      "primitive": "cube",
+      "shader": "texture2D"
     }
   ]
 }

@@ -73,6 +73,14 @@ void Mesh::load(GLTFLoader loader)
 
 void Mesh::load_primitive(PrimitiveTypes primitive)
 {
+	switch (primitive)
+	{
+	case PrimitiveTypes::Cube:
+		Cube cube;
+		m_va = cube.get_va();
+		m_indices_count = cube.get_index_count();
+		break;
+	}
 }
 
 void Mesh::bind() const
