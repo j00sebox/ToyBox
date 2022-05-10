@@ -6,14 +6,6 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
-Texture2D::Texture2D()
-{
-	m_id = 0;
-	m_width = 0, m_height = 0;
-	m_colour_channels = 0;
-	m_data = nullptr;
-}
-
 Texture2D::Texture2D(const std::string& file_name)
 {
 	stbi_set_flip_vertically_on_load(0);

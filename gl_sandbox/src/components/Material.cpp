@@ -6,34 +6,35 @@
 
 void Material::load(const GLTFLoader& loader)
 {
-	std::vector<std::string> strs = loader.get_textures();
-
-	for (auto& s : strs)
-	{
-		if (!s.empty())
-		{
-			m_textures.emplace_back(Texture2D(s));
-		}
-	}
+    m_textures[0] = std::make_unique<Texture2D>(Texture2D(loader.get_base_color_texture()));
+    m_textures[1] = std::make_unique<Texture2D>(Texture2D(loader.get_specular_texture()));
+    m_textures[2] = std::make_unique<Texture2D>(Texture2D(loader.get_normal_texture()));
+    m_textures[3] = std::make_unique<Texture2D>(Texture2D(loader.get_occlusion_texture()));
 }
 
 void Material::bind() const
 {
-	for (unsigned int i = 0; i < m_textures.size(); ++i)
-	{
-		m_textures[i].bind(i);
-	}
+    if (m_textures[0])
+    {
+        for (unsigned int i = 0; i < 4; ++i)
+        {
+            m_textures[i]->bind(i);
+        }
+    }
 	m_shader->bind();
 }
 
 void Material::imgui_render()
 {
-    for(const Texture2D& tex : m_textures)
+    if (m_textures[0] == nullptr)
+        return;
+
+    for(unsigned int i = 0; i < 4; ++i)
     {
         ImGuiIO& io = ImGui::GetIO();
-        ImTextureID my_tex_id = (ImTextureID)tex.get_id();
-        float my_tex_w = (float)tex.get_width();
-        float my_tex_h = (float)tex.get_height();
+        ImTextureID my_tex_id = (ImTextureID)m_textures[i]->get_id();
+        float my_tex_w = (float)m_textures[i]->get_width();
+        float my_tex_h = (float)m_textures[i]->get_height();
         {
             ImGui::Text("%.0fx%.0f", my_tex_w, my_tex_h);
             ImVec2 pos = ImGui::GetCursorScreenPos();

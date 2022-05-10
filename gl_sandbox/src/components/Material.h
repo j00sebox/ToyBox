@@ -26,6 +26,6 @@ public:
 
 private:
 	std::shared_ptr<ShaderProgram> m_shader;
-	std::vector<Texture2D> m_textures;
+	std::unique_ptr<Texture2D> m_textures[4];
 };
 

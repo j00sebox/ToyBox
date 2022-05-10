@@ -13,7 +13,6 @@ public:
 class Texture2D : public TextureBase
 {
 public:
-	Texture2D();
 	Texture2D(const std::string& file_name);
 	Texture2D(Texture2D&& t) noexcept;
 	~Texture2D();

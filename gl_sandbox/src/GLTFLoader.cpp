@@ -47,8 +47,16 @@ GLTFLoader::GLTFLoader(const char* path)
 	{
 		m_spec_tex_ind = materials["pbrMetallicRoughness"]["metallicRoughnessTexture"]["index"];
 	}
-	/*m_norm_tex_ind = materials["normalTexture"]["index"];
-	m_occ_tex_ind = materials["occlusionTexture"]["index"];*/
+
+	if (!materials["normalTexture"].is_null())
+	{
+		m_norm_tex_ind = materials["normalTexture"]["index"];
+	}
+
+	if (!materials["occlusionTexture"].is_null())
+	{
+		m_occ_tex_ind = materials["occlusionTexture"]["index"];
+	}
 }
 
 std::vector<float> GLTFLoader::get_positions() const
@@ -145,7 +153,7 @@ std::vector<std::string> GLTFLoader::get_textures() const
 	std::vector<std::string> vec;
 
 	vec.emplace_back(get_base_color_texture());
-	vec.emplace_back(get_specular_color_texture());
+	vec.emplace_back(get_specular_texture());
 	vec.emplace_back(get_normal_texture());
 	vec.emplace_back(get_occlusion_texture());
 	
@@ -160,7 +168,7 @@ std::string GLTFLoader::get_base_color_texture() const
 	return m_base_dir + image;
 }
 
-std::string GLTFLoader::get_specular_color_texture() const
+std::string GLTFLoader::get_specular_texture() const
 {
 	json uri = m_json["images"][m_spec_tex_ind];
 	std::string image = uri["uri"];
@@ -170,12 +178,18 @@ std::string GLTFLoader::get_specular_color_texture() const
 
 std::string GLTFLoader::get_normal_texture() const
 {
-	return std::string();
+	json uri = m_json["images"][m_norm_tex_ind];
+	std::string image = uri["uri"];
+
+	return m_base_dir + image;
 }
 
 std::string GLTFLoader::get_occlusion_texture() const
 {
-	return std::string();
+	json uri = m_json["images"][m_occ_tex_ind];
+	std::string image = uri["uri"];
+
+	return m_base_dir + image;
 }
 
 void GLTFLoader::load_bin(const char* file_path)

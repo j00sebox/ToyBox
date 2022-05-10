@@ -16,7 +16,7 @@ public:
 
 	[[nodiscard]] std::vector<std::string> get_textures() const;
 	[[nodiscard]] std::string get_base_color_texture() const;
-	[[nodiscard]] std::string get_specular_color_texture() const;
+	[[nodiscard]] std::string get_specular_texture() const;
 	[[nodiscard]] std::string get_normal_texture() const;
 	[[nodiscard]] std::string get_occlusion_texture() const;
 
