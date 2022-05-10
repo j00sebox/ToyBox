@@ -31,7 +31,8 @@ public:
 	[[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
 
 	virtual void on_remove() {};
-	const char* get_type() const override { return typeid(Mesh).name(); }
+	[[nodiscard]] const char* get_name() const override { return "Mesh"; }
+	[[nodiscard]] const char* get_type() const override { return typeid(Mesh).name(); }
 	void parse(json mesh) override {};
 	void imgui_render() override;
 

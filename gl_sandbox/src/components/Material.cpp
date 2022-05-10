@@ -28,5 +28,5 @@ void Material::bind() const
 
 void Material::imgui_render()
 {
-	ImGui::Text("\nMaterial\n");
+
 }

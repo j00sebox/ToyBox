@@ -90,7 +90,6 @@ void Mesh::bind() const
 
 void Mesh::imgui_render()
 {
-	ImGui::Text("\nMesh\n");
 	ImGui::Text(m_path.c_str());
 }
 

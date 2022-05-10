@@ -10,7 +10,8 @@ public:
 	Light();
 
 	virtual void on_remove() override {};
-	const char* get_type() const override { return typeid(Light).name(); }
+	[[nodiscard]] const char* get_name() const override { return "Light"; }
+	[[nodiscard]] const char* get_type() const override { return typeid(Light).name(); }
 	void parse(json info) override;
 	void imgui_render() override;
 
@@ -30,7 +31,8 @@ public:
 	[[nodiscard]] float get_range() const { return m_range; }
 
 	void on_remove() override;
-	const char* get_type() const override { return typeid(PointLight).name(); }
+	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
+	[[nodiscard]] const char* get_type() const override { return typeid(PointLight).name(); }
 	void parse(json info) override;
 	void imgui_render() override;
 

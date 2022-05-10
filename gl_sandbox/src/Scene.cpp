@@ -250,19 +250,20 @@ void Scene::render_components()
 
 	for (unsigned int i = 0; i < components.size(); ++i)
 	{
-		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+		ImVec2 content_region = ImGui::GetContentRegionAvail();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 5, 5 });
+		float line_width = GImGui->Font->FontSize + GImGui->Style.FramePadding.x * 3.0f;
+		float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y;
 		ImGui::PopStyleVar();
 
-		if(ImGui::TreeNodeEx(components[i]->get_type(), ImGuiTreeNodeFlags_DefaultOpen))
+		if(ImGui::TreeNodeEx(components[i]->get_name(), ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			bool remove_component = false;
 
-			ImGui::SameLine();
+			ImGui::SameLine(content_region.x - line_width);
 
-			if (ImGui::Button("...", ImVec2{ lineHeight, lineHeight }))
+			if (ImGui::Button("...", ImVec2{ line_width, line_height }))
 			{
 				ImGui::OpenPopup("component_settings");
 			}

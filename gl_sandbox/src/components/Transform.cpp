@@ -45,8 +45,6 @@ void Transform::parse(json info)
 
 void Transform::imgui_render()
 {
-	ImGui::Text("\nTransform\n");
-
 	mathz::Vec3 position = m_postion;
 	ImGui::Text("\nPosition: ");
 	ImGui::InputFloat("x", &position.x);

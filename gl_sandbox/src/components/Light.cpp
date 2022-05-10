@@ -18,8 +18,6 @@ void Light::parse(json info)
 
 void Light::imgui_render()
 {
-	ImGui::Text("\nLight\n");
-
 	float colour[4] = {
 		m_colour.x,
 		m_colour.y,

@@ -19,7 +19,8 @@ public:
 	void bind() const;
 
 	virtual void on_remove() override {};
-	const char* get_type() const override { return typeid(Material).name(); }
+	[[nodiscard]] const char* get_name() const override { return "Material"; }
+	[[nodiscard]] const char* get_type() const override { return typeid(Material).name(); }
 	void parse(json info) override {};
 	void imgui_render() override;
 
