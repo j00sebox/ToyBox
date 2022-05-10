@@ -133,8 +133,7 @@ void Scene::load(const char* scene)
 
 				Material material;
 				material.set_shader(ShaderLib::get(model["shader"]));
-				
-				ShaderLib::get(model["shader"])->set_uniform_4f("u_flat_colour", {1.f, 1.f, 1.f, 1.f});
+				material.set_colour({ 1.f, 1.f, 1.f, 1.f });
 				m.attach(std::move(material));
 			}
 		}

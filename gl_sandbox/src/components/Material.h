@@ -18,6 +18,10 @@ public:
 	void load(const GLTFLoader& loader);
 	void bind() const;
 
+	void set_colour(const mathz::Vec4& colour) { m_colour = colour; }
+	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
+	[[nodiscard]] bool is_using_colour() const { return m_use_colour; }
+
 	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Material"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Material).name(); }
@@ -26,7 +30,7 @@ public:
 
 private:
 	std::shared_ptr<ShaderProgram> m_shader;
-	bool m_use_colour;
+	bool m_use_colour = true;
 	std::unique_ptr<Texture2D> m_textures[4];
 	mathz::Vec4 m_colour;
 };
