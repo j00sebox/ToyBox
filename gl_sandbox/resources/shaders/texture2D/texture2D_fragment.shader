@@ -11,7 +11,7 @@ uniform int u_use_pl;
 uniform vec3 u_directional_light;
 uniform vec3 u_cam_pos;
 
-uniform int u_use_colour;
+uniform bool u_use_colour;
 uniform vec4 u_flat_colour;
 
 // point light stuff
@@ -30,7 +30,7 @@ vec4 point_light()
 {
 	vec4 base_colour;
 
-	if (u_use_colour == 1)
+	if (u_use_colour)
 	{
 		base_colour = u_flat_colour;
 	}

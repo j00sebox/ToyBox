@@ -26,6 +26,8 @@ public:
 
 private:
 	std::shared_ptr<ShaderProgram> m_shader;
+	bool m_use_colour;
 	std::unique_ptr<Texture2D> m_textures[4];
+	mathz::Vec4 m_colour;
 };
 

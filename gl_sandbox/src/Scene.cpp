@@ -204,11 +204,11 @@ void Scene::update(float elapsed_time)
 			ShaderLib::get("texture2D")->set_uniform_1f("u_pl_range", point_light.get_range());
 			ShaderLib::get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 
-			ShaderLib::get("texture2D")->set_uniform_1i("u_use_colour", 1);
+			ShaderLib::get("texture2D")->set_uniform_1i("u_use_colour", true);
 		}
 		else
 		{
-			ShaderLib::get("texture2D")->set_uniform_1i("u_use_colour", 0);
+			ShaderLib::get("texture2D")->set_uniform_1i("u_use_colour", false);
 		}
 
 		if (m_entities[i]->has<Mesh>())
