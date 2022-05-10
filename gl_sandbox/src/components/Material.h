@@ -29,6 +29,8 @@ public:
 	void imgui_render() override;
 
 private:
+	void texture_viewer(unsigned int texture_index);
+
 	std::shared_ptr<ShaderProgram> m_shader;
 	bool m_use_colour = true;
 	std::unique_ptr<Texture2D> m_textures[4];
