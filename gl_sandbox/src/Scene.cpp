@@ -104,6 +104,7 @@ void Scene::load(const char* scene)
 
 				json colour = model["light"]["colour"];
 				pl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
+				pl.set_radius(model["light"]["radius"]);
 
 				m.attach(std::move(pl));
 			}
