@@ -21,8 +21,9 @@ public:
 	void bind(int slot = 0) const override;
 	void unbind() const override;
 
-	int get_width() const { return m_width; }
-	int get_height() const { return m_height; }
+	[[nodiscard]] unsigned int get_id() const { return m_id; }
+	[[nodiscard]] int get_width() const { return m_width; }
+	[[nodiscard]] int get_height() const { return m_height; }
 
 	void operator= (Texture2D&& t) noexcept;
 

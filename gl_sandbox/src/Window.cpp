@@ -73,7 +73,7 @@ void Window::begin_frame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	//ImGui::ShowDemoWindow();
+	ImGui::ShowDemoWindow();
 
 	ImGui::Begin("FPS");
 
