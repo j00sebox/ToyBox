@@ -200,6 +200,7 @@ void Scene::update(float elapsed_time)
 			ShaderLib::get("texture2D")->set_uniform_1i("u_use_pl", 1);
 			ShaderLib::get("texture2D")->set_uniform_4f("u_pl_col", point_light.get_colour());
 			ShaderLib::get("texture2D")->set_uniform_3f("u_pl_pos", pos);
+			ShaderLib::get("texture2D")->set_uniform_1f("u_pl_rad", point_light.get_radius());
 			ShaderLib::get("texture2D")->set_uniform_1f("u_pl_range", point_light.get_range());
 			ShaderLib::get("texture2D")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 
@@ -247,43 +248,43 @@ void Scene::render_components()
 {
 	std::vector<std::shared_ptr<Component>> components = m_selected_entity->get_components();
 
-	ImGui::SameLine();
-	ImGui::PushItemWidth(-1);
-
 	for (unsigned int i = 0; i < components.size(); ++i)
 	{
-		bool remove_component = false;
-
 		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImGui::PopStyleVar();
 
-		ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-
-		if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+		if(ImGui::TreeNodeEx(components[i]->get_type(), ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::OpenPopup("component_settings");
-		}
+			bool remove_component = false;
 
-		if (ImGui::BeginPopup("component_settings"))
-		{
-			if (ImGui::MenuItem("Remove component"))
+			ImGui::SameLine();
+
+			if (ImGui::Button("...", ImVec2{ lineHeight, lineHeight }))
 			{
-				remove_component = true;
+				ImGui::OpenPopup("component_settings");
 			}
 
-			ImGui::EndPopup();
-		}
+			if (ImGui::BeginPopup("component_settings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+				{
+					remove_component = true;
+				}
 
-		components[i]->imgui_render();
+				ImGui::EndPopup();
+			}
 
+			if (remove_component)
+			{
+				m_selected_entity->remove(*components[i--]);
+			}
 
-		if (remove_component)
-		{
-			m_selected_entity->remove(*components[i--]);
-		}
+			components[i]->imgui_render();
+			ImGui::TreePop();
+		}	
 	}
 }
 

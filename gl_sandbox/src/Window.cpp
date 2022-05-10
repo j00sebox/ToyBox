@@ -73,6 +73,8 @@ void Window::begin_frame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	//ImGui::ShowDemoWindow();
+
 	ImGui::Begin("FPS");
 
 	ImGui::Text("Avg. %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
