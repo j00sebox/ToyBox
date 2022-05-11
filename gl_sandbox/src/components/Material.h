@@ -20,7 +20,7 @@ public:
 
 	void set_colour(const mathz::Vec4& colour) { m_colour = colour; }
 	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
-	[[nodiscard]] bool is_using_colour() const { return m_use_colour; }
+	[[nodiscard]] bool is_custom() const { return m_custom; }
 
 	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Material"; }
@@ -32,8 +32,10 @@ private:
 	void texture_viewer(unsigned int texture_index);
 
 	std::shared_ptr<ShaderProgram> m_shader;
-	bool m_use_colour = true;
+	bool m_custom = true;
 	std::unique_ptr<Texture2D> m_textures[4];
 	mathz::Vec4 m_colour;
+	float m_metallic = 0.f;
+	float m_roughness = 0.f;
 };
 

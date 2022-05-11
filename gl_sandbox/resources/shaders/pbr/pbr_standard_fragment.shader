@@ -15,11 +15,15 @@ in vec2 v_tex_coord;
 uniform vec3 u_directional_light;
 uniform vec3 u_cam_pos;
 
-uniform bool u_use_colour;
+uniform bool u_custom;
 uniform vec4 u_flat_colour;
+uniform float u_metallic;
+uniform float u_roughness;
 
-float metallic = texture(specular_t, v_tex_coord).r;
-float roughness = texture(specular_t, v_tex_coord).g;
+vec4 base_colour;
+vec3 normal;
+float metallic;
+float roughness;
 float ao = texture(occlusion_t, v_tex_coord).r;
 vec4 F0 = vec4(vec3(0.04f), 1.0f);
 
@@ -42,17 +46,6 @@ out vec4 colour;
 
 vec4 lambertian()
 {
-	vec4 base_colour;
-
-	if (u_use_colour)
-	{
-		base_colour = u_flat_colour;
-	}
-	else
-	{
-		base_colour = texture(diffuse_t, v_tex_coord);
-	}
-
 	return base_colour / pi;
 }
 
@@ -96,19 +89,13 @@ vec4 point_light(int i)
 	float distance = length(light_vec);
 	vec3 l = normalize(light_vec);
 	vec3 v = normalize(u_cam_pos - v_position);
-	vec3 n = texture(normal_t, v_tex_coord).rgb;
+	vec3 n = normalize(normal);
 	vec3 h = normalize(l + v);
 
 	/*if (distance > u_pl_range)
 	{
 		return lambertian() * ambient;
 	}*/
-
-	// TODO: remove later
-	if (u_use_colour)
-	{
-		return lambertian();
-	}
 
 	vec4 ks = fresnel(h, v);
 	vec4 kd = vec4(1 - vec3(ks), 1.f);
@@ -134,16 +121,19 @@ vec4 point_light(int i)
 
 void main()
 {
-	// TODO: cleanup
-	vec4 base_colour;
-
-	if (u_use_colour)
+	if (u_custom)
 	{
 		base_colour = u_flat_colour;
+		normal = v_normal;
+		metallic = u_metallic;
+		roughness = u_roughness;
 	}
 	else
 	{
 		base_colour = texture(diffuse_t, v_tex_coord);
+		normal = texture(normal_t, v_tex_coord).rgb;
+		metallic = texture(specular_t, v_tex_coord).r;
+		roughness = texture(specular_t, v_tex_coord).g;
 	}
 
 	F0 = mix(F0, base_colour, metallic);

@@ -11,16 +11,18 @@ void Material::load(const GLTFLoader& loader)
     m_textures[2] = std::make_unique<Texture2D>(Texture2D(loader.get_normal_texture()));
     m_textures[3] = std::make_unique<Texture2D>(Texture2D(loader.get_occlusion_texture()));
 
-    m_use_colour = false;
+    m_custom = false;
 }
 
 void Material::bind() const
 {
-    m_shader->set_uniform_1i("u_use_colour", m_use_colour);
+    m_shader->set_uniform_1i("u_custom", m_custom);
 
-    if (m_use_colour)
+    if (m_custom)
     {
         m_shader->set_uniform_4f("u_flat_colour", m_colour);
+        m_shader->set_uniform_1f("u_metallic", m_metallic);
+        m_shader->set_uniform_1f("u_roughness", m_roughness);
     }
     else
     {
@@ -70,9 +72,9 @@ void Material::texture_viewer(unsigned int texture_index)
 
 void Material::imgui_render()
 {
-    ImGui::Checkbox("Use Colour", &m_use_colour);
+    ImGui::Checkbox("Custom", &m_custom);
 
-    if (m_use_colour)
+    if (m_custom)
     {
         float colour[4] = {
             m_colour.x,
@@ -87,6 +89,9 @@ void Material::imgui_render()
         m_colour.y = colour[1];
         m_colour.z = colour[2];
         m_colour.w = colour[3];
+
+        ImGui::SliderFloat("Metallic", &m_metallic, 0.f, 1.f);
+        ImGui::SliderFloat("Roughness", &m_roughness, 0.f, 1.f);
     }
     else
     {
