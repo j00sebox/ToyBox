@@ -4,6 +4,7 @@ uniform sampler2D diffuse_t;
 uniform sampler2D specular_t;
 uniform sampler2D normal_t;
 uniform sampler2D occlusion_t;
+uniform vec4 u_emissive_colour;
 
 in vec3 v_position;
 in vec3 v_normal;
@@ -118,7 +119,7 @@ void main()
 {
 	if (u_use_pl == 1)
 	{
-		colour = point_light();
+		colour = u_emissive_colour + point_light();
 	}
 	else
 	{
