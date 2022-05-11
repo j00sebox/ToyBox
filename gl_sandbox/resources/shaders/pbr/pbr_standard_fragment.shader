@@ -24,7 +24,7 @@ vec4 base_colour;
 vec3 normal;
 float metallic;
 float roughness;
-float ao = texture(occlusion_t, v_tex_coord).r;
+float ao;
 vec4 F0 = vec4(vec3(0.04f), 1.0f);
 
 const float pi = 3.14159265358f;
@@ -127,6 +127,7 @@ void main()
 		normal = v_normal;
 		metallic = u_metallic;
 		roughness = u_roughness;
+		ao = 0.5f;
 	}
 	else
 	{
@@ -134,6 +135,7 @@ void main()
 		normal = texture(normal_t, v_tex_coord).rgb;
 		metallic = texture(specular_t, v_tex_coord).r;
 		roughness = texture(specular_t, v_tex_coord).g;
+		ao = texture(occlusion_t, v_tex_coord).r;
 	}
 
 	F0 = mix(F0, base_colour, metallic);

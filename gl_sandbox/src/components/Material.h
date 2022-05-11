@@ -17,6 +17,7 @@ public:
 
 	void load(const GLTFLoader& loader);
 	void bind() const;
+	void unbind() const;
 
 	void set_colour(const mathz::Vec4& colour) { m_colour = colour; }
 	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }

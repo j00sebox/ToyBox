@@ -28,6 +28,8 @@ public:
 	void load(GLTFLoader loader);
 	void load_primitive(PrimitiveTypes primitive);
 	void bind() const;
+	void unbind() const;
+
 	[[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
 
 	virtual void on_remove() {};

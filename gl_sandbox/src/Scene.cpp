@@ -219,6 +219,8 @@ void Scene::update(float elapsed_time)
 			material.bind();
 			mesh.bind();
 			Renderer::draw_elements(mesh.get_index_count());
+			mesh.unbind();
+			material.unbind();
 		}
 	}
 

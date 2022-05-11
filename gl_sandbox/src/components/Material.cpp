@@ -35,6 +35,20 @@ void Material::bind() const
 	m_shader->bind();
 }
 
+void Material::unbind() const
+{
+
+    if (!m_custom)
+    {
+        for (unsigned int i = 0; i < 4; ++i)
+        {
+            m_textures[i]->unbind();
+        }
+    }
+    
+    m_shader->unbind();
+}
+
 void Material::texture_viewer(unsigned int texture_index)
 {
     ImGuiIO& io = ImGui::GetIO();

@@ -88,6 +88,11 @@ void Mesh::bind() const
 	m_va.bind();
 }
 
+void Mesh::unbind() const
+{
+	m_va.unbind();
+}
+
 void Mesh::imgui_render()
 {
 	ImGui::Text(m_path.c_str());
