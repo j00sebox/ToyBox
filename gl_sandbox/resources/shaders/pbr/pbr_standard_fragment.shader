@@ -1,5 +1,7 @@
 #version 410
 
+/*----------Textures----------*/
+
 uniform sampler2D diffuse_t;
 uniform sampler2D specular_t;
 uniform sampler2D normal_t;
@@ -10,27 +12,31 @@ in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_tex_coord;
 
-uniform int u_use_pl;
 uniform vec3 u_directional_light;
 uniform vec3 u_cam_pos;
 
 uniform bool u_use_colour;
 uniform vec4 u_flat_colour;
 
-// point light stuff
-uniform vec3 u_pl_pos;
-uniform vec4 u_pl_col;
-uniform float u_pl_rad;
-uniform float u_pl_range;
-
 float metallic = texture(specular_t, v_tex_coord).r;
 float roughness = texture(specular_t, v_tex_coord).g;
 float ao = texture(occlusion_t, v_tex_coord).r;
 vec4 F0 = vec4(vec3(0.04f), 1.0f);
 
-// ambient light
-//float ambient = 0.2f;
 const float pi = 3.14159265358f;
+
+/*----------Lighting----------*/
+
+#define MAX_POINT_LIGHTS 1
+
+struct PointLight
+{
+	bool active;
+	vec4 colour;
+	vec3 position;
+};
+
+uniform PointLight point_lights[MAX_POINT_LIGHTS];
 
 out vec4 colour;
 
@@ -84,13 +90,12 @@ float G_Smith(vec3 n, vec3 v, vec3 l)
 	return G_Schlick(n, v) * G_Schlick(n, l);
 }
 
-vec4 point_light()
+vec4 point_light(int i)
 {
-	vec3 light_vec = u_pl_pos - v_position;	
+	vec3 light_vec = point_lights[i].position - v_position;
 	float distance = length(light_vec);
 	vec3 l = normalize(light_vec);
 	vec3 v = normalize(u_cam_pos - v_position);
-	//vec3 n = normalize(v_normal);
 	vec3 n = texture(normal_t, v_tex_coord).rgb;
 	vec3 h = normalize(l + v);
 
@@ -124,7 +129,7 @@ vec4 point_light()
 	
 	float attenuation = 1 / (distance * distance);
 
-	return  brdf * attenuation * u_pl_col * h_dot_n;
+	return  brdf * attenuation * point_lights[i].colour * h_dot_n;
 }
 
 void main()
@@ -143,14 +148,13 @@ void main()
 
 	F0 = mix(F0, base_colour, metallic);
 
-	vec4 ambient = vec4(0.03f, 0.03f, 0.03f, 1.f) * base_colour * ao;
+	vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.f) * base_colour * ao;
 
-	if (u_use_pl == 1)
+	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
-		colour = u_emissive_colour + point_light() * 4.f + ambient;
+		if(point_lights[i].active)
+			colour += point_light(i) * 4.f;
 	}
-	else
-	{
-		colour = texture(diffuse_t, v_tex_coord) * ambient;
-	}
+	
+	colour += u_emissive_colour + ambient;
 }

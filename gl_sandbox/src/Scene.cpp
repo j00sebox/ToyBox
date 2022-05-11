@@ -197,11 +197,10 @@ void Scene::update(float elapsed_time)
 			auto& point_light = m_entities[i]->get<PointLight>();
 			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
-			ShaderLib::get("pbr_standard")->set_uniform_1i("u_use_pl", 1);
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_pl_col", point_light.get_colour());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("u_pl_pos", pos);
-			ShaderLib::get("pbr_standard")->set_uniform_1f("u_pl_rad", point_light.get_radius());
-			ShaderLib::get("pbr_standard")->set_uniform_1f("u_pl_range", point_light.get_range());
+			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
+			ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
+		/*	ShaderLib::get("pbr_standard")->set_uniform_1f("u_pl_rad", point_light.get_radius());
+			ShaderLib::get("pbr_standard")->set_uniform_1f("u_pl_range", point_light.get_range());*/
 			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
 			ShaderLib::get("pbr_standard")->set_uniform_1i("u_use_colour", true);

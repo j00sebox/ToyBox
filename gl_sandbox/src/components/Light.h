@@ -25,8 +25,10 @@ protected:
 class PointLight : public Light
 {
 public:
+	PointLight();
 	void set_radius(float rad) { m_radius = rad; }
 	void set_range(float range) { m_range = range; }
+	[[nodiscard]] int get_index() const { return m_index; }
 	[[nodiscard]] float get_radius() const { return m_radius; }
 	[[nodiscard]] float get_range() const { return m_range; }
 
@@ -37,6 +39,8 @@ public:
 	void imgui_render() override;
 
 private:
+	static int m_point_light_count;
+	int m_index;
 	float m_radius = 1.f;
 	float m_range = 10.f;
 };

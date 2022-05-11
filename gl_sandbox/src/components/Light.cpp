@@ -33,9 +33,18 @@ void Light::imgui_render()
 	m_colour.w = colour[3];
 }
 
+int PointLight::m_point_light_count = 0;
+
+PointLight::PointLight()
+{
+	m_index = m_point_light_count++;
+	ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), true);
+}
+
 void PointLight::on_remove()
 {
-	ShaderLib::get("texture2D")->set_uniform_1i("u_use_pl", 0);
+	--m_point_light_count;
+	ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), false);
 }
 
 void PointLight::parse(json info)
