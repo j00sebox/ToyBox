@@ -14,16 +14,16 @@
   "shader_count": 1,
   "shaders": [
     {
-      "name": "texture2D",
-      "vertex": "resources/shaders/texture2D/texture2D_vertex.shader",
-      "fragment": "resources/shaders/texture2D/texture2D_fragment.shader"
+      "name": "pbr_standard",
+      "vertex": "resources/shaders/pbr/pbr_standard_vertex.shader",
+      "fragment": "resources/shaders/pbr/pbr_standard_fragment.shader"
     }
   ],
   "model_count": 2,
   "models": [
     {
       "name": "Floor",
-      "shader": "texture2D",
+      "shader": "pbr_standard",
       "transform": {
         "translate": [
           0.0,
@@ -69,7 +69,7 @@
         "scale": 0.01
       },
       "primitive": "cube",
-      "shader": "texture2D"
+      "shader": "pbr_standard"
     }
   ]
 }
