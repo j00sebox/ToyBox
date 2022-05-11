@@ -36,7 +36,7 @@ GLTFLoader::GLTFLoader(const char* path)
 
 	m_postion_ind = attributes["POSITION"];
 	m_tex_coord_ind = attributes["TEXCOORD_0"];
-	m_norm_tex_ind = attributes["NORMAL"];
+	m_normal_ind = attributes["NORMAL"];
 	m_indices_ind = m_json["meshes"][0]["primitives"][0]["indices"];
 
 	json materials = m_json["materials"][0];
@@ -71,7 +71,7 @@ std::vector<float> GLTFLoader::get_positions() const
 
 std::vector<float> GLTFLoader::get_normals() const
 {
-	json accessor = m_json["accessors"][m_norm_tex_ind];
+	json accessor = m_json["accessors"][m_normal_ind];
 
 	std::vector<float> normals;
 	extract_floats(accessor, normals);

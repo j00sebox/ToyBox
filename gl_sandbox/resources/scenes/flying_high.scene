@@ -23,6 +23,38 @@
 	"model_count": 2,
 	"models": [
 		{
+			"name": "Direct Light",
+			"light": {
+				"type": "directional_light",
+				"colour": [
+					1.0,
+					1.0,
+					1.0,
+					1.0
+				],
+				"brightness": 3.0,
+				"direction": [
+					1.0,
+					0.0,
+					0.0
+				]
+			},
+			"transform": {
+				"translate": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"rotation": [
+					0.0,
+					0.0,
+					0.0,
+					0.0
+				],
+				"scale": 1.0
+			}
+		},
+		{
 			"name": "Biplane",
 			"shader": "pbr_standard",
 			"transform": {
@@ -41,27 +73,6 @@
 			},
 			"gltf": {
 				"path": "resources/models/airplane_biplane/scene.gltf"
-			}
-		},
-		{
-			"name": "Green Airplane",
-			"shader": "pbr_standard",
-			"transform": {
-				"translate": [
-					1000.0,
-					0.0,
-					-100.0
-				],
-				"rotation": [
-					0.0,
-					0.0,
-					0.0,
-					0.0
-				],
-				"scale": 0.4
-			},
-			"gltf": {
-				"path": "resources/models/green_airplane/scene.gltf"
 			}
 		}
 	]
