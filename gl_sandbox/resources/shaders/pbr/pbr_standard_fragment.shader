@@ -35,6 +35,7 @@ struct DirectionalLight
 	bool active;
 	vec4 colour;
 	vec3 direction;
+	float brightness;
 };
 
 uniform DirectionalLight directional_light;
@@ -48,6 +49,7 @@ struct PointLight
 	vec3 position;
 	float range;
 	float radius;
+	float brightness;
 };
 
 uniform PointLight point_lights[MAX_POINT_LIGHTS];
@@ -126,7 +128,7 @@ vec4 point_light(int i)
 	
 	float attenuation = 1 / (distance * distance);
 
-	return  brdf * attenuation * point_lights[i].colour * h_dot_n;
+	return  brdf * attenuation * point_lights[i].colour * h_dot_n * point_lights[i].brightness;
 }
 
 vec4 direct_light()
@@ -153,7 +155,7 @@ vec4 direct_light()
 
 	float h_dot_n = max(dot(h, n), 0.0f);
 
-	return  brdf * directional_light.colour * h_dot_n;
+	return  brdf * directional_light.colour * h_dot_n * directional_light.brightness;
 }
 
 void main()
@@ -180,12 +182,12 @@ void main()
 	vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.f) * base_colour * ao;
 
 	if (directional_light.active)
-		colour += direct_light() * 3.f;
+		colour += direct_light();
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
 		if(point_lights[i].active)
-			colour += point_light(i) * 4.f;
+			colour += point_light(i);
 	}
 	
 	colour += u_emissive_colour + ambient;

@@ -25,12 +25,14 @@ void Light::imgui_render()
 		m_colour.w
 	};
 
-	ImGui::ColorEdit4("colour", colour);
+	ImGui::ColorEdit4("Colour", colour);
 
 	m_colour.x = colour[0];
 	m_colour.y = colour[1];
 	m_colour.z = colour[2];
 	m_colour.w = colour[3];
+
+	ImGui::SliderFloat("Brightness", &m_brightness, 0.f, 10.f);
 }
 
 DirectionalLight::DirectionalLight()

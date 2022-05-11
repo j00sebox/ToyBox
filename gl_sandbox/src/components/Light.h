@@ -16,10 +16,13 @@ public:
 	void imgui_render() override;
 
 	void set_colour(mathz::Vec4 col) { m_colour = col; }
+	void set_brightness(float b) { m_brightness = b; }
 	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
+	[[nodiscard]] float get_brightness() const { return m_brightness; }
 
 protected:
 	mathz::Vec4 m_colour;
+	float m_brightness;
 };
 
 class DirectionalLight : public Light

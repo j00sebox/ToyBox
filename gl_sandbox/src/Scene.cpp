@@ -105,6 +105,7 @@ void Scene::load(const char* scene)
 				json colour = model["light"]["colour"];
 				pl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
 				pl.set_radius(model["light"]["radius"]);
+				pl.set_brightness(model["light"]["brightness"]);
 
 				m.attach(std::move(pl));
 			}
@@ -117,6 +118,8 @@ void Scene::load(const char* scene)
 				
 				json dir = model["light"]["direction"];
 				dl.set_direction({ dir[0], dir[1], dir[2] });
+
+				dl.set_brightness(model["light"]["brightness"]);
 
 				m.attach(std::move(dl));
 			}
@@ -210,6 +213,7 @@ void Scene::update(float elapsed_time)
 			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
 			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
+			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", point_light.get_index()), point_light.get_brightness());
 			ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
 			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", point_light.get_index()), point_light.get_radius());
 			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
@@ -221,6 +225,7 @@ void Scene::update(float elapsed_time)
 			auto& direct_light = m_entities[i]->get<DirectionalLight>();
 
 			ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
+			ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
 			ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", direct_light.get_direction());
 			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", direct_light.get_colour());

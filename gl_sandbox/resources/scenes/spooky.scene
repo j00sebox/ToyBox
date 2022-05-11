@@ -52,6 +52,7 @@
           1.0,
           1.0
         ],
+        "brightness": 3.0,
         "direction": [
           1.0,
           0.0,
@@ -84,6 +85,7 @@
           1.0,
           1.0
         ],
+        "brightness": 1.0,
         "radius": 0.1
       },
       "transform": {
@@ -113,6 +115,7 @@
           0.0,
           1.0
         ],
+        "brightness": 1.0,
         "radius": 0.1
       },
       "transform": {
