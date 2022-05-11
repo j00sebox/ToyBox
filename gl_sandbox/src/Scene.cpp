@@ -199,8 +199,8 @@ void Scene::update(float elapsed_time)
 
 			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
 			ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
-		/*	ShaderLib::get("pbr_standard")->set_uniform_1f("u_pl_rad", point_light.get_radius());
-			ShaderLib::get("pbr_standard")->set_uniform_1f("u_pl_range", point_light.get_range());*/
+			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", point_light.get_index()), point_light.get_radius());
+			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
 			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
 		}

@@ -38,6 +38,8 @@ struct PointLight
 	bool active;
 	vec4 colour;
 	vec3 position;
+	float range;
+	float radius;
 };
 
 uniform PointLight point_lights[MAX_POINT_LIGHTS];
@@ -92,10 +94,10 @@ vec4 point_light(int i)
 	vec3 n = normalize(normal);
 	vec3 h = normalize(l + v);
 
-	/*if (distance > u_pl_range)
+	if (distance > point_lights[i].range)
 	{
-		return lambertian() * ambient;
-	}*/
+		return vec4(0.f);
+	}
 
 	vec4 ks = fresnel(h, v);
 	vec4 kd = vec4(1 - vec3(ks), 1.f);
