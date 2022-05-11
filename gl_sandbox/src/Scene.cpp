@@ -108,6 +108,18 @@ void Scene::load(const char* scene)
 
 				m.attach(std::move(pl));
 			}
+			else if (type == "directional_light")
+			{
+				DirectionalLight dl;
+
+				json colour = model["light"]["colour"];
+				dl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
+				
+				json dir = model["light"]["direction"];
+				dl.set_direction({ dir[0], dir[1], dir[2] });
+
+				m.attach(std::move(dl));
+			}
 		}
 
 		if (!model["gltf"].is_null())
@@ -203,6 +215,15 @@ void Scene::update(float elapsed_time)
 			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
 			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+		}
+		else if (m_entities[i]->has<DirectionalLight>())
+		{
+			auto& direct_light = m_entities[i]->get<DirectionalLight>();
+
+			ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
+			ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", direct_light.get_direction());
+			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", direct_light.get_colour());
 		}
 		else
 		{

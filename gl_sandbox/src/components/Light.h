@@ -22,6 +22,23 @@ protected:
 	mathz::Vec4 m_colour;
 };
 
+class DirectionalLight : public Light
+{
+public:
+	DirectionalLight();
+	void set_direction(const mathz::Vec3& dir) { m_direction = dir; m_direction.normalize(); }
+	[[nodiscard]] const mathz::Vec3& get_direction() const { return m_direction; }
+
+	void on_remove() override;
+	[[nodiscard]] const char* get_name() const override { return "Directional Light"; }
+	[[nodiscard]] const char* get_type() const override { return typeid(DirectionalLight).name(); }
+	void parse(json info) override;
+	void imgui_render() override;
+
+private:
+	mathz::Vec3 m_direction;
+};
+
 class PointLight : public Light
 {
 public:

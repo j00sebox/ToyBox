@@ -33,6 +33,37 @@ void Light::imgui_render()
 	m_colour.w = colour[3];
 }
 
+DirectionalLight::DirectionalLight()
+{
+	ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", true);
+}
+
+void DirectionalLight::on_remove()
+{
+	ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", false);
+}
+
+void DirectionalLight::parse(json info)
+{
+}
+
+void DirectionalLight::imgui_render()
+{
+	Light::imgui_render();
+
+	ImGui::Text("\n");
+
+	float direction[3] = { m_direction.x, m_direction.y, m_direction.z };
+
+	ImGui::InputFloat3("Direction", direction);
+
+	m_direction.x = direction[0];
+	m_direction.y = direction[1]; 
+	m_direction.z = direction[2];
+
+	m_direction.normalize();
+}
+
 int PointLight::m_point_light_count = 0;
 
 PointLight::PointLight()
@@ -60,3 +91,4 @@ void PointLight::imgui_render()
 	ImGui::InputFloat("radius", &m_radius);
 	ImGui::InputFloat("range", &m_range);
 }
+

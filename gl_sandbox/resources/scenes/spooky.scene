@@ -19,7 +19,7 @@
       "fragment": "resources/shaders/pbr/pbr_standard_fragment.shader"
     }
   ],
-  "model_count": 2,
+  "model_count": 4,
   "models": [
     {
       "name": "Floor",
@@ -43,7 +43,39 @@
       }
     },
     {
+      "name": "Direct Light",
+      "light": {
+        "type": "directional_light",
+        "colour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "direction": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "transform": {
+        "translate": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": 1.0
+      }
+    },
+    {
       "name": "Point Light",
+      "shader": "pbr_standard",
       "light": {
         "type": "point_light",
         "colour": [
@@ -68,8 +100,36 @@
         ],
         "scale": 0.01
       },
-      "primitive": "cube",
-      "shader": "pbr_standard"
+      "primitive": "cube"
+    },
+    {
+      "name": "Point Light (1)",
+      "shader": "pbr_standard",
+      "light": {
+        "type": "point_light",
+        "colour": [
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "radius": 0.1
+      },
+      "transform": {
+        "translate": [
+          -0.2,
+          -0.6,
+          -1.8
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": 0.01
+      },
+      "primitive": "cube"
     }
   ]
 }

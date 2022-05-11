@@ -12,7 +12,6 @@ in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_tex_coord;
 
-uniform vec3 u_directional_light;
 uniform vec3 u_cam_pos;
 
 uniform bool u_custom;
@@ -31,7 +30,16 @@ const float pi = 3.14159265358f;
 
 /*----------Lighting----------*/
 
-#define MAX_POINT_LIGHTS 1
+struct DirectionalLight
+{
+	bool active;
+	vec4 colour;
+	vec3 direction;
+};
+
+uniform DirectionalLight directional_light;
+
+#define MAX_POINT_LIGHTS 2
 
 struct PointLight
 {
@@ -121,6 +129,33 @@ vec4 point_light(int i)
 	return  brdf * attenuation * point_lights[i].colour * h_dot_n;
 }
 
+vec4 direct_light()
+{
+	vec3 l = normalize(directional_light.direction);
+	vec3 v = normalize(u_cam_pos - v_position);
+	vec3 n = normalize(normal);
+	vec3 h = normalize(l + v);
+
+	vec4 ks = fresnel(h, v);
+	vec4 kd = vec4(1 - vec3(ks), 1.f);
+	kd *= (1 - metallic);
+
+	float D = normal_distribution(h, n);
+	float G = G_Smith(n, v, l);
+
+	float v_dot_n = max(dot(v, n), 0.000001f);
+	float l_dot_n = max(dot(l, n), 0.000001f);
+
+	// Cook-Torrance
+	vec4 specular = (ks * D * G) / (4 * v_dot_n * l_dot_n);
+
+	vec4 brdf = kd * lambertian() + specular;
+
+	float h_dot_n = max(dot(h, n), 0.0f);
+
+	return  brdf * directional_light.colour * h_dot_n;
+}
+
 void main()
 {
 	if (u_custom)
@@ -143,6 +178,9 @@ void main()
 	F0 = mix(F0, base_colour, metallic);
 
 	vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.f) * base_colour * ao;
+
+	if (directional_light.active)
+		colour += direct_light() * 3.f;
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
