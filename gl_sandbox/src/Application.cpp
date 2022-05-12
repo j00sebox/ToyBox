@@ -30,42 +30,7 @@ void Application::start()
 
 		ImGui::ShowDemoWindow();
 
-		ImGui::Begin("Menu", (bool*)1, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("Menu"))
-			{
-				if (ImGui::BeginMenu("Open")) 
-				{
-					if(ImGui::MenuItem("Flying High"))
-					{
-#ifdef PLATFORM_WINDOWS
-						switch_scene("resources/scenes/flying_high.scene");
-#else
-						switch_scene("./gl_sandbox/resources/scenes/flying_high.scene");
-#endif
-					}
-
-					if (ImGui::MenuItem("Spooky"))
-					{
-#ifdef PLATFORM_WINDOWS
-						switch_scene("resources/scenes/spooky.scene");
-#else
-						switch_scene("./gl_sandbox/resources/scenes/spooky.scene");
-#endif
-					}
-
-					ImGui::EndMenu();
-				}
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Examples"))
-			{
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-		ImGui::End();
+		display_menu();
 
 		float delta_time = m_window.get_delta_time();
 		m_current_scene->update(delta_time);
@@ -80,4 +45,44 @@ void Application::switch_scene(const char* scene_path)
 	m_current_scene->load(scene_path);
 	auto [width, height] = m_window.get_dimensions();
 	m_current_scene->init(width, height);
+}
+
+void Application::display_menu()
+{
+	ImGui::Begin("Menu", (bool*)1, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu("Menu"))
+		{
+			if (ImGui::BeginMenu("Open"))
+			{
+				if (ImGui::MenuItem("Flying High"))
+				{
+#ifdef PLATFORM_WINDOWS
+					switch_scene("resources/scenes/flying_high.scene");
+#else
+					switch_scene("./gl_sandbox/resources/scenes/flying_high.scene");
+#endif
+				}
+
+				if (ImGui::MenuItem("Spooky"))
+				{
+#ifdef PLATFORM_WINDOWS
+					switch_scene("resources/scenes/spooky.scene");
+#else
+					switch_scene("./gl_sandbox/resources/scenes/spooky.scene");
+#endif
+				}
+
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Examples"))
+		{
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+	ImGui::End();
 }

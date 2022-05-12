@@ -11,6 +11,8 @@ public:
 	void switch_scene(const char* scene_path);
 
 private:
+	void display_menu();
+
 	Window m_window;
 	std::unique_ptr<Scene> m_current_scene;
 	bool m_running = false;
