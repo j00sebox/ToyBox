@@ -3,7 +3,9 @@
 
 #include "GLError.h"
 
-#include "mathz/Matrix.h"
+#include "Buffer.h"
+
+#include <mathz/Matrix.h>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -18,39 +20,8 @@ Mesh::Mesh(Mesh&& mesh) noexcept
 	m_path = std::move(mesh.m_path);
 }
 
-void Mesh::load(GLTFLoader loader)
+void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>& indices)
 {
-	std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
-	std::vector<mathz::Vec3> normals = floats_to_vec3(loader.get_normals());
-	std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
-
-	std::vector<Vertex> vertices;
-
-	for (unsigned int i = 0; i < positions.size(); i++)
-	{
-		vertices.push_back({
-				positions[i],
-				normals[i],
-				tex_coords[i]
-			});
-	}
-
-	std::vector<float> verts;
-
-	for (const Vertex& v : vertices)
-	{
-		verts.push_back(v.positon.x);
-		verts.push_back(v.positon.y);
-		verts.push_back(v.positon.z);
-		verts.push_back(v.normal.x);
-		verts.push_back(v.normal.y);
-		verts.push_back(v.normal.z);
-		verts.push_back(v.st.x);
-		verts.push_back(v.st.y);
-	}
-
-	std::vector<unsigned int> indices = loader.get_indices();
-
 	m_indices_count = indices.size();
 
 	m_va.bind();
@@ -98,24 +69,3 @@ void Mesh::imgui_render()
 	ImGui::Text(m_path.c_str());
 }
 
-std::vector<mathz::Vec3> Mesh::floats_to_vec3(const std::vector<float>& flts) const
-{
-	std::vector<mathz::Vec3> vec;
-	for (unsigned int i = 0; i < flts.size();)
-	{
-		vec.push_back({ flts[i++], flts[i++], flts[i++] });
-	}
-
-	return vec;
-}
-
-std::vector<mathz::Vec2<float>> Mesh::floats_to_vec2(const std::vector<float>& flts) const
-{
-	std::vector<mathz::Vec2<float>> vec;
-	for (unsigned int i = 0; i < flts.size();)
-	{
-		vec.push_back({ flts[i++], flts[i++] });
-	}
-
-	return vec;
-}

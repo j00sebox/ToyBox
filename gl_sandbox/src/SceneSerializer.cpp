@@ -16,6 +16,9 @@
 #include <mathz/Matrix.h>
 #include <mathz/Quaternion.h>
 
+static std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts);
+static std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts);
+
 void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, std::vector<std::unique_ptr<Entity>>& entities)
 {
 	if (scene == "")
@@ -94,8 +97,57 @@ void SceneSerializer::load_shaders(nlohmann::json accessor, unsigned int num_sha
 
 void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_models, std::vector<std::unique_ptr<Entity>>& entities)
 {
+	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh) 
+	{
+		std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
+		std::vector<mathz::Vec3> normals = floats_to_vec3(loader.get_normals());
+		std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
+
+		std::vector<Vertex> vertices;
+
+		for (unsigned int i = 0; i < positions.size(); i++)
+		{
+			vertices.push_back({
+					positions[i],
+					normals[i],
+					tex_coords[i]
+				});
+		}
+
+		std::vector<float> verts;
+
+		for (const Vertex& v : vertices)
+		{
+			verts.push_back(v.positon.x);
+			verts.push_back(v.positon.y);
+			verts.push_back(v.positon.z);
+			verts.push_back(v.normal.x);
+			verts.push_back(v.normal.y);
+			verts.push_back(v.normal.z);
+			verts.push_back(v.st.x);
+			verts.push_back(v.st.y);
+		}
+
+		std::vector<unsigned int> indices = loader.get_indices();
+
+		mesh.load(verts, indices);
+	};
+
+	auto load_gltf_material = [](const GLTFLoader& loader, Material& material)
+	{
+		std::string textures[4] = {
+			loader.get_base_color_texture(),
+			loader.get_specular_texture(),
+			loader.get_normal_texture(),
+			loader.get_occlusion_texture()
+		};
+
+		material.load(textures);
+	};
+
 	for (unsigned int i = 0; i < num_models; ++i)
 	{
+#include "Buffer.h"
 		Entity e;
 
 		json model = accessor[i];
@@ -144,7 +196,7 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_mode
 
 				e.attach(std::move(dl));
 			}
-			}
+		}
 
 		if (!model["gltf"].is_null())
 		{
@@ -152,11 +204,11 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_mode
 			GLTFLoader loader(gltf_path.c_str());
 
 			Mesh mesh;
-			mesh.load(loader);
+			load_gltf_mesh(loader, mesh);
 			e.attach(std::move(mesh));
 
 			Material material;
-			material.load(loader);
+			load_gltf_material(loader, material);
 			material.set_shader(ShaderLib::get(model["shader"]));
 
 			e.attach(std::move(material));
@@ -178,4 +230,26 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_mode
 
 		entities.emplace_back(std::make_unique<Entity>(std::move(e)));
 	}
+}
+
+std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts)
+{
+	std::vector<mathz::Vec3> vec;
+	for (unsigned int i = 0; i < flts.size();)
+	{
+		vec.push_back({ flts[i++], flts[i++], flts[i++] });
+	}
+	
+	return vec;
+}
+
+std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts)
+{
+	std::vector<mathz::Vec2<float>> vec;
+	for (unsigned int i = 0; i < flts.size();)
+	{
+		vec.push_back({ flts[i++], flts[i++] });
+	}
+
+	return vec;
 }

@@ -2,7 +2,6 @@
 
 #include "Texture.h"
 #include "Shader.h"
-#include "GLTFLoader.h"
 
 #include "components/Component.h"
 
@@ -15,7 +14,7 @@ public:
 	void set_shader(const std::shared_ptr<ShaderProgram>& shader) { m_shader = shader; }
 	[[nodiscard]] const std::shared_ptr<ShaderProgram>& get_shader() const { return m_shader; }
 
-	void load(const GLTFLoader& loader);
+	void load(const std::string* const textures);
 	void bind() const;
 	void unbind() const;
 

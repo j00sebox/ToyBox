@@ -4,12 +4,12 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-void Material::load(const GLTFLoader& loader)
+void Material::load(const std::string* const textures)
 {
-    m_textures[0] = std::make_unique<Texture2D>(Texture2D(loader.get_base_color_texture()));
-    m_textures[1] = std::make_unique<Texture2D>(Texture2D(loader.get_specular_texture()));
-    m_textures[2] = std::make_unique<Texture2D>(Texture2D(loader.get_normal_texture()));
-    m_textures[3] = std::make_unique<Texture2D>(Texture2D(loader.get_occlusion_texture()));
+    m_textures[0] = std::make_unique<Texture2D>(Texture2D(textures[0]));
+    m_textures[1] = std::make_unique<Texture2D>(Texture2D(textures[1]));
+    m_textures[2] = std::make_unique<Texture2D>(Texture2D(textures[2]));
+    m_textures[3] = std::make_unique<Texture2D>(Texture2D(textures[3]));
 
     m_custom = false;
 }
