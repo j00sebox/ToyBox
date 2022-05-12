@@ -29,7 +29,7 @@ Window::Window(int width, int height)
 	if (!glfwInit())
 		ASSERT(false);
 
-	m_window_handle = glfwCreateWindow(width, height, "gl_sandbox", NULL, NULL);
+	m_window_handle = glfwCreateWindow(width, height, "Toy Box", NULL, NULL);
 
 	if (!m_window_handle)
 		ASSERT(false);

@@ -1,3 +1,3 @@
-[submodule "gl_sandbox/external/mathz"]
-	path = gl_sandbox/external/mathz
+[submodule "toy_box/external/mathz"]
+	path = toy_box/external/mathz
 	url = https://github.com/j00sebox/mathz.git

@@ -1,5 +1,5 @@
-workspace "gl_sandbox"
-	startproject "gl_sandbox"
+workspace "toy_box"
+	startproject "toy_box"
 	architecture "x64"
 
 	configurations
@@ -10,16 +10,16 @@ workspace "gl_sandbox"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-include "gl_sandbox/external/glad"
+include "toy_box/external/glad"
 
-project "gl_sandbox"
-	location "gl_sandbox"
+project "toy_box"
+	location "toy_box"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"
 
 	pchheader "pch.h"
-	pchsource "gl_sandbox/src/pch.cpp"
+	pchsource "toy_box/src/pch.cpp"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")

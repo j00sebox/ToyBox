@@ -12,7 +12,7 @@ void Application::start()
 #ifdef PLATFORM_WINDOWS
 	m_current_scene->load("resources/scenes/spooky.scene");
 #else
-	m_current_scene->load("./gl_sandbox/resources/scenes/spooky.scene");
+	m_current_scene->load("./toy_box/resources/scenes/spooky.scene");
 #endif
 	auto [width, height] = m_window.get_dimensions();
 	m_current_scene->init(width, height);
@@ -61,7 +61,7 @@ void Application::display_menu()
 #ifdef PLATFORM_WINDOWS
 					switch_scene("resources/scenes/flying_high.scene");
 #else
-					switch_scene("./gl_sandbox/resources/scenes/flying_high.scene");
+					switch_scene("./toy_box/resources/scenes/flying_high.scene");
 #endif
 				}
 
@@ -70,7 +70,7 @@ void Application::display_menu()
 #ifdef PLATFORM_WINDOWS
 					switch_scene("resources/scenes/spooky.scene");
 #else
-					switch_scene("./gl_sandbox/resources/scenes/spooky.scene");
+					switch_scene("./toy_box/resources/scenes/spooky.scene");
 #endif
 				}
 

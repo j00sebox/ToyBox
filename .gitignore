@@ -36,8 +36,8 @@ bin/*
 bin-int/*
 */bin/*
 */bin-int/*
-gl_sandbox/vendor/glad/bin/*
-gl_sandbox/vendor/glad/bin-int/*
+toy_box/vendor/glad/bin/*
+toy_box/vendor/glad/bin-int/*
 
 # premake
 .premake/*
@@ -49,10 +49,16 @@ gl_sandbox/vendor/glad/bin-int/*
 */*.vcxproj
 */*.vcxproj.user
 */*.vcxproj.filters
-gl_sandbox/vendor/glad/*.vcxproj.filters
 
 #GLFW
 */glfw/*
+
+#GLAD
+toy_box/external/glad/bin/*
+toy_box/external/glad/bin-int/*
+toy_box/external/glad/GLAD.vcxproj
+toy_box/external/glad/GLAD.vcxproj.filters
+toy_box/external/glad/GLAD.vcxproj.user
 
 # Makefiles
 Makefile
@@ -66,7 +72,5 @@ run.sh
 *.workspace
 *.project
 compile_flags.txt
-radrenderer.mk
-radrenderer.txt
 pch.h.gch
 
