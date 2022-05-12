@@ -6,12 +6,13 @@
 class Application
 {
 public:
-	Application() : m_window(1280, 960) {}
+	Application() : m_window(1280, 960) { m_current_scene.reset(new Scene()); }
 	void start();
+	void switch_scene(const char* scene_path);
 
 private:
 	Window m_window;
-	Scene m_current_scene;
+	std::unique_ptr<Scene> m_current_scene;
 	bool m_running = false;
 };
 

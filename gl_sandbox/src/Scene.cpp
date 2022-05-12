@@ -17,8 +17,6 @@
 
 Scene::Scene()
 {
-	m_directional_light = { 2.f, -1.f, -1.f };
-	m_directional_light.normalize();
 	m_camera = std::make_shared<Camera>();
 }
 
@@ -40,10 +38,6 @@ void Scene::load(const char* scene)
 	json camera_pos = camera["position"];
 
 	m_camera->set_pos(mathz::Vec3({ camera_pos[0], camera_pos[1], camera_pos[2] }));
-
-	json directional_light = m_json["directional_light"];
-	m_directional_light = mathz::Vec3({ directional_light[0], directional_light[1], directional_light[2] });
-	m_directional_light.normalize();
 
 	std::string skybox_src = m_json.value("skybox", "");
 

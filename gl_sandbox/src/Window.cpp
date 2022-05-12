@@ -73,24 +73,6 @@ void Window::begin_frame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	//ImGui::ShowDemoWindow();
-
-	ImGui::Begin("Menu", (bool*)1, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
-	if (ImGui::BeginMenuBar())
-	{
-		if (ImGui::BeginMenu("Menu"))
-		{
-			if (ImGui::MenuItem("Open")) {}
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Examples"))
-		{
-			ImGui::EndMenu();
-		}
-		ImGui::EndMenuBar();
-	}
-	ImGui::End();
-
 	ImGui::Begin("FPS");
 
 	ImGui::Text("Avg. %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
