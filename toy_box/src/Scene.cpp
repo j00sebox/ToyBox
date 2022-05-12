@@ -67,9 +67,9 @@ void Scene::update(float elapsed_time)
 	
 	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{
+		bool selected = false;
 		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
 		{
-			bool selected = false;
 			ImGui::Selectable(m_entities[i]->get_name().c_str(), &selected);
 			if (selected)
 			{
@@ -78,7 +78,7 @@ void Scene::update(float elapsed_time)
 		}
 		ImGui::EndChild();
 		
-		auto& transform = m_entities[i]->get<Transform>();
+		auto transform = m_entities[i]->get<Transform>();
 
 		if (m_entities[i]->has<PointLight>())
 		{
@@ -115,11 +115,24 @@ void Scene::update(float elapsed_time)
 
 			material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
 			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-			material.bind();
-			mesh.bind();
-			Renderer::draw_elements(mesh.get_index_count());
-			mesh.unbind();
-			material.unbind();
+			
+			if (m_entities[i].get() == m_selected_entity)
+			{
+				transform.scale(transform.get_uniform_scale() * 1.05f); // scale up a tiny bit to see outline
+				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", transform.get_transform());
+				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+				material.bind();
+				mesh.bind();
+				Renderer::stencil(mesh.get_index_count());
+			}
+			else
+			{
+				material.bind();
+				mesh.bind();
+				Renderer::draw_elements(mesh.get_index_count());
+			}
 		}
 	}
 

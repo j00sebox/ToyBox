@@ -31,7 +31,7 @@ void Material::bind() const
             m_textures[i]->bind(i);
         }
     }
- 
+    
 	m_shader->bind();
 }
 
