@@ -63,7 +63,6 @@ void Application::start()
 
 void Application::switch_scene(const char* scene_path)
 {
-	m_current_scene.release();
 	m_current_scene.reset(new Scene());
 	m_current_scene->load(scene_path);
 	auto [width, height] = m_window.get_dimensions();
