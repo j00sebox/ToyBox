@@ -35,7 +35,6 @@ public:
 	virtual void on_remove() {};
 	[[nodiscard]] const char* get_name() const override { return "Mesh"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Mesh).name(); }
-	void parse(json mesh) override {};
 	void imgui_render() override;
 
 private:

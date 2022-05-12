@@ -11,11 +11,6 @@ Light::Light()
 	m_colour = { 1.f, 1.f, 1.f, 1.f };
 }
 
-void Light::parse(json info)
-{
-	
-}
-
 void Light::imgui_render()
 {
 	float colour[4] = {
@@ -43,10 +38,6 @@ DirectionalLight::DirectionalLight()
 void DirectionalLight::on_remove()
 {
 	ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", false);
-}
-
-void DirectionalLight::parse(json info)
-{
 }
 
 void DirectionalLight::imgui_render()
@@ -78,10 +69,6 @@ void PointLight::on_remove()
 {
 	--m_point_light_count;
 	ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), false);
-}
-
-void PointLight::parse(json info)
-{
 }
 
 void PointLight::imgui_render()

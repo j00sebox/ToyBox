@@ -4,12 +4,9 @@
 #include "Skybox.h"
 #include "Camera.h"
 
-// TODO: remove later
-#include "components/Light.h"
-
 #include <json/json.hpp>
 
-using json = nlohmann::json;
+using namespace nlohmann;
 
 class Scene
 {

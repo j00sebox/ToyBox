@@ -2,11 +2,12 @@
 #include "Model.h"
 
 #include "GLError.h"
+#include "GLTFLoader.h"
 
 #include "components/Mesh.h"
 #include "components/Material.h"
 
-#include "mathz/Misc.h"
+#include <mathz/Misc.h>
 
 #include <glad/glad.h>
 

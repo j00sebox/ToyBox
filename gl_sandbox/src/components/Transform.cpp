@@ -32,17 +32,6 @@ mathz::Mat4 Transform::get_transform() const
 	return  m_rotation * m_scale * m_translate;
 }
 
-void Transform::parse(json info)
-{
-	json translation = info["translate"];
-	translate(mathz::Vec3({ translation[0], translation[1], translation[2] }));
-
-	json rotation = info["rotation"];
-	rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
-
-	scale(info["scale"]);
-}
-
 void Transform::imgui_render()
 {
 	mathz::Vec3 position = m_postion;

@@ -2,10 +2,11 @@
 
 #include "Entity.h"
 #include "Shader.h"
-#include "GLTFLoader.h"
 
 #include "mathz/Matrix.h"
 #include "mathz/Quaternion.h"
+
+class GLTFLoader;
 
 class Model : public Entity
 {

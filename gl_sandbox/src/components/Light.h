@@ -12,7 +12,6 @@ public:
 	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Light).name(); }
-	void parse(json info) override;
 	void imgui_render() override;
 
 	void set_colour(mathz::Vec4 col) { m_colour = col; }
@@ -35,7 +34,6 @@ public:
 	void on_remove() override;
 	[[nodiscard]] const char* get_name() const override { return "Directional Light"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(DirectionalLight).name(); }
-	void parse(json info) override;
 	void imgui_render() override;
 
 private:
@@ -55,7 +53,6 @@ public:
 	void on_remove() override;
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(PointLight).name(); }
-	void parse(json info) override;
 	void imgui_render() override;
 
 private:

@@ -2,7 +2,7 @@
 
 #include <json/json.hpp>
 
-using json = nlohmann::json;
+using namespace nlohmann;
 
 class GLTFLoader
 {

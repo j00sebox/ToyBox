@@ -10,7 +10,7 @@
 #include "components/Mesh.h"
 #include "components/Material.h"
 
-#include "mathz/Misc.h"
+#include <mathz/Misc.h>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -85,7 +85,16 @@ void Scene::load(const char* scene)
 		m.set_name(model.value("name", "no_name"));
 
 		Transform t{};
-		t.parse(model["transform"]);
+		json info = model["transform"];
+
+		json translation = info["translate"];
+		t.translate(mathz::Vec3({ translation[0], translation[1], translation[2] }));
+
+		json rotation = info["rotation"];
+		t.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
+
+		t.scale(info["scale"]);
+
 		m.attach(std::move(t));
 
 		if (!model["light"].is_null())

@@ -20,7 +20,6 @@ public:
 	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Transform"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Transform).name(); }
-	void parse(json info) override;
 	void imgui_render() override;
 
 private:
