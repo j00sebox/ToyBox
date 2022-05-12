@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Scene.h"
 
-#include "Core.h"
 #include "Entity.h"
 #include "Renderer.h"
 #include "ParseFile.h"
@@ -32,8 +31,6 @@ void Scene::load(const char* scene)
 	if (scene == "")
 		return;
 
-	std::string path = std::string(PATH) + std::string(scene);
-
 	std::string src = file_to_string(scene);
 
 	m_json = json::parse(src);
@@ -49,11 +46,21 @@ void Scene::load(const char* scene)
 	{
 		Skybox sb(skybox_src);
 
-		std::string v_path = std::string(PATH) + std::string("resources/shaders/skybox/skybox_vertex.shader");
-		std::string f_path = std::string(PATH) + std::string("resources/shaders/skybox/skybox_fragment.shader");
+#ifdef PLATFORM_WINDOWS
+		const char* v_path = "resources/shaders/skybox/skybox_vertex.shader";
+#else
+		const char* v_path = "./gl_sandbox/resources/shaders/skybox/skybox_vertex.shader";
+#endif
+
+#ifdef PLATFORM_WINDOWS
+		const char* f_path = "resources/shaders/skybox/skybox_fragment.shader";
+#else
+		const char* f_path = "./gl_sandbox/resources/shaders/skybox/skybox_fragment.shader";
+#endif
+
 		ShaderProgram sp(
-			Shader(v_path.c_str(), ShaderType::Vertex),
-			Shader(f_path.c_str(), ShaderType::Fragment)
+			Shader(v_path, ShaderType::Vertex),
+			Shader(f_path, ShaderType::Fragment)
 		);
 
 		sb.attach_shader_program(std::move(sp));
@@ -68,12 +75,10 @@ void Scene::load(const char* scene)
 	{
 		// TODO: add support for other shader types
 		std::string vertex_src = shaders[s]["vertex"];
-		std::string v_path = std::string(PATH) + vertex_src;
-		Shader vertex_shader(v_path.c_str(), ShaderType::Vertex);
+		Shader vertex_shader(vertex_src.c_str(), ShaderType::Vertex);
 
 		std::string fragment_src = shaders[s]["fragment"];
-		std::string f_path = std::string(PATH) + fragment_src;
-		Shader fragment_shader(f_path.c_str(), ShaderType::Fragment);
+		Shader fragment_shader(fragment_src.c_str(), ShaderType::Fragment);
 
 		ShaderProgram shader_program(vertex_shader, fragment_shader);
 
@@ -139,7 +144,6 @@ void Scene::load(const char* scene)
 		if (!model["gltf"].is_null())
 		{
 			std::string gltf_path = model["gltf"]["path"];
-			gltf_path = std::string(PATH) + gltf_path;
 			GLTFLoader loader(gltf_path.c_str());
 
 			Mesh mesh;

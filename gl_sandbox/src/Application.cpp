@@ -8,7 +8,12 @@
 void Application::start()
 {
 	m_running = true;
+
+#ifdef PLATFORM_WINDOWS
 	m_current_scene->load("resources/scenes/spooky.scene");
+#else
+	m_current_scene->load("./gl_sandbox/resources/scenes/spooky.scene");
+#endif
 	auto [width, height] = m_window.get_dimensions();
 	m_current_scene->init(width, height);
 	Renderer::init(width, height);
@@ -34,12 +39,20 @@ void Application::start()
 				{
 					if(ImGui::MenuItem("Flying High"))
 					{
+#ifdef PLATFORM_WINDOWS
 						switch_scene("resources/scenes/flying_high.scene");
+#else
+						switch_scene("./gl_sandbox/resources/scenes/flying_high.scene");
+#endif
 					}
 
 					if (ImGui::MenuItem("Spooky"))
 					{
+#ifdef PLATFORM_WINDOWS
 						switch_scene("resources/scenes/spooky.scene");
+#else
+						switch_scene("./gl_sandbox/resources/scenes/spooky.scene");
+#endif
 					}
 
 					ImGui::EndMenu();
