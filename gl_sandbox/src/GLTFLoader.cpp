@@ -15,7 +15,7 @@ int get_num_verts(const std::string& type)
 	else if (type == "VEC4")
 		return 4;
 	
-	ASSERT(false);
+	return 0;
 }
 
 GLTFLoader::GLTFLoader(const char* path)
