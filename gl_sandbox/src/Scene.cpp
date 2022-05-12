@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Scene.h"
 
+#include "Entity.h"
 #include "Renderer.h"
 #include "ParseFile.h"
 #include "GLTFLoader.h"
@@ -78,11 +79,11 @@ void Scene::load(const char* scene)
 
 	for (unsigned int i = 0; i < model_count; ++i)
 	{
-		Model m;
+		Entity e;
 
 		json model = models[i];
 
-		m.set_name(model.value("name", "no_name"));
+		e.set_name(model.value("name", "no_name"));
 
 		Transform t{};
 		json info = model["transform"];
@@ -95,7 +96,7 @@ void Scene::load(const char* scene)
 
 		t.scale(info["scale"]);
 
-		m.attach(std::move(t));
+		e.attach(std::move(t));
 
 		if (!model["light"].is_null())
 		{
@@ -110,7 +111,7 @@ void Scene::load(const char* scene)
 				pl.set_radius(model["light"]["radius"]);
 				pl.set_brightness(model["light"]["brightness"]);
 
-				m.attach(std::move(pl));
+				e.attach(std::move(pl));
 			}
 			else if (type == "directional_light")
 			{
@@ -124,23 +125,24 @@ void Scene::load(const char* scene)
 
 				dl.set_brightness(model["light"]["brightness"]);
 
-				m.attach(std::move(dl));
+				e.attach(std::move(dl));
 			}
 		}
 
 		if (!model["gltf"].is_null())
 		{
-			GLTFLoader loader = m.load_gltf(model["gltf"]["path"]); 
+			std::string gltf_path = model["gltf"]["path"];
+			GLTFLoader loader(gltf_path.c_str());
 
 			Mesh mesh;
 			mesh.load(loader);
-			m.attach(std::move(mesh));
+			e.attach(std::move(mesh));
 
 			Material material;
 			material.load(loader);
 			material.set_shader(ShaderLib::get(model["shader"]));
 			
-			m.attach(std::move(material));
+			e.attach(std::move(material));
 		}
 		else if (!model["primitive"].is_null())
 		{
@@ -148,16 +150,16 @@ void Scene::load(const char* scene)
 			{
 				Mesh mesh;
 				mesh.load_primitive(PrimitiveTypes::Cube);
-				m.attach(std::move(mesh));
+				e.attach(std::move(mesh));
 
 				Material material;
 				material.set_shader(ShaderLib::get(model["shader"]));
 				material.set_colour({ 1.f, 1.f, 1.f, 1.f });
-				m.attach(std::move(material));
+				e.attach(std::move(material));
 			}
 		}
 	
-		m_entities.emplace_back(std::make_unique<Model>(std::move(m)));
+		m_entities.emplace_back(std::make_unique<Entity>(std::move(e)));
 	}
 }
 

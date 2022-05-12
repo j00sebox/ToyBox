@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Model.h"
 #include "Skybox.h"
 #include "Camera.h"
 
 #include <json/json.hpp>
 
 using namespace nlohmann;
+
+class Entity;
 
 class Scene
 {
@@ -26,7 +27,6 @@ private:
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<std::unique_ptr<Entity>> m_entities;
-	mathz::Mat4 m_perspective;
 
 	// imgui stuff
 	Entity* m_selected_entity = nullptr;
