@@ -2,29 +2,28 @@
 
 #include "Component.h"
 
-#include "mathz/Vector.h"
+#include <mathz/Vector.h>
 
 class Light : public Component
 {
 public:
 	Light();
+	void set_colour(mathz::Vec4 col) { m_colour = col; }
+	void set_brightness(float b) { m_brightness = b; }
+	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
+	[[nodiscard]] float get_brightness() const { return m_brightness; }
 
 	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Light).name(); }
 	void imgui_render() override;
 
-	void set_colour(mathz::Vec4 col) { m_colour = col; }
-	void set_brightness(float b) { m_brightness = b; }
-	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
-	[[nodiscard]] float get_brightness() const { return m_brightness; }
-
 protected:
 	mathz::Vec4 m_colour;
 	float m_brightness;
 };
 
-class DirectionalLight : public Light
+class DirectionalLight final : public Light
 {
 public:
 	DirectionalLight();
@@ -40,7 +39,7 @@ private:
 	mathz::Vec3 m_direction;
 };
 
-class PointLight : public Light
+class PointLight final : public Light
 {
 public:
 	PointLight();

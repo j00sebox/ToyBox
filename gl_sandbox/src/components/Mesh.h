@@ -18,7 +18,7 @@ struct Vertex
 };
 
 
-class Mesh : public Component
+class Mesh final : public Component
 {
 public:
 	Mesh() = default;

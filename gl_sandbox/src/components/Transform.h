@@ -2,9 +2,9 @@
 
 #include "Component.h"
 
-#include "mathz/Matrix.h"
+#include <mathz/Matrix.h>
 
-class Transform : public Component
+class Transform final : public Component
 {
 public:
 	void translate(const mathz::Vec3& pos);

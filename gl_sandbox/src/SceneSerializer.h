@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "json/json_fwd.hpp"
+#include <json/json_fwd.hpp>
 
 class Entity;
 class Camera;

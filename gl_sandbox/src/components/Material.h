@@ -8,7 +8,7 @@
 #include <vector>
 #include <memory>
 
-class Material : public Component
+class Material final : public Component
 {
 public:
 	void set_shader(const std::shared_ptr<ShaderProgram>& shader) { m_shader = shader; }
