@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Texture.h"
-#include "Shader.h"
-
+#include "renderer/Fwd.h"
 #include "components/Component.h"
+
+#include "mathz/Vector.h"
 
 #include <vector>
 #include <memory>

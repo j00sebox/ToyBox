@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "Material.h"
 
+#include "Texture.h"
+#include "Shader.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 

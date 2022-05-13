@@ -2,16 +2,10 @@
 #include "Renderer.h"
 
 #include "GLError.h"
-#include "Texture.h"
 #include "Shader.h"
-#include "VertexArray.h"
-
 #include "components/Mesh.h"
 #include "components/Material.h"
-
 #include "events/EventList.h"
-
-#include "mathz/Quaternion.h";
 
 #include <glad/glad.h>
 

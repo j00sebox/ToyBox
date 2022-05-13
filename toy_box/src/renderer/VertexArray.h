@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "Buffer.h"
 
 struct VertexAttribute

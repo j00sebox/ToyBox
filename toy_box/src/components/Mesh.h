@@ -1,14 +1,11 @@
 #pragma once
 
-#include <string>
-
-#include "Texture.h"
-#include "VertexArray.h"
 #include "Primitives.h"
-
+#include "renderer/Fwd.h"
 #include "components/Component.h"
 
 #include <mathz/Vector.h>
+#include <string>
 
 struct Vertex
 {
@@ -16,7 +13,6 @@ struct Vertex
 	mathz::Vec3 normal;
 	mathz::Vec2<float> st;
 };
-
 
 class Mesh final : public Component
 {
@@ -37,9 +33,7 @@ public:
 	void imgui_render() override;
 
 private:
-	std::string m_path;
 	unsigned int m_indices_count = 0;
 	VertexArray m_va;
-	std::vector<Texture2D> m_textures;
 };
 

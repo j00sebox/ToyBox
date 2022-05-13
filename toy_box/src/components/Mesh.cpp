@@ -2,22 +2,18 @@
 #include "Mesh.h"
 
 #include "GLError.h"
-
 #include "Buffer.h"
-
-#include <mathz/Matrix.h>
+#include "VertexArray.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
-
+#include <mathz/Matrix.h>
 #include <glad/glad.h>
 
 Mesh::Mesh(Mesh&& mesh) noexcept
 {
 	m_va = std::move(mesh.m_va);
 	m_indices_count = mesh.m_indices_count;
-	m_textures = std::move(mesh.m_textures);
-	m_path = std::move(mesh.m_path);
 }
 
 void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>& indices)
@@ -66,6 +62,6 @@ void Mesh::unbind() const
 
 void Mesh::imgui_render()
 {
-	ImGui::Text(m_path.c_str());
+	
 }
 
