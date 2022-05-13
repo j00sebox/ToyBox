@@ -5,6 +5,9 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <json/json.hpp>
+
+using namespace nlohmann;
 
 Light::Light()
 {
@@ -57,6 +60,10 @@ void DirectionalLight::imgui_render()
 	m_direction.normalize();
 }
 
+void DirectionalLight::serialize(json& accessor) const
+{
+}
+
 int PointLight::m_point_light_count = 0;
 
 PointLight::PointLight()
@@ -79,5 +86,9 @@ void PointLight::imgui_render()
 
 	ImGui::InputFloat("radius", &m_radius);
 	ImGui::InputFloat("range", &m_range);
+}
+
+void PointLight::serialize(json& accessor) const
+{
 }
 

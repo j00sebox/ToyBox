@@ -4,10 +4,9 @@
 #include "Log.h"
 #include "components/Component.h"
 
-#include "mathz/Matrix.h"
-
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <mathz/Matrix.h>
 
 class Entity
 {

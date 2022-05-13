@@ -6,6 +6,10 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <json/json.hpp>
+
+using namespace nlohmann;
+
 
 void Material::load(const std::string* const textures)
 {
@@ -126,4 +130,8 @@ void Material::imgui_render()
     }
 
     
+}
+
+void Material::serialize(json& accessor) const
+{
 }

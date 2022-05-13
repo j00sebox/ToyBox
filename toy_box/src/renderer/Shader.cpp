@@ -244,6 +244,19 @@ bool ShaderLib::exists(const std::string& name)
 	return (m_shaders.find(name) != m_shaders.end());
 }
 
+std::string ShaderLib::find(const std::shared_ptr<ShaderProgram>& s)
+{
+	for (const auto& [name, shader_ptr] : m_shaders)
+	{
+		if (shader_ptr == s)
+		{
+			return name;
+		}
+	}
+
+	return "";
+}
+
 void ShaderLib::release()
 {
 	m_shaders.clear();

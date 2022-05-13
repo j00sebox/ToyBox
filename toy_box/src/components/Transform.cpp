@@ -6,6 +6,9 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <json/json.hpp>
+
+using namespace nlohmann;
 
 void Transform::translate(const mathz::Vec3& pos)
 {
@@ -55,4 +58,18 @@ void Transform::imgui_render()
 	ImGui::Text("\nScale: ");
 	ImGui::InputFloat("uniform scale", &uniform_scale);
 	scale(uniform_scale);
+}
+
+void Transform::serialize(json& accessor) const
+{
+	accessor["transform"]["translate"][0] = m_postion.x;
+	accessor["transform"]["translate"][1] = m_postion.y;
+	accessor["transform"]["translate"][2] = m_postion.z;
+
+	accessor["transform"]["rotation"][0] = m_rotate_angle;
+	accessor["transform"]["rotation"][1] = m_rotate_axis.x;
+	accessor["transform"]["rotation"][2] = m_rotate_axis.y;
+	accessor["transform"]["rotation"][3] = m_rotate_axis.z;
+
+	accessor["transform"]["scale"] = m_uniform_scale;
 }

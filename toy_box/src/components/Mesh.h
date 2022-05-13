@@ -31,9 +31,14 @@ public:
 	[[nodiscard]] const char* get_name() const override { return "Mesh"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Mesh).name(); }
 	void imgui_render() override;
+	void serialize(nlohmann::json& accessor) const override;
 
 private:
 	unsigned int m_indices_count = 0;
 	VertexArray m_va;
+
+	// TODO: Remove after a better way is found
+	std::string m_gltf_path;
+	PrimitiveTypes m_primitive = PrimitiveTypes::None;
 };
 

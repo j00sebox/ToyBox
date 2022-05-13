@@ -1,5 +1,44 @@
 {
   "camera": { "position": [ 0.0, 0.0, 0.0 ] },
+  "model_count": 4,
+  "models": [
+    
+    {
+      "name": "Floor",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 90.0, 1.0, 0.0, 0.0 ],
+        "scale": 0.009999999776482582,
+        "translate": [ 0.0, -1.0, -2.0 ]
+      }
+    },
+    {
+      "name": "Direct Light",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "name": "Point Light",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 0.009999999776482582,
+        "translate": [ -0.800000011920929, -0.6000000238418579, -1.7000000476837158 ]
+      }
+    },
+    {
+      "name": "Point Light (1)",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 0.009999999776482582,
+        "translate": [ -0.20000000298023224, -0.6000000238418579, -1.7999999523162842 ]
+      }
+    }
+  ],
   "shader_count": 2,
   "shaders": [
     {

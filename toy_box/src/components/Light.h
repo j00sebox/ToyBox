@@ -17,6 +17,7 @@ public:
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Light).name(); }
 	void imgui_render() override;
+	void serialize(nlohmann::json& accessor) const = 0;
 
 protected:
 	mathz::Vec4 m_colour;
@@ -34,6 +35,7 @@ public:
 	[[nodiscard]] const char* get_name() const override { return "Directional Light"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(DirectionalLight).name(); }
 	void imgui_render() override;
+	void serialize(nlohmann::json& accessor) const override;
 
 private:
 	mathz::Vec3 m_direction;
@@ -53,6 +55,7 @@ public:
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(PointLight).name(); }
 	void imgui_render() override;
+	void serialize(nlohmann::json& accessor) const override;
 
 private:
 	static int m_point_light_count;

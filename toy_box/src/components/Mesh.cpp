@@ -9,6 +9,9 @@
 #include <imgui_internal.h>
 #include <mathz/Matrix.h>
 #include <glad/glad.h>
+#include <json/json.hpp>
+
+using namespace nlohmann;
 
 Mesh::Mesh(Mesh&& mesh) noexcept
 {
@@ -63,5 +66,9 @@ void Mesh::unbind() const
 void Mesh::imgui_render()
 {
 	
+}
+
+void Mesh::serialize(json& accessor) const
+{
 }
 

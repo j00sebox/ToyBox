@@ -5,7 +5,8 @@
 // TODO: Add more
 enum class PrimitiveTypes
 {
-	Cube = 0
+	None = 0,
+	Cube
 };
 
 class Cube

@@ -26,6 +26,7 @@ public:
 	[[nodiscard]] const char* get_name() const override { return "Material"; }
 	[[nodiscard]] const char* get_type() const override { return typeid(Material).name(); }
 	void imgui_render() override;
+	void serialize(nlohmann::json& accessor) const override;
 
 private:
 	void texture_viewer(unsigned int texture_index);

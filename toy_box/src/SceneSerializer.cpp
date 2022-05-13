@@ -70,6 +70,29 @@ void SceneSerializer::save(const char* scene, std::shared_ptr<Camera>& camera, s
 		++i;
 	}
 	
+	res_json["model_count"] = entities.size();
+
+	int j = 0;
+	for (const auto& e : entities)
+	{	
+		res_json["models"][j]["name"] = e->get_name();
+		
+		if (e->has<Material>())
+		{
+			Material& material = e->get<Material>();
+			res_json["models"][j]["shader"] = ShaderLib::find(material.get_shader());
+		}
+
+		const auto& components = e->get_components();
+
+		for (const auto& c : components)
+		{
+			c->serialize(res_json["models"][j]);
+		}
+		 
+		++j;
+	}
+
 	overwrite_file(scene, res_json.dump());
 }
 

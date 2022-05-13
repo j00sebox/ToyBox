@@ -94,6 +94,7 @@ public:
 	static std::shared_ptr<ShaderProgram> get(const std::string& name);
 	static int get_num() { return m_shaders.size(); }
 	static bool exists(const std::string& name);
+	static std::string find(const std::shared_ptr<ShaderProgram>& s);
 	static void release();
 
 private:
