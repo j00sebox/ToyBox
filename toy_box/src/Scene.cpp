@@ -123,15 +123,11 @@ void Scene::update(float elapsed_time)
 				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 
-				material.bind();
-				mesh.bind();
-				Renderer::stencil(mesh.get_index_count());
+				Renderer::stencil(mesh, material);
 			}
 			else
 			{
-				material.bind();
-				mesh.bind();
-				Renderer::draw_elements(mesh.get_index_count());
+				Renderer::draw_elements(mesh, material);
 			}
 		}
 	}

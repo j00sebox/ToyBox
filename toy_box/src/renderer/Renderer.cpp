@@ -6,6 +6,9 @@
 #include "Shader.h"
 #include "VertexArray.h"
 
+#include "components/Mesh.h"
+#include "components/Material.h"
+
 #include "events/EventList.h"
 
 #include "mathz/Quaternion.h";
@@ -30,24 +33,28 @@ void Renderer::init(int width, int height)
 	));
 }
 
-void Renderer::draw_elements(unsigned int count)
+void Renderer::draw_elements(const Mesh& mesh, const Material& material)
 {
-	GL_CALL(glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr));
+	material.bind();
+	mesh.bind();
+	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::stencil(unsigned int count)
+void Renderer::stencil(const Mesh& mesh, const Material& material)
 {
 	GL_CALL(glStencilFunc(GL_ALWAYS, 1, 0xFF)); // make all the fragments of the object have a stencil of 1
 	GL_CALL(glStencilMask(0xFF)); // any stencil value can be written to
 	
-	GL_CALL(glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr));
+	material.bind();
+	mesh.bind();
+	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 
 	ShaderLib::get("flat_colour")->bind();
 	GL_CALL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF)); // now all fragments not apart of the original object are written
 	GL_CALL(glStencilMask(0x00)); // disable writing to stencil buffer
 	GL_CALL(glDisable(GL_DEPTH_TEST));
 
-	GL_CALL(glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr));
+	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 	
 	// set back to normal for other objects
 	GL_CALL(glStencilMask(0xFF));
