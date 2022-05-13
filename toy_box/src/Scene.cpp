@@ -3,7 +3,6 @@
 
 #include "Entity.h"
 #include "Renderer.h"
-#include "ParseFile.h"
 #include "SceneSerializer.h"
 
 #include "components/Transform.h"
@@ -29,6 +28,11 @@ Scene::~Scene()
 void Scene::load(const char* scene)
 {
 	SceneSerializer::open(scene, m_camera, m_skybox, m_entities);
+}
+
+void Scene::save(const std::string& path)
+{
+	SceneSerializer::save(path.c_str(), m_camera, m_skybox, m_entities);
 }
 
 void Scene::init(int width, int height)

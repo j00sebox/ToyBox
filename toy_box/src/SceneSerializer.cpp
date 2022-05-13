@@ -2,7 +2,7 @@
 #include "SceneSerializer.h"
 
 #include "GLTFLoader.h"
-#include "ParseFile.h"
+#include "FileOperations.h"
 
 #include "Entity.h"
 #include "Camera.h"
@@ -26,7 +26,7 @@ void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, s
 
 	std::string src = file_to_string(scene);
 
-	json w_json = json::parse(src);
+	json w_json = json::parse(src);                                                                                               
 
 	json camera_accessor = w_json["camera"];
 	json camera_pos = camera_accessor["position"];
@@ -44,6 +44,33 @@ void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, s
 	unsigned int model_count = w_json["model_count"];
 
 	load_models(models, model_count, entities);
+}
+
+void SceneSerializer::save(const char* scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, std::vector<std::unique_ptr<Entity>>& entities)
+{
+	json res_json;
+
+	mathz::Vec3 camera_pos = camera->get_pos();
+	res_json["camera"]["position"][0] = camera_pos.x;
+	res_json["camera"]["position"][1] = camera_pos.y;
+	res_json["camera"]["position"][2] = camera_pos.z;
+
+	int num_shader = ShaderLib::get_num();
+	res_json["shader_count"] = num_shader;
+
+	int i = 0;
+	for (const auto& [name, shader_ptr] : ShaderLib::m_shaders)
+	{
+		res_json["shaders"][i]["name"] = name;
+
+		// TODO: Find better way to do this
+		std::vector<std::string> locations = shader_ptr->get_shader_locations();
+		res_json["shaders"][i]["vertex"] = locations[0];
+		res_json["shaders"][i]["fragment"] = locations[1];
+		++i;
+	}
+	
+	overwrite_file(scene, res_json.dump());
 }
 
 void SceneSerializer::load_skybox(json accessor, std::unique_ptr<Skybox>& sky_box)

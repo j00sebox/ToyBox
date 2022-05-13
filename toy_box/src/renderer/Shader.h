@@ -65,13 +65,14 @@ public:
 	void set_uniform_mat4f(const std::string& name, const mathz::Mat4& mat);
 
 	[[nodiscard]] int get_uniform_loaction(const std::string& name);
+	[[nodiscard]] const std::vector<std::string>& get_shader_locations() const { return m_shader_locations; } // TODO: Remove later
 
 	void bind() const;
 	void unbind() const;
 
 private:
 	void create_program();
-	std::string load_shader(const Shader& s) const;
+	std::string load_shader(const Shader& s);
 	void create_shader(Shader& s, const std::string& src) const;
 	void compile_shader(unsigned int id) const;
 	void attach_shader(unsigned int id) const;
@@ -82,6 +83,7 @@ private:
 
 	unsigned int m_program_id;
 	std::vector<Shader> m_shaders;
+	std::vector<std::string> m_shader_locations;
 	std::unordered_map<std::string, int> m_uniform_location_cache;
 };
 
@@ -90,9 +92,12 @@ class ShaderLib
 public:
 	static void add(const std::string& name, ShaderProgram&& sp);
 	static std::shared_ptr<ShaderProgram> get(const std::string& name);
+	static int get_num() { return m_shaders.size(); }
 	static bool exists(const std::string& name);
 	static void release();
 
 private:
 	static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;
+
+	friend class SceneSerializer;
 };

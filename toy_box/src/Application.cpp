@@ -78,8 +78,19 @@ void Application::display_menu()
 			}
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Examples"))
+		if (ImGui::BeginMenu("Save"))
 		{
+			static char buf[32] = "\x73\x6F\x6D\x65\x74\x68\x69\x6E\x67\x2E\x73\x63\x65\x6E\x65";
+			ImGui::Text("resources/scenes/");
+			ImGui::SameLine();
+			ImGui::InputText("##LeftSide", buf, IM_ARRAYSIZE(buf));
+
+			if (ImGui::Button("Save As"))
+			{
+				std::string path = std::string("resources/scenes/") + std::string(buf);
+				m_current_scene->save(path);
+			}
+			
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();

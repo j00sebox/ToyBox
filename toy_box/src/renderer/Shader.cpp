@@ -28,6 +28,7 @@ ShaderProgram::ShaderProgram(ShaderProgram&& sp) noexcept
 {
 	m_program_id = sp.m_program_id;
 	sp.m_program_id = 0;
+	m_shader_locations = std::move(sp.m_shader_locations); // TODO: Remove later
 }
 
 ShaderProgram::~ShaderProgram()
@@ -50,8 +51,12 @@ void ShaderProgram::create_program()
 	GL_CALL(m_program_id = glCreateProgram());
 }
 
-std::string ShaderProgram::load_shader(const Shader& s) const
+// TODO: Add const back in
+std::string ShaderProgram::load_shader(const Shader& s) 
 {
+	// TODO: Remove later
+	m_shader_locations.emplace_back(s.file_path);
+
 	std::string line;
 	std::ifstream stream(s.file_path);
 

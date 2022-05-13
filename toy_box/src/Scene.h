@@ -12,6 +12,7 @@ public:
 	~Scene();
 
 	void load(const char* scene);
+	void save(const std::string& path);
 	void init(int width, int height);
 	void update(float elapsed_time);
 	void render_components();

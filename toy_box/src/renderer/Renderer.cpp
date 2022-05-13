@@ -21,10 +21,13 @@ void Renderer::init(int width, int height)
 
 	GL_CALL(glClearColor(0.2f, 0.0f, 0.3f, 1.f));
 
-	ShaderLib::add("flat_colour", ShaderProgram(
-		Shader("resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
-		Shader("resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
-	));
+	if (!ShaderLib::exists("flat_colour"))
+	{
+		ShaderLib::add("flat_colour", ShaderProgram(
+			Shader("resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
+			Shader("resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
+		));
+	}
 }
 
 void Renderer::draw_elements(const Mesh& mesh, const Material& material)
