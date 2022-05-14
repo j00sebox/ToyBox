@@ -12,7 +12,7 @@ using namespace nlohmann;
 
 void Transform::translate(const mathz::Vec3& pos)
 {
-	m_postion = pos;
+	m_position = pos;
 	m_translate[3][0] = pos.x;	m_translate[3][1] = pos.y;	m_translate[3][2] = pos.z;
 }
 
@@ -37,20 +37,28 @@ mathz::Mat4 Transform::get_transform() const
 
 void Transform::imgui_render()
 {
-	mathz::Vec3 position = m_postion;
+	mathz::Vec3 position = m_position;
+
 	ImGui::Text("\nPosition: ");
-	ImGui::InputFloat("x", &position.x);
-	ImGui::InputFloat("y", &position.y);
-	ImGui::InputFloat("z", &position.z);
+	ImGui::Text("x"); ImGui::SameLine();
+	ImGui::DragFloat("##x", &position.x);
+	ImGui::Text("y"); ImGui::SameLine();
+	ImGui::DragFloat("##y", &position.y);
+	ImGui::Text("z"); ImGui::SameLine();
+	ImGui::DragFloat("##z", &position.z);
 	translate(position);
 
 	float angle = m_rotate_angle;
 	mathz::Vec3 axis = m_rotate_axis;
 	ImGui::Text("\nRotation: ");
-	ImGui::InputFloat("angle", &angle);
-	ImGui::SliderFloat("i", &axis.x, -1.f, 1.f);
-	ImGui::SliderFloat("j", &axis.y, -1.f, 1.f);
-	ImGui::SliderFloat("k", &axis.z, -1.f, 1.f);
+	ImGui::Text("angle"); ImGui::SameLine();
+	ImGui::DragFloat("##angle", &angle);
+	ImGui::Text("i"); ImGui::SameLine();
+	ImGui::SliderFloat("##i", &axis.x, -1.f, 1.f);
+	ImGui::Text("j"); ImGui::SameLine();
+	ImGui::SliderFloat("##j", &axis.y, -1.f, 1.f);
+	ImGui::Text("k"); ImGui::SameLine();
+	ImGui::SliderFloat("##k", &axis.z, -1.f, 1.f);
 	axis.normalize();
 	rotate(angle, axis);
 
@@ -62,9 +70,9 @@ void Transform::imgui_render()
 
 void Transform::serialize(json& accessor) const
 {
-	accessor["transform"]["translate"][0] = m_postion.x;
-	accessor["transform"]["translate"][1] = m_postion.y;
-	accessor["transform"]["translate"][2] = m_postion.z;
+	accessor["transform"]["translate"][0] = m_position.x;
+	accessor["transform"]["translate"][1] = m_position.y;
+	accessor["transform"]["translate"][2] = m_position.z;
 
 	accessor["transform"]["rotation"][0] = m_rotate_angle;
 	accessor["transform"]["rotation"][1] = m_rotate_axis.x;
