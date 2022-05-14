@@ -59,9 +59,9 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 			m_indices_count = cube.get_index_count();
 			break;
 		}
-		case PrimitiveTypes::Plane:
+		case PrimitiveTypes::Quad:
 		{
-			Plane plane;
+			Quad plane;
 			m_va = plane.get_va();
 			m_indices_count = plane.get_index_count();
 			break;

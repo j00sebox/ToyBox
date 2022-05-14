@@ -15,8 +15,8 @@ std::string primitve_type_to_str(PrimitiveTypes pt)
 	case PrimitiveTypes::Cube:
 		return "cube";
 		break;
-	case PrimitiveTypes::Plane:
-		return "plane";
+	case PrimitiveTypes::Quad:
+		return "quad";
 		break;
 	default:
 		break;
@@ -29,9 +29,9 @@ PrimitiveTypes str_to_primitive_type(const char* name)
 	{
 		return PrimitiveTypes::Cube;
 	}
-	else if (!strcmp(name, "plane"))
+	else if (!strcmp(name, "quad"))
 	{
-		return PrimitiveTypes::Plane;
+		return PrimitiveTypes::Quad;
 	}
 
 	return PrimitiveTypes::None;
@@ -98,7 +98,7 @@ Cube::Cube()
 	cube_vb.unbind();
 }
 
-Plane::Plane()
+Quad::Quad()
 {
 	std::vector<float> vertices = {
 		-0.5f, -0.5f, -0.5f,
@@ -112,12 +112,12 @@ Plane::Plane()
 		0, 3, 2
 	};
 
-	m_plane_va.bind();
+	m_quad_va.bind();
 
-	VertexBuffer plane_vb(vertices);
-	IndexBuffer plane_ib(indices);
+	VertexBuffer quad_vb(vertices);
+	IndexBuffer quad_ib(indices);
 
-	m_index_count = plane_ib.get_count();
+	m_index_count = quad_ib.get_count();
 
 	BufferLayout sb_layout = {
 		{0, 3, GL_FLOAT, false},
@@ -125,9 +125,9 @@ Plane::Plane()
 		{2, 3, GL_FLOAT, false}*/
 	};
 
-	m_plane_va.set_layout(plane_vb, sb_layout);
+	m_quad_va.set_layout(quad_vb, sb_layout);
 
-	m_plane_va.unbind();
-	plane_ib.unbind();
-	plane_vb.unbind();
+	m_quad_va.unbind();
+	quad_ib.unbind();
+	quad_vb.unbind();
 }

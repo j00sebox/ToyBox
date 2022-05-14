@@ -90,9 +90,9 @@ void Application::display_menu()
 				m_current_scene->add_primitive("cube");
 			}
 
-			if (ImGui::MenuItem("Plane"))
+			if (ImGui::MenuItem("Quad"))
 			{
-				m_current_scene->add_primitive("plane");
+				m_current_scene->add_primitive("quad");
 			}
 
 			ImGui::EndMenu();
