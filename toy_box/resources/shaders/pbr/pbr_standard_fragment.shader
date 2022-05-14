@@ -178,6 +178,11 @@ void main()
 		ao = texture(occlusion_t, v_tex_coord).r;
 	}
 
+	if (base_colour.a < 0.01f)
+	{
+		discard;
+	}
+
 	F0 = mix(F0, base_colour, metallic);
 
 	vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.f) * base_colour * ao;
