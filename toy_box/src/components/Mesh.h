@@ -40,5 +40,6 @@ private:
 	// TODO: Remove after a better way is found
 	std::string m_gltf_path;
 	PrimitiveTypes m_primitive = PrimitiveTypes::None;
+	friend class SceneSerializer;
 };
 

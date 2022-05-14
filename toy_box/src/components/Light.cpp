@@ -62,6 +62,18 @@ void DirectionalLight::imgui_render()
 
 void DirectionalLight::serialize(json& accessor) const
 {
+	accessor["light"]["type"] = "directional_light";
+
+	accessor["light"]["colour"][0] = m_colour.x;
+	accessor["light"]["colour"][1] = m_colour.y;
+	accessor["light"]["colour"][2] = m_colour.z;
+	accessor["light"]["colour"][3] = m_colour.w;
+
+	accessor["light"]["brightness"] = m_brightness;
+
+	accessor["light"]["direction"][0] = m_direction.x;
+	accessor["light"]["direction"][1] = m_direction.y;
+	accessor["light"]["direction"][2] = m_direction.z;
 }
 
 int PointLight::m_point_light_count = 0;
@@ -90,5 +102,16 @@ void PointLight::imgui_render()
 
 void PointLight::serialize(json& accessor) const
 {
+	accessor["light"]["type"] = "point_light";
+
+	accessor["light"]["colour"][0] = m_colour.x;
+	accessor["light"]["colour"][1] = m_colour.y;
+	accessor["light"]["colour"][2] = m_colour.z;
+	accessor["light"]["colour"][3] = m_colour.w;
+
+	accessor["light"]["brightness"] = m_brightness;
+
+	accessor["light"]["radius"] = m_radius;
+	accessor["light"]["range"] = m_range;
 }
 

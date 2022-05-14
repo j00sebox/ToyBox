@@ -4,6 +4,7 @@
   "models": [
     
     {
+      "gltf": { "path": "resources/models/wooden_floor/scene.gltf" },
       "name": "Floor",
       "shader": "pbr_standard",
       "transform": {
@@ -13,6 +14,12 @@
       }
     },
     {
+      "light": {
+        "brightness": 3.0,
+        "colour": [ 1.0, 1.0, 1.0, 1.0 ],
+        "direction": [ 1.0, 0.0, 0.0 ],
+        "type": "directional_light"
+      },
       "name": "Direct Light",
       "transform": {
         "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
@@ -21,7 +28,15 @@
       }
     },
     {
+      "light": {
+        "brightness": 1.0,
+        "colour": [ 1.0, 1.0, 1.0, 1.0 ],
+        "radius": 0.10000000149011612,
+        "range": 10.0,
+        "type": "point_light"
+      },
       "name": "Point Light",
+      "primitive": "Cube",
       "shader": "pbr_standard",
       "transform": {
         "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
@@ -30,7 +45,15 @@
       }
     },
     {
+      "light": {
+        "brightness": 1.0,
+        "colour": [ 1.0, 0.0, 0.0, 1.0 ],
+        "radius": 0.10000000149011612,
+        "range": 10.0,
+        "type": "point_light"
+      },
       "name": "Point Light (1)",
+      "primitive": "Cube",
       "shader": "pbr_standard",
       "transform": {
         "rotation": [ 0.0, 0.0, 0.0, 0.0 ],

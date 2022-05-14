@@ -197,7 +197,6 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_mode
 
 	for (unsigned int i = 0; i < num_models; ++i)
 	{
-#include "Buffer.h"
 		Entity e;
 
 		json model = accessor[i];
@@ -255,6 +254,9 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_mode
 
 			Mesh mesh;
 			load_gltf_mesh(loader, mesh);
+			
+			// TODO: remove later
+			mesh.m_gltf_path = model["gltf"]["path"];
 			e.attach(std::move(mesh));
 
 			Material material;

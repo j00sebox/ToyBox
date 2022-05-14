@@ -13,10 +13,29 @@
 
 using namespace nlohmann;
 
+std::string primitve_type_to_str(PrimitiveTypes pt)
+{
+	switch (pt)
+	{
+	case PrimitiveTypes::None:
+		return "None";
+		break;
+	case PrimitiveTypes::Cube:
+		return "Cube";
+		break;
+	default:
+		break;
+	}
+}
+
 Mesh::Mesh(Mesh&& mesh) noexcept
 {
 	m_va = std::move(mesh.m_va);
 	m_indices_count = mesh.m_indices_count;
+	
+	// TODO: Remove later
+	m_gltf_path = mesh.m_gltf_path;
+	m_primitive = mesh.m_primitive;
 }
 
 void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>& indices)
@@ -43,6 +62,9 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 
 void Mesh::load_primitive(PrimitiveTypes primitive)
 {
+	// TODO: Figure out better way to do this
+	m_primitive = primitive;
+
 	switch (primitive)
 	{
 	case PrimitiveTypes::Cube:
@@ -70,5 +92,13 @@ void Mesh::imgui_render()
 
 void Mesh::serialize(json& accessor) const
 {
+	if (!m_gltf_path.empty())
+	{
+		accessor["gltf"]["path"] = m_gltf_path;
+	}
+	else if (m_primitive != PrimitiveTypes::None)
+	{
+		accessor["primitive"] = primitve_type_to_str(m_primitive);
+	}
 }
 
