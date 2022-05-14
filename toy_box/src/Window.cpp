@@ -21,6 +21,11 @@ extern "C"
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
+
+	void glfw_window_resize_callback(GLFWwindow* window, int width, int height)
+	{
+		EventList::e_resize.execute_function(width, height);
+	}
 }
 
 Window::Window(int width, int height)
@@ -53,6 +58,7 @@ Window::Window(int width, int height)
 
 	// setup callbacks
 	glfwSetErrorCallback(glfw_error_callback);
+	glfwSetWindowSizeCallback(m_window_handle, glfw_window_resize_callback);
 
 	Input::m_window_handle = m_window_handle;
 }

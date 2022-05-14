@@ -11,7 +11,7 @@
 
 void Renderer::init(int width, int height)
 {
-	GL_CALL(glViewport(0, 0, width, height));
+	set_viewport(width, height);
 
 	GL_CALL(glEnable(GL_STENCIL_TEST));
 	GL_CALL(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)); // replace all the stencil values when drawing original object
@@ -28,6 +28,11 @@ void Renderer::init(int width, int height)
 			Shader("resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
 		));
 	}
+}
+
+void Renderer::set_viewport(int width, int height)
+{
+	GL_CALL(glViewport(0, 0, width, height));
 }
 
 void Renderer::draw_elements(const Mesh& mesh, const Material& material)

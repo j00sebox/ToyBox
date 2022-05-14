@@ -17,6 +17,7 @@ public:
 	void update(float elapsed_time);
 	void render_components();
 	void add_primitive(const char* name);
+	void window_resize(int width, int height);
 	void reset_view();
 	Camera* get_camera() { return m_camera.get(); }
 

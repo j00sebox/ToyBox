@@ -10,6 +10,8 @@
 #include "components/Mesh.h"
 #include "components/Material.h"
 
+#include "events/EventList.h"
+
 #include <mathz/Misc.h>
 
 #include <imgui.h>
@@ -37,21 +39,8 @@ void Scene::save(const std::string& path)
 
 void Scene::init(int width, int height)
 {
+	EventList::e_resize.bind_function(std::bind(&Scene::window_resize, this, std::placeholders::_1, std::placeholders::_2));
 	m_camera->resize(width, height);
-
-	if (m_skybox)
-	{
-		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-	}
-
-	for (unsigned int i = 0; i < m_entities.size(); ++i)
-	{
-		if (m_entities[i]->has<Material>())
-		{
-			auto& material = m_entities[i]->get<Material>();
-			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-		}
-	}
 }
 
 void Scene::update(float elapsed_time)
@@ -119,6 +108,7 @@ void Scene::update(float elapsed_time)
 
 			material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
 			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 			
 			if (m_entities[i].get() == m_selected_entity)
 			{
@@ -217,6 +207,12 @@ void Scene::add_primitive(const char* name)
 	e.attach(std::move(material));
 
 	m_entities.emplace_back(std::make_unique<Entity>(std::move(e)));
+}
+
+void Scene::window_resize(int width, int height)
+{
+	m_camera->resize(width, height);
+	Renderer::set_viewport(width, height);
 }
 
 void Scene::reset_view()
