@@ -53,6 +53,11 @@ void SceneSerializer::save(const char* scene, std::shared_ptr<Camera>& camera, s
 {
 	json res_json;
 
+	if (sky_box)
+	{
+		res_json["skybox"] = sky_box->get_resource_path();
+	}
+
 	mathz::Vec3 camera_pos = camera->get_pos();
 	res_json["camera"]["position"][0] = camera_pos.x;
 	res_json["camera"]["position"][1] = camera_pos.y;

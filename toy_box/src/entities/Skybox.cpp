@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 
 Skybox::Skybox(const std::string& texture_path)
-	: m_skybox_texture(texture_path)
+	: m_skybox_texture(texture_path), m_path(texture_path)
 {
 	std::vector<float> skybox_verts =
 	{
@@ -70,6 +70,7 @@ Skybox::Skybox(Skybox&& sb) noexcept
 	m_indices_count = sb.m_indices_count;
 	m_skybox_va = std::move(sb.m_skybox_va);
 	m_skybox_shader = sb.m_skybox_shader;
+	m_path = std::move(sb.m_path);
 }
 
 void Skybox::draw() const
