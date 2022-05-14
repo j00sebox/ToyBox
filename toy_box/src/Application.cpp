@@ -10,7 +10,7 @@ void Application::start()
 	m_running = true;
 
 #ifdef PLATFORM_WINDOWS
-	m_current_scene->load("resources/scenes/spooky.scene");
+	m_current_scene->load("resources/scenes/flying_high.scene");
 #else
 	m_current_scene->load("./toy_box/resources/scenes/spooky.scene");
 #endif

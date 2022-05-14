@@ -122,7 +122,7 @@ void Scene::update(float elapsed_time)
 			
 			if (m_entities[i].get() == m_selected_entity)
 			{
-				transform.scale(transform.get_uniform_scale() * 1.05f); // scale up a tiny bit to see outline
+				transform.scale(transform.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
 				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", transform.get_transform());
 				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());

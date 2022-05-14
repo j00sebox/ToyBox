@@ -55,7 +55,7 @@ void Renderer::stencil(const Mesh& mesh, const Material& material)
 	
 	// set back to normal for other objects
 	GL_CALL(glStencilMask(0xFF));
-	GL_CALL(glStencilFunc(GL_ALWAYS, 1, 0xFF));
+	GL_CALL(glStencilFunc(GL_ALWAYS, 0, 0xFF));
 	GL_CALL(glEnable(GL_DEPTH_TEST));
 }
 

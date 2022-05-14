@@ -80,6 +80,9 @@ void Skybox::draw() const
 	m_skybox_shader->bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
 	GL_CALL(glDepthMask(GL_TRUE));
+	m_skybox_va.unbind();
+	m_skybox_texture.unbind();
+	m_skybox_shader->unbind();
 }
 
 void Skybox::attach_shader_program(ShaderProgram&& sp)
