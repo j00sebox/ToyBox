@@ -56,32 +56,12 @@ void Application::display_menu()
 		{
 			if (ImGui::BeginMenu("Open"))
 			{
-				// TODO: Make this more dynamic
-				if (ImGui::MenuItem("Flying High"))
+				for (const auto& entry : std::filesystem::directory_iterator("resources/scenes/"))
 				{
-#ifdef PLATFORM_WINDOWS
-					switch_scene("resources/scenes/flying_high.scene");
-#else
-					switch_scene("./toy_box/resources/scenes/flying_high.scene");
-#endif
-				}
-
-				if (ImGui::MenuItem("Spooky"))
-				{
-#ifdef PLATFORM_WINDOWS
-					switch_scene("resources/scenes/spooky.scene");
-#else
-					switch_scene("./toy_box/resources/scenes/spooky.scene");
-#endif
-				}
-
-				if (ImGui::MenuItem("Something"))
-				{
-#ifdef PLATFORM_WINDOWS
-					switch_scene("resources/scenes/something.scene");
-#else
-					switch_scene("./toy_box/resources/scenes/spooky.scene");
-#endif
+					if (ImGui::MenuItem(entry.path().filename().string().c_str()))
+					{
+						switch_scene(entry.path().string().c_str());
+					}
 				}
 
 				ImGui::EndMenu();

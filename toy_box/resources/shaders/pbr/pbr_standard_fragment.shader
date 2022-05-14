@@ -11,6 +11,7 @@ uniform vec4 u_emissive_colour;
 in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_tex_coord;
+in mat3 v_model;
 
 uniform vec3 u_cam_pos;
 
@@ -101,7 +102,7 @@ vec4 point_light(int i)
 	float distance = length(light_vec);
 	vec3 l = normalize(light_vec);
 	vec3 v = normalize(u_cam_pos - v_position);
-	vec3 n = normalize(normal);
+	vec3 n = normalize(v_model * normal);
 	vec3 h = normalize(l + v);
 
 	if (distance > point_lights[i].range)
@@ -135,7 +136,7 @@ vec4 direct_light()
 {
 	vec3 l = normalize(directional_light.direction);
 	vec3 v = normalize(u_cam_pos - v_position);
-	vec3 n = normalize(normal);
+	vec3 n = normalize(v_model * normal); // TODO: will need to change once non uniform scaling is implemented
 	vec3 h = normalize(l + v);
 
 	vec4 ks = fresnel(h, v);
