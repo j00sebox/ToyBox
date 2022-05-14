@@ -13,21 +13,6 @@
 
 using namespace nlohmann;
 
-std::string primitve_type_to_str(PrimitiveTypes pt)
-{
-	switch (pt)
-	{
-	case PrimitiveTypes::None:
-		return "None";
-		break;
-	case PrimitiveTypes::Cube:
-		return "cube";
-		break;
-	default:
-		break;
-	}
-}
-
 Mesh::Mesh(Mesh&& mesh) noexcept
 {
 	m_va = std::move(mesh.m_va);

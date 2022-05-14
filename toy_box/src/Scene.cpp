@@ -201,14 +201,14 @@ void Scene::render_components()
 	}
 }
 
-void Scene::add_cube()
+void Scene::add_primitive(const char* name)
 {
 	Entity e;
 	e.set_name("Cubert");
 	e.attach(Transform());
 	
 	Mesh mesh;
-	mesh.load_primitive(PrimitiveTypes::Cube);
+	mesh.load_primitive(str_to_primitive_type(name));
 	e.attach(std::move(mesh));
 
 	Material material;

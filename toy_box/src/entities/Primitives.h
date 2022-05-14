@@ -9,6 +9,9 @@ enum class PrimitiveTypes
 	Cube
 };
 
+std::string primitve_type_to_str(PrimitiveTypes pt);
+PrimitiveTypes str_to_primitive_type(const char* name);
+
 class Cube
 {
 public:

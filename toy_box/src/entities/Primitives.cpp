@@ -5,6 +5,29 @@
 
 #include <glad/glad.h>
 
+std::string primitve_type_to_str(PrimitiveTypes pt)
+{
+	switch (pt)
+	{
+	case PrimitiveTypes::None:
+		return "None";
+		break;
+	case PrimitiveTypes::Cube:
+		return "cube";
+		break;
+	default:
+		break;
+	}
+}
+
+PrimitiveTypes str_to_primitive_type(const char* name)
+{
+	if (name == "cube")
+	{
+		return PrimitiveTypes::Cube;
+	}
+}
+
 Cube::Cube()
 {
 	std::vector<float> vertices =

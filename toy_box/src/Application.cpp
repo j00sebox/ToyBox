@@ -87,7 +87,7 @@ void Application::display_menu()
 		{
 			if (ImGui::MenuItem("Cube"))
 			{
-				m_current_scene->add_cube();
+				m_current_scene->add_primitive("cube");
 			}
 
 			ImGui::EndMenu();
