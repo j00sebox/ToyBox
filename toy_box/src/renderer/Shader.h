@@ -92,7 +92,7 @@ class ShaderLib
 public:
 	static void add(const std::string& name, ShaderProgram&& sp);
 	static std::shared_ptr<ShaderProgram> get(const std::string& name);
-	static int get_num() { return m_shaders.size(); }
+	static size_t get_num() { return m_shaders.size(); }
 	static bool exists(const std::string& name);
 	static std::string find(const std::shared_ptr<ShaderProgram>& s);
 	static void release();

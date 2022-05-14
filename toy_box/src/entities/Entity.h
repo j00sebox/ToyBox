@@ -30,7 +30,7 @@ public:
 	{
 		if (m_type_map.find(component.get_type()) != m_type_map.end())
 		{
-			int index = m_type_map.at(component.get_type());
+			size_t index = m_type_map.at(component.get_type());
 
 			m_components[m_type_map.at(component.get_type())]->on_remove();
 
@@ -70,7 +70,7 @@ public:
 
 protected:
 	std::string m_name;
-	std::unordered_map<const char*, int> m_type_map;
+	std::unordered_map<const char*, size_t> m_type_map;
 	std::vector<std::shared_ptr<Component>> m_components;
 };
 

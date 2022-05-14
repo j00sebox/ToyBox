@@ -63,7 +63,7 @@ void SceneSerializer::save(const char* scene, std::shared_ptr<Camera>& camera, s
 	res_json["camera"]["position"][1] = camera_pos.y;
 	res_json["camera"]["position"][2] = camera_pos.z;
 
-	int num_shader = ShaderLib::get_num();
+	size_t num_shader = ShaderLib::get_num();
 	res_json["shader_count"] = num_shader;
 
 	int i = 0;
