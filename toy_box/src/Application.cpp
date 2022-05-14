@@ -10,7 +10,7 @@ void Application::start()
 	m_running = true;
 
 #ifdef PLATFORM_WINDOWS
-	m_current_scene->load("resources/scenes/flying_high.scene");
+	m_current_scene->load("resources/scenes/spooky.scene");
 #else
 	m_current_scene->load("./toy_box/resources/scenes/spooky.scene");
 #endif
@@ -88,6 +88,11 @@ void Application::display_menu()
 			if (ImGui::MenuItem("Cube"))
 			{
 				m_current_scene->add_primitive("cube");
+			}
+
+			if (ImGui::MenuItem("Plane"))
+			{
+				m_current_scene->add_primitive("plane");
 			}
 
 			ImGui::EndMenu();

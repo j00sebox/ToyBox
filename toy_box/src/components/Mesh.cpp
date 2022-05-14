@@ -52,11 +52,20 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 
 	switch (primitive)
 	{
-	case PrimitiveTypes::Cube:
-		Cube cube;
-		m_va = cube.get_va();
-		m_indices_count = cube.get_index_count();
-		break;
+		case PrimitiveTypes::Cube:
+		{
+			Cube cube;
+			m_va = cube.get_va();
+			m_indices_count = cube.get_index_count();
+			break;
+		}
+		case PrimitiveTypes::Plane:
+		{
+			Plane plane;
+			m_va = plane.get_va();
+			m_indices_count = plane.get_index_count();
+			break;
+		}
 	}
 }
 

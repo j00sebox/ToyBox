@@ -10,10 +10,13 @@ std::string primitve_type_to_str(PrimitiveTypes pt)
 	switch (pt)
 	{
 	case PrimitiveTypes::None:
-		return "None";
+		return "none";
 		break;
 	case PrimitiveTypes::Cube:
 		return "cube";
+		break;
+	case PrimitiveTypes::Plane:
+		return "plane";
 		break;
 	default:
 		break;
@@ -26,6 +29,12 @@ PrimitiveTypes str_to_primitive_type(const char* name)
 	{
 		return PrimitiveTypes::Cube;
 	}
+	else if (name == "plane")
+	{
+		return PrimitiveTypes::Plane;
+	}
+
+	return PrimitiveTypes::None;
 }
 
 Cube::Cube()
@@ -87,4 +96,38 @@ Cube::Cube()
 	m_cube_va.unbind();
 	cube_ib.unbind();
 	cube_vb.unbind();
+}
+
+Plane::Plane()
+{
+	std::vector<float> vertices = {
+		-0.5f, -0.5f, -0.5f,
+		-0.5f,	0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f
+	};
+
+	std::vector<unsigned int> indices = {
+		0, 2, 1,
+		0, 3, 2
+	};
+
+	m_plane_va.bind();
+
+	VertexBuffer plane_vb(vertices);
+	IndexBuffer plane_ib(indices);
+
+	m_index_count = plane_ib.get_count();
+
+	BufferLayout sb_layout = {
+		{0, 3, GL_FLOAT, false},
+		/*{1, 2, GL_FLOAT, false},
+		{2, 3, GL_FLOAT, false}*/
+	};
+
+	m_plane_va.set_layout(plane_vb, sb_layout);
+
+	m_plane_va.unbind();
+	plane_ib.unbind();
+	plane_vb.unbind();
 }

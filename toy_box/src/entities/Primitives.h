@@ -6,7 +6,8 @@
 enum class PrimitiveTypes
 {
 	None = 0,
-	Cube
+	Cube,
+	Plane
 };
 
 std::string primitve_type_to_str(PrimitiveTypes pt);
@@ -22,5 +23,18 @@ public:
 
 private:
 	VertexArray m_cube_va;
+	unsigned int m_index_count;
+};
+
+class Plane
+{
+public:
+	Plane();
+
+	VertexArray&& get_va() { return std::move(m_plane_va); }
+	unsigned int get_index_count() const { return m_index_count; }
+
+private:
+	VertexArray m_plane_va;
 	unsigned int m_index_count;
 };
