@@ -103,6 +103,15 @@ void Application::display_menu()
 			
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Add"))
+		{
+			if (ImGui::MenuItem("Cube"))
+			{
+				m_current_scene->add_cube();
+			}
+
+			ImGui::EndMenu();
+		}
 		ImGui::EndMenuBar();
 	}
 	ImGui::End();

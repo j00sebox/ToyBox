@@ -201,6 +201,24 @@ void Scene::render_components()
 	}
 }
 
+void Scene::add_cube()
+{
+	Entity e;
+	e.set_name("Cubert");
+	e.attach(Transform());
+	
+	Mesh mesh;
+	mesh.load_primitive(PrimitiveTypes::Cube);
+	e.attach(std::move(mesh));
+
+	Material material;
+	material.set_shader(ShaderLib::get("pbr_standard"));
+	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+	e.attach(std::move(material));
+
+	m_entities.emplace_back(std::make_unique<Entity>(std::move(e)));
+}
+
 void Scene::reset_view()
 {
 	m_camera->reset();

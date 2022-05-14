@@ -27,7 +27,7 @@ private:
 	mathz::Vec3 m_postion;
 	mathz::Vec3 m_rotate_axis;
 	float m_rotate_angle = 0.f;
-	float m_uniform_scale;
+	float m_uniform_scale = 1.f;
 
 	mathz::Mat4 m_scale;
 	mathz::Mat4 m_rotation;

@@ -16,6 +16,7 @@ public:
 	void init(int width, int height);
 	void update(float elapsed_time);
 	void render_components();
+	void add_cube();
 	void reset_view();
 	Camera* get_camera() { return m_camera.get(); }
 
