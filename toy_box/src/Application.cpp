@@ -52,7 +52,7 @@ void Application::display_menu()
 	ImGui::Begin("Menu", (bool*)1, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu("Menu"))
+		if (ImGui::BeginMenu("Scene"))
 		{
 			if (ImGui::BeginMenu("Open"))
 			{
@@ -86,23 +86,23 @@ void Application::display_menu()
 
 				ImGui::EndMenu();
 			}
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Save"))
-		{
-			static char buf[32] = "\x73\x6F\x6D\x65\x74\x68\x69\x6E\x67\x2E\x73\x63\x65\x6E\x65";
-			ImGui::Text("resources/scenes/");
-			ImGui::SameLine();
-			ImGui::InputText("##LeftSide", buf, IM_ARRAYSIZE(buf));
-
-			if (ImGui::Button("Save As"))
+			if (ImGui::BeginMenu("Save"))
 			{
-				std::string path = std::string("resources/scenes/") + std::string(buf);
-				m_current_scene->save(path);
+				static char buf[32] = "\x73\x6F\x6D\x65\x74\x68\x69\x6E\x67\x2E\x73\x63\x65\x6E\x65";
+				ImGui::Text("resources/scenes/");
+				ImGui::SameLine();
+				ImGui::InputText("##LeftSide", buf, IM_ARRAYSIZE(buf));
+
+				if (ImGui::Button("Save As"))
+				{
+					std::string path = std::string("resources/scenes/") + std::string(buf);
+					m_current_scene->save(path);
+				}
+
+				ImGui::EndMenu();
 			}
-			
 			ImGui::EndMenu();
-		}
+		}	
 		if (ImGui::BeginMenu("Add"))
 		{
 			if (ImGui::MenuItem("Cube"))
