@@ -172,7 +172,9 @@ int ShaderProgram::get_uniform_loaction(const std::string& name)
 	GL_CALL(int location = glGetUniformLocation(m_program_id, name.c_str()));
 
 	if (location == -1)
+	{
 		fprintf(stderr, "%s uniform not found!", name.c_str());
+	}
 
 	m_uniform_location_cache[name] = location;
 

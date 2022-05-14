@@ -62,4 +62,6 @@ private:
 	int m_index;
 	float m_radius = 1.f;
 	float m_range = 10.f;
+
+	friend class SceneSerializer;
 };

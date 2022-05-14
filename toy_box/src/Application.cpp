@@ -56,6 +56,7 @@ void Application::display_menu()
 		{
 			if (ImGui::BeginMenu("Open"))
 			{
+				// TODO: Make this more dynamic
 				if (ImGui::MenuItem("Flying High"))
 				{
 #ifdef PLATFORM_WINDOWS
@@ -69,6 +70,15 @@ void Application::display_menu()
 				{
 #ifdef PLATFORM_WINDOWS
 					switch_scene("resources/scenes/spooky.scene");
+#else
+					switch_scene("./toy_box/resources/scenes/spooky.scene");
+#endif
+				}
+
+				if (ImGui::MenuItem("Something"))
+				{
+#ifdef PLATFORM_WINDOWS
+					switch_scene("resources/scenes/something.scene");
 #else
 					switch_scene("./toy_box/resources/scenes/spooky.scene");
 #endif

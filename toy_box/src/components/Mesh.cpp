@@ -21,7 +21,7 @@ std::string primitve_type_to_str(PrimitiveTypes pt)
 		return "None";
 		break;
 	case PrimitiveTypes::Cube:
-		return "Cube";
+		return "cube";
 		break;
 	default:
 		break;
