@@ -275,17 +275,16 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_mode
 		}
 		else if (!model["primitive"].is_null())
 		{
-			if (model["primitive"] == "cube")
-			{
-				Mesh mesh;
-				mesh.load_primitive(PrimitiveTypes::Cube);
-				e.attach(std::move(mesh));
+			std::string p_name = model["primitive"];
 
-				Material material;
-				material.set_shader(ShaderLib::get(model["shader"]));
-				material.set_colour({ 1.f, 1.f, 1.f, 1.f });
-				e.attach(std::move(material));
-			}
+			Mesh mesh;
+			mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
+			e.attach(std::move(mesh));
+
+			Material material;
+			material.set_shader(ShaderLib::get(model["shader"]));
+			material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+			e.attach(std::move(material));
 		}
 
 		entities.emplace_back(std::make_unique<Entity>(std::move(e)));

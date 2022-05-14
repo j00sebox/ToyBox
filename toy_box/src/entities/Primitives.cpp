@@ -25,11 +25,11 @@ std::string primitve_type_to_str(PrimitiveTypes pt)
 
 PrimitiveTypes str_to_primitive_type(const char* name)
 {
-	if (name == "cube")
+	if (!strcmp(name, "cube"))
 	{
 		return PrimitiveTypes::Cube;
 	}
-	else if (name == "plane")
+	else if (!strcmp(name, "plane"))
 	{
 		return PrimitiveTypes::Plane;
 	}
@@ -41,13 +41,13 @@ Cube::Cube()
 {
 	std::vector<float> vertices =
 	{
-		-1.0f, -1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//        7--------6
-		 1.0f, -1.0f,  1.0f, //1.f, 0.f, 0.f, 0.f, 1.f,   //       /|       /|
-		 1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      4--------5 |
-		-1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      | |      | | 
-		-1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      | 3------|-2
-		 1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      |/       |/
-		 1.0f,  1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,	//      0--------1
+		-1.0f, -1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//        7--------6
+		 1.0f, -1.0f,  1.0f, //1.f, 0.f, 0.f, 0.f, 1.f,		//       /|       /|
+		 1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      4--------5 |
+		-1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      | |      | | 
+		-1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      | 3------|-2
+		 1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      |/       |/
+		 1.0f,  1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      0--------1
 		-1.0f,  1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f
 	};
 
