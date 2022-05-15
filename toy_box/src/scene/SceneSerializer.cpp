@@ -20,7 +20,7 @@
 static std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts);
 static std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts);
 
-void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, std::vector<std::unique_ptr<Entity>>& entities)
+void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& root)
 {
 	if (scene == "")
 		return;
@@ -47,7 +47,7 @@ void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, s
 	json models = w_json["models"];
 	unsigned int model_count = w_json["model_count"];
 
-	load_models(models, model_count, entities);
+	load_models(models, model_count, root);
 }
 
 void SceneSerializer::save(const char* scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root)
@@ -154,7 +154,7 @@ void SceneSerializer::load_shaders(nlohmann::json accessor, unsigned int num_sha
 	}
 }
 
-void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_models, std::vector<std::unique_ptr<Entity>>& entities)
+void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_models, SceneNode& root)
 {
 	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh) 
 	{
@@ -288,7 +288,7 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_mode
 			e.attach(std::move(material));
 		}
 
-		entities.emplace_back(std::make_unique<Entity>(std::move(e)));
+		root.add_child(std::make_unique<Entity>(std::move(e)));
 	}
 }
 

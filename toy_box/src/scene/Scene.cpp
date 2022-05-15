@@ -30,17 +30,7 @@ Scene::~Scene()
 
 void Scene::load(const char* scene)
 {
-	SceneSerializer::open(scene, m_camera, m_skybox, m_entities);
-
-	/*for (auto&& e : m_entities)
-	{
-		m_es[e->get_name().c_str()] = std::move(e);
-	}*/
-
-	for (auto&& e : m_entities)
-	{
-		root.add_child(std::move(e));
-	}
+	SceneSerializer::open(scene, m_camera, m_skybox, root);
 }
 
 void Scene::save(const std::string& path)
