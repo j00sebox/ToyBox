@@ -32,9 +32,14 @@ void Scene::load(const char* scene)
 {
 	SceneSerializer::open(scene, m_camera, m_skybox, m_entities);
 
-	for (auto&& e : m_entities)
+	/*for (auto&& e : m_entities)
 	{
 		m_es[e->get_name().c_str()] = std::move(e);
+	}*/
+
+	for (auto&& e : m_entities)
+	{
+		root.add_child(std::move(e));
 	}
 }
 
@@ -64,24 +69,24 @@ void Scene::update(float elapsed_time)
 
 	ImGui::Begin("Models");
 	
-	for (const auto& [name, e_ptr] : m_es)
+	for (const auto& scene_node : root.children)
 	{
 		bool selected = false;
 		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
 		{
-			ImGui::Selectable(e_ptr->get_name().c_str(), &selected);
+			ImGui::Selectable(scene_node.entity->get_name().c_str(), &selected);
 			if (selected)
 			{
-				m_selected_entity = e_ptr.get();
+				m_selected_entity = scene_node.entity.get();
 			}
 		}
 		ImGui::EndChild();
 
-		auto transform = e_ptr->get<Transform>();
+		auto transform = scene_node.entity->get<Transform>();
 
-		if (e_ptr->has<PointLight>())
+		if (scene_node.entity->has<PointLight>())
 		{
-			auto& point_light = e_ptr->get<PointLight>();
+			auto& point_light = scene_node.entity->get<PointLight>();
 			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
 			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
@@ -92,9 +97,9 @@ void Scene::update(float elapsed_time)
 			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
 		}
-		else if (e_ptr->has<DirectionalLight>())
+		else if (scene_node.entity->has<DirectionalLight>())
 		{
-			auto& direct_light = e_ptr->get<DirectionalLight>();
+			auto& direct_light = scene_node.entity->get<DirectionalLight>();
 
 			ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
 			ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
@@ -107,16 +112,16 @@ void Scene::update(float elapsed_time)
 			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", { 0.f, 0.f, 0.f, 0.f });
 		}
 
-		if (e_ptr->has<Mesh>())
+		if (scene_node.entity->has<Mesh>())
 		{
-			auto& material = e_ptr->get<Material>();
-			auto& mesh = e_ptr->get<Mesh>();
+			auto& material = scene_node.entity->get<Material>();
+			auto& mesh = scene_node.entity->get<Mesh>();
 
 			material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
 			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 
-			if (e_ptr.get() == m_selected_entity)
+			if (scene_node.entity.get() == m_selected_entity)
 			{
 				transform.scale(transform.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
 				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", transform.get_transform());
@@ -203,7 +208,7 @@ void Scene::add_primitive(const char* name)
 	Timer timer{};
 	std::string lookup{ name };
 	int i = 1;
-	while (m_es.find(lookup) != m_es.end())
+	while (root.exists(lookup))
 	{
 		lookup = std::string(name) + std::format(" ({})", i);
 		++i;
@@ -222,7 +227,7 @@ void Scene::add_primitive(const char* name)
 	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
 	e.attach(std::move(material));
 
-	m_es[lookup] = std::make_unique<Entity>(std::move(e));
+	root.add_child(std::make_unique<Entity>(std::move(e)));
 }
 
 void Scene::window_resize(int width, int height)
@@ -236,3 +241,27 @@ void Scene::reset_view()
 	m_camera->reset();
 }
 
+void SceneNode::add_child(std::unique_ptr<Entity>&& e)
+{
+	SceneNode sn;
+	sn.name = e->get_name();
+	sn.entity = std::move(e);
+	children.emplace_back(std::move(sn));
+	
+}
+
+bool SceneNode::exists(const std::string& name) const
+{
+	if (this->name == name)
+	{
+		return true;
+	}
+
+	bool found = false;
+	for (const SceneNode& sn : children)
+	{
+		found |= sn.exists(name);
+	}
+
+	return found;
+}

@@ -7,6 +7,16 @@
 
 class Entity;
 
+struct SceneNode
+{
+	std::string name;
+	std::unique_ptr<Entity> entity;
+	std::vector<SceneNode> children;
+
+	void add_child(std::unique_ptr<Entity>&& e);
+	bool exists(const std::string& name) const;
+};
+
 class Scene
 {
 public:
@@ -28,6 +38,7 @@ private:
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<std::unique_ptr<Entity>> m_entities;
 	std::map<std::string, std::unique_ptr<Entity>> m_es;
+	SceneNode root;
 
 	// imgui stuff
 	Entity* m_selected_entity = nullptr;
