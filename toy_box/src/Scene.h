@@ -25,6 +25,7 @@ private:
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<std::unique_ptr<Entity>> m_entities;
+	
 
 	// imgui stuff
 	Entity* m_selected_entity = nullptr;

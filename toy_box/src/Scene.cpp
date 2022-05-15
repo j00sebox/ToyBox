@@ -11,6 +11,7 @@
 #include "components/Material.h"
 
 #include "events/EventList.h"
+#include "profiler/Timer.h"
 
 #include <mathz/Misc.h>
 
@@ -58,70 +59,73 @@ void Scene::update(float elapsed_time)
 
 	ImGui::Begin("Models");
 	
-	for (unsigned int i = 0; i < m_entities.size(); ++i)
 	{
-		bool selected = false;
-		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
+		Timer timer{};
+		for (unsigned int i = 0; i < m_entities.size(); ++i)
 		{
-			ImGui::Selectable(m_entities[i]->get_name().c_str(), &selected);
-			if (selected)
+			bool selected = false;
+			ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
 			{
-				m_selected_entity = m_entities[i].get();
+				ImGui::Selectable(m_entities[i]->get_name().c_str(), &selected);
+				if (selected)
+				{
+					m_selected_entity = m_entities[i].get();
+				}
 			}
-		}
-		ImGui::EndChild();
-		
-		auto transform = m_entities[i]->get<Transform>();
+			ImGui::EndChild();
 
-		if (m_entities[i]->has<PointLight>())
-		{
-			auto& point_light = m_entities[i]->get<PointLight>();
-			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
+			auto transform = m_entities[i]->get<Transform>();
 
-			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", point_light.get_index()), point_light.get_brightness());
-			ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", point_light.get_index()), point_light.get_radius());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
-		}
-		else if (m_entities[i]->has<DirectionalLight>())
-		{
-			auto& direct_light = m_entities[i]->get<DirectionalLight>();
-
-			ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
-			ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", direct_light.get_direction());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", direct_light.get_colour());
-		}
-		else
-		{
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", {0.f, 0.f, 0.f, 0.f});
-		}
-
-		if (m_entities[i]->has<Mesh>())
-		{
-			auto& material = m_entities[i]->get<Material>();
-			auto& mesh = m_entities[i]->get<Mesh>();
-
-			material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
-			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-			
-			if (m_entities[i].get() == m_selected_entity)
+			if (m_entities[i]->has<PointLight>())
 			{
-				transform.scale(transform.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", transform.get_transform());
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+				auto& point_light = m_entities[i]->get<PointLight>();
+				mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
-				Renderer::stencil(mesh, material);
+				ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
+				ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", point_light.get_index()), point_light.get_brightness());
+				ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
+				ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", point_light.get_index()), point_light.get_radius());
+				ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
+				ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+				ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+			}
+			else if (m_entities[i]->has<DirectionalLight>())
+			{
+				auto& direct_light = m_entities[i]->get<DirectionalLight>();
+
+				ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
+				ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
+				ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", direct_light.get_direction());
+				ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+				ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", direct_light.get_colour());
 			}
 			else
 			{
-				Renderer::draw_elements(mesh, material);
+				ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", { 0.f, 0.f, 0.f, 0.f });
+			}
+
+			if (m_entities[i]->has<Mesh>())
+			{
+				auto& material = m_entities[i]->get<Material>();
+				auto& mesh = m_entities[i]->get<Mesh>();
+
+				material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
+				material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+				material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+				if (m_entities[i].get() == m_selected_entity)
+				{
+					transform.scale(transform.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
+					ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", transform.get_transform());
+					ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+					ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+					Renderer::stencil(mesh, material);
+				}
+				else
+				{
+					Renderer::draw_elements(mesh, material);
+				}
 			}
 		}
 	}
