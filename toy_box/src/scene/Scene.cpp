@@ -45,7 +45,7 @@ void Scene::load(const char* scene)
 
 void Scene::save(const std::string& path)
 {
-	SceneSerializer::save(path.c_str(), m_camera, m_skybox, m_entities);
+	SceneSerializer::save(path.c_str(), m_camera, m_skybox, root);
 }
 
 void Scene::init(int width, int height)
@@ -69,7 +69,7 @@ void Scene::update(float elapsed_time)
 
 	ImGui::Begin("Models");
 	
-	for (const auto& scene_node : root.children)
+	for (const auto& scene_node : root)
 	{
 		bool selected = false;
 		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
@@ -241,27 +241,3 @@ void Scene::reset_view()
 	m_camera->reset();
 }
 
-void SceneNode::add_child(std::unique_ptr<Entity>&& e)
-{
-	SceneNode sn;
-	sn.name = e->get_name();
-	sn.entity = std::move(e);
-	children.emplace_back(std::move(sn));
-	
-}
-
-bool SceneNode::exists(const std::string& name) const
-{
-	if (this->name == name)
-	{
-		return true;
-	}
-
-	bool found = false;
-	for (const SceneNode& sn : children)
-	{
-		found |= sn.exists(name);
-	}
-
-	return found;
-}

@@ -42,6 +42,7 @@ project "toy_box"
 		"%{prj.name}/src/geometry",
 		"%{prj.name}/src/events",
 		"%{prj.name}/src/entities",
+		"%{prj.name}/src/scene",
 		"%{prj.name}/external",
 		"%{prj.name}/external/stb",
 		"%{prj.name}/external/glfw/include",

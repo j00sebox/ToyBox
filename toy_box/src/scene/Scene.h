@@ -2,20 +2,11 @@
 
 #include "Skybox.h"
 #include "Camera.h"
+#include "SceneNode.h"
 
 #include <map>
 
 class Entity;
-
-struct SceneNode
-{
-	std::string name;
-	std::unique_ptr<Entity> entity;
-	std::vector<SceneNode> children;
-
-	void add_child(std::unique_ptr<Entity>&& e);
-	bool exists(const std::string& name) const;
-};
 
 class Scene
 {

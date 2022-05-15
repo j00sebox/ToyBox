@@ -7,6 +7,7 @@
 #include "Entity.h"
 #include "Camera.h"
 #include "Skybox.h"
+#include "SceneNode.h"
 
 #include "components/Transform.h"
 #include "components/Light.h"
@@ -49,7 +50,7 @@ void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, s
 	load_models(models, model_count, entities);
 }
 
-void SceneSerializer::save(const char* scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, std::vector<std::unique_ptr<Entity>>& entities)
+void SceneSerializer::save(const char* scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root)
 {
 	json res_json;
 
@@ -78,20 +79,20 @@ void SceneSerializer::save(const char* scene, std::shared_ptr<Camera>& camera, s
 		++i;
 	}
 	
-	res_json["model_count"] = entities.size();
+	res_json["model_count"] = root.size();
 
 	int j = 0;
-	for (const auto& e : entities)
+	for (const auto& scene_node : root)
 	{	
-		res_json["models"][j]["name"] = e->get_name();
+		res_json["models"][j]["name"] = scene_node.entity->get_name();
 		
-		if (e->has<Material>())
+		if (scene_node.entity->has<Material>())
 		{
-			Material& material = e->get<Material>();
+			Material& material = scene_node.entity->get<Material>();
 			res_json["models"][j]["shader"] = ShaderLib::find(material.get_shader());
 		}
 
-		const auto& components = e->get_components();
+		const auto& components = scene_node.entity->get_components();
 
 		for (const auto& c : components)
 		{
