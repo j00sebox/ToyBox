@@ -3,6 +3,8 @@
 #include "Skybox.h"
 #include "Camera.h"
 
+#include <map>
+
 class Entity;
 
 class Scene
@@ -25,7 +27,7 @@ private:
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<std::unique_ptr<Entity>> m_entities;
-	
+	std::map<std::string, std::unique_ptr<Entity>> m_es;
 
 	// imgui stuff
 	Entity* m_selected_entity = nullptr;
