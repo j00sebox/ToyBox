@@ -3,12 +3,15 @@
 
 #include "Entity.h"
 
-void SceneNode::add_child(std::unique_ptr<Entity>&& e)
+SceneNode::SceneNode(std::unique_ptr<Entity>&& e)
 {
-	SceneNode sn;
-	sn.m_name = e->get_name();
-	sn.entity = std::move(e);
-	m_children.emplace_back(std::move(sn));
+	m_name = e->get_name();
+	entity = std::move(e);
+}
+
+void SceneNode::add_child(SceneNode&& s)
+{
+	m_children.emplace_back(std::move(s));
 }
 
 bool SceneNode::exists(const std::string& name) const

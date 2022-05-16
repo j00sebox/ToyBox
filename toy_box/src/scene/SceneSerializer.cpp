@@ -117,6 +117,7 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 			accessor[parent_index]["children"][ch_ind++] = ++node_index;
 			serialize_node(accessor, node_index, child);
 		}
+		accessor[parent_index]["child_count"] = scene_node.size();
 	}
 }
 
@@ -169,9 +170,19 @@ void SceneSerializer::load_shaders(json accessor, unsigned int num_shaders)
 	}
 }
 
-void SceneSerializer::load_models(json accessor, unsigned int num_models, SceneNode& root)
+void SceneSerializer::load_models(nlohmann::json accessor, unsigned int model_count, SceneNode& root)
 {
-	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh) 
+	int num_models_checked = 0;
+	while (num_models_checked < model_count)
+	{
+		root.add_child(load_model(accessor, num_models_checked, num_models_checked));
+	}
+}
+
+// TODO: Make this look less ugly
+SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, int& num_models_checked)
+{
+	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
 	{
 		std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
 		std::vector<mathz::Vec3> normals = floats_to_vec3(loader.get_normals());
@@ -219,92 +230,100 @@ void SceneSerializer::load_models(json accessor, unsigned int num_models, SceneN
 		material.load(textures);
 	};
 
-	for (unsigned int i = 0; i < num_models; ++i)
+	Entity e;
+
+	json model = accessor[model_index];
+
+	e.set_name(model.value("name", "no_name"));
+
+	Transform t{};
+	json info = model["transform"];
+
+	json translation = info["translate"];
+	t.translate(mathz::Vec3({ translation[0], translation[1], translation[2] }));
+
+	json rotation = info["rotation"];
+	t.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
+
+	t.scale(info["scale"]);
+
+	e.attach(std::move(t));
+
+	if (!model["light"].is_null())
 	{
-		Entity e;
+		std::string type = model["light"]["type"];
 
-		json model = accessor[i];
-
-		e.set_name(model.value("name", "no_name"));
-
-		Transform t{};
-		json info = model["transform"];
-
-		json translation = info["translate"];
-		t.translate(mathz::Vec3({ translation[0], translation[1], translation[2] }));
-
-		json rotation = info["rotation"];
-		t.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
-
-		t.scale(info["scale"]);
-
-		e.attach(std::move(t));
-
-		if (!model["light"].is_null())
+		if (type == "point_light")
 		{
-			std::string type = model["light"]["type"];
+			PointLight pl;
 
-			if (type == "point_light")
-			{
-				PointLight pl;
+			json colour = model["light"]["colour"];
+			pl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
+			pl.set_radius(model["light"]["radius"]);
+			pl.set_brightness(model["light"]["brightness"]);
 
-				json colour = model["light"]["colour"];
-				pl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
-				pl.set_radius(model["light"]["radius"]);
-				pl.set_brightness(model["light"]["brightness"]);
-
-				e.attach(std::move(pl));
-			}
-			else if (type == "directional_light")
-			{
-				DirectionalLight dl;
-
-				json colour = model["light"]["colour"];
-				dl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
-
-				json dir = model["light"]["direction"];
-				dl.set_direction({ dir[0], dir[1], dir[2] });
-
-				dl.set_brightness(model["light"]["brightness"]);
-
-				e.attach(std::move(dl));
-			}
+			e.attach(std::move(pl));
 		}
-
-		if (!model["gltf"].is_null())
+		else if (type == "directional_light")
 		{
-			std::string gltf_path = model["gltf"]["path"];
-			GLTFLoader loader(gltf_path.c_str());
+			DirectionalLight dl;
 
-			Mesh mesh;
-			load_gltf_mesh(loader, mesh);
-			
-			// TODO: remove later
-			mesh.m_gltf_path = model["gltf"]["path"];
-			e.attach(std::move(mesh));
+			json colour = model["light"]["colour"];
+			dl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
 
-			Material material;
-			load_gltf_material(loader, material);
-			material.set_shader(ShaderLib::get(model["shader"]));
+			json dir = model["light"]["direction"];
+			dl.set_direction({ dir[0], dir[1], dir[2] });
 
-			e.attach(std::move(material));
+			dl.set_brightness(model["light"]["brightness"]);
+
+			e.attach(std::move(dl));
 		}
-		else if (!model["primitive"].is_null())
-		{
-			std::string p_name = model["primitive"];
-
-			Mesh mesh;
-			mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
-			e.attach(std::move(mesh));
-
-			Material material;
-			material.set_shader(ShaderLib::get(model["shader"]));
-			material.set_colour({ 1.f, 1.f, 1.f, 1.f });
-			e.attach(std::move(material));
-		}
-
-		root.add_child(std::make_unique<Entity>(std::move(e)));
 	}
+
+	if (!model["gltf"].is_null())
+	{
+		std::string gltf_path = model["gltf"]["path"];
+		GLTFLoader loader(gltf_path.c_str());
+
+		Mesh mesh;
+		load_gltf_mesh(loader, mesh);
+
+		// TODO: remove later
+		mesh.m_gltf_path = model["gltf"]["path"];
+		e.attach(std::move(mesh));
+
+		Material material;
+		load_gltf_material(loader, material);
+		material.set_shader(ShaderLib::get(model["shader"]));
+
+		e.attach(std::move(material));
+	}
+	else if (!model["primitive"].is_null())
+	{
+		std::string p_name = model["primitive"];
+
+		Mesh mesh;
+		mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
+		e.attach(std::move(mesh));
+
+		Material material;
+		material.set_shader(ShaderLib::get(model["shader"]));
+		material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+		e.attach(std::move(material));
+	}
+
+	SceneNode current_node{ std::make_unique<Entity>(std::move(e)) };
+
+	int num_children = accessor[model_index].value("child_count", 0);
+
+	for (int i = 0; i < num_children; ++i)
+	{
+		int child_index = accessor[model_index]["children"][i];
+		current_node.add_child(load_model(accessor, child_index, num_models_checked));
+	}
+
+	++num_models_checked;
+	return current_node;
 }
 
 std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts)

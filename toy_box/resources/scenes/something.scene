@@ -1,1 +1,138 @@
-{"camera":{"position":[0.9344377517700195,1.251775860786438,-0.39601463079452515]},"model_count":6,"models":[{"children":[1],"gltf":{"path":"resources/models/wooden_floor/scene.gltf"},"name":"Floor","shader":"pbr_standard","transform":{"rotation":[90.0,1.0,0.0,0.0],"scale":0.009999999776482582,"translate":[0.0,-1.0,-2.0]}},{"name":"cube","primitive":"cube","shader":"pbr_standard","transform":{"rotation":[0.0,0.0,0.0,0.0],"scale":1.0,"translate":[0.0,0.0,0.0]}},{"light":{"brightness":3.0,"colour":[1.0,1.0,1.0,1.0],"direction":[1.0,0.0,0.0],"type":"directional_light"},"name":"Direct Light","transform":{"rotation":[0.0,0.0,0.0,0.0],"scale":1.0,"translate":[0.0,0.0,0.0]}},{"children":[4],"light":{"brightness":1.0,"colour":[1.0,1.0,1.0,1.0],"radius":0.10000000149011612,"range":10.0,"type":"point_light"},"name":"Point Light","primitive":"cube","shader":"pbr_standard","transform":{"rotation":[0.0,0.0,0.0,0.0],"scale":0.009999999776482582,"translate":[-0.800000011920929,-0.6000000238418579,-1.7000000476837158]}},{"name":"cube (1)","primitive":"cube","shader":"pbr_standard","transform":{"rotation":[0.0,0.0,0.0,0.0],"scale":1.0,"translate":[0.0,0.0,-0.10000000149011612]}},{"light":{"brightness":1.0,"colour":[1.0,0.0,0.0,1.0],"radius":0.10000000149011612,"range":10.0,"type":"point_light"},"name":"Point Light (1)","primitive":"cube","shader":"pbr_standard","transform":{"rotation":[0.0,0.0,0.0,0.0],"scale":0.009999999776482582,"translate":[-0.20000000298023224,-0.6000000238418579,-1.7999999523162842]}}],"shader_count":2,"shaders":[{"fragment":"resources/shaders/pbr/pbr_standard_fragment.shader","name":"pbr_standard","vertex":"resources/shaders/pbr/pbr_standard_vertex.shader"},{"fragment":"resources/shaders/flat_colour/flat_colour_fragment.shader","name":"flat_colour","vertex":"resources/shaders/flat_colour/flat_colour_vertex.shader"}]}
+{
+  "camera": { "position": [ 0.0, 0.0, 0.0 ] },
+  "model_count": 11,
+  "models": [
+    
+    {
+      "child_count": 4,
+      "children": [ 1, 2, 3, 4 ],
+      "gltf": { "path": "resources/models/wooden_floor/scene.gltf" },
+      "name": "Floor",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 90.0, 1.0, 0.0, 0.0 ],
+        "scale": 0.009999999776482582,
+        "translate": [ 0.0, -1.0, -2.0 ]
+      }
+    },
+    {
+      "name": "cube",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "name": "cube (1)",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "name": "cube (2)",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "name": "cube (3)",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "light": {
+        "brightness": 3.0,
+        "colour": [ 1.0, 1.0, 1.0, 1.0 ],
+        "direction": [ 1.0, 0.0, 0.0 ],
+        "type": "directional_light"
+      },
+      "name": "Direct Light",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "child_count": 3,
+      "children": [ 7, 8, 9 ],
+      "light": {
+        "brightness": 1.0,
+        "colour": [ 1.0, 1.0, 1.0, 1.0 ],
+        "radius": 0.10000000149011612,
+        "range": 10.0,
+        "type": "point_light"
+      },
+      "name": "Point Light",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 0.009999999776482582,
+        "translate": [ -0.800000011920929, -0.6000000238418579, -1.7000000476837158 ]
+      }
+    },
+    {
+      "name": "cube (4)",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "name": "cube (5)",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "name": "cube (6)",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 1.0,
+        "translate": [ 0.0, 0.0, 0.0 ]
+      }
+    },
+    {
+      "light": {
+        "brightness": 1.0,
+        "colour": [ 1.0, 0.0, 0.0, 1.0 ],
+        "radius": 0.10000000149011612,
+        "range": 10.0,
+        "type": "point_light"
+      },
+      "name": "Point Light (1)",
+      "primitive": "cube",
+      "shader": "pbr_standard",
+      "transform": {
+        "rotation": [ 0.0, 0.0, 0.0, 0.0 ],
+        "scale": 0.009999999776482582,
+        "translate": [ -0.20000000298023224, -0.6000000238418579, -1.7999999523162842 ]
+      }
+    }
+  ],"shader_count":2,"shaders":[{"fragment":"resources/shaders/pbr/pbr_standard_fragment.shader","name":"pbr_standard","vertex":"resources/shaders/pbr/pbr_standard_vertex.shader"},{"fragment":"resources/shaders/flat_colour/flat_colour_fragment.shader","name":"flat_colour","vertex":"resources/shaders/flat_colour/flat_colour_vertex.shader"}]}
