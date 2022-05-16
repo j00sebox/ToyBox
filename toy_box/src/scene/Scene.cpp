@@ -180,15 +180,50 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		{
 			m_selected_node = &scene_node;
 		}
+
+		auto transform = scene_node.entity->get<Transform>();
+		Transform t = parent_transform * transform;
+
+		update_lights(scene_node);
+
+		if (scene_node.entity->has<Mesh>())
+		{
+			auto& material = scene_node.entity->get<Material>();
+			auto& mesh = scene_node.entity->get<Mesh>();
+
+			material.get_shader()->set_uniform_mat4f("u_model", t.get_transform());
+			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+			if (m_selected_node && (scene_node == *m_selected_node))
+			{
+				t.scale(t.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
+				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", t.get_transform());
+				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+				Renderer::stencil(mesh, material);
+			}
+			else
+			{
+				Renderer::draw_elements(mesh, material);
+			}
+		}
+
+		for (SceneNode& node : scene_node)
+		{
+			update_node(node, t);
+		}
 	}
-	ImGui::EndChild();
+	ImGui::EndChild();	
+}
 
-	auto transform = scene_node.entity->get<Transform>();
-	Transform t = parent_transform * transform;
-
-	if (scene_node.entity->has<PointLight>())
+void Scene::update_lights(SceneNode& light_node)
+{
+	if (light_node.entity->has<PointLight>())
 	{
-		auto& point_light = scene_node.entity->get<PointLight>();
+		auto transform = light_node.entity->get<Transform>();
+		auto& point_light = light_node.entity->get<PointLight>();
 		mathz::Vec3 pos = transform.get_transform() * transform.get_position();
 
 		ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
@@ -199,9 +234,9 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
 	}
-	else if (scene_node.entity->has<DirectionalLight>())
+	else if (light_node.entity->has<DirectionalLight>())
 	{
-		auto& direct_light = scene_node.entity->get<DirectionalLight>();
+		auto& direct_light = light_node.entity->get<DirectionalLight>();
 
 		ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
 		ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
@@ -212,35 +247,6 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 	else
 	{
 		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", { 0.f, 0.f, 0.f, 0.f });
-	}
-
-	if (scene_node.entity->has<Mesh>())
-	{
-		auto& material = scene_node.entity->get<Material>();
-		auto& mesh = scene_node.entity->get<Mesh>();		
-
-		material.get_shader()->set_uniform_mat4f("u_model", t.get_transform());
-		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-		material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-
-		if (m_selected_node && (scene_node == *m_selected_node))
-		{
-			t.scale(t.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
-			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", t.get_transform());
-			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-
-			Renderer::stencil(mesh, material);
-		}
-		else
-		{
-			Renderer::draw_elements(mesh, material);
-		}
-	}
-
-	for (SceneNode& node : scene_node)
-	{
-		update_node(node, t);
 	}
 }
 

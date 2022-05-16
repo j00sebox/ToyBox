@@ -27,6 +27,7 @@ public:
 
 private:
 	void update_node(SceneNode& node, const Transform& parent_transform);
+	void update_lights(SceneNode& light_node);
 
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
