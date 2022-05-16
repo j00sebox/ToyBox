@@ -19,5 +19,6 @@ private:
 	static void load_skybox(nlohmann::json accessor, std::unique_ptr<Skybox>& sky_box);
 	static void load_shaders(nlohmann::json accessor, unsigned int num_shaders);
 	static void load_models(nlohmann::json accessor, unsigned int num_models, SceneNode& entities);
+	static void serialize_node(nlohmann::json& accessor, int& node_index, const SceneNode& scene_node);
 };
 

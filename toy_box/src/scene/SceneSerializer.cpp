@@ -78,31 +78,46 @@ void SceneSerializer::save(const char* scene, const std::shared_ptr<Camera>& cam
 		res_json["shaders"][i]["fragment"] = locations[1];
 		++i;
 	}
-	
-	res_json["model_count"] = root.size();
 
-	int j = 0;
+	int node_index = -1; // keeps track of nodes (left to right and depth first)
 	for (const auto& scene_node : root)
-	{	
-		res_json["models"][j]["name"] = scene_node.entity->get_name();
-		
-		if (scene_node.entity->has<Material>())
-		{
-			Material& material = scene_node.entity->get<Material>();
-			res_json["models"][j]["shader"] = ShaderLib::find(material.get_shader());
-		}
-
-		const auto& components = scene_node.entity->get_components();
-
-		for (const auto& c : components)
-		{
-			c->serialize(res_json["models"][j]);
-		}
-		 
-		++j;
+	{
+		++node_index;
+		serialize_node(res_json["models"], node_index, scene_node);
 	}
 
+	res_json["model_count"] = node_index + 1;
+
 	overwrite_file(scene, res_json.dump());
+}
+
+void SceneSerializer::serialize_node(json& accessor, int& node_index, const SceneNode& scene_node)
+{
+	accessor[node_index]["name"] = scene_node.entity->get_name();
+
+	if (scene_node.entity->has<Material>())
+	{
+		Material& material = scene_node.entity->get<Material>();
+		accessor[node_index]["shader"] = ShaderLib::find(material.get_shader());
+	}
+
+	const auto& components = scene_node.entity->get_components();
+
+	for (const auto& c : components)
+	{
+		c->serialize(accessor[node_index]);
+	}
+
+	if (scene_node.has_children())
+	{
+		int ch_ind = 0; // keeps track of index of child array
+		int parent_index = node_index;
+		for (const SceneNode& child : scene_node)
+		{
+			accessor[parent_index]["children"][ch_ind++] = ++node_index;
+			serialize_node(accessor, node_index, child);
+		}
+	}
 }
 
 void SceneSerializer::load_skybox(json accessor, std::unique_ptr<Skybox>& sky_box)
@@ -136,7 +151,7 @@ void SceneSerializer::load_skybox(json accessor, std::unique_ptr<Skybox>& sky_bo
 	}
 }
 
-void SceneSerializer::load_shaders(nlohmann::json accessor, unsigned int num_shaders)
+void SceneSerializer::load_shaders(json accessor, unsigned int num_shaders)
 {
 	for (unsigned int s = 0; s < num_shaders; ++s)
 	{
@@ -154,7 +169,7 @@ void SceneSerializer::load_shaders(nlohmann::json accessor, unsigned int num_sha
 	}
 }
 
-void SceneSerializer::load_models(nlohmann::json accessor, unsigned int num_models, SceneNode& root)
+void SceneSerializer::load_models(json accessor, unsigned int num_models, SceneNode& root)
 {
 	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh) 
 	{

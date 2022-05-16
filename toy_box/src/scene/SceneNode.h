@@ -6,8 +6,9 @@ class SceneNode
 {
 public:
 	void add_child(std::unique_ptr<Entity>&& e);
-	bool exists(const std::string& name) const;
-	size_t size() const;
+	[[nodiscard]] bool exists(const std::string& name) const;
+	[[nodiscard]] bool has_children() const { return (m_children.size() > 0); }
+	[[nodiscard]] size_t size() const;
 	
 	[[nodiscard]] const std::string& get_name() const { return m_name; }
 	
