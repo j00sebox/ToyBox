@@ -59,73 +59,9 @@ void Scene::update(float elapsed_time)
 
 	ImGui::Begin("Models");
 	
-	for (const auto& scene_node : root)
+	for (auto& scene_node : root)
 	{
-		bool selected = false;
-		ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
-		{
-			ImGui::Selectable(scene_node.entity->get_name().c_str(), &selected);
-			if (selected)
-			{
-				m_selected_entity = scene_node.entity.get();
-			}
-		}
-		ImGui::EndChild();
-
-		auto transform = scene_node.entity->get<Transform>();
-
-		if (scene_node.entity->has<PointLight>())
-		{
-			auto& point_light = scene_node.entity->get<PointLight>();
-			mathz::Vec3 pos = transform.get_transform() * transform.get_position();
-
-			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", point_light.get_index()), point_light.get_brightness());
-			ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", point_light.get_index()), point_light.get_radius());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
-		}
-		else if (scene_node.entity->has<DirectionalLight>())
-		{
-			auto& direct_light = scene_node.entity->get<DirectionalLight>();
-
-			ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
-			ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", direct_light.get_direction());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", direct_light.get_colour());
-		}
-		else
-		{
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", { 0.f, 0.f, 0.f, 0.f });
-		}
-
-		if (scene_node.entity->has<Mesh>())
-		{
-			auto& material = scene_node.entity->get<Material>();
-			auto& mesh = scene_node.entity->get<Mesh>();
-
-			material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
-			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-
-			if (scene_node.entity.get() == m_selected_entity)
-			{
-				transform.scale(transform.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", transform.get_transform());
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-
-				Renderer::stencil(mesh, material);
-			}
-			else
-			{
-				Renderer::draw_elements(mesh, material);
-			}
-		}
-		
+		update_node(scene_node, Transform{});
 	}
 
 	{
@@ -136,9 +72,9 @@ void Scene::update(float elapsed_time)
 
 	ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
 	{
-		if (m_selected_entity)
+		if (m_selected_node)
 		{
-			ImGui::Text(m_selected_entity->get_name().c_str());
+			ImGui::Text(m_selected_node->entity->get_name().c_str());
 
 			render_components();
 		}
@@ -150,7 +86,7 @@ void Scene::update(float elapsed_time)
 
 void Scene::render_components()
 {
-	std::vector<std::shared_ptr<Component>> components = m_selected_entity->get_components();
+	std::vector<std::shared_ptr<Component>> components = m_selected_node->entity->get_components();
 
 	for (unsigned int i = 0; i < components.size(); ++i)
 	{
@@ -184,7 +120,7 @@ void Scene::render_components()
 
 			if (remove_component)
 			{
-				m_selected_entity->remove(*components[i--]);
+				m_selected_node->entity->remove(*components[i--]);
 			}
 
 			components[i]->imgui_render();
@@ -217,7 +153,10 @@ void Scene::add_primitive(const char* name)
 	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
 	e.attach(std::move(material));
 
-	root.add_child(std::make_unique<Entity>(std::move(e)));
+	if(m_selected_node)
+		m_selected_node->add_child(std::make_unique<Entity>(std::move(e)));
+	else
+		root.add_child(std::make_unique<Entity>(std::move(e)));
 }
 
 void Scene::window_resize(int width, int height)
@@ -229,5 +168,79 @@ void Scene::window_resize(int width, int height)
 void Scene::reset_view()
 {
 	m_camera->reset();
+}
+
+void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
+{
+	bool selected = false;
+	ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
+	{
+		ImGui::Selectable(scene_node.entity->get_name().c_str(), &selected);
+		if (selected)
+		{
+			m_selected_node = &scene_node;
+		}
+	}
+	ImGui::EndChild();
+
+	auto transform = scene_node.entity->get<Transform>();
+	Transform t = parent_transform * transform;
+
+	if (scene_node.entity->has<PointLight>())
+	{
+		auto& point_light = scene_node.entity->get<PointLight>();
+		mathz::Vec3 pos = transform.get_transform() * transform.get_position();
+
+		ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
+		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", point_light.get_index()), point_light.get_brightness());
+		ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
+		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", point_light.get_index()), point_light.get_radius());
+		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
+		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+	}
+	else if (scene_node.entity->has<DirectionalLight>())
+	{
+		auto& direct_light = scene_node.entity->get<DirectionalLight>();
+
+		ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
+		ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
+		ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", direct_light.get_direction());
+		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", direct_light.get_colour());
+	}
+	else
+	{
+		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", { 0.f, 0.f, 0.f, 0.f });
+	}
+
+	if (scene_node.entity->has<Mesh>())
+	{
+		auto& material = scene_node.entity->get<Material>();
+		auto& mesh = scene_node.entity->get<Mesh>();		
+
+		material.get_shader()->set_uniform_mat4f("u_model", t.get_transform());
+		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+		material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+		if (m_selected_node && (scene_node == *m_selected_node))
+		{
+			t.scale(t.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
+			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", t.get_transform());
+			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+			Renderer::stencil(mesh, material);
+		}
+		else
+		{
+			Renderer::draw_elements(mesh, material);
+		}
+	}
+
+	for (SceneNode& node : scene_node)
+	{
+		update_node(node, t);
+	}
 }
 

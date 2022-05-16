@@ -23,6 +23,8 @@ public:
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 
+	Transform operator* (const Transform& other) const;
+
 private:
 	mathz::Vec3 m_position;
 	mathz::Vec3 m_rotate_axis;

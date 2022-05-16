@@ -16,6 +16,11 @@ public:
 	inline std::vector<SceneNode>::const_iterator begin() const { return m_children.begin(); }
 	inline std::vector<SceneNode>::const_iterator end() const { return m_children.end(); }
 
+	bool operator== (const SceneNode& other)
+	{
+		return (entity == other.entity);
+	}
+
 	std::unique_ptr<Entity> entity;
 
 private:

@@ -7,6 +7,7 @@
 #include <map>
 
 class Entity;
+class Transform;
 
 class Scene
 {
@@ -25,6 +26,8 @@ public:
 	Camera* get_camera() { return m_camera.get(); }
 
 private:
+	void update_node(SceneNode& node, const Transform& parent_transform);
+
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
 	std::vector<std::unique_ptr<Entity>> m_entities;
@@ -32,6 +35,6 @@ private:
 	SceneNode root;
 
 	// imgui stuff
-	Entity* m_selected_entity = nullptr;
+	SceneNode* m_selected_node = nullptr;
 };
 
