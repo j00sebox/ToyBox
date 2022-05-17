@@ -62,6 +62,7 @@ void Scene::update(float elapsed_time)
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
+		imgui_render(scene_node);
 	}
 
 	{
@@ -172,50 +173,39 @@ void Scene::reset_view()
 
 void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
 {
-	bool selected = false;
-	ImGui::BeginChild("##LeftSide", ImVec2(120, ImGui::GetContentRegionAvail().y), true);
+	auto transform = scene_node.entity->get<Transform>();
+	Transform t = parent_transform * transform;
+
+	update_lights(scene_node);
+
+	if (scene_node.entity->has<Mesh>())
 	{
-		ImGui::Selectable(scene_node.entity->get_name().c_str(), &selected);
-		if (selected)
+		auto& material = scene_node.entity->get<Material>();
+		auto& mesh = scene_node.entity->get<Mesh>();
+
+		material.get_shader()->set_uniform_mat4f("u_model", t.get_transform());
+		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+		material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+		if (m_selected_node && (scene_node == *m_selected_node))
 		{
-			m_selected_node = &scene_node;
+			t.scale(t.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
+			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", t.get_transform());
+			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+
+			Renderer::stencil(mesh, material);
 		}
-
-		auto transform = scene_node.entity->get<Transform>();
-		Transform t = parent_transform * transform;
-
-		update_lights(scene_node);
-
-		if (scene_node.entity->has<Mesh>())
+		else
 		{
-			auto& material = scene_node.entity->get<Material>();
-			auto& mesh = scene_node.entity->get<Mesh>();
-
-			material.get_shader()->set_uniform_mat4f("u_model", t.get_transform());
-			material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-			material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-
-			if (m_selected_node && (scene_node == *m_selected_node))
-			{
-				t.scale(t.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", t.get_transform());
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-				ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-
-				Renderer::stencil(mesh, material);
-			}
-			else
-			{
-				Renderer::draw_elements(mesh, material);
-			}
-		}
-
-		for (SceneNode& node : scene_node)
-		{
-			update_node(node, t);
+			Renderer::draw_elements(mesh, material);
 		}
 	}
-	ImGui::EndChild();	
+
+	for (SceneNode& node : scene_node)
+	{
+		update_node(node, t);
+	}
 }
 
 void Scene::update_lights(SceneNode& light_node)
@@ -247,6 +237,26 @@ void Scene::update_lights(SceneNode& light_node)
 	else
 	{
 		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", { 0.f, 0.f, 0.f, 0.f });
+	}
+}
+
+void Scene::imgui_render(SceneNode& scene_node)
+{
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+	if (!scene_node.has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
+	bool opened = ImGui::TreeNodeEx(scene_node.get_name().c_str(), flags);
+	if (ImGui::IsItemClicked())
+	{
+		m_selected_node = &scene_node;
+	}
+
+	if (opened)
+	{
+		for (SceneNode& node : scene_node)
+		{
+			imgui_render(node);
+		}
+		ImGui::TreePop();
 	}
 }
 
