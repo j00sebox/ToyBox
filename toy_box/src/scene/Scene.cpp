@@ -59,17 +59,17 @@ void Scene::update(float elapsed_time)
 
 	ImGui::Begin("Models");
 	
+	ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
 		imgui_render(scene_node);
 	}
+	ImGui::EndChild();
 
-	{
-		ImGui::SameLine(0);
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-		ImGui::SameLine();
-	}
+	ImGui::SameLine();
+	ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+	ImGui::SameLine();
 
 	ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
 	{
@@ -197,12 +197,25 @@ void Scene::update_lights(SceneNode& light_node)
 
 void Scene::imgui_render(SceneNode& scene_node)
 {
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
 	if (!scene_node.has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
 	bool opened = ImGui::TreeNodeEx(scene_node.get_name().c_str(), flags);
 	if (ImGui::IsItemClicked())
 	{
 		m_selected_node = &scene_node;
+	}
+	else if(ImGui::IsItemClicked(ImGuiMouseButton_Middle))
+	{
+		m_selected_node = &scene_node;
+		ImGui::OpenPopup("entity_options");
+		ImGui::SameLine();
+		if (ImGui::BeginPopup("entity_options"))
+		{
+			bool selected = false;
+			ImGui::Selectable("Remove", &selected);
+			
+			ImGui::EndPopup();
+		}
 	}
 
 	if (opened)
