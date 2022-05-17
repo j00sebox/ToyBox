@@ -77,57 +77,12 @@ void Scene::update(float elapsed_time)
 		{
 			ImGui::Text(m_selected_node->entity->get_name().c_str());
 
-			render_components();
+			display_components();
 		}
 	}
 	ImGui::EndChild();
 
 	ImGui::End();
-}
-
-void Scene::render_components()
-{
-	std::vector<std::shared_ptr<Component>> components = m_selected_node->entity->get_components();
-
-	for (unsigned int i = 0; i < components.size(); ++i)
-	{
-		ImVec2 content_region = ImGui::GetContentRegionAvail();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 5, 5 });
-		float line_width = GImGui->Font->FontSize + GImGui->Style.FramePadding.x * 3.0f;
-		float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y;
-		ImGui::PopStyleVar();
-
-		if(ImGui::TreeNodeEx(components[i]->get_name(), ImGuiTreeNodeFlags_DefaultOpen))
-		{
-			bool remove_component = false;
-
-			ImGui::SameLine(content_region.x - line_width);
-
-			if (ImGui::Button("...", ImVec2{ line_width, line_height }))
-			{
-				ImGui::OpenPopup("component_settings");
-			}
-
-			if (ImGui::BeginPopup("component_settings"))
-			{
-				if (ImGui::MenuItem("Remove component"))
-				{
-					remove_component = true;
-				}
-
-				ImGui::EndPopup();
-			}
-
-			if (remove_component)
-			{
-				m_selected_node->entity->remove(*components[i--]);
-			}
-
-			components[i]->imgui_render();
-			ImGui::TreePop();
-		}	
-	}
 }
 
 void Scene::add_primitive(const char* name)
@@ -257,6 +212,51 @@ void Scene::imgui_render(SceneNode& scene_node)
 			imgui_render(node);
 		}
 		ImGui::TreePop();
+	}
+}
+
+void Scene::display_components()
+{
+	std::vector<std::shared_ptr<Component>> components = m_selected_node->entity->get_components();
+
+	for (unsigned int i = 0; i < components.size(); ++i)
+	{
+		ImVec2 content_region = ImGui::GetContentRegionAvail();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 5, 5 });
+		float line_width = GImGui->Font->FontSize + GImGui->Style.FramePadding.x * 3.0f;
+		float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y;
+		ImGui::PopStyleVar();
+
+		if (ImGui::TreeNodeEx(components[i]->get_name(), ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			bool remove_component = false;
+
+			ImGui::SameLine(content_region.x - line_width);
+
+			if (ImGui::Button("...", ImVec2{ line_width, line_height }))
+			{
+				ImGui::OpenPopup("component_settings");
+			}
+
+			if (ImGui::BeginPopup("component_settings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+				{
+					remove_component = true;
+				}
+
+				ImGui::EndPopup();
+			}
+
+			if (remove_component)
+			{
+				m_selected_node->entity->remove(*components[i--]);
+			}
+
+			components[i]->imgui_render();
+			ImGui::TreePop();
+		}
 	}
 }
 

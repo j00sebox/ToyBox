@@ -19,7 +19,7 @@ public:
 	void save(const std::string& path);
 	void init(int width, int height);
 	void update(float elapsed_time);
-	void render_components();
+	
 	void add_primitive(const char* name);
 	void window_resize(int width, int height);
 	void reset_view();
@@ -29,6 +29,7 @@ private:
 	void update_node(SceneNode& node, const Transform& parent_transform);
 	void update_lights(SceneNode& light_node);
 	void imgui_render(SceneNode& node);
+	void display_components();
 
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
