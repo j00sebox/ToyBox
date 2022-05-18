@@ -46,6 +46,7 @@ Window::Window(int width, int height)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 	ImGui::StyleColorsDark();
 
 	const char* glsl_version = "#version 410";
