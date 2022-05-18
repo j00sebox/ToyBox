@@ -9,6 +9,7 @@ public:
 	SceneNode(std::unique_ptr<Entity>&& e);
 	void add_child(SceneNode&& s);
 	bool remove(SceneNode& node);
+	SceneNode move(SceneNode& node);
 	[[nodiscard]] bool exists(const std::string& name) const;
 	[[nodiscard]] bool has_children() const { return (m_children.size() > 0); }
 	[[nodiscard]] size_t size() const;

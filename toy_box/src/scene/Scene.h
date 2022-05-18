@@ -28,6 +28,7 @@ public:
 private:
 	// scene management
 	void remove_node(SceneNode& node);
+	SceneNode move_node(SceneNode& node);
 
 	// rendering helpers
 	void update_node(SceneNode& node, const Transform& parent_transform);
@@ -46,5 +47,7 @@ private:
 
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;
+	SceneNode* m_drag_node = nullptr;
+	SceneNode* m_drop_node = nullptr;
 };
 

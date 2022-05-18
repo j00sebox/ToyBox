@@ -63,7 +63,7 @@ void Scene::update(float elapsed_time)
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
-		imgui_render(scene_node);
+		imgui_render(scene_node);	
 	}
 	ImGui::EndChild();
 
@@ -83,6 +83,15 @@ void Scene::update(float elapsed_time)
 	ImGui::EndChild();
 
 	ImGui::End();
+
+	// resolve drag and drop
+	if (m_drag_node && m_drop_node)
+	{
+		m_drop_node->add_child(move_node(*m_drag_node));
+		m_selected_node = nullptr;
+		m_drag_node = nullptr;
+		m_drop_node = nullptr;
+	}
 
 	while (!m_nodes_to_remove.empty())
 	{
@@ -141,6 +150,11 @@ void Scene::remove_node(SceneNode& node)
 	{
 		m_selected_node = nullptr;
 	}
+}
+
+SceneNode Scene::move_node(SceneNode& node)
+{
+	return root.move(node);
 }
 
 void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
@@ -217,6 +231,7 @@ void Scene::imgui_render(SceneNode& scene_node)
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
 	if (!scene_node.has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
 	bool opened = ImGui::TreeNodeEx(scene_node.get_name().c_str(), flags);
+
 	if (ImGui::IsItemClicked())
 	{
 		m_selected_node = &scene_node;
@@ -231,6 +246,23 @@ void Scene::imgui_render(SceneNode& scene_node)
 		}
 
 		ImGui::EndPopup();
+	}
+
+	if (ImGui::BeginDragDropSource())
+	{
+		ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
+		m_drag_node = &scene_node;
+		ImGui::Text(scene_node.get_name().c_str());
+		ImGui::EndDragDropSource();
+	}
+	
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_TREENODE"))
+		{
+			m_drop_node = &scene_node;
+		}
+		ImGui::EndDragDropTarget();
 	}
 	
 	if (opened)

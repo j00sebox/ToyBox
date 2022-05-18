@@ -51,6 +51,30 @@ bool SceneNode::remove(SceneNode& node)
 	return false;
 }
 
+// node must exist for this to work
+SceneNode SceneNode::move(SceneNode& node)
+{
+	std::vector<SceneNode>::iterator it = m_children.begin();
+	for (; it != m_children.end(); ++it)
+	{
+		if (*it == node)
+		{
+			SceneNode sn{ std::move(*it) };
+			m_children.erase(it);
+			return sn;
+		}
+
+		if (it->has_children())
+		{
+			SceneNode sn = it->move(node);
+			if (sn.entity)
+				return sn;
+		}
+	}
+
+	return SceneNode{};
+}
+
 size_t SceneNode::size() const
 {
 	if (m_children.size() == 0)
