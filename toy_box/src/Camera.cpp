@@ -3,7 +3,9 @@
 
 #include "Input.h"
 
-#define DEG_TO_RAD(x) (x / 180.f) * 3.1415f
+#include <mathz/Misc.h>
+
+#include <imgui.h>
 
 Camera::Camera()
 	: m_screen_width(0), m_screen_height(0)
@@ -40,7 +42,7 @@ void Camera::resize(int width, int height)
 {
 	m_screen_width = width; m_screen_height = height;
 
-	float scaling_factor = 1.0f / tanf(DEG_TO_RAD(m_fov) * 0.5f);
+	float scaling_factor = 1.0f / tanf(mathz::radians(m_fov) * 0.5f);
 	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
 
 	float q = -1.f / (m_far - m_near);
@@ -63,59 +65,62 @@ void Camera::resize(int width, int height)
 
 void Camera::update(float elapsed_time)
 {
-	if (Input::is_key_pressed(GLFW_KEY_W))
+	// block camera update if imgui menu is in use
+	if (!ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive())
 	{
-		move_forward(m_speed * elapsed_time);
-	}
-
-	if (Input::is_key_pressed(GLFW_KEY_S))
-	{
-		move_forward(-m_speed * elapsed_time);
-	}
-
-	if (Input::is_key_pressed(GLFW_KEY_A))
-	{
-		move_right(-m_speed * elapsed_time);
-	}
-
-	if (Input::is_key_pressed(GLFW_KEY_D))
-	{
-		move_right(m_speed * elapsed_time);
-	}
-
-	if (Input::is_key_pressed(GLFW_KEY_R))
-	{
-		reset();
-	}
-
-	// TODO: Change this back to right button when event blocking is a thing
-	if (Input::is_button_pressed(GLFW_MOUSE_BUTTON_3))
-	{
-		if (!m_mouse_down)
+		if (Input::is_key_pressed(GLFW_KEY_W))
 		{
-			Input::show_cursor(false);
-			Input::set_mouse_pos((m_screen_width / 2), (m_screen_height / 2));
-
-			m_mouse_down = true;
+			move_forward(m_speed * elapsed_time);
 		}
 
-		auto [x, y] = Input::get_mouse_pos();
+		if (Input::is_key_pressed(GLFW_KEY_S))
+		{
+			move_forward(-m_speed * elapsed_time);
+		}
 
-		float rotX = elapsed_time * m_sensitivity * (float)(y - (m_screen_height / 2)) / m_screen_width;
-		float rotY = elapsed_time * m_sensitivity * (float)(x - (m_screen_width / 2)) / m_screen_height;
+		if (Input::is_key_pressed(GLFW_KEY_A))
+		{
+			move_right(-m_speed * elapsed_time);
+		}
 
-		mathz::Quaternion qx(DEG_TO_RAD(rotX), m_right);
-		mathz::Quaternion qy(DEG_TO_RAD(rotY), m_up);
+		if (Input::is_key_pressed(GLFW_KEY_D))
+		{
+			move_right(m_speed * elapsed_time);
+		}
 
-		rotate(qx * qy);
+		if (Input::is_key_pressed(GLFW_KEY_R))
+		{
+			reset();
+		}
 
-		Input::set_mouse_pos((m_screen_width / 2), (m_screen_height / 2));
-	}
-	else
-	{
-		m_mouse_down = false;
+		if (Input::is_button_pressed(GLFW_MOUSE_BUTTON_2))
+		{
+			if (!m_mouse_down)
+			{
+				Input::show_cursor(false);
+				Input::set_mouse_pos((m_screen_width / 2), (m_screen_height / 2));
 
-		Input::show_cursor(true);
+				m_mouse_down = true;
+			}
+
+			auto [x, y] = Input::get_mouse_pos();
+
+			float rotX = elapsed_time * m_sensitivity * (float)(y - (m_screen_height / 2)) / m_screen_width;
+			float rotY = elapsed_time * m_sensitivity * (float)(x - (m_screen_width / 2)) / m_screen_height;
+
+			mathz::Quaternion qx(mathz::radians(rotX), m_right);
+			mathz::Quaternion qy(mathz::radians(rotY), m_up);
+
+			rotate(qx * qy);
+
+			Input::set_mouse_pos((m_screen_width / 2), (m_screen_height / 2));
+		}
+		else
+		{
+			m_mouse_down = false;
+
+			Input::show_cursor(true);
+		}
 	}
 }
 
