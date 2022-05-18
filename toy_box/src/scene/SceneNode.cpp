@@ -30,6 +30,27 @@ bool SceneNode::exists(const std::string& name) const
 	return found;
 }
 
+bool SceneNode::remove(SceneNode& node)
+{
+	std::vector<SceneNode>::iterator it = m_children.begin();
+	for (;it != m_children.end(); ++it)
+	{
+		if (*it == node)
+		{
+			m_children.erase(it);
+			return true;
+		}
+
+		if (it->has_children())
+		{
+			if (it->remove(node))
+				return true;
+		}
+	}
+
+	return false;
+}
+
 size_t SceneNode::size() const
 {
 	if (m_children.size() == 0)

@@ -83,11 +83,16 @@ void Scene::update(float elapsed_time)
 	ImGui::EndChild();
 
 	ImGui::End();
+
+	while (!m_nodes_to_remove.empty())
+	{
+		remove_node(*m_nodes_to_remove.front());
+		m_nodes_to_remove.pop();
+	}
 }
 
 void Scene::add_primitive(const char* name)
 {
-	Timer timer{};
 	std::string lookup{ name };
 	int i = 1;
 	while (root.exists(lookup))
@@ -124,6 +129,18 @@ void Scene::window_resize(int width, int height)
 void Scene::reset_view()
 {
 	m_camera->reset();
+}
+
+void Scene::remove_node(SceneNode& node)
+{
+	if (!root.remove(node))
+	{
+		fprintf(stderr, "Node not apart of current scene tree!");
+	}
+	else
+	{
+		m_selected_node = nullptr;
+	}
 }
 
 void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
@@ -204,20 +221,18 @@ void Scene::imgui_render(SceneNode& scene_node)
 	{
 		m_selected_node = &scene_node;
 	}
-	else if(ImGui::IsItemClicked(ImGuiMouseButton_Middle))
+
+	if (ImGui::BeginPopupContextItem())
 	{
 		m_selected_node = &scene_node;
-		ImGui::OpenPopup("entity_options");
-		ImGui::SameLine();
-		if (ImGui::BeginPopup("entity_options"))
+		if (ImGui::MenuItem("Delete"))
 		{
-			bool selected = false;
-			ImGui::Selectable("Remove", &selected);
-			
-			ImGui::EndPopup();
+			m_nodes_to_remove.push(&scene_node);
 		}
-	}
 
+		ImGui::EndPopup();
+	}
+	
 	if (opened)
 	{
 		for (SceneNode& node : scene_node)

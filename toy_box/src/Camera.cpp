@@ -88,7 +88,8 @@ void Camera::update(float elapsed_time)
 		reset();
 	}
 
-	if (Input::is_button_pressed(GLFW_MOUSE_BUTTON_2))
+	// TODO: Change this back to right button when event blocking is a thing
+	if (Input::is_button_pressed(GLFW_MOUSE_BUTTON_3))
 	{
 		if (!m_mouse_down)
 		{
