@@ -88,7 +88,7 @@ void Scene::update(float elapsed_time)
 	ImGui::End();
 
 	// resolve drag and drop
-	if (m_drag_drop_active && !m_drop_node && !Input::is_button_pressed(GLFW_MOUSE_BUTTON_1))
+	if (m_drag_node && !m_drop_node && !Input::is_button_pressed(GLFW_MOUSE_BUTTON_1))
 	{
 		m_drop_node = &root;
 	}
@@ -99,7 +99,6 @@ void Scene::update(float elapsed_time)
 		m_selected_node = nullptr;
 		m_drag_node = nullptr;
 		m_drop_node = nullptr;
-		m_drag_drop_active = false;
 	}
 
 	while (!m_nodes_to_remove.empty())
@@ -262,7 +261,6 @@ void Scene::imgui_render(SceneNode& scene_node)
 		ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
 		m_drag_node = &scene_node;
 		ImGui::Text(scene_node.get_name().c_str());
-		m_drag_drop_active = true;
 		ImGui::EndDragDropSource();
 	}
 	

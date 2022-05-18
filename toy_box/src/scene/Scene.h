@@ -49,6 +49,5 @@ private:
 	SceneNode* m_selected_node = nullptr;
 	SceneNode* m_drag_node = nullptr;
 	SceneNode* m_drop_node = nullptr;
-	bool m_drag_drop_active = false;
 };
 
