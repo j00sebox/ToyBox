@@ -3,6 +3,7 @@
 
 #include "Entity.h"
 #include "Renderer.h"
+#include "Input.h"
 #include "SceneSerializer.h"
 
 #include "components/Transform.h"
@@ -60,11 +61,13 @@ void Scene::update(float elapsed_time)
 	ImGui::Begin("Models");
 	
 	ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
+
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
-		imgui_render(scene_node);	
-	}
+		imgui_render(scene_node);
+	}	
+
 	ImGui::EndChild();
 
 	ImGui::SameLine();
@@ -85,12 +88,18 @@ void Scene::update(float elapsed_time)
 	ImGui::End();
 
 	// resolve drag and drop
+	if (m_drag_drop_active && !m_drop_node && !Input::is_button_pressed(GLFW_MOUSE_BUTTON_1))
+	{
+		m_drop_node = &root;
+	}
+
 	if (m_drag_node && m_drop_node)
 	{
 		m_drop_node->add_child(move_node(*m_drag_node));
 		m_selected_node = nullptr;
 		m_drag_node = nullptr;
 		m_drop_node = nullptr;
+		m_drag_drop_active = false;
 	}
 
 	while (!m_nodes_to_remove.empty())
@@ -253,6 +262,7 @@ void Scene::imgui_render(SceneNode& scene_node)
 		ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
 		m_drag_node = &scene_node;
 		ImGui::Text(scene_node.get_name().c_str());
+		m_drag_drop_active = true;
 		ImGui::EndDragDropSource();
 	}
 	
