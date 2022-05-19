@@ -45,12 +45,27 @@ void Transform::imgui_render()
 {
 	mathz::Vec3 position = m_position;
 
+	float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+	ImVec2 button_size = { line_height + 3.0f, line_height };
+
 	ImGui::Text("\nPosition: ");
-	ImGui::Text("x"); ImGui::SameLine();
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+	ImGui::Button("x", button_size); ImGui::SameLine();
+	ImGui::PopStyleColor(3);
 	ImGui::DragFloat("##x", &position.x);
-	ImGui::Text("y"); ImGui::SameLine();
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+	ImGui::Button("y", button_size); ImGui::SameLine();
+	ImGui::PopStyleColor(3);
 	ImGui::DragFloat("##y", &position.y);
-	ImGui::Text("z"); ImGui::SameLine();
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+	ImGui::Button("z", button_size); ImGui::SameLine();
+	ImGui::PopStyleColor(3);
 	ImGui::DragFloat("##z", &position.z);
 	translate(position);
 
@@ -59,11 +74,23 @@ void Transform::imgui_render()
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
 	ImGui::DragFloat("##angle", &angle);
-	ImGui::Text("i"); ImGui::SameLine(0.f, 36.f);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.8f, 0.96f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.0f, 0.8f, 0.96f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.8f, 0.96f, 1.0f });
+	ImGui::Button("i", button_size); ImGui::SameLine(0.f, 21.f);
+	ImGui::PopStyleColor(3);
 	ImGui::SliderFloat("##i", &axis.x, -1.f, 1.f);
-	ImGui::Text("j"); ImGui::SameLine(0.f, 36.f);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.84f, 0.78f, 0.1f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.84f, 0.78f, 0.1f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.84f, 0.78f, 0.1f, 1.0f });
+	ImGui::Button("j", button_size); ImGui::SameLine(0.f, 21.f);
+	ImGui::PopStyleColor(3);
 	ImGui::SliderFloat("##j", &axis.y, -1.f, 1.f);
-	ImGui::Text("k"); ImGui::SameLine(0.f, 36.f);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.97f, 0.04f, 1.f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.97f, 0.04f, 1.f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.97f, 0.04f, 1.f, 1.0f });
+	ImGui::Button("k", button_size); ImGui::SameLine(0.f, 21.f);
+	ImGui::PopStyleColor(3);
 	ImGui::SliderFloat("##k", &axis.z, -1.f, 1.f);
 	axis.normalize();
 	rotate(angle, axis);
