@@ -35,6 +35,12 @@ mathz::Mat4 Transform::get_transform() const
 	return  m_rotation * m_scale * m_translate;
 }
 
+void Transform::set_parent_offsets(mathz::Vec3 parent_pos, float parent_scale)
+{
+	m_parent_position = parent_pos;
+	m_parent_scale = parent_scale;
+}
+
 void Transform::imgui_render()
 {
 	mathz::Vec3 position = m_position;

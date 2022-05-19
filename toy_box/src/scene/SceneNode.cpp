@@ -13,10 +13,12 @@ SceneNode::SceneNode(std::unique_ptr<Entity>&& e)
 
 void SceneNode::add_child(SceneNode&& s)
 {
+	// need to adjust child transform so it stays the same
 	Transform& child = s.entity->get<Transform>();
-	Transform parent = (entity) ? entity->get<Transform>() : Transform{};
-	child.translate((parent.get_position() * -1.f) + child.get_position());
-	child.scale((1 / parent.get_uniform_scale()) * child.get_uniform_scale());
+	Transform parent = (entity) ? entity->get<Transform>() : Transform{}; // if no entity then parent is root
+	child.translate((parent.get_position() * -1.f) + child.get_position() + child.get_parent_pos());
+	child.scale((1 / parent.get_uniform_scale()) * child.get_uniform_scale() * child.get_parent_scale());
+	child.set_parent_offsets(parent.get_position(), parent.get_uniform_scale());
 	m_children.emplace_back(std::move(s));
 }
 
