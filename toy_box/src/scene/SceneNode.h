@@ -26,6 +26,7 @@ public:
 		return (entity == other.entity);
 	}
 
+	bool moved = false;
 	std::unique_ptr<Entity> entity;
 
 private:
