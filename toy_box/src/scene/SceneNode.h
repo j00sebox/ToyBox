@@ -1,6 +1,7 @@
 #pragma once
 
 class Entity;
+class Transform;
 
 class SceneNode
 {
@@ -10,6 +11,7 @@ public:
 	void add_child(SceneNode&& s);
 	bool remove(SceneNode& node);
 	SceneNode move(SceneNode& node);
+	Transform update(const Transform& parent_transform);
 	[[nodiscard]] bool exists(const std::string& name) const;
 	[[nodiscard]] bool has_children() const { return (m_children.size() > 0); }
 	[[nodiscard]] size_t size() const;
@@ -26,11 +28,11 @@ public:
 		return (entity == other.entity);
 	}
 
-	bool moved = false;
 	std::unique_ptr<Entity> entity;
 
 private:
 	std::string m_name;
 	std::vector<SceneNode> m_children;
+	bool m_moved = false;
 };
 

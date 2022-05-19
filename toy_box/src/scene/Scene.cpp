@@ -167,17 +167,7 @@ SceneNode Scene::move_node(SceneNode& node)
 
 void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
 {
-	auto& transform = scene_node.entity->get<Transform>();
-	// this is only true if the node was recently given a new parent
-	if (scene_node.moved)
-	{
-		// need to adjust this if the parent is new so it doesn't modify the transform
-		transform.translate((parent_transform.get_position() * -1.f) + transform.get_position() + transform.get_parent_pos());
-		transform.scale((1 / parent_transform.get_uniform_scale()) * transform.get_uniform_scale() * transform.get_parent_scale());
-		scene_node.moved = false;
-	}
-	transform.set_parent_offsets(parent_transform.get_position(), parent_transform.get_uniform_scale()); // update so that it will be correct size after switching parents
-	Transform relative_transform = parent_transform * transform;
+	Transform relative_transform = scene_node.update(parent_transform);
 
 	update_lights(scene_node);
 
