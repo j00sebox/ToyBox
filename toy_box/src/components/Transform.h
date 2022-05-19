@@ -25,14 +25,18 @@ public:
 
 	Transform operator* (const Transform& other) const;
 
+	mathz::Mat4 m_scale;
+	mathz::Mat4 m_rotation;
+	mathz::Mat4 m_translate;
+	mathz::Mat4 m_offset;
+
 private:
 	mathz::Vec3 m_position;
 	mathz::Vec3 m_rotate_axis;
 	float m_rotate_angle = 0.f;
 	float m_uniform_scale = 1.f;
 
-	mathz::Mat4 m_scale;
-	mathz::Mat4 m_rotation;
-	mathz::Mat4 m_translate;
+	
+	
 };
 

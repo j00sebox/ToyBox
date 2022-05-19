@@ -168,7 +168,7 @@ SceneNode Scene::move_node(SceneNode& node)
 void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
 {
 	auto transform = scene_node.entity->get<Transform>();
-	Transform t = parent_transform * transform;
+	Transform relative_transform = parent_transform * transform;
 
 	update_lights(scene_node);
 
@@ -177,14 +177,14 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		auto& material = scene_node.entity->get<Material>();
 		auto& mesh = scene_node.entity->get<Mesh>();
 
-		material.get_shader()->set_uniform_mat4f("u_model", t.get_transform());
+		material.get_shader()->set_uniform_mat4f("u_model", relative_transform.get_transform());
 		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 		material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 
 		if (m_selected_node && (scene_node == *m_selected_node))
 		{
-			t.scale(t.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
-			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", t.get_transform());
+			relative_transform.scale(relative_transform.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
+			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", relative_transform.get_transform());
 			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
 
@@ -198,7 +198,7 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 
 	for (SceneNode& node : scene_node)
 	{
-		update_node(node, t);
+		update_node(node, relative_transform);
 	}
 }
 

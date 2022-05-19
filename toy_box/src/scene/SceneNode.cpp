@@ -3,6 +3,8 @@
 
 #include "Entity.h"
 
+#include "components/Transform.h"
+
 SceneNode::SceneNode(std::unique_ptr<Entity>&& e)
 {
 	m_name = e->get_name();
@@ -11,6 +13,10 @@ SceneNode::SceneNode(std::unique_ptr<Entity>&& e)
 
 void SceneNode::add_child(SceneNode&& s)
 {
+	Transform& child = s.entity->get<Transform>();
+	Transform parent = (entity) ? entity->get<Transform>() : Transform{};
+	child.translate((parent.get_position() * -1.f) + child.get_position());
+	child.scale((1 / parent.get_uniform_scale()) * child.get_uniform_scale());
 	m_children.emplace_back(std::move(s));
 }
 
