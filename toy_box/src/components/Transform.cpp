@@ -59,11 +59,11 @@ void Transform::imgui_render()
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
 	ImGui::DragFloat("##angle", &angle);
-	ImGui::Text("i"); ImGui::SameLine();
+	ImGui::Text("i"); ImGui::SameLine(0.f, 36.f);
 	ImGui::SliderFloat("##i", &axis.x, -1.f, 1.f);
-	ImGui::Text("j"); ImGui::SameLine();
+	ImGui::Text("j"); ImGui::SameLine(0.f, 36.f);
 	ImGui::SliderFloat("##j", &axis.y, -1.f, 1.f);
-	ImGui::Text("k"); ImGui::SameLine();
+	ImGui::Text("k"); ImGui::SameLine(0.f, 36.f);
 	ImGui::SliderFloat("##k", &axis.z, -1.f, 1.f);
 	axis.normalize();
 	rotate(angle, axis);
