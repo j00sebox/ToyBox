@@ -319,7 +319,7 @@ void Scene::display_components()
 
 			if (remove_component)
 			{
-				m_selected_node->entity->remove(*components[i--]);
+				if (m_selected_node->entity->remove(*components[i])) --i;
 			}
 
 			components[i]->imgui_render();

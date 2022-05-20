@@ -26,25 +26,32 @@ public:
 	}
 
 	template<class T>
-	void remove(const T& component)
+	bool remove(const T& component)
 	{
 		if (m_type_map.find(component.get_type()) != m_type_map.end())
 		{
-			size_t index = m_type_map.at(component.get_type());
+			if (is_removeable(component.get_type()))
+			{
+				size_t index = m_type_map.at(component.get_type());
 
-			m_components[m_type_map.at(component.get_type())]->on_remove();
+				m_components[m_type_map.at(component.get_type())]->on_remove();
 
-			m_components.erase(m_components.begin() + index);
+				m_components.erase(m_components.begin() + index);
 
-			m_type_map.erase(component.get_type());
+				m_type_map.erase(component.get_type());
 
-			for (auto& [key, value] : m_type_map) {
-				if (value > index)
-				{
-					--value;
+				for (auto& [key, value] : m_type_map) {
+					if (value > index)
+					{
+						--value;
+					}
 				}
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	template<class T>
@@ -69,6 +76,11 @@ public:
 	[[nodiscard]] std::vector<std::shared_ptr<Component>>& get_components() { return m_components; }
 
 protected:
+	bool is_removeable(const char* type)
+	{
+		return (!strcmp(type, "class Mesh") || !strcmp(type, "class Material") || !strcmp(type, "class PointLight") || !strcmp(type, "class DirectionalLight"));
+	}
+
 	std::string m_name;
 	std::unordered_map<const char*, size_t> m_type_map;
 	std::vector<std::shared_ptr<Component>> m_components;
