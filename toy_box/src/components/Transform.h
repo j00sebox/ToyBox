@@ -24,7 +24,7 @@ public:
 
 	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Transform"; }
-	[[nodiscard]] const char* get_type() const override { return typeid(Transform).name(); }
+	[[nodiscard]] size_t get_type() const override { return typeid(Transform).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 

@@ -29,7 +29,7 @@ public:
 
 	virtual void on_remove() {};
 	[[nodiscard]] const char* get_name() const override { return "Mesh"; }
-	[[nodiscard]] const char* get_type() const override { return typeid(Mesh).name(); }
+	[[nodiscard]] size_t get_type() const override { return typeid(Mesh).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 

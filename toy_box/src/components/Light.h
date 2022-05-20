@@ -15,7 +15,7 @@ public:
 
 	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
-	[[nodiscard]] const char* get_type() const override { return typeid(Light).name(); }
+	[[nodiscard]] size_t get_type() const override { return typeid(Light).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const = 0;
 
@@ -33,7 +33,7 @@ public:
 
 	void on_remove() override;
 	[[nodiscard]] const char* get_name() const override { return "Directional Light"; }
-	[[nodiscard]] const char* get_type() const override { return typeid(DirectionalLight).name(); }
+	[[nodiscard]] size_t get_type() const override { return typeid(DirectionalLight).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 
@@ -52,7 +52,7 @@ public:
 
 	void on_remove() override;
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
-	[[nodiscard]] const char* get_type() const override { return typeid(PointLight).name(); }
+	[[nodiscard]] size_t get_type() const override { return typeid(PointLight).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 

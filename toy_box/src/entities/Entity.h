@@ -3,6 +3,7 @@
 
 #include "Log.h"
 #include "components/Component.h"
+#include "components/All.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -17,11 +18,11 @@ public:
 	template<class T>
 	void attach(T&& component)
 	{
-		const char* type_name = typeid(T).name();
-		if (m_type_map.find(type_name) == m_type_map.end())
+		size_t type_hash = typeid(T).hash_code();
+		if (m_type_map.find(type_hash) == m_type_map.end())
 		{
 			m_components.emplace_back(std::make_shared<T>(std::forward<T>(component)));
-			m_type_map[type_name] = m_components.size() - 1;
+			m_type_map[type_hash] = m_components.size() - 1;
 		}
 	}
 
@@ -29,7 +30,7 @@ public:
 	{
 		if (m_type_map.find(component.get_type()) != m_type_map.end())
 		{
-			if (is_removeable(component.get_name()))
+			if (is_removeable(component.get_type()))
 			{
 				size_t index = m_type_map.at(component.get_type());
 
@@ -56,32 +57,32 @@ public:
 	template<class T>
 	T& get() const
 	{
-		const char* type_name = typeid(T).name();
-		if (m_type_map.find(type_name) == m_type_map.end())
+		size_t type_hash = typeid(T).hash_code();
+		if (m_type_map.find(type_hash) == m_type_map.end())
 		{
 			fprintf(stderr, "Component does not exist!\n");
 			ASSERT(false);
 		}
 
-		return *std::static_pointer_cast<T>(m_components[m_type_map.at(type_name)]);
+		return *std::static_pointer_cast<T>(m_components[m_type_map.at(type_hash)]);
 	}
 	
 	template<class T>
 	bool has() const
 	{
-		return (m_type_map.find(typeid(T).name()) != m_type_map.end());
+		return (m_type_map.find(typeid(T).hash_code()) != m_type_map.end());
 	}
 
 	[[nodiscard]] std::vector<std::shared_ptr<Component>>& get_components() { return m_components; }
 
 protected:
-	bool is_removeable(const char* type)
+	bool is_removeable(size_t type_hash)
 	{
-		return (!strcmp(type, "Mesh") || !strcmp(type, "Material") || !strcmp(type, "Point Light") || !strcmp(type, "Directional Light"));
+		return (type_hash == typeid(Mesh).hash_code() || type_hash == typeid(Material).hash_code() || type_hash == typeid(PointLight).hash_code() || type_hash == typeid(DirectionalLight).hash_code());
 	}
 
 	std::string m_name;
-	std::unordered_map<const char*, size_t> m_type_map;
+	std::unordered_map<size_t, size_t> m_type_map;
 	std::vector<std::shared_ptr<Component>> m_components;
 };
 
