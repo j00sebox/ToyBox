@@ -4,11 +4,12 @@
 #include "Camera.h"
 #include "SceneNode.h"
 
+#include "components/Fwd.h"
+
 #include <map>
 #include <queue>
 
 class Entity;
-class Transform;
 
 class Scene
 {
@@ -27,12 +28,13 @@ public:
 
 private:
 	// scene management
+	void create_light_map(const SceneNode& node);
 	void remove_node(SceneNode& node);
 	SceneNode move_node(SceneNode& node);
 
 	// rendering helpers
 	void update_node(SceneNode& node, const Transform& parent_transform);
-	void update_lights(SceneNode& light_node);
+	void update_lights();
 	
 	// imgui helpers
 	void imgui_render(SceneNode& node);
@@ -40,10 +42,10 @@ private:
 
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
-	std::vector<std::unique_ptr<Entity>> m_entities;
-	std::map<std::string, std::unique_ptr<Entity>> m_es;
 	SceneNode root;
 	std::queue<SceneNode*> m_nodes_to_remove;
+	std::vector<Entity*> m_point_lights;
+	DirectionalLight* m_direct_light = nullptr;
 
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;

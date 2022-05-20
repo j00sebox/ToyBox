@@ -29,9 +29,6 @@ void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, s
 
 	json w_json = json::parse(src);                                            
 
-	// Not sure where to put this 
-	PointLight::m_point_light_count = 0;
-
 	json camera_accessor = w_json["camera"];
 	json camera_pos = camera_accessor["position"];
 

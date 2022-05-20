@@ -196,5 +196,5 @@ void main()
 			colour += point_light(i);
 	}
 	
-	colour += u_emissive_colour + ambient;
+	colour += ambient;
 }

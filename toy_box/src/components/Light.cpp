@@ -76,18 +76,14 @@ void DirectionalLight::serialize(json& accessor) const
 	accessor["light"]["direction"][2] = m_direction.z;
 }
 
-int PointLight::m_point_light_count = 0;
-
 PointLight::PointLight()
 {
-	m_index = m_point_light_count++;
-	ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), true);
+	//ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), true);
 }
 
 void PointLight::on_remove()
 {
-	--m_point_light_count;
-	ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), false);
+	//ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), false);
 }
 
 void PointLight::imgui_render()

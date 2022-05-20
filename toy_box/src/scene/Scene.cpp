@@ -43,6 +43,28 @@ void Scene::init(int width, int height)
 {
 	EventList::e_resize.bind_function(std::bind(&Scene::window_resize, this, std::placeholders::_1, std::placeholders::_2));
 	m_camera->resize(width, height);
+
+	for (const SceneNode& node : root)
+	{
+		create_light_map(node);
+	}
+}
+
+void Scene::create_light_map(const SceneNode& node)
+{
+	if (node.entity->has<PointLight>())
+	{
+		m_point_lights.emplace_back(node.entity.get());
+	} 
+	else if (node.entity->has<DirectionalLight>())
+	{
+		m_direct_light = &node.entity->get<DirectionalLight>();
+	}
+
+	for (const SceneNode& n : node)
+	{
+		create_light_map(n);
+	}
 }
 
 void Scene::update(float elapsed_time)
@@ -62,6 +84,7 @@ void Scene::update(float elapsed_time)
 	
 	ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 
+	update_lights();
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
@@ -169,8 +192,6 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 {
 	Transform relative_transform = scene_node.update(parent_transform);
 
-	update_lights(scene_node);
-
 	if (scene_node.entity->has<Mesh>())
 	{
 		auto& material = scene_node.entity->get<Material>();
@@ -202,35 +223,31 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 	}
 }
 
-void Scene::update_lights(SceneNode& light_node)
+void Scene::update_lights()
 {
-	if (light_node.entity->has<PointLight>())
+	for(int i = 0; i < m_point_lights.size(); ++i)
 	{
-		auto transform = light_node.entity->get<Transform>();
-		auto& point_light = light_node.entity->get<PointLight>();
-		mathz::Vec3 pos = transform.get_transform() * transform.get_position();
+		auto& transform = m_point_lights[i]->get<Transform>();
+		auto& point_light = m_point_lights[i]->get<PointLight>();
+		mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
 
-		ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", point_light.get_index()), point_light.get_colour());
-		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", point_light.get_index()), point_light.get_brightness());
-		ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", point_light.get_index()), pos);
-		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", point_light.get_index()), point_light.get_radius());
-		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", point_light.get_index()), point_light.get_range());
+		ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", i), true);
+		ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", i), point_light.get_colour());
+		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", i), point_light.get_brightness());
+		ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", i), pos);
+		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", i), point_light.get_radius());
+		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", i), point_light.get_range());
 		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
 		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
 	}
-	else if (light_node.entity->has<DirectionalLight>())
-	{
-		auto& direct_light = light_node.entity->get<DirectionalLight>();
 
-		ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", direct_light.get_colour());
-		ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", direct_light.get_brightness());
-		ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", direct_light.get_direction());
-		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", direct_light.get_colour());
-	}
-	else
+	if (m_direct_light)
 	{
-		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", { 0.f, 0.f, 0.f, 0.f });
+		ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", m_direct_light->get_colour());
+		ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", m_direct_light->get_brightness());
+		ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", m_direct_light->get_direction());
+		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", m_direct_light->get_colour());
 	}
 }
 
@@ -280,15 +297,6 @@ void Scene::imgui_render(SceneNode& scene_node)
 			imgui_render(node);
 		}
 		ImGui::TreePop();
-	}
-}
-
-template<typename T>
-inline T component_dynamic_cast(const std::shared_ptr<Component> component) 
-{
-	if (!strcmp(component->get_name(), "Transform"))
-	{
-		return *dynamic_cast<Transform*>(component.get());
 	}
 }
 
