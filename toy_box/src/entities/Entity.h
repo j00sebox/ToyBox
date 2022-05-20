@@ -25,8 +25,7 @@ public:
 		}
 	}
 
-	template<class T>
-	bool remove(const T& component)
+	bool remove(const Component& component)
 	{
 		if (m_type_map.find(component.get_type()) != m_type_map.end())
 		{
