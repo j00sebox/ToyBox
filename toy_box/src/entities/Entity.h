@@ -64,7 +64,7 @@ public:
 			ASSERT(false);
 		}
 
-		return *std::static_pointer_cast<T>(m_components[m_type_map.at(type_hash)]);
+		return *dynamic_cast<T*>(m_components[m_type_map.at(type_hash)].get());
 	}
 	
 	template<class T>
