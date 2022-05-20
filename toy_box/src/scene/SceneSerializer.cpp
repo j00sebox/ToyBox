@@ -247,6 +247,9 @@ SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, 
 
 	t.scale(info["scale"]);
 
+	json parent_position = info["parent_position"];
+	t.set_parent_offsets(mathz::Vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
+
 	e.attach(std::move(t));
 
 	if (!model["light"].is_null())

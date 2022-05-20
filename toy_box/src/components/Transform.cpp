@@ -97,6 +97,11 @@ void Transform::serialize(json& accessor) const
 	accessor["transform"]["rotation"][3] = m_rotate_axis.z;
 
 	accessor["transform"]["scale"] = m_uniform_scale;
+
+	accessor["transform"]["parent_position"][0] = m_parent_position.x;
+	accessor["transform"]["parent_position"][1] = m_parent_position.y;
+	accessor["transform"]["parent_position"][2] = m_parent_position.z;
+	accessor["transform"]["parent_scale"] = m_parent_scale;
 }
 
 Transform Transform::operator*(const Transform& other) const
