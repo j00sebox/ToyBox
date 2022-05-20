@@ -283,6 +283,15 @@ void Scene::imgui_render(SceneNode& scene_node)
 	}
 }
 
+template<typename T>
+inline T component_dynamic_cast(const std::shared_ptr<Component> component) 
+{
+	if (!strcmp(component->get_name(), "Transform"))
+	{
+		return *dynamic_cast<Transform*>(component.get());
+	}
+}
+
 void Scene::display_components()
 {
 	std::vector<std::shared_ptr<Component>> components = m_selected_node->entity->get_components();

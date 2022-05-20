@@ -30,7 +30,7 @@ public:
 	{
 		if (m_type_map.find(component.get_type()) != m_type_map.end())
 		{
-			if (is_removeable(component.get_type()))
+			if (is_removeable(component.get_name()))
 			{
 				size_t index = m_type_map.at(component.get_type());
 
@@ -78,7 +78,7 @@ public:
 protected:
 	bool is_removeable(const char* type)
 	{
-		return (!strcmp(type, "class Mesh") || !strcmp(type, "class Material") || !strcmp(type, "class PointLight") || !strcmp(type, "class DirectionalLight"));
+		return (!strcmp(type, "Mesh") || !strcmp(type, "Material") || !strcmp(type, "Point Light") || !strcmp(type, "Directional Light"));
 	}
 
 	std::string m_name;
