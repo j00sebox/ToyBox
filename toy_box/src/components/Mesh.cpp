@@ -17,8 +17,6 @@ Mesh::Mesh(Mesh&& mesh) noexcept
 {
 	m_va = std::move(mesh.m_va);
 	m_indices_count = mesh.m_indices_count;
-	
-	// TODO: Remove later
 	m_gltf_path = mesh.m_gltf_path;
 	m_primitive = mesh.m_primitive;
 }
@@ -81,7 +79,16 @@ void Mesh::unbind() const
 
 void Mesh::imgui_render()
 {
-	
+	if (!m_gltf_path.empty())
+	{
+		ImGui::Text("GLTF: ");
+		ImGui::SameLine();
+		ImGui::Text(m_gltf_path.c_str());
+	}
+	else if (m_primitive != PrimitiveTypes::None)
+	{
+		ImGui::Text(primitve_type_to_str(m_primitive).c_str());
+	}
 }
 
 void Mesh::serialize(json& accessor) const
