@@ -46,24 +46,7 @@ void Scene::init(int width, int height)
 
 	for (const SceneNode& node : root)
 	{
-		create_light_map(node);
-	}
-}
-
-void Scene::create_light_map(const SceneNode& node)
-{
-	if (node.entity->has_component<PointLight>())
-	{
-		m_point_lights.emplace_back(node.entity.get());
-	} 
-	else if (node.entity->has_component<DirectionalLight>())
-	{
-		m_direct_light = &node.entity->get_component<DirectionalLight>();
-	}
-
-	for (const SceneNode& n : node)
-	{
-		create_light_map(n);
+		m_light_manager.set_lights(node);
 	}
 }
 
@@ -84,7 +67,7 @@ void Scene::update(float elapsed_time)
 	
 	ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 
-	update_lights();
+	m_light_manager.update_lights(m_camera);
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
@@ -178,6 +161,11 @@ void Scene::reset_view()
 
 void Scene::remove_node(SceneNode& node)
 {
+	if (node.entity->has_component<PointLight>())
+	{
+		m_light_manager.remove_point_light(node);
+	}
+
 	if (!root.remove(node))
 	{
 		fprintf(stderr, "Node not apart of current scene tree!");
@@ -228,42 +216,6 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 	}
 }
 
-void Scene::update_lights()
-{
-	for (int i = 0; i < m_point_lights.size(); ++i)
-	{
-		if (m_point_lights[i]->has_component<PointLight>())
-		{
-			auto& transform = m_point_lights[i]->get_component<Transform>();
-			auto& point_light = m_point_lights[i]->get_component<PointLight>();
-			mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
-
-			ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", i), true);
-			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", i), point_light.get_colour());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", i), point_light.get_brightness());
-			ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", i), pos);
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", i), point_light.get_radius());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", i), point_light.get_range());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
-		}
-		else
-		{
-			ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", i), false);
-			m_point_lights.erase(m_point_lights.begin() + i); --i;
-		}
-	}
-
-	if (m_direct_light)
-	{
-		ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", m_direct_light->get_colour());
-		ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", m_direct_light->get_brightness());
-		ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", m_direct_light->get_direction());
-		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", m_direct_light->get_colour());
-	}
-}
-
 void Scene::imgui_render(SceneNode& scene_node)
 {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
@@ -278,9 +230,21 @@ void Scene::imgui_render(SceneNode& scene_node)
 	if (ImGui::BeginPopupContextItem())
 	{
 		m_selected_node = &scene_node;
+		
 		if (ImGui::MenuItem("Delete"))
 		{
 			m_nodes_to_remove.push(&scene_node);
+		}
+
+		if (ImGui::BeginMenu("Add Component"))
+		{
+			if (ImGui::MenuItem("Point Light"))
+			{
+				m_selected_node->entity->add_component(PointLight{});
+				m_light_manager.add_point_light(*m_selected_node);
+			}
+
+			ImGui::EndMenu();
 		}
 
 		ImGui::EndPopup();
@@ -349,6 +313,7 @@ void Scene::display_components()
 
 			if (remove_component)
 			{
+				if (m_selected_node->entity->has_component<PointLight>()) m_light_manager.remove_point_light(*m_selected_node);
 				if (m_selected_node->entity->remove_component(*components[i])) --i;
 			}
 

@@ -18,7 +18,7 @@ void SceneNode::add_child(SceneNode&& s)
 
 bool SceneNode::exists(const std::string& name) const
 {
-	if (entity->get_name() == name)
+	if (entity && entity->get_name() == name)
 	{
 		return true;
 	}

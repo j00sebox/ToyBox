@@ -3,6 +3,7 @@
 #include "Skybox.h"
 #include "Camera.h"
 #include "SceneNode.h"
+#include "LightManager.h"
 
 #include "components/Fwd.h"
 
@@ -28,13 +29,9 @@ public:
 
 private:
 	// scene management
-	void create_light_map(const SceneNode& node);
+	void update_node(SceneNode& node, const Transform& parent_transform);
 	void remove_node(SceneNode& node);
 	SceneNode move_node(SceneNode& node);
-
-	// rendering helpers
-	void update_node(SceneNode& node, const Transform& parent_transform);
-	void update_lights();
 	
 	// imgui helpers
 	void imgui_render(SceneNode& node);
@@ -44,8 +41,8 @@ private:
 	std::unique_ptr<Skybox> m_skybox;
 	SceneNode root;
 	std::queue<SceneNode*> m_nodes_to_remove;
-	std::vector<Entity*> m_point_lights;
-	DirectionalLight* m_direct_light = nullptr;
+	LightManager m_light_manager;
+	
 
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;
