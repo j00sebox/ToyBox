@@ -52,13 +52,13 @@ void Scene::init(int width, int height)
 
 void Scene::create_light_map(const SceneNode& node)
 {
-	if (node.entity->has<PointLight>())
+	if (node.entity->has_component<PointLight>())
 	{
 		m_point_lights.emplace_back(node.entity.get());
 	} 
-	else if (node.entity->has<DirectionalLight>())
+	else if (node.entity->has_component<DirectionalLight>())
 	{
-		m_direct_light = &node.entity->get<DirectionalLight>();
+		m_direct_light = &node.entity->get_component<DirectionalLight>();
 	}
 
 	for (const SceneNode& n : node)
@@ -143,16 +143,16 @@ void Scene::add_primitive(const char* name)
 
 	Entity e;
 	e.set_name(lookup.c_str());
-	e.attach(Transform());
+	e.add_component(Transform());
 	
 	Mesh mesh;
 	mesh.load_primitive(str_to_primitive_type(name));
-	e.attach(std::move(mesh));
+	e.add_component(std::move(mesh));
 
 	Material material;
 	material.set_shader(ShaderLib::get("pbr_standard"));
 	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
-	e.attach(std::move(material));
+	e.add_component(std::move(material));
 
 	if(m_selected_node)
 		m_selected_node->add_child(std::make_unique<Entity>(std::move(e)));
@@ -192,10 +192,10 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 {
 	Transform relative_transform = scene_node.update(parent_transform);
 
-	if (scene_node.entity->has<Mesh>())
+	if (scene_node.entity->has_component<Mesh>())
 	{
-		auto& material = scene_node.entity->get<Material>();
-		auto& mesh = scene_node.entity->get<Mesh>();
+		auto& material = scene_node.entity->get_component<Material>();
+		auto& mesh = scene_node.entity->get_component<Mesh>();
 
 		material.get_shader()->set_uniform_mat4f("u_model", relative_transform.get_transform());
 		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
@@ -227,8 +227,8 @@ void Scene::update_lights()
 {
 	for(int i = 0; i < m_point_lights.size(); ++i)
 	{
-		auto& transform = m_point_lights[i]->get<Transform>();
-		auto& point_light = m_point_lights[i]->get<PointLight>();
+		auto& transform = m_point_lights[i]->get_component<Transform>();
+		auto& point_light = m_point_lights[i]->get_component<PointLight>();
 		mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
 
 		ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", i), true);
@@ -336,7 +336,7 @@ void Scene::display_components()
 
 			if (remove_component)
 			{
-				if (m_selected_node->entity->remove(*components[i])) --i;
+				if (m_selected_node->entity->remove_component(*components[i])) --i;
 			}
 
 			components[i]->imgui_render();

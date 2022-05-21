@@ -5,10 +5,6 @@
 #include "components/Component.h"
 #include "components/All.h"
 
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <mathz/Matrix.h>
-
 class Entity
 {
 public:
@@ -16,7 +12,7 @@ public:
 	[[nodiscard]] const std::string& get_name() const { return m_name; }
 
 	template<class T>
-	void attach(T&& component)
+	void add_component(T&& component)
 	{
 		size_t type_hash = typeid(T).hash_code();
 		if (m_type_map.find(type_hash) == m_type_map.end())
@@ -26,7 +22,7 @@ public:
 		}
 	}
 
-	bool remove(const Component& component)
+	bool remove_component(const Component& component)
 	{
 		if (m_type_map.find(component.get_type()) != m_type_map.end())
 		{
@@ -55,7 +51,7 @@ public:
 	}
 
 	template<class T>
-	T& get() const
+	T& get_component() const
 	{
 		size_t type_hash = typeid(T).hash_code();
 		if (m_type_map.find(type_hash) == m_type_map.end())
@@ -68,7 +64,7 @@ public:
 	}
 	
 	template<class T>
-	bool has() const
+	bool has_component() const
 	{
 		return (m_type_map.find(typeid(T).hash_code()) != m_type_map.end());
 	}

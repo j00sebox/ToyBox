@@ -80,7 +80,7 @@ SceneNode SceneNode::move(SceneNode& node)
 
 Transform SceneNode::update(const Transform& parent_transform)
 {
-	auto& transform = entity->get<Transform>();
+	auto& transform = entity->get_component<Transform>();
 	// this is only true if the node was recently given a new parent
 	if (m_moved)
 	{

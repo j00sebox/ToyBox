@@ -92,9 +92,9 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 {
 	accessor[node_index]["name"] = scene_node.entity->get_name();
 
-	if (scene_node.entity->has<Material>())
+	if (scene_node.entity->has_component<Material>())
 	{
-		Material& material = scene_node.entity->get<Material>();
+		Material& material = scene_node.entity->get_component<Material>();
 		accessor[node_index]["shader"] = ShaderLib::find(material.get_shader());
 	}
 
@@ -247,7 +247,7 @@ SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, 
 	json parent_position = info["parent_position"];
 	t.set_parent_offsets(mathz::Vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
 
-	e.attach(std::move(t));
+	e.add_component(std::move(t));
 
 	if (!model["light"].is_null())
 	{
@@ -262,7 +262,7 @@ SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, 
 			pl.set_radius(model["light"]["radius"]);
 			pl.set_brightness(model["light"]["brightness"]);
 
-			e.attach(std::move(pl));
+			e.add_component(std::move(pl));
 		}
 		else if (type == "directional_light")
 		{
@@ -276,7 +276,7 @@ SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, 
 
 			dl.set_brightness(model["light"]["brightness"]);
 
-			e.attach(std::move(dl));
+			e.add_component(std::move(dl));
 		}
 	}
 
@@ -290,13 +290,13 @@ SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, 
 
 		// TODO: remove later
 		mesh.m_gltf_path = model["gltf"]["path"];
-		e.attach(std::move(mesh));
+		e.add_component(std::move(mesh));
 
 		Material material;
 		load_gltf_material(loader, material);
 		material.set_shader(ShaderLib::get(model["shader"]));
 
-		e.attach(std::move(material));
+		e.add_component(std::move(material));
 	}
 	else if (!model["primitive"].is_null())
 	{
@@ -304,12 +304,12 @@ SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, 
 
 		Mesh mesh;
 		mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
-		e.attach(std::move(mesh));
+		e.add_component(std::move(mesh));
 
 		Material material;
 		material.set_shader(ShaderLib::get(model["shader"]));
 		material.set_colour({ 1.f, 1.f, 1.f, 1.f });
-		e.attach(std::move(material));
+		e.add_component(std::move(material));
 	}
 
 	SceneNode current_node{ std::make_unique<Entity>(std::move(e)) };
