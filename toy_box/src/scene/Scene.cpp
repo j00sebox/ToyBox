@@ -101,7 +101,12 @@ void Scene::update(float elapsed_time)
 	{
 		if (m_selected_node)
 		{
-			ImGui::Text(m_selected_node->entity->get_name().c_str());
+			char buf[32];
+			strcpy(buf, m_selected_node->entity->get_name().c_str());
+			if (ImGui::InputText("##EntityName", buf, IM_ARRAYSIZE(buf)))
+			{
+				m_selected_node->entity->set_name(buf);
+			}
 
 			display_components();
 		}
@@ -263,7 +268,7 @@ void Scene::imgui_render(SceneNode& scene_node)
 {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
 	if (!scene_node.has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
-	bool opened = ImGui::TreeNodeEx(scene_node.get_name().c_str(), flags);
+	bool opened = ImGui::TreeNodeEx(scene_node.entity->get_name().c_str(), flags);
 
 	if (ImGui::IsItemClicked())
 	{
@@ -285,7 +290,7 @@ void Scene::imgui_render(SceneNode& scene_node)
 	{
 		ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
 		m_drag_node = &scene_node;
-		ImGui::Text(scene_node.get_name().c_str());
+		ImGui::Text(scene_node.entity->get_name().c_str());
 		ImGui::EndDragDropSource();
 	}
 	

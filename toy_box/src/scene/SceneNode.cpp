@@ -7,7 +7,6 @@
 
 SceneNode::SceneNode(std::unique_ptr<Entity>&& e)
 {
-	m_name = e->get_name();
 	entity = std::move(e);
 }
 
@@ -19,7 +18,7 @@ void SceneNode::add_child(SceneNode&& s)
 
 bool SceneNode::exists(const std::string& name) const
 {
-	if (m_name == name)
+	if (entity->get_name() == name)
 	{
 		return true;
 	}
