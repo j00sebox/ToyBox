@@ -22,7 +22,6 @@ public:
 	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] bool is_custom() const { return m_custom; }
 
-	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Material"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Material).hash_code(); }
 	void imgui_render() override;

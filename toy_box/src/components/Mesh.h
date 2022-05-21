@@ -27,7 +27,6 @@ public:
 
 	[[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
 
-	virtual void on_remove() {};
 	[[nodiscard]] const char* get_name() const override { return "Mesh"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Mesh).hash_code(); }
 	void imgui_render() override;

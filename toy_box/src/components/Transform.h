@@ -22,7 +22,6 @@ public:
 	[[nodiscard]] const mathz::Vec3 get_parent_pos() const { return m_parent_position; }
 	[[nodiscard]] float get_parent_scale() const { return m_parent_scale; }
 
-	virtual void on_remove() override {};
 	[[nodiscard]] const char* get_name() const override { return "Transform"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Transform).hash_code(); }
 	void imgui_render() override;

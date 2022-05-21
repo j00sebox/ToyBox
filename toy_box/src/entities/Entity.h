@@ -30,8 +30,6 @@ public:
 			{
 				size_t index = m_type_map.at(component.get_type());
 
-				m_components[m_type_map.at(component.get_type())]->on_remove();
-
 				m_components.erase(m_components.begin() + index);
 
 				m_type_map.erase(component.get_type());

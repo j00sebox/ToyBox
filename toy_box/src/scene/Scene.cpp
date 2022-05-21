@@ -225,20 +225,28 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 
 void Scene::update_lights()
 {
-	for(int i = 0; i < m_point_lights.size(); ++i)
+	for (int i = 0; i < m_point_lights.size(); ++i)
 	{
-		auto& transform = m_point_lights[i]->get_component<Transform>();
-		auto& point_light = m_point_lights[i]->get_component<PointLight>();
-		mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
+		if (m_point_lights[i]->has_component<PointLight>())
+		{
+			auto& transform = m_point_lights[i]->get_component<Transform>();
+			auto& point_light = m_point_lights[i]->get_component<PointLight>();
+			mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
 
-		ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", i), true);
-		ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", i), point_light.get_colour());
-		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", i), point_light.get_brightness());
-		ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", i), pos);
-		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", i), point_light.get_radius());
-		ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", i), point_light.get_range());
-		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
-		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+			ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", i), true);
+			ShaderLib::get("pbr_standard")->set_uniform_4f(std::format("point_lights[{}].colour", i), point_light.get_colour());
+			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].brightness", i), point_light.get_brightness());
+			ShaderLib::get("pbr_standard")->set_uniform_3f(std::format("point_lights[{}].position", i), pos);
+			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].radius", i), point_light.get_radius());
+			ShaderLib::get("pbr_standard")->set_uniform_1f(std::format("point_lights[{}].range", i), point_light.get_range());
+			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", m_camera->get_pos());
+			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+		}
+		else
+		{
+			ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", i), false);
+			m_point_lights.erase(m_point_lights.begin() + i); --i;
+		}
 	}
 
 	if (m_direct_light)

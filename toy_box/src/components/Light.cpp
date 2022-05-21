@@ -38,11 +38,6 @@ DirectionalLight::DirectionalLight()
 	ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", true);
 }
 
-void DirectionalLight::on_remove()
-{
-	ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", false);
-}
-
 void DirectionalLight::imgui_render()
 {
 	Light::imgui_render();
@@ -74,16 +69,6 @@ void DirectionalLight::serialize(json& accessor) const
 	accessor["light"]["direction"][0] = m_direction.x;
 	accessor["light"]["direction"][1] = m_direction.y;
 	accessor["light"]["direction"][2] = m_direction.z;
-}
-
-PointLight::PointLight()
-{
-	//ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), true);
-}
-
-void PointLight::on_remove()
-{
-	//ShaderLib::get("pbr_standard")->set_uniform_1i(std::format("point_lights[{}].active", m_index), false);
 }
 
 void PointLight::imgui_render()
