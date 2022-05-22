@@ -52,9 +52,4 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC external/stb
 )
 
-# target_link_directories(${PROJECT_NAME}
-#     PRIVATE external/glfw/src
-#     PRIVATE exeternal/glad/src
-# )
-
 target_link_libraries(${PROJECT_NAME} glfw glad imgui fmt stb)
