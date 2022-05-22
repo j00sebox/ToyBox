@@ -14,10 +14,10 @@
 #include "events/EventList.h"
 #include "profiler/Timer.h"
 
-#include <mathz/Misc.h>
-
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <fmt/format.h>
+#include <mathz/Misc.h>
 
 Scene::Scene()
 {
@@ -125,7 +125,7 @@ void Scene::add_primitive(const char* name)
 	int i = 1;
 	while (root.exists(lookup))
 	{
-		lookup = std::string(name) + std::format(" ({})", i);
+		lookup = std::string(name) + fmt::format(" ({})", i);
 		++i;
 	}
 

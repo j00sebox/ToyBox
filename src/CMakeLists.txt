@@ -20,6 +20,11 @@
 # )
 
 include(${CMAKE_CURRENT_LIST_DIR}/scene/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/renderer/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/entities/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/events/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/profiler/CMakeLists.txt)
 
 list(APPEND SRCS
         ${CMAKE_CURRENT_LIST_DIR}/main.cpp

@@ -6,7 +6,7 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 #include <mathz/Quaternion.h>
 #include <mathz/Misc.h>

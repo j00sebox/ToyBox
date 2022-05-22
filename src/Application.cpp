@@ -9,11 +9,8 @@ void Application::start()
 {
 	m_running = true;
 
-#ifdef PLATFORM_WINDOWS
-	m_current_scene->load("resources/scenes/spooky.scene");
-#else
-	m_current_scene->load("./toy_box/resources/scenes/spooky.scene");
-#endif
+	m_current_scene->load("../resources/scenes/spooky.scene");
+
 	auto [width, height] = m_window.get_dimensions();
 	m_current_scene->init(width, height);
 	Renderer::init(width, height);

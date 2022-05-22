@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.23.1)
 project(toy_box CXX)
 set(CMAKE_CXX_STANDARD 20)
 
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include)
 
 # Download submodules
@@ -26,6 +27,8 @@ add_subdirectory(external/glad)
 add_subdirectory(external/mathz)
 add_subdirectory(external/imgui)
 add_subdirectory(external/json)
+add_subdirectory(external/fmt)
+add_subdirectory(external/stb)
 
 include(src/CMakeLists.txt)
 add_executable(${PROJECT_NAME} ${SRCS})
@@ -45,6 +48,8 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC external/mathz/include
     PUBLIC external/imgui
     PUBLIC external/json/include
+    PUBLIC external/fmt/include
+    PUBLIC external/stb
 )
 
 # target_link_directories(${PROJECT_NAME}
@@ -52,4 +57,4 @@ target_include_directories(${PROJECT_NAME}
 #     PRIVATE exeternal/glad/src
 # )
 
-target_link_libraries(${PROJECT_NAME} glfw glad imgui)
+target_link_libraries(${PROJECT_NAME} glfw glad imgui fmt stb)
