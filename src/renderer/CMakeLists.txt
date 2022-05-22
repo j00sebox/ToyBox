@@ -1,0 +1,12 @@
+set(SOURCES
+    Buffer.h,
+    Buffer.cpp,
+    Renderer.h,
+    Renderer.cpp,
+    Shader.h,
+    Shader.cpp,
+    Texture.h,
+    Texture.cpp,
+    VertexArray.h,
+    VertexArray.cpp
+)

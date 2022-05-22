@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Skybox.h"
 #include "Camera.h"
-#include "SceneNode.h"
-#include "LightManager.h"
+#include "entities/Skybox.h"
+#include "scene/SceneNode.h"
+#include "scene/LightManager.h"
 
 #include "components/Fwd.h"
 

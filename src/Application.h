@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "Scene.h"
+#include "scene/Scene.h"
 
 class Application
 {

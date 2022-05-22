@@ -1,0 +1,10 @@
+set(SOURCES
+    LightManager.h,
+    LightManager.cpp,
+    Scene.h,
+    Scene.cpp,
+    SceneNode.h,
+    SceneNode.cpp,
+    SceneSerializer.h,
+    SceneSerializer.cpp
+)
