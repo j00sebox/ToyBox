@@ -25,7 +25,7 @@ void Application::start()
 
 		m_window.begin_frame();
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		display_menu();
 
@@ -53,7 +53,7 @@ void Application::display_menu()
 		{
 			if (ImGui::BeginMenu("Open"))
 			{
-				for (const auto& entry : std::filesystem::directory_iterator("resources/scenes/"))
+				for (const auto& entry : std::filesystem::directory_iterator("../resources/scenes/"))
 				{
 					if (ImGui::MenuItem(entry.path().filename().string().c_str()))
 					{
@@ -72,7 +72,7 @@ void Application::display_menu()
 
 				if (ImGui::Button("Save As"))
 				{
-					std::string path = std::string("resources/scenes/") + std::string(buf);
+					std::string path = std::string("../resources/scenes/") + std::string(buf);
 					m_current_scene->save(path);
 				}
 

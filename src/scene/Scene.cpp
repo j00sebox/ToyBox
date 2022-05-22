@@ -197,7 +197,7 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		if (m_selected_node && (scene_node == *m_selected_node))
 		{
 			Transform stencil_transform = relative_transform;
-			stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.1f); // scale up a tiny bit to see outline
+			stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.03f); // scale up a tiny bit to see outline
 			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", stencil_transform.get_transform());
 			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
 			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());

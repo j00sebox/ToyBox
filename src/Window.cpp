@@ -47,6 +47,7 @@ Window::Window(int width = 0, int height = 0)
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.WantCaptureMouse = false;
 	ImGui::StyleColorsDark();
 

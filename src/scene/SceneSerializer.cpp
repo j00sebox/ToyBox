@@ -126,17 +126,8 @@ void SceneSerializer::load_skybox(json accessor, std::unique_ptr<Skybox>& sky_bo
 	{
 		Skybox sb(skybox_src);
 
-#ifdef PLATFORM_WINDOWS
-		const char* v_path = "resources/shaders/skybox/skybox_vertex.shader";
-#else
-		const char* v_path = "./gl_sandbox/resources/shaders/skybox/skybox_vertex.shader";
-#endif
-
-#ifdef PLATFORM_WINDOWS
-		const char* f_path = "resources/shaders/skybox/skybox_fragment.shader";
-#else
-		const char* f_path = "./gl_sandbox/resources/shaders/skybox/skybox_fragment.shader";
-#endif
+		const char* v_path = "../resources/shaders/skybox/skybox_vertex.shader";
+		const char* f_path = "../resources/shaders/skybox/skybox_fragment.shader";
 
 		ShaderProgram sp(
 			Shader(v_path, ShaderType::Vertex),
