@@ -50,10 +50,10 @@ toy_box/vendor/glad/bin-int/*
 */*.vcxproj.user
 */*.vcxproj.filters
 
-#GLFW
+# GLFW
 */glfw/*
 
-#GLAD
+# GLAD
 toy_box/external/glad/bin/*
 toy_box/external/glad/bin-int/*
 toy_box/external/glad/GLAD.vcxproj
@@ -64,7 +64,7 @@ toy_box/external/glad/GLAD.vcxproj.user
 Makefile
 run.sh
 
-#Codelite
+# Codelite
 */.codelite
 .codelite
 */.ctagsd
@@ -73,4 +73,18 @@ run.sh
 *.project
 compile_flags.txt
 pch.h.gch
+
+# CMake
+build
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 

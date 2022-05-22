@@ -1,0 +1,6 @@
+add_subdirectory(components)
+add_subdirectory(entities)
+add_subdirectory(events)
+add_subdirectory(profiler)
+add_subdirectory(renderer)
+add_subdirectory(scene)
