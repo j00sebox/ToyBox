@@ -41,14 +41,14 @@ Cube::Cube()
 {
 	std::vector<float> vertices =
 	{
-		-1.0f, -1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//        7--------6
-		 1.0f, -1.0f,  1.0f, //1.f, 0.f, 0.f, 0.f, 1.f,		//       /|       /|
-		 1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      4--------5 |
-		-1.0f, -1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      | |      | | 
-		-1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      | 3------|-2
-		 1.0f,  1.0f,  1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      |/       |/
-		 1.0f,  1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f,		//      0--------1
-		-1.0f,  1.0f, -1.0f, //0.f, 0.f, 0.f, 0.f, 1.f
+		-1.0f, -1.0f,  1.0f, // 0.f, 0.f, -1.f, 0.f, 1.f,		//        7--------6
+		 1.0f, -1.0f,  1.0f, // 0.f, 0.f, -1.f, 0.f, 1.f,		//       /|       /|
+		 1.0f, -1.0f, -1.0f, // 0.f, 0.f,  1.f, 0.f, 1.f,		//      4--------5 |
+		-1.0f, -1.0f, -1.0f, // 0.f, 0.f,  1.f, 0.f, 1.f,		//      | |      | | 
+		-1.0f,  1.0f,  1.0f, // 0.f, 0.f, -1.f, 0.f, 1.f,		//      | 3------|-2
+		 1.0f,  1.0f,  1.0f, // 0.f, 0.f, -1.f, 0.f, 1.f,		//      |/       |/
+		 1.0f,  1.0f, -1.0f, // 0.f, 0.f,  1.f, 0.f, 1.f,		//      0--------1
+		-1.0f,  1.0f, -1.0f // 0.f, 0.f,  1.f, 0.f, 1.f
 	};
 
 	std::vector<unsigned int> indices =
@@ -87,8 +87,8 @@ Cube::Cube()
 
 	BufferLayout sb_layout = { 
 		{0, 3, GL_FLOAT, false},
-		/*{1, 2, GL_FLOAT, false},
-		{2, 3, GL_FLOAT, false}*/
+		//{1, 3, GL_FLOAT, false},
+		//{2, 3, GL_FLOAT, false}
 	};
 
 	m_cube_va.set_layout(cube_vb, sb_layout);
@@ -101,10 +101,10 @@ Cube::Cube()
 Quad::Quad()
 {
 	std::vector<float> vertices = {
-		-0.5f, -0.5f, -0.5f,
-		-0.5f,	0.5f, -0.5f,
-		 0.5f,  0.5f, -0.5f,
-		 0.5f, -0.5f, -0.5f
+		-0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 0.f,
+		-0.5f,	0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
+		 0.5f,  0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f, 1.f,
+		 0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f, 0.f
 	};
 
 	std::vector<unsigned int> indices = {
@@ -121,8 +121,8 @@ Quad::Quad()
 
 	BufferLayout sb_layout = {
 		{0, 3, GL_FLOAT, false},
-		/*{1, 2, GL_FLOAT, false},
-		{2, 3, GL_FLOAT, false}*/
+		{1, 3, GL_FLOAT, false},
+		{2, 2, GL_FLOAT, false}
 	};
 
 	m_quad_va.set_layout(quad_vb, sb_layout);
