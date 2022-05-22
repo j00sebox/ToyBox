@@ -4,6 +4,8 @@
 
 This project is a sandbox for learning more about how rendering is done and OpenGL. 
 
+![Airplane](/screenshots/airplane.png)
+
 ## Build
 
 If on Windows you can use the cmaker.bat file to create project files for Visual Studio.
