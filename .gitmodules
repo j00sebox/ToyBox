@@ -4,3 +4,11 @@
 [submodule "external/mathz"]
 	path = external/mathz
 	url = https://github.com/j00sebox/mathz.git
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/j00sebox/imgui.git
+[submodule "imgui"]
+	branch = docking
+[submodule "external/json"]
+	path = external/json
+	url = https://github.com/nlohmann/json.git

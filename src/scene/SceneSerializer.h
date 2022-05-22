@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <json/json_fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 class Camera;
 class Skybox;

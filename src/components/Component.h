@@ -1,6 +1,6 @@
 #pragma once
 
-#include "json/json_fwd.hpp"
+#include "nlohmann/json_fwd.hpp"
 
 class Component
 {
