@@ -13,5 +13,4 @@ Otherwise you can use cmake to generate files for whatever platform you are usin
 ```
 mkdir build
 cmake -S . -B build
-
 ```
