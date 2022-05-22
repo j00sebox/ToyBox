@@ -4,7 +4,7 @@
 
 This project is a sandbox for learning more about how rendering is done and OpenGL. 
 
-![Airplane](/screenshots/airplane.png)
+![Airplane](/screenshots/airplane.PNG)
 
 ## Build
 
