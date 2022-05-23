@@ -2,11 +2,15 @@
 
 enum class AttachmentType
 {
-    None = 0,
-    Colour,
-    Depth,
-    Stencil
+    None    = 0,
+    Colour  = 1,
+    Depth   = 2,
+    Stencil = 4
 };
+
+#define Colour  1
+#define Depth   2
+#define Stencil 4
 
 class FrameBuffer
 {
@@ -15,8 +19,8 @@ public:
     FrameBuffer(FrameBuffer&& fbo);
     ~FrameBuffer();
 
-    void attach_texture(AttachmentType attachment);
-    void attach_renderbuffer(AttachmentType attachment);
+    void attach_texture(int attachment);
+    void attach_renderbuffer(int attachment);
 
     void bind() const;
     void unbind() const;

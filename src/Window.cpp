@@ -72,13 +72,8 @@ Window::Window(int width = 0, int height = 0)
 	m_frame_buffer->bind();
 
 	// want the main buffer to have a texture colour for imgui
-	m_frame_buffer->attach_texture(AttachmentType::Colour);
-	m_frame_buffer->attach_renderbuffer(AttachmentType::Depth);
-	//m_frame_buffer->attach_renderbuffer(AttachmentType::Stencil);
-
-	printf("%i\n", m_frame_buffer->get_colour_attachment());
-	printf("%i\n", m_frame_buffer->get_depth_attachment());
-	printf("%i\n", m_frame_buffer->get_stencil_attachment());
+	m_frame_buffer->attach_texture(Colour);
+	m_frame_buffer->attach_renderbuffer(Depth | Stencil); // create one render buffer object for both
 
 	assert(m_frame_buffer->is_complete());
 
@@ -97,7 +92,7 @@ Window::~Window()
 
 void Window::display_render_context()
 {
-	ImGui::Begin("##GameWindow", (bool*)true, ImGuiWindowFlags_NoTitleBar);
+	ImGui::Begin("##RenderWindow", (bool*)true, ImGuiWindowFlags_NoTitleBar);
     ImVec2 pos = ImGui::GetCursorScreenPos();
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	drawList->AddImage((void*)m_frame_buffer->get_colour_attachment(),
