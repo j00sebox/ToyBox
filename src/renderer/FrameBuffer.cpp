@@ -39,12 +39,12 @@ void FrameBuffer::attach_texture(AttachmentType attachment)
 
         case AttachmentType::Depth:
         {
-            glGenTextures(1, &m_depth_buffer_attachment);
-            glBindTexture(GL_TEXTURE_2D, m_depth_buffer_attachment);
+            glGenTextures(1, &m_depth_attachment);
+            glBindTexture(GL_TEXTURE_2D, m_depth_attachment);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth_buffer_attachment, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth_attachment, 0);
             break;   
         }
 
@@ -70,16 +70,28 @@ void FrameBuffer::attach_renderbuffer(AttachmentType attachment)
     {
         case AttachmentType::Colour:
         {
+            glGenRenderbuffers(1, &m_colour_attachment);
+            glBindRenderbuffer(GL_RENDERBUFFER, m_colour_attachment);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, m_width, m_height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_colour_attachment);
             break;   
         }
 
         case AttachmentType::Depth:
         {
+            glGenRenderbuffers(1, &m_depth_attachment);
+            glBindRenderbuffer(GL_RENDERBUFFER, m_depth_attachment);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth_attachment);
             break;   
         }
 
         case AttachmentType::Stencil:
         {
+            glGenRenderbuffers(1, &m_stencil_attachment);
+            glBindRenderbuffer(GL_RENDERBUFFER, m_stencil_attachment);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, m_width, m_height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_stencil_attachment);
             break;   
         }
     
