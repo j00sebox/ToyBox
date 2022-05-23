@@ -23,6 +23,7 @@ public:
 
 private:
 	int m_width, m_height;
+	int prev_fb_width = 0, prev_fb_height = 0;
 	double prev_time = 0.0;
 	GLFWwindow* m_window_handle;
 	std::unique_ptr<FrameBuffer> m_frame_buffer;

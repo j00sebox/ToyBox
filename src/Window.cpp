@@ -93,11 +93,20 @@ Window::~Window()
 void Window::display_render_context()
 {
 	ImGui::Begin("##RenderWindow", (bool*)true, ImGuiWindowFlags_NoTitleBar);
+	ImVec2 avail_size = ImGui::GetContentRegionAvail();
     ImVec2 pos = ImGui::GetCursorScreenPos();
+	
+	if(prev_fb_width != avail_size.x || prev_fb_height != avail_size.y)
+	{
+		printf("x: %f, y: %f\n", avail_size.x, avail_size.y);
+		EventList::e_resize.execute_function(avail_size.x, avail_size.y);
+		prev_fb_width = avail_size.x;
+		prev_fb_height = avail_size.y;
+	}
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	drawList->AddImage((void*)m_frame_buffer->get_colour_attachment(),
         pos,
-        ImVec2(pos.x + 800, pos.y + 600),
+        ImVec2(pos.x + avail_size.x, pos.y + avail_size.y),
         ImVec2(0, 1),
         ImVec2(1, 0));
     ImGui::End();
