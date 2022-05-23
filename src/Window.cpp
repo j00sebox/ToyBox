@@ -5,6 +5,8 @@
 #include "Input.h"
 #include "events/EventList.h"
 
+#include "FrameBuffer.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
@@ -48,7 +50,6 @@ Window::Window(int width = 0, int height = 0)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
 	io.WantCaptureMouse = false;
 	ImGui::StyleColorsDark();
 
@@ -66,6 +67,20 @@ Window::Window(int width = 0, int height = 0)
 	glfwSetWindowSizeCallback(m_window_handle, glfw_window_resize_callback);
 
 	Input::m_window_handle = m_window_handle;
+
+	m_frame_buffer = std::make_unique<FrameBuffer>();
+	m_frame_buffer->bind();
+
+	// want the main buffer to have a texture colour for imgui
+	m_frame_buffer->attach_texture(AttachmentType::Colour);
+	m_frame_buffer->attach_renderbuffer(AttachmentType::Depth);
+	//m_frame_buffer->attach_renderbuffer(AttachmentType::Stencil);
+
+	printf("%i\n", m_frame_buffer->get_colour_attachment());
+	printf("%i\n", m_frame_buffer->get_depth_attachment());
+	printf("%i\n", m_frame_buffer->get_stencil_attachment());
+
+	assert(m_frame_buffer->is_complete());
 }
 
 Window::~Window()
@@ -80,6 +95,8 @@ Window::~Window()
 
 void Window::begin_frame()
 {
+	m_frame_buffer->bind();
+
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -89,10 +106,23 @@ void Window::begin_frame()
 	ImGui::Text("Avg. %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 	ImGui::End();
+
+	ImGui::Begin("Game Window");
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	drawList->AddImage((void*)m_frame_buffer->get_colour_attachment(),
+        pos,
+        ImVec2(pos.x + 800, pos.y + 600),
+        ImVec2(0, 1),
+        ImVec2(1, 0));
+    ImGui::End();
 }
 
 void Window::end_frame()
 {
+
+	m_frame_buffer->unbind();
+
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

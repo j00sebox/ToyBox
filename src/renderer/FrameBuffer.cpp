@@ -41,7 +41,7 @@ void FrameBuffer::attach_texture(AttachmentType attachment)
         {
             GL_CALL(glGenTextures(1, &m_depth_attachment));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, m_depth_attachment));
-            GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL));
+            GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_width, m_height, 0, GL_DEPTH_COMPONENT32F, GL_UNSIGNED_INT, NULL));
             GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
             GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
             GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth_attachment, 0));
@@ -81,7 +81,7 @@ void FrameBuffer::attach_renderbuffer(AttachmentType attachment)
         {
             GL_CALL(glGenRenderbuffers(1, &m_depth_attachment));
             GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, m_depth_attachment));
-            GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height));
+            GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, m_width, m_height));
             GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth_attachment));
             break;   
         }
@@ -114,5 +114,7 @@ void FrameBuffer::unbind() const
 // fbo needs to be bound first
 bool FrameBuffer::is_complete() const
 {
-    return (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+    auto fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    printf("Frame Buffer Status: %#04x\n", fb_status);
+    return (fb_status == GL_FRAMEBUFFER_COMPLETE);
 }

@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+class FrameBuffer;
+
 class Window
 {
 public:
@@ -21,5 +23,6 @@ private:
 	int m_width, m_height;
 	double prev_time = 0.0;
 	GLFWwindow* m_window_handle;
+	std::unique_ptr<FrameBuffer> m_frame_buffer;
 };
 
