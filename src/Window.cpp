@@ -81,6 +81,8 @@ Window::Window(int width = 0, int height = 0)
 	printf("%i\n", m_frame_buffer->get_stencil_attachment());
 
 	assert(m_frame_buffer->is_complete());
+
+	m_frame_buffer->unbind();
 }
 
 Window::~Window()
@@ -95,15 +97,42 @@ Window::~Window()
 
 void Window::begin_frame()
 {
-	m_frame_buffer->bind();
-
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	m_frame_buffer->bind();
+
 	ImGui::Begin("FPS");
 
 	ImGui::Text("Avg. %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+	ImGui::End();
+
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+	static bool show_dock_space = true;
+
+	ImGui::Begin("DockSpace", &show_dock_space, window_flags);
+
+    // Submit the DockSpace
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+    {
+        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    }
+
+	ImGui::PopStyleVar(2);
 
 	ImGui::End();
 
@@ -120,7 +149,6 @@ void Window::begin_frame()
 
 void Window::end_frame()
 {
-
 	m_frame_buffer->unbind();
 
 	ImGui::Render();
