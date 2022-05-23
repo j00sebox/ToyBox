@@ -4,7 +4,7 @@
 
 This project is a sandbox for learning more about how rendering is done and OpenGL. 
 
-![Airplane](/screenshots/airplane.PNG)
+![Airplane](/screenshots/airplane.png)
 
 ## Build
 
@@ -14,5 +14,5 @@ Otherwise you can use cmake to generate files for whatever platform you are usin
 
 ```
 mkdir build
-cmake -S . -B build
+cmake -DGLFW_BUILD_DOCS=OFF -S . -B build
 ```
