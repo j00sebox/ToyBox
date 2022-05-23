@@ -48,6 +48,7 @@ Window::Window(int width = 0, int height = 0)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
 	io.WantCaptureMouse = false;
 	ImGui::StyleColorsDark();
 
@@ -93,7 +94,6 @@ void Window::begin_frame()
 void Window::end_frame()
 {
 	ImGui::Render();
-
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	glfwSwapBuffers(m_window_handle);

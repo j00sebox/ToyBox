@@ -9,4 +9,6 @@ list(APPEND SRCS
     ${CMAKE_CURRENT_LIST_DIR}/Texture.cpp
     ${CMAKE_CURRENT_LIST_DIR}/VertexArray.h
     ${CMAKE_CURRENT_LIST_DIR}/VertexArray.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/FrameBuffer.h
+    ${CMAKE_CURRENT_LIST_DIR}/FrameBuffer.cpp
 )
