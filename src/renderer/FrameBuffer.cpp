@@ -30,7 +30,7 @@ void FrameBuffer::attach_texture(int attachment)
         {
             GL_CALL(glGenTextures(1, &m_colour_attachment));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, m_colour_attachment));
-            GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_INT, NULL));
+            GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_INT, NULL));
             GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
             GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
             GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colour_attachment, 0));
@@ -103,8 +103,6 @@ void FrameBuffer::attach_renderbuffer(int attachment)
             GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depth_attachment));
         }
 
-    
-    
     default:
         break;
     }

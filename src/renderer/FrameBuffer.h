@@ -1,13 +1,5 @@
 #pragma once
 
-enum class AttachmentType
-{
-    None    = 0,
-    Colour  = 1,
-    Depth   = 2,
-    Stencil = 4
-};
-
 #define Colour  1
 #define Depth   2
 #define Stencil 4
