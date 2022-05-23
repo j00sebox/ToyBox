@@ -14,6 +14,8 @@ public:
 	Window(int width, int height);
 	~Window();
 
+	void display_render_context();
+
 	void begin_frame();
 	void end_frame();
 	float get_delta_time();

@@ -11,10 +11,13 @@ public:
 	void switch_scene(const char* scene_path);
 
 private:
+	void display_dockspace();
 	void display_menu();
-
+	void display_fps();
+	
 	Window m_window;
 	std::unique_ptr<Scene> m_current_scene;
 	bool m_running = false;
+	bool m_show_dock_space = true;
 };
 
