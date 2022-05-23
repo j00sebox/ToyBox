@@ -88,3 +88,5 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
+# VS Code
+.vscode/

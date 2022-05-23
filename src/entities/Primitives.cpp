@@ -3,6 +3,7 @@
 
 #include "Buffer.h"
 
+#include <string.h>
 #include <glad/glad.h>
 
 std::string primitve_type_to_str(PrimitiveTypes pt)
