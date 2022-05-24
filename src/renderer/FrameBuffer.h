@@ -1,8 +1,13 @@
 #pragma once
 
-#define Colour  1
-#define Depth   2
-#define Stencil 4
+namespace AttachmentTypes {
+    enum : unsigned char 
+    {
+        Colour  = 1,
+        Depth   = 2,
+        Stencil = 4
+    };
+}
 
 class FrameBuffer
 {
@@ -11,8 +16,8 @@ public:
     FrameBuffer(FrameBuffer&& fbo);
     ~FrameBuffer();
 
-    void attach_texture(int attachment);
-    void attach_renderbuffer(int attachment);
+    void attach_texture(unsigned char attachment);
+    void attach_renderbuffer(unsigned char attachment);
 
     void bind() const;
     void unbind() const;

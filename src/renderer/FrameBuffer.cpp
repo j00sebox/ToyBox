@@ -22,11 +22,11 @@ FrameBuffer::~FrameBuffer()
     GL_CALL(glDeleteFramebuffers(1, &m_id));
 }
 
-void FrameBuffer::attach_texture(int attachment)
+void FrameBuffer::attach_texture(unsigned char attachment)
 {
     switch (attachment)
     {
-        case Colour:
+        case AttachmentTypes::Colour:
         {
             GL_CALL(glGenTextures(1, &m_colour_attachment));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, m_colour_attachment));
@@ -37,7 +37,7 @@ void FrameBuffer::attach_texture(int attachment)
             break;   
         }
 
-        case Depth:
+        case AttachmentTypes::Depth:
         {
             GL_CALL(glGenTextures(1, &m_depth_attachment));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, m_depth_attachment));
@@ -48,7 +48,7 @@ void FrameBuffer::attach_texture(int attachment)
             break;   
         }
 
-        case Stencil:
+        case AttachmentTypes::Stencil:
         {
             GL_CALL(glGenTextures(1, &m_stencil_attachment));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, m_stencil_attachment));
@@ -64,11 +64,11 @@ void FrameBuffer::attach_texture(int attachment)
     }
 }
 
-void FrameBuffer::attach_renderbuffer(int attachment)
+void FrameBuffer::attach_renderbuffer(unsigned char attachment)
 {
     switch (attachment)
     {
-        case Colour:
+        case AttachmentTypes::Colour:
         {
             GL_CALL(glGenRenderbuffers(1, &m_colour_attachment));
             GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, m_colour_attachment));
@@ -77,7 +77,7 @@ void FrameBuffer::attach_renderbuffer(int attachment)
             break;   
         }
 
-        case Depth:
+        case AttachmentTypes::Depth:
         {
             GL_CALL(glGenRenderbuffers(1, &m_depth_attachment));
             GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, m_depth_attachment));
@@ -86,7 +86,7 @@ void FrameBuffer::attach_renderbuffer(int attachment)
             break;   
         }
 
-        case Stencil:
+        case AttachmentTypes::Stencil:
         {
             GL_CALL(glGenRenderbuffers(1, &m_stencil_attachment));
             GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, m_stencil_attachment));
@@ -95,12 +95,13 @@ void FrameBuffer::attach_renderbuffer(int attachment)
             break;   
         }
 
-        case (Depth | Stencil):
+        case (AttachmentTypes::Depth | AttachmentTypes::Stencil):
         {
             GL_CALL(glGenRenderbuffers(1, &m_depth_attachment));
             GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, m_depth_attachment));
             GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_width, m_height));
             GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depth_attachment));
+            break;
         }
 
     default:

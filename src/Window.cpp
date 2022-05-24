@@ -72,8 +72,8 @@ Window::Window(int width = 0, int height = 0)
 	m_frame_buffer->bind();
 
 	// want the main buffer to have a texture colour for imgui
-	m_frame_buffer->attach_texture(Colour);
-	m_frame_buffer->attach_renderbuffer(Depth | Stencil); // create one render buffer object for both
+	m_frame_buffer->attach_texture(AttachmentTypes::Colour);
+	m_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
 
 	assert(m_frame_buffer->is_complete());
 
