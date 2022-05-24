@@ -95,10 +95,10 @@ void ShaderProgram::compile_shader(unsigned int id) const
 
 		char* info_log = new char[log_sz * sizeof(char)];
 		GL_CALL(glGetShaderInfoLog(id, log_sz, nullptr, info_log));
-
+		
+		fatal("{}\n", info_log);
 		delete[] info_log;
 		GL_CALL(glDeleteShader(id));
-		fatal("%s\n", info_log);
 	}
 	else
 	{
@@ -125,10 +125,10 @@ void ShaderProgram::link()
 		char* info_log = new char[log_sz * sizeof(char)];
 		GL_CALL(glGetProgramInfoLog(m_program_id, log_sz, nullptr, info_log));
 
+		fatal("{}\n", info_log);
 		delete[] info_log;
 		delete_shaders();
 		GL_CALL(glDeleteProgram(m_program_id));
-		fatal("{}\n", info_log);
 	}
 }
 

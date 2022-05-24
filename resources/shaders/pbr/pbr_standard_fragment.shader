@@ -57,6 +57,52 @@ uniform PointLight point_lights[MAX_POINT_LIGHTS];
 
 out vec4 colour;
 
+// various kernels
+
+float sharper_kernel[9] = float[](
+        -1, -1, -1,
+        -1,  9, -1,
+        -1, -1, -1
+);
+
+float blur_kernel[9] = float[](
+    1.f / 16.f, 2.f / 16.f, 1.f / 16.f,
+    2.f / 16.f, 4.f / 16.f, 2.f / 16.f,
+    1.f / 16.f, 2.f / 16.f, 1.f / 16.f  
+);
+
+// assuming the kernel is 3x3
+vec4 apply_kernel(float[9] kernel, sampler2D tex)
+{
+	const float offset = 1.0 / 300.0;  
+
+    vec2 offsets[9] = vec2[](
+        vec2(-offset,  offset), // top-left
+        vec2( 0.0f,    offset), // top-center
+        vec2( offset,  offset), // top-right
+        vec2(-offset,  0.0f),   // center-left
+        vec2( 0.0f,    0.0f),   // center-center
+        vec2( offset,  0.0f),   // center-right
+        vec2(-offset, -offset), // bottom-left
+        vec2( 0.0f,   -offset), // bottom-center
+        vec2( offset, -offset)  // bottom-right    
+    );
+
+	vec4 samples[9];
+	for(int i = 0; i < 9; i++)
+	{
+		samples[i] = texture(tex, v_tex_coord + offsets[i]);
+	}
+
+	vec4 res_colour;
+	for(int i = 0; i < 9; i++)
+	{
+		res_colour += samples[i] * kernel[i];
+	}
+
+	return res_colour;
+}
+
 vec4 lambertian()
 {
 	return base_colour / pi;
@@ -171,7 +217,8 @@ void main()
 	}
 	else
 	{
-		base_colour = texture(diffuse_t, v_tex_coord);
+		//base_colour = texture(diffuse_t, v_tex_coord);
+		base_colour = apply_kernel(blur_kernel, diffuse_t);
 		normal = texture(normal_t, v_tex_coord).rgb;
 		metallic = texture(specular_t, v_tex_coord).r;
 		roughness = texture(specular_t, v_tex_coord).g;
