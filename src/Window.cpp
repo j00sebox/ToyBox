@@ -35,12 +35,12 @@ Window::Window(int width = 0, int height = 0)
 	: m_width(width), m_height(height)
 {
 	if (!glfwInit())
-		ASSERT(false);
+		fatal("Could not initialize GLFW!");
 
 	m_window_handle = glfwCreateWindow(width, height, "Toy Box", NULL, NULL);
 
 	if (!m_window_handle)
-		ASSERT(false);
+		fatal("Window handle is null!");
 
 	glfwMakeContextCurrent(m_window_handle);
 	gladLoadGL();

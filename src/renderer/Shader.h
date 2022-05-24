@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Log.h"
-
-#include "mathz/Matrix.h"
+#include <mathz/Matrix.h>
 
 #include <string>
 #include <unordered_map>

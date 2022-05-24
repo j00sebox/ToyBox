@@ -109,7 +109,7 @@ CubeMap::CubeMap(const std::string& dir)
 		stbi_set_flip_vertically_on_load(0);
 
 		if (!data)
-			ASSERT(false);
+			fatal("Could not load image: %s! No data!", m_faces[i]);
 
 		GL_CALL(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 

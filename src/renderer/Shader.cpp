@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Shader.h"
 
+#include "Log.h"
 #include "GLError.h"
 
 #include <glad/glad.h>
@@ -95,15 +96,13 @@ void ShaderProgram::compile_shader(unsigned int id) const
 		char* info_log = new char[log_sz * sizeof(char)];
 		GL_CALL(glGetShaderInfoLog(id, log_sz, nullptr, info_log));
 
-		std::cout << info_log << "\n";
-
 		delete[] info_log;
 		GL_CALL(glDeleteShader(id));
-		ASSERT(false);
+		fatal("%s\n", info_log);
 	}
 	else
 	{
-		std::cout << "Shader compilation successful!\n";
+		info("Shader compilation successful!\n");
 	}
 }
 
@@ -126,12 +125,10 @@ void ShaderProgram::link()
 		char* info_log = new char[log_sz * sizeof(char)];
 		GL_CALL(glGetProgramInfoLog(m_program_id, log_sz, nullptr, info_log));
 
-		std::cout << info_log << "\n";
-
 		delete[] info_log;
 		delete_shaders();
 		GL_CALL(glDeleteProgram(m_program_id));
-		ASSERT(false);
+		fatal("{}\n", info_log);
 	}
 }
 
@@ -173,7 +170,7 @@ int ShaderProgram::get_uniform_loaction(const std::string& name)
 
 	if (location == -1)
 	{
-		fprintf(stderr, "%s uniform not found!", name.c_str());
+		warn("{} uniform not found!\n", name);
 	}
 
 	m_uniform_location_cache[name] = location;
@@ -237,7 +234,7 @@ std::shared_ptr<ShaderProgram> ShaderLib::get(const std::string& name)
 		return m_shaders[name];
 	}
 
-	ASSERT(false);
+	fatal("Shader {} does not exist in library!\n", name);
 	return nullptr;
 }
 

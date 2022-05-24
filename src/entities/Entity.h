@@ -54,8 +54,7 @@ public:
 		size_t type_hash = typeid(T).hash_code();
 		if (m_type_map.find(type_hash) == m_type_map.end())
 		{
-			fprintf(stderr, "Component does not exist!\n");
-			ASSERT(false);
+			fatal("Component does not exist!\n");
 		}
 
 		return *dynamic_cast<T*>(m_components[m_type_map.at(type_hash)].get());

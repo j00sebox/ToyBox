@@ -8,7 +8,7 @@
 #include "components/Transform.h"
 #include "components/Light.h"
 
-#include <fmt/format.h>
+#include <spdlog/fmt/bundled/format.h>
 
 LightManager::LightManager()
 {

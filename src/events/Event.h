@@ -18,7 +18,7 @@ public:
 	void execute_function(Args... args)
 	{
 		if (!m_function)
-			ASSERT(false);
+			fatal("No function was bound!\n");
 
 		m_function(args...);
 	}
