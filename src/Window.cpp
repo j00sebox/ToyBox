@@ -98,7 +98,7 @@ void Window::display_render_context()
 	
 	if(prev_fb_width != avail_size.x || prev_fb_height != avail_size.y)
 	{
-		printf("x: %f, y: %f\n", avail_size.x, avail_size.y);
+		info("New screen size [x: {}, y: {}]\n", avail_size.x, avail_size.y);
 		EventList::e_resize.execute_function(avail_size.x, avail_size.y);
 		prev_fb_width = avail_size.x;
 		prev_fb_height = avail_size.y;
