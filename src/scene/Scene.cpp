@@ -16,9 +16,8 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
-//#include <fmt/format.h>
-#include <spdlog/fmt/bundled/format.h>
 #include <mathz/Misc.h>
+#include <spdlog/fmt/bundled/format.h>
 
 Scene::Scene()
 {

@@ -22,15 +22,11 @@ set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include)
 #     endif()
 # endif()
 
-# so spdlog knows we are using an external version of fmt
-# add_definitions(-DSPDLOG_FMT_EXTERNAL)
-
 add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
 add_subdirectory(external/mathz)
 add_subdirectory(external/imgui)
 add_subdirectory(external/json)
-#add_subdirectory(external/fmt)
 add_subdirectory(external/stb)
 add_subdirectory(external/spdlog)
 
@@ -52,7 +48,6 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC external/mathz/include
     PUBLIC external/imgui
     PUBLIC external/json/include
-   # PUBLIC external/fmt/include
     PUBLIC external/stb
     PUBLIC external/spdlog/include
 )
