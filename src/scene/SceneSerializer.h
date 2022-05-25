@@ -7,13 +7,14 @@
 
 class Camera;
 class Skybox;
+class Scene;
 class SceneNode;
 
 class SceneSerializer
 {
 public:
-	static void open(const char* scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& entities);
-	static void save(const char* scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root);
+	static void open(const char* scene_name, Scene& scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& entities);
+	static void save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root);
 
 private:
 	static void load_skybox(nlohmann::json accessor, std::unique_ptr<Skybox>& sky_box);

@@ -21,8 +21,6 @@ void Renderer::init(int width, int height)
 	GL_CALL(glDepthFunc(GL_LEQUAL));
 	GL_CALL(glFrontFace(GL_CCW));
 
-	GL_CALL(glClearColor(0.f, 0.f, 0.f, 1.f));
-
 	if (!ShaderLib::exists("flat_colour"))
 	{
 		ShaderLib::add("flat_colour", ShaderProgram(

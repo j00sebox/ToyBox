@@ -31,12 +31,12 @@ Scene::~Scene()
 
 void Scene::load(const char* scene)
 {
-	SceneSerializer::open(scene, m_camera, m_skybox, root);
+	SceneSerializer::open(scene, *this, m_camera, m_skybox, root);
 }
 
 void Scene::save(const std::string& path)
 {
-	SceneSerializer::save(path.c_str(), m_camera, m_skybox, root);
+	SceneSerializer::save(path.c_str(), *this, m_camera, m_skybox, root);
 }
 
 void Scene::init(int width, int height)

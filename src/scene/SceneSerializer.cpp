@@ -7,6 +7,7 @@
 #include "Entity.h"
 #include "Camera.h"
 #include "Skybox.h"
+#include "Scene.h"
 #include "SceneNode.h"
 
 #include "components/Transform.h"
@@ -20,19 +21,21 @@
 static std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts);
 static std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts);
 
-void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& root)
+void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& root)
 {
-	if (scene == "")
+	if (scene_name == "")
 		return;
 
-	std::string src = file_to_string(scene);
+	std::string src = file_to_string(scene_name);
 
 	json w_json = json::parse(src);                                            
 
 	json camera_accessor = w_json["camera"];
 	json camera_pos = camera_accessor["position"];
-
 	camera->set_pos(mathz::Vec3({ camera_pos[0], camera_pos[1], camera_pos[2] }));
+
+	json bg_col = w_json["background_colour"];
+	scene.set_background_colour({bg_col[0], bg_col[1], bg_col[2], bg_col[3]});
 
 	load_skybox(w_json, sky_box);
 
@@ -47,7 +50,7 @@ void SceneSerializer::open(const char* scene, std::shared_ptr<Camera>& camera, s
 	load_models(models, model_count, root);
 }
 
-void SceneSerializer::save(const char* scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root)
+void SceneSerializer::save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root)
 {
 	json res_json;
 
@@ -60,6 +63,12 @@ void SceneSerializer::save(const char* scene, const std::shared_ptr<Camera>& cam
 	res_json["camera"]["position"][0] = camera_pos.x;
 	res_json["camera"]["position"][1] = camera_pos.y;
 	res_json["camera"]["position"][2] = camera_pos.z;
+
+	mathz::Vec4 bg_col = scene.get_background_colour();
+	res_json["background_colour"][0] = bg_col.x;
+	res_json["background_colour"][1] = bg_col.y;
+	res_json["background_colour"][2] = bg_col.z;
+	res_json["background_colour"][3] = bg_col.w;
 
 	size_t num_shader = ShaderLib::get_num();
 	res_json["shader_count"] = num_shader;
@@ -85,7 +94,7 @@ void SceneSerializer::save(const char* scene, const std::shared_ptr<Camera>& cam
 
 	res_json["model_count"] = node_index + 1;
 
-	overwrite_file(scene, res_json.dump());
+	overwrite_file(scene_name, res_json.dump());
 }
 
 void SceneSerializer::serialize_node(json& accessor, int& node_index, const SceneNode& scene_node)
