@@ -60,15 +60,22 @@ out vec4 colour;
 // various kernels
 
 float sharper_kernel[9] = float[](
-        -1, -1, -1,
-        -1,  9, -1,
-        -1, -1, -1
+        -2, -2, -2,
+        -2,  9, -2,
+        -2, -2, -2
 );
 
 float blur_kernel[9] = float[](
     1.f / 16.f, 2.f / 16.f, 1.f / 16.f,
     2.f / 16.f, 4.f / 16.f, 2.f / 16.f,
     1.f / 16.f, 2.f / 16.f, 1.f / 16.f  
+);
+
+float edge_detector[9] = float[](
+	2,  2, 2,
+	2, -8, 2,
+	2,  2, 2
+
 );
 
 // assuming the kernel is 3x3
@@ -88,19 +95,19 @@ vec4 apply_kernel(float[9] kernel, sampler2D tex)
         vec2( offset, -offset)  // bottom-right    
     );
 
-	vec4 samples[9];
+	vec3 samples[9];
 	for(int i = 0; i < 9; i++)
 	{
-		samples[i] = texture(tex, v_tex_coord + offsets[i]);
+		samples[i] = vec3(texture(tex, v_tex_coord + offsets[i]));
 	}
 
-	vec4 res_colour;
+	vec3 res_colour;
 	for(int i = 0; i < 9; i++)
 	{
 		res_colour += samples[i] * kernel[i];
 	}
 
-	return res_colour;
+	return vec4(res_colour, 1.f);
 }
 
 vec4 lambertian()
@@ -218,7 +225,7 @@ void main()
 	else
 	{
 		base_colour = texture(diffuse_t, v_tex_coord);
-		//base_colour = apply_kernel(sharper_kernel, diffuse_t);
+		//base_colour = apply_kernel(edge_detector, diffuse_t);
 		normal = texture(normal_t, v_tex_coord).rgb;
 		metallic = texture(specular_t, v_tex_coord).r;
 		roughness = texture(specular_t, v_tex_coord).g;

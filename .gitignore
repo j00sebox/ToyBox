@@ -90,3 +90,7 @@ _deps
 
 # VS Code
 .vscode/
+
+# CLion
+.idea/
+cmake-build-debug/
