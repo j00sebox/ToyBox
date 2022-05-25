@@ -74,7 +74,7 @@ float blur_kernel[9] = float[](
 // assuming the kernel is 3x3
 vec4 apply_kernel(float[9] kernel, sampler2D tex)
 {
-	const float offset = 1.0 / 300.0;  
+	const float offset = 1.0 / 30.0;  
 
     vec2 offsets[9] = vec2[](
         vec2(-offset,  offset), // top-left
@@ -217,8 +217,8 @@ void main()
 	}
 	else
 	{
-		//base_colour = texture(diffuse_t, v_tex_coord);
-		base_colour = apply_kernel(blur_kernel, diffuse_t);
+		base_colour = texture(diffuse_t, v_tex_coord);
+		//base_colour = apply_kernel(sharper_kernel, diffuse_t);
 		normal = texture(normal_t, v_tex_coord).rgb;
 		metallic = texture(specular_t, v_tex_coord).r;
 		roughness = texture(specular_t, v_tex_coord).g;

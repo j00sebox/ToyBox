@@ -2,8 +2,10 @@
 #include "Application.h"
 
 #include "Input.h"
+#include "Log.h"
 
 #include <imgui.h>
+#include <mathz/Vector.h>
 
 void Application::start()
 {
@@ -74,6 +76,8 @@ void Application::display_dockspace()
 
 void Application::display_menu()
 {
+	static bool display_bg_col_picker = false;
+
 	ImGui::Begin("Menu", (bool*)true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
 	{
@@ -91,6 +95,7 @@ void Application::display_menu()
 
 				ImGui::EndMenu();
 			}
+			
 			if (ImGui::BeginMenu("Save"))
 			{
 				static char buf[32] = "\x73\x6F\x6D\x65\x74\x68\x69\x6E\x67\x2E\x73\x63\x65\x6E\x65";
@@ -108,6 +113,7 @@ void Application::display_menu()
 			}
 			ImGui::EndMenu();
 		}	
+
 		if (ImGui::BeginMenu("Add"))
 		{
 			if (ImGui::MenuItem("Cube"))
@@ -122,7 +128,36 @@ void Application::display_menu()
 
 			ImGui::EndMenu();
 		}
+
+		if(ImGui::BeginMenu("Settings"))
+		{
+			if(ImGui::MenuItem("Set Background Colour"))
+			{
+				display_bg_col_picker = true;
+			}
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMenuBar();
+
+		if(display_bg_col_picker)
+		{
+			ImGui::Begin("Background Colour");
+			ImGui::SameLine(ImGui::GetContentRegionAvail().x);
+			if(ImGui::Button("x"))
+			{
+				display_bg_col_picker = false;
+			}
+			mathz::Vec4 bg_colour = m_current_scene->get_background_colour();
+			float col[4] = { bg_colour.x, bg_colour.y, bg_colour.z, bg_colour.w };
+			if(ImGui::ColorPicker4("##BGColor", col))
+			{
+				m_current_scene->set_background_colour({ col[0], col[1], col[2], col[3] });
+			}
+			ImGui::End();
+		}
+		
 	}
 	ImGui::End();
 }

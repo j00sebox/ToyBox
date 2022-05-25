@@ -10,6 +10,8 @@
 #include <map>
 #include <queue>
 
+#include <mathz/Vector.h>
+
 class Entity;
 
 class Scene
@@ -27,6 +29,9 @@ public:
 	void reset_view();
 	Camera* get_camera() { return m_camera.get(); }
 
+	void set_background_colour(mathz::Vec4 colour);
+	[[nodiscard]] const mathz::Vec4& get_background_colour() const { return m_clear_colour; }
+
 private:
 	// scene management
 	void update_node(SceneNode& node, const Transform& parent_transform);
@@ -43,6 +48,7 @@ private:
 	std::queue<SceneNode*> m_nodes_to_remove;
 	LightManager m_light_manager;
 	
+	mathz::Vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
 
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;

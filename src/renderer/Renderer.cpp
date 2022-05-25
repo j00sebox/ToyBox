@@ -21,7 +21,7 @@ void Renderer::init(int width, int height)
 	GL_CALL(glDepthFunc(GL_LEQUAL));
 	GL_CALL(glFrontFace(GL_CCW));
 
-	GL_CALL(glClearColor(0.2f, 0.0f, 0.3f, 1.f));
+	GL_CALL(glClearColor(0.f, 0.f, 0.f, 1.f));
 
 	if (!ShaderLib::exists("flat_colour"))
 	{
@@ -35,6 +35,11 @@ void Renderer::init(int width, int height)
 void Renderer::set_viewport(int width, int height)
 {
 	GL_CALL(glViewport(0, 0, width, height));
+}
+
+void Renderer::set_clear_colour(mathz::Vec4 colour)
+{
+	GL_CALL(glClearColor(colour.x, colour.y, colour.z, colour.w));
 }
 
 void Renderer::draw_elements(const Mesh& mesh, const Material& material)
