@@ -34,9 +34,12 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
 	json camera_pos = camera_accessor["position"];
 	camera->set_pos(mathz::Vec3({ camera_pos[0], camera_pos[1], camera_pos[2] }));
 
-	json bg_col = w_json["background_colour"];
-	scene.set_background_colour({bg_col[0], bg_col[1], bg_col[2], bg_col[3]});
-
+    if(!w_json["background_colour"].is_null())
+    {
+        json bg_col = w_json["background_colour"];
+        scene.set_background_colour({bg_col[0], bg_col[1], bg_col[2], bg_col[3]});
+    }
+    
 	load_skybox(w_json, sky_box);
 
 	json shaders = w_json["shaders"];

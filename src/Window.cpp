@@ -31,7 +31,7 @@ extern "C"
 	}
 }
 
-Window::Window(int width = 0, int height = 0)
+Window::Window(int width, int height)
 	: m_width(width), m_height(height)
 {
 	if (!glfwInit())
