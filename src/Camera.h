@@ -7,10 +7,10 @@ class Camera
 {
 public:
 	Camera();
-	~Camera() {}
+	~Camera() = default;
 
 	mathz::Mat4 camera_look_at();
-	mathz::Mat4 look_at_no_translate();
+	mathz::Mat4 look_at_no_translate() const;
 
 	void update(float elapsed_time);
 
@@ -19,7 +19,7 @@ public:
 	void move_right(float r);
 
 	void set_pos(mathz::Vec3&& pos);
-	const mathz::Vec3& get_pos() const;
+	[[nodiscard]] const mathz::Vec3& get_pos() const;
 
 	inline const mathz::Vec3& get_forward() { return m_forward; }
 	inline const mathz::Mat4& get_transform() { return m_transform; }

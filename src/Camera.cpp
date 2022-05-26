@@ -28,7 +28,7 @@ mathz::Mat4 Camera::camera_look_at()
 	return result;
 }
 
-mathz::Mat4 Camera::look_at_no_translate()
+mathz::Mat4 Camera::look_at_no_translate() const
 {
 	mathz::Mat4 result;
 	result[0][0] = m_right.x;					result[0][1] = m_up.x;					result[0][2] = -m_forward.x;
@@ -105,8 +105,8 @@ void Camera::update(float elapsed_time)
 
 			auto [x, y] = Input::get_mouse_pos();
 
-			float rotX = elapsed_time * m_sensitivity * (float)(y - (m_screen_height / 2)) / m_screen_width;
-			float rotY = elapsed_time * m_sensitivity * (float)(x - (m_screen_width / 2)) / m_screen_height;
+			float rotX = elapsed_time * m_sensitivity * (y - (float)(m_screen_height / 2)) / (float)m_screen_width;
+			float rotY = elapsed_time * m_sensitivity * (x - (float)(m_screen_width / 2)) / (float)m_screen_height;
 
 			mathz::Quaternion qx(mathz::radians(rotX), m_right);
 			mathz::Quaternion qy(mathz::radians(rotY), m_up);

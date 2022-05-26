@@ -6,7 +6,7 @@ class TextureBase
 {
 public:
 
-	virtual void bind(unsigned int slot = 0) const = 0;
+	virtual void bind(unsigned int slot) const = 0;
 	virtual void unbind() const = 0;
 };
 

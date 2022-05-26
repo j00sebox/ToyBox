@@ -1,6 +1,6 @@
 #pragma once
 
-#include <signal.h>
+#include <csignal>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 

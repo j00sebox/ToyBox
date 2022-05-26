@@ -42,7 +42,7 @@ void Application::start()
 
 void Application::switch_scene(const char* scene_path)
 {
-	m_current_scene.reset(new Scene());
+	m_current_scene = std::make_unique<Scene>();
 	m_current_scene->load(scene_path);
 	auto [width, height] = m_window.get_dimensions();
 	m_current_scene->init(width, height);

@@ -25,7 +25,7 @@ std::pair<float, float> Input::get_mouse_pos()
 	double xPos, yPos;
 	glfwGetCursorPos(m_window_handle, &xPos, &yPos);
 
-	return std::pair<float, float>((float)xPos, (float)yPos);
+	return { (float)xPos, (float)yPos };
 }
 
 void Input::show_cursor(bool show)

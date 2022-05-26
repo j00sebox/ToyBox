@@ -21,8 +21,8 @@ public:
 	void add_attribute(VertexAttribute& attrib);
 	void calculate_stride_offset(VertexAttribute& attrib);
 
-	int get_stride() const { return m_stride; }
-	const std::vector<VertexAttribute>& get_layout() const { return m_layout; }
+	[[nodiscard]] int get_stride() const { return m_stride; }
+	[[nodiscard]] const std::vector<VertexAttribute>& get_layout() const { return m_layout; }
 
 private:
 	int m_stride = 0;

@@ -110,7 +110,7 @@ void Window::display_render_context()
 void Window::resize_frame_buffer(int width, int height)
 {
     m_frame_buffer->unbind();
-    m_frame_buffer.reset(new FrameBuffer(width, height));
+    m_frame_buffer = std::make_unique<FrameBuffer>(width, height);
     m_frame_buffer->bind();
 
     // want the main buffer to have a texture colour for imgui
