@@ -12,8 +12,8 @@ namespace AttachmentTypes {
 class FrameBuffer
 {
 public:
-    FrameBuffer(int width = 800, int height = 600);
-    FrameBuffer(FrameBuffer&& fbo);
+    explicit FrameBuffer(int width = 800, int height = 600);
+    FrameBuffer(FrameBuffer&& fbo) noexcept;
     ~FrameBuffer();
 
     void attach_texture(unsigned char attachment);

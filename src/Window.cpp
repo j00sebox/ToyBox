@@ -19,12 +19,6 @@ extern "C"
 		fprintf(stderr, "[%i] Error: %s\n", error, description);
 	}
 
-	void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-	{
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-			glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
-
 	void glfw_window_resize_callback(GLFWwindow* window, int width, int height)
 	{
 		EventList::e_resize.execute_function(width, height);
@@ -37,7 +31,7 @@ Window::Window(int width, int height)
 	if (!glfwInit())
 		fatal("Could not initialize GLFW!");
 
-	m_window_handle = glfwCreateWindow(width, height, "Toy Box", NULL, NULL);
+	m_window_handle = glfwCreateWindow(width, height, "Toy Box", nullptr, nullptr);
 
 	if (!m_window_handle)
 		fatal("Window handle is null!");
@@ -99,7 +93,7 @@ void Window::display_render_context()
 	if(prev_fb_width != avail_size.x || prev_fb_height != avail_size.y)
 	{
 		info("New screen size [x: {}, y: {}]\n", avail_size.x, avail_size.y);
-		EventList::e_resize.execute_function(avail_size.x, avail_size.y);
+		EventList::e_resize.execute_function((int)avail_size.x, (int)avail_size.y);
 		prev_fb_width = avail_size.x;
 		prev_fb_height = avail_size.y;
 	}
@@ -134,7 +128,6 @@ void Window::end_frame()
 
 float Window::get_delta_time()
 {
-	float dx = 0.f, dy = 0.f;
 	double time = glfwGetTime() * 1000.0;
 
 	auto delta_time = (float)(time - prev_time);

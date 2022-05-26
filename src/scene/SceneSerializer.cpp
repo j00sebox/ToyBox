@@ -16,14 +16,13 @@
 #include "components/Material.h"
 
 #include <mathz/Matrix.h>
-#include <mathz/Quaternion.h>
 
 static std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts);
 static std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts);
 
 void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& root)
 {
-	if (scene_name == "")
+	if (!strcmp(scene_name, ""))
 		return;
 
 	std::string src = file_to_string(scene_name);
@@ -39,7 +38,7 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
         json bg_col = w_json["background_colour"];
         scene.set_background_colour({bg_col[0], bg_col[1], bg_col[2], bg_col[3]});
     }
-    
+
 	load_skybox(w_json, sky_box);
 
 	json shaders = w_json["shaders"];
@@ -106,7 +105,7 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 
 	if (scene_node.entity->has_component<Material>())
 	{
-		Material& material = scene_node.entity->get_component<Material>();
+		auto& material = scene_node.entity->get_component<Material>();
 		accessor[node_index]["shader"] = ShaderLib::find(material.get_shader());
 	}
 
@@ -130,7 +129,7 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 	}
 }
 
-void SceneSerializer::load_skybox(json accessor, std::unique_ptr<Skybox>& sky_box)
+void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>& sky_box)
 {
 	std::string skybox_src = accessor.value("skybox", "");
 
@@ -152,7 +151,7 @@ void SceneSerializer::load_skybox(json accessor, std::unique_ptr<Skybox>& sky_bo
 	}
 }
 
-void SceneSerializer::load_shaders(json accessor, unsigned int num_shaders)
+void SceneSerializer::load_shaders(const json& accessor, unsigned int num_shaders)
 {
 	for (unsigned int s = 0; s < num_shaders; ++s)
 	{
@@ -170,7 +169,7 @@ void SceneSerializer::load_shaders(json accessor, unsigned int num_shaders)
 	}
 }
 
-void SceneSerializer::load_models(nlohmann::json accessor, unsigned int model_count, SceneNode& root)
+void SceneSerializer::load_models(const json& accessor, unsigned int model_count, SceneNode& root)
 {
 	int num_models_checked = 0;
 	while (num_models_checked < model_count)
@@ -180,7 +179,7 @@ void SceneSerializer::load_models(nlohmann::json accessor, unsigned int model_co
 }
 
 // TODO: Make this look less ugly
-SceneNode SceneSerializer::load_model(nlohmann::json accessor, int model_index, int& num_models_checked)
+SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked)
 {
 	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
 	{
@@ -334,7 +333,7 @@ std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts)
 	std::vector<mathz::Vec3> vec;
 	for (unsigned int i = 0; i < flts.size();)
 	{
-		vec.push_back({ flts[i++], flts[i++], flts[i++] });
+		vec.emplace_back(mathz::Vec3{ flts[i++], flts[i++], flts[i++] });
 	}
 	
 	return vec;
@@ -345,7 +344,7 @@ std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts)
 	std::vector<mathz::Vec2<float>> vec;
 	for (unsigned int i = 0; i < flts.size();)
 	{
-		vec.push_back({ flts[i++], flts[i++] });
+		vec.emplace_back(mathz::Vec2<float>{ flts[i++], flts[i++] });
 	}
 
 	return vec;

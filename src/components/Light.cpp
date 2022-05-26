@@ -12,6 +12,7 @@ using namespace nlohmann;
 Light::Light()
 {
 	m_colour = { 1.f, 1.f, 1.f, 1.f };
+    m_brightness = 1.f;
 }
 
 void Light::imgui_render()

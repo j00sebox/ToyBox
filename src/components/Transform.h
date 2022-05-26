@@ -19,7 +19,7 @@ public:
 
 	// TODO: add solution for rotation
 	void set_parent_offsets(mathz::Vec3 parent_pos, float parent_scale);
-	[[nodiscard]] const mathz::Vec3 get_parent_pos() const { return m_parent_position; }
+	[[nodiscard]] const mathz::Vec3& get_parent_pos() const { return m_parent_position; }
 	[[nodiscard]] float get_parent_scale() const { return m_parent_scale; }
 
 	[[nodiscard]] const char* get_name() const override { return "Transform"; }

@@ -30,7 +30,7 @@ public:
 			{
 				size_t index = m_type_map.at(component.get_type());
 
-				m_components.erase(m_components.begin() + index);
+				m_components.erase(m_components.begin() + (int)index);
 
 				m_type_map.erase(component.get_type());
 
@@ -69,7 +69,7 @@ public:
 	[[nodiscard]] std::vector<std::shared_ptr<Component>>& get_components() { return m_components; }
 
 protected:
-	bool is_removeable(size_t type_hash)
+	static bool is_removeable(size_t type_hash)
 	{
 		return (type_hash == typeid(Mesh).hash_code() || type_hash == typeid(Material).hash_code() || type_hash == typeid(PointLight).hash_code() || type_hash == typeid(DirectionalLight).hash_code());
 	}

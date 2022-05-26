@@ -12,11 +12,9 @@
 #include "components/Material.h"
 
 #include "events/EventList.h"
-#include "profiler/Timer.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <mathz/Misc.h>
 #include <spdlog/fmt/bundled/format.h>
 
 Scene::Scene()
@@ -130,7 +128,7 @@ void Scene::add_primitive(const char* name)
 	}
 
 	Entity e;
-	e.set_name(lookup.c_str());
+	e.set_name(lookup);
 	e.add_component(Transform());
 	
 	Mesh mesh;
@@ -252,7 +250,7 @@ void Scene::imgui_render(SceneNode& scene_node)
 
 	if (ImGui::BeginDragDropSource())
 	{
-		ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
+		ImGui::SetDragDropPayload("_TREENODE", nullptr, 0);
 		m_drag_node = &scene_node;
 		ImGui::Text(scene_node.entity->get_name().c_str());
 		ImGui::EndDragDropSource();
@@ -260,7 +258,7 @@ void Scene::imgui_render(SceneNode& scene_node)
 	
 	if (ImGui::BeginDragDropTarget())
 	{
-		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_TREENODE"))
+		if (ImGui::AcceptDragDropPayload("_TREENODE"))
 		{
 			m_drop_node = &scene_node;
 		}

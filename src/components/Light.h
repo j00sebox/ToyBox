@@ -16,7 +16,7 @@ public:
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Light).hash_code(); }
 	void imgui_render() override;
-	void serialize(nlohmann::json& accessor) const = 0;
+	void serialize(nlohmann::json& accessor) const override = 0;
 
 protected:
 	mathz::Vec4 m_colour;

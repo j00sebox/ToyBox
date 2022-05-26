@@ -18,8 +18,8 @@ class Cube
 public:
 	Cube();
 
-	VertexArray&& get_va() { return std::move(m_cube_va); }
-	unsigned int get_index_count() const { return m_index_count; }
+	[[nodiscard]] VertexArray&& get_va() { return std::move(m_cube_va); }
+	[[nodiscard]] unsigned int get_index_count() const { return m_index_count; }
 
 private:
 	VertexArray m_cube_va;
@@ -31,8 +31,8 @@ class Quad
 public:
 	Quad();
 
-	VertexArray&& get_va() { return std::move(m_quad_va); }
-	unsigned int get_index_count() const { return m_index_count; }
+	[[nodiscard]]VertexArray&& get_va() { return std::move(m_quad_va); }
+	[[nodiscard]] unsigned int get_index_count() const { return m_index_count; }
 
 private:
 	VertexArray m_quad_va;

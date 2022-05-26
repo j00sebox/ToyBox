@@ -47,9 +47,9 @@ void Material::unbind() const
 
     if (!m_custom)
     {
-        for (unsigned int i = 0; i < 4; ++i)
+        for (const auto & m_texture : m_textures)
         {
-            m_textures[i]->unbind();
+            m_texture->unbind();
         }
     }
     
@@ -59,9 +59,9 @@ void Material::unbind() const
 void Material::texture_viewer(unsigned int texture_index)
 {
     ImGuiIO& io = ImGui::GetIO();
-    ImTextureID my_tex_id = (ImTextureID)m_textures[texture_index]->get_id();
-    float my_tex_w = (float)m_textures[texture_index]->get_width();
-    float my_tex_h = (float)m_textures[texture_index]->get_height();
+    auto my_tex_id = (ImTextureID)m_textures[texture_index]->get_id();
+    auto my_tex_w = (float)m_textures[texture_index]->get_width();
+    auto my_tex_h = (float)m_textures[texture_index]->get_height();
     {
         ImGui::Text("%.0fx%.0f", my_tex_w, my_tex_h);
         ImVec2 pos = ImGui::GetCursorScreenPos();

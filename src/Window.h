@@ -18,12 +18,12 @@ public:
 
 	void begin_frame();
 	void end_frame();
-	float get_delta_time();
-	std::pair<int, int> get_dimensions() { return std::pair<int, int>(m_width, m_height); }
+	[[nodiscard]] float get_delta_time();
+    [[nodiscard]] std::pair<int, int> get_dimensions() { return { m_width, m_height }; }
 
 private:
 	int m_width, m_height;
-	int prev_fb_width = 0, prev_fb_height = 0;
+	float prev_fb_width = 0.f, prev_fb_height = 0.f;
 	double prev_time = 0.0;
 	GLFWwindow* m_window_handle;
 	std::unique_ptr<FrameBuffer> m_frame_buffer;

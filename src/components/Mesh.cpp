@@ -50,6 +50,8 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 
 	switch (primitive)
 	{
+        case PrimitiveTypes::None:
+            break;
 		case PrimitiveTypes::Cube:
 		{
 			Cube cube;

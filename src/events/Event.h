@@ -8,7 +8,7 @@ template<typename ... Args>
 class Event
 {
 public:
-	Event() {}
+	Event() = default;
 
 	void bind_function(std::function<void(Args...)> func)
 	{

@@ -39,8 +39,6 @@ Texture2D::Texture2D(const std::string& file_name)
 	GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
 
 	stbi_image_free(m_data);
-
-	unbind();
 }
 
 Texture2D::Texture2D(Texture2D&& t) noexcept
@@ -53,7 +51,7 @@ Texture2D::~Texture2D()
 	GL_CALL(glDeleteTextures(1, &m_id));
 }
 
-void Texture2D::bind(int slot /* = 0 */) const
+void Texture2D::bind(unsigned int slot /* = 0 */) const
 {
 	GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 	GL_CALL(glBindTexture(GL_TEXTURE_2D, m_id));
@@ -129,7 +127,7 @@ CubeMap::~CubeMap()
 	GL_CALL(glDeleteTextures(1, &m_id));
 }
 
-void CubeMap::bind(int slot) const
+void CubeMap::bind(unsigned int slot) const
 {
 	GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 	GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, m_id));

@@ -6,7 +6,7 @@ class TextureBase
 {
 public:
 
-	virtual void bind(int slot = 0) const = 0;
+	virtual void bind(unsigned int slot = 0) const = 0;
 	virtual void unbind() const = 0;
 };
 
@@ -17,7 +17,7 @@ public:
 	Texture2D(Texture2D&& t) noexcept;
 	~Texture2D();
 	
-	void bind(int slot = 0) const override;
+	void bind(unsigned int slot = 0) const override;
 	void unbind() const override;
 
 	[[nodiscard]] unsigned int get_id() const { return m_id; }
@@ -42,7 +42,7 @@ public:
 	CubeMap(CubeMap&& cb) noexcept;
 	~CubeMap();
 
-	void bind(int slot = 0) const override;
+	void bind(unsigned int slot = 0) const override;
 	void unbind() const override;
 
 	void operator= (CubeMap&& cb) noexcept;

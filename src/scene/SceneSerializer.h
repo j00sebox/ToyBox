@@ -17,10 +17,10 @@ public:
 	static void save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root);
 
 private:
-	static void load_skybox(nlohmann::json accessor, std::unique_ptr<Skybox>& sky_box);
-	static void load_shaders(nlohmann::json accessor, unsigned int num_shaders);
-	static void load_models(nlohmann::json accessor, unsigned int model_count, SceneNode& root);
-	static SceneNode load_model(nlohmann::json accessor, int model_index, int& num_models_checked);
+	static void load_skybox(const nlohmann::json& accessor, std::unique_ptr<Skybox>& sky_box);
+	static void load_shaders(const nlohmann::json& accessor, unsigned int num_shaders);
+	static void load_models(const nlohmann::json& accessor, unsigned int model_count, SceneNode& root);
+	static SceneNode load_model(const nlohmann::json& accessor, int model_index, int& num_models_checked);
 	static void serialize_node(nlohmann::json& accessor, int& node_index, const SceneNode& scene_node);
 };
 

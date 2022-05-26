@@ -3,7 +3,7 @@
 
 #include "Buffer.h"
 
-#include <string.h>
+#include <cstring>
 #include <glad/glad.h>
 
 std::string primitve_type_to_str(PrimitiveTypes pt)
@@ -12,13 +12,10 @@ std::string primitve_type_to_str(PrimitiveTypes pt)
 	{
 	case PrimitiveTypes::None:
 		return "none";
-		break;
 	case PrimitiveTypes::Cube:
 		return "cube";
-		break;
 	case PrimitiveTypes::Quad:
 		return "quad";
-		break;
 	default:
 		break;
 	}

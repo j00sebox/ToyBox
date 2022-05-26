@@ -14,10 +14,8 @@ GLenum get_gl_shader_type(ShaderType type)
 		break;
 	case ShaderType::Vertex:
 		return GL_VERTEX_SHADER;
-		break;
 	case ShaderType::Fragment:
 		return GL_FRAGMENT_SHADER;
-		break;
 	default:
 		break;
 	}
@@ -96,7 +94,7 @@ void ShaderProgram::compile_shader(unsigned int id) const
 		char* info_log = new char[log_sz * sizeof(char)];
 		GL_CALL(glGetShaderInfoLog(id, log_sz, nullptr, info_log));
 		
-		fatal("{}\n", info_log);
+		fatal("{}\n", info_log)
 		delete[] info_log;
 		GL_CALL(glDeleteShader(id));
 	}
@@ -134,7 +132,7 @@ void ShaderProgram::link()
 
 void ShaderProgram::delete_shaders() 
 {
-	if (m_shaders.size() > 0)
+	if (!m_shaders.empty())
 	{
 		for (const auto& s : m_shaders)
 		{
@@ -146,7 +144,7 @@ void ShaderProgram::delete_shaders()
 	}	
 }
 
-void ShaderProgram::get_active_uniforms()
+void ShaderProgram::get_active_uniforms() const
 {
 	int num_uniforms;
 	glGetProgramiv(m_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms);

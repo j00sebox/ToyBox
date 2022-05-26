@@ -29,7 +29,7 @@ class ShaderProgram
 {
 public:
 	template<is_shader ... Shaders>
-	ShaderProgram(const Shaders& ... s)
+	explicit ShaderProgram(const Shaders& ... s)
 	{
 		create_program();
 
@@ -48,7 +48,6 @@ public:
 
 		link();
 		delete_shaders();
-
 		get_active_uniforms();
 	}
 
@@ -77,9 +76,9 @@ private:
 	void link();
 	// also does a detach
 	void delete_shaders(); 
-	void get_active_uniforms();
+	void get_active_uniforms() const;
 
-	unsigned int m_program_id;
+	unsigned int m_program_id = 0;
 	std::vector<Shader> m_shaders;
 	std::vector<std::string> m_shader_locations;
 	std::unordered_map<std::string, int> m_uniform_location_cache;
