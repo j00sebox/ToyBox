@@ -93,6 +93,7 @@ void Window::display_render_context()
 	if(prev_fb_width != avail_size.x || prev_fb_height != avail_size.y)
 	{
 		info("New screen size [x: {}, y: {}]\n", avail_size.x, avail_size.y);
+        resize_frame_buffer((int)avail_size.x, (int)avail_size.y);
 		EventList::e_resize.execute_function((int)avail_size.x, (int)avail_size.y);
 		prev_fb_width = avail_size.x;
 		prev_fb_height = avail_size.y;
@@ -104,6 +105,22 @@ void Window::display_render_context()
         ImVec2(0, 1),
         ImVec2(1, 0));
     ImGui::End();
+}
+
+void Window::resize_frame_buffer(int width, int height)
+{
+    m_frame_buffer->unbind();
+    m_frame_buffer.reset(new FrameBuffer(width, height));
+    m_frame_buffer->bind();
+
+    // want the main buffer to have a texture colour for imgui
+    m_frame_buffer->attach_texture(AttachmentTypes::Colour);
+    m_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
+
+    assert(m_frame_buffer->is_complete());
+
+    m_frame_buffer->unbind();
+
 }
 
 void Window::begin_frame()

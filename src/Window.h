@@ -15,6 +15,7 @@ public:
 	~Window();
 
 	void display_render_context();
+    void resize_frame_buffer(int width, int height);
 
 	void begin_frame();
 	void end_frame();
