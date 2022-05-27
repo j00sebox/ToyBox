@@ -34,7 +34,7 @@ bool SceneNode::exists(const std::string& name) const
 
 bool SceneNode::remove(SceneNode& node)
 {
-	std::vector<SceneNode>::iterator it = m_children.begin();
+	std::list<SceneNode>::iterator it = m_children.begin();
 	for (;it != m_children.end(); ++it)
 	{
 		if (*it == node)
@@ -56,7 +56,7 @@ bool SceneNode::remove(SceneNode& node)
 // node must exist for this to work
 SceneNode SceneNode::move(SceneNode& node)
 {
-	std::vector<SceneNode>::iterator it = m_children.begin();
+	std::list<SceneNode>::iterator it = m_children.begin();
 	for (; it != m_children.end(); ++it)
 	{
 		if (*it == node)
