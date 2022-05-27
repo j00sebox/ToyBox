@@ -27,7 +27,7 @@ void Application::start()
 
 		m_window.begin_frame();
 
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 		display_dockspace();
 		m_window.display_render_context();
 		display_menu();

@@ -93,6 +93,26 @@ void Material::texture_viewer(unsigned int texture_index)
 
 void Material::imgui_render()
 {
+    static std::string combo_preview = ShaderLib::find(m_shader);
+    if (ImGui::BeginCombo("Shader", combo_preview.c_str()))
+    {
+        for (auto [name, shader_ptr] : ShaderLib::m_shaders)
+        {
+            const bool is_selected = (name == combo_preview);
+            if (ImGui::Selectable(name.c_str(), is_selected))
+            {
+                combo_preview = name;
+                m_shader = ShaderLib::get(combo_preview);
+            }
+
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+
+
+        }
+        ImGui::EndCombo();
+    }
+
     ImGui::Checkbox("Custom", &m_custom);
 
     if (m_custom)

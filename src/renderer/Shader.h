@@ -97,5 +97,6 @@ public:
 private:
 	static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;
 
+    friend class Material;
 	friend class SceneSerializer;
 };
