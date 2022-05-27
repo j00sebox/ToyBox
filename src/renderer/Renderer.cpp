@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "components/Mesh.h"
 #include "components/Material.h"
+#include "components/Transform.h"
 #include "events/EventList.h"
 
 #include <glad/glad.h>
@@ -47,7 +48,7 @@ void Renderer::draw_elements(const Mesh& mesh, const Material& material)
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::stencil(const Mesh& mesh, const Material& material)
+void Renderer::stencil(const Transform& stencil_transform, const Mesh& mesh, const Material& material)
 {
 	GL_CALL(glStencilFunc(GL_ALWAYS, 1, 0xFF)); // make all the fragments of the object have a stencil of 1
 	GL_CALL(glStencilMask(0xFF)); // any stencil value can be written to
@@ -56,6 +57,8 @@ void Renderer::stencil(const Mesh& mesh, const Material& material)
 	mesh.bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 
+    ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", stencil_transform.get_transform());
+    ShaderLib::get("flat_colour")->set_uniform_4f("u_flat_colour", {1.f, 1.f, 0.f, 1.f});
 	ShaderLib::get("flat_colour")->bind();
 	GL_CALL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF)); // now all fragments not apart of the original object are written
 	GL_CALL(glStencilMask(0x00)); // disable writing to stencil buffer
