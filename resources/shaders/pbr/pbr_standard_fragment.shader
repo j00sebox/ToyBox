@@ -6,6 +6,7 @@ uniform sampler2D diffuse_t;
 uniform sampler2D specular_t;
 uniform sampler2D normal_t;
 uniform sampler2D occlusion_t;
+uniform sampler2D scene_t;
 uniform vec4 u_emissive_colour;
 
 in vec3 v_position;
