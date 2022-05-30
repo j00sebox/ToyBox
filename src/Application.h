@@ -8,6 +8,7 @@ class Application
 public:
 	Application() : m_window(1920, 1080) { m_current_scene = std::make_unique<Scene>(); }
 	void start();
+    void compile_shaders();
 	void switch_scene(const char* scene_path);
 
 private:

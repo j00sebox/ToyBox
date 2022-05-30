@@ -156,16 +156,21 @@ void SceneSerializer::load_shaders(const json& accessor, unsigned int num_shader
 	for (unsigned int s = 0; s < num_shaders; ++s)
 	{
 		// TODO: add support for other shader types
-		std::string vertex_src = accessor[s]["vertex"];
-		Shader vertex_shader(vertex_src.c_str(), ShaderType::Vertex);
+        std::string shader_name = accessor[s]["name"];
 
-		std::string fragment_src = accessor[s]["fragment"];
-		Shader fragment_shader(fragment_src.c_str(), ShaderType::Fragment);
+        if(!ShaderLib::exists(shader_name))
+        {
+            info("Added new shader to lib");
+            std::string vertex_src = accessor[s]["vertex"];
+            Shader vertex_shader(vertex_src.c_str(), ShaderType::Vertex);
 
-		ShaderProgram shader_program(vertex_shader, fragment_shader);
+            std::string fragment_src = accessor[s]["fragment"];
+            Shader fragment_shader(fragment_src.c_str(), ShaderType::Fragment);
 
-		std::string shader_name = accessor[s]["name"];
-		ShaderLib::add(shader_name, std::move(shader_program));
+            ShaderProgram shader_program(vertex_shader, fragment_shader);
+
+            ShaderLib::add(shader_name, std::move(shader_program));
+        }
 	}
 }
 

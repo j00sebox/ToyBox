@@ -3,6 +3,7 @@
 
 #include "Input.h"
 #include "Log.h"
+#include "renderer/Shader.h"
 
 #include <imgui.h>
 #include <mathz/Vector.h>
@@ -11,6 +12,7 @@ void Application::start()
 {
 	m_running = true;
 
+    compile_shaders();
 	m_current_scene->load("../resources/scenes/chamber_of_reflection.scene");
 
 	auto [width, height] = m_window.get_dimensions();
@@ -38,6 +40,25 @@ void Application::start()
 
 		m_window.end_frame();
 	}
+}
+
+// load the standard shaders
+void Application::compile_shaders()
+{
+    ShaderLib::add("flat_colour", ShaderProgram(
+            Shader("../resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
+    ));
+
+    ShaderLib::add("pbr_standard", ShaderProgram(
+            Shader("../resources/shaders/pbr/pbr_standard_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/pbr/pbr_standard_fragment.shader", ShaderType::Fragment)
+    ));
+
+    ShaderLib::add("mirror", ShaderProgram(
+            Shader("../resources/shaders/mirror/mirror_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/mirror/mirror_fragment.shader", ShaderType::Fragment)
+    ));
 }
 
 void Application::switch_scene(const char* scene_path)

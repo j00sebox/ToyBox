@@ -21,14 +21,6 @@ void Renderer::init(int width, int height)
 	GL_CALL(glEnable(GL_DEPTH_TEST));
 	GL_CALL(glDepthFunc(GL_LEQUAL));
 	GL_CALL(glFrontFace(GL_CCW));
-
-	if (!ShaderLib::exists("flat_colour"))
-	{
-		ShaderLib::add("flat_colour", ShaderProgram(
-			Shader("resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
-			Shader("resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
-		));
-	}
 }
 
 void Renderer::set_viewport(int width, int height)

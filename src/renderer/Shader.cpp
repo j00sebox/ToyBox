@@ -100,7 +100,7 @@ void ShaderProgram::compile_shader(unsigned int id) const
 	}
 	else
 	{
-		info("Shader compilation successful!\n");
+		info("Shader compilation successful! [id:{}]\n", id);
 	}
 }
 

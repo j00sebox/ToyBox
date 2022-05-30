@@ -7,7 +7,9 @@ in mat3 v_model;
 
 uniform sampler2D scene_t;
 
+out vec4 colour;
+
 void main()
 {
-    color = texture(scene_t, v_tex_coord);
+    colour = texture(scene_t, v_tex_coord);
 }

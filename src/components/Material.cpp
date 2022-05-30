@@ -107,8 +107,6 @@ void Material::imgui_render()
 
             if (is_selected)
                 ImGui::SetItemDefaultFocus();
-
-
         }
         ImGui::EndCombo();
     }
