@@ -13,7 +13,7 @@ void Application::start()
 	m_running = true;
 
     compile_shaders();
-	m_current_scene->load("../resources/scenes/chamber_of_reflection.scene");
+	m_current_scene->load("../resources/scenes/flying_high.scene");
 
 	auto [width, height] = m_window.get_dimensions();
 	m_current_scene->init(width, height);

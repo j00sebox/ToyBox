@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GLError.h"
 
+#include "Log.h"
 #include <glad/glad.h>
 
 const char* gl_get_err_str(unsigned int err)
@@ -25,7 +26,7 @@ bool gl_check_error(const char* func_name, const char* file_name, int line)
 		if (GL_NO_ERROR == err)
 			break;
 
-		printf("[%i] Error: %s at function: %s in { file: %s, line %i }\n", err, gl_get_err_str(err), func_name, file_name, line);
+		fatal("[{}] Error: {} at function: {} in ( file: {}, line {} )\n", err, gl_get_err_str(err), func_name, file_name, line);
 
 		return false;
 	}

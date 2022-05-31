@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Input.h"
 #include "SceneSerializer.h"
+#include "Timer.h"
 
 #include "components/Transform.h"
 #include "components/Light.h"
@@ -50,6 +51,9 @@ void Scene::init(int width, int height)
 
 void Scene::update(float elapsed_time)
 {
+#ifdef DEBUG
+    Timer timer{};
+#endif
 	Renderer::clear();
 
 	m_camera->update(elapsed_time);

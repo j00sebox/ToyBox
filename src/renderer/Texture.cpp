@@ -2,6 +2,7 @@
 #include "Texture.h"
 
 #include "GLError.h"
+#include "Log.h"
 
 #include <glad/glad.h>
 #include <stb_image.h>

@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include)
 
+add_compile_definitions(DEBUG)
+
 # Download submodules
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
