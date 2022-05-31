@@ -12,7 +12,8 @@ public:
 	mathz::Mat4 camera_look_at();
 	mathz::Mat4 look_at_no_translate() const;
 
-	void update(float elapsed_time);
+    // true if the camera could be moved
+	bool update(float elapsed_time);
 
 	void rotate(mathz::Quaternion q);
 	void move_forward(float f);

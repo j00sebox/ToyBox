@@ -13,6 +13,7 @@
 #include <mathz/Vector.h>
 
 class Entity;
+class UniformBuffer;
 
 class Scene
 {
@@ -33,6 +34,8 @@ public:
 	[[nodiscard]] const mathz::Vec4& get_background_colour() const { return m_clear_colour; }
 
 private:
+    void compile_shaders() const;
+
 	// scene management
 	void update_node(SceneNode& node, const Transform& parent_transform);
 	void remove_node(SceneNode& node);
@@ -44,6 +47,7 @@ private:
 
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
+    std::unique_ptr<UniformBuffer> m_uniform_buffer;
 	SceneNode root;
 	std::queue<SceneNode*> m_nodes_to_remove;
 	LightManager m_light_manager;

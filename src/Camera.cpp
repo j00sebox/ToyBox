@@ -63,7 +63,7 @@ void Camera::resize(int width, int height)
 	);
 }
 
-void Camera::update(float elapsed_time)
+bool Camera::update(float elapsed_time)
 {
 	// block camera update if imgui menu is in use
 	if (!ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive())
@@ -121,7 +121,11 @@ void Camera::update(float elapsed_time)
 
 			Input::show_cursor(true);
 		}
+
+        return true;
 	}
+
+    return false;
 }
 
 void Camera::rotate(mathz::Quaternion q)

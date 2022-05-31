@@ -3,6 +3,7 @@
 
 #include "Entity.h"
 #include "Renderer.h"
+#include "Buffer.h"
 #include "Input.h"
 #include "SceneSerializer.h"
 #include "Timer.h"
@@ -30,6 +31,7 @@ Scene::~Scene()
 
 void Scene::load(const char* scene)
 {
+    compile_shaders();
 	SceneSerializer::open(scene, *this, m_camera, m_skybox, root);
 }
 
@@ -42,6 +44,11 @@ void Scene::init(int width, int height)
 {
 	EventList::e_resize.bind_function(std::bind(&Scene::window_resize, this, std::placeholders::_1, std::placeholders::_2));
 	m_camera->resize(width, height);
+
+    m_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(256));
+    m_uniform_buffer->link(0);
+    m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());
+    m_uniform_buffer->set_data_mat4(64, m_camera->get_perspective());
 
 	for (const SceneNode& node : root)
 	{
@@ -56,7 +63,9 @@ void Scene::update(float elapsed_time)
 #endif
 	Renderer::clear();
 
-	m_camera->update(elapsed_time);
+    // if the camera moved at all we need to adjust the view uniform
+	if(m_camera->update(elapsed_time))
+        m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());
 
 	if (m_skybox)
 	{
@@ -154,6 +163,8 @@ void Scene::window_resize(int width, int height)
 {
 	m_camera->resize(width, height);
 	Renderer::set_viewport(width, height);
+    m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());
+    m_uniform_buffer->set_data_mat4(64, m_camera->get_perspective());
 }
 
 void Scene::reset_view()
@@ -193,8 +204,8 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		auto& mesh = scene_node.entity->get_component<Mesh>();
 
 		material.get_shader()->set_uniform_mat4f("u_model", relative_transform.get_transform());
-		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-		material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
+//		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
+//		material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
         material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
 
 		if (m_selected_node && (scene_node == *m_selected_node))
@@ -329,5 +340,24 @@ void Scene::set_background_colour(mathz::Vec4 colour)
 {
 	m_clear_colour = colour;
 	Renderer::set_clear_colour(colour);
+}
+
+// load the standard shaders
+void Scene::compile_shaders() const
+{
+    ShaderLib::add("flat_colour", ShaderProgram(
+            Shader("../resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
+    ));
+
+    ShaderLib::add("pbr_standard", ShaderProgram(
+            Shader("../resources/shaders/pbr/pbr_standard_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/pbr/pbr_standard_fragment.shader", ShaderType::Fragment)
+    ));
+
+    ShaderLib::add("mirror", ShaderProgram(
+            Shader("../resources/shaders/mirror/mirror_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/mirror/mirror_fragment.shader", ShaderType::Fragment)
+    ));
 }
 
