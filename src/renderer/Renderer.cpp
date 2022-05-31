@@ -14,13 +14,13 @@ void Renderer::init(int width, int height)
 {
 	set_viewport(width, height);
 
-	//GL_CALL(glEnable(GL_BLEND));
-	//GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    glEnable(GL_CULL_FACE);
+//	GL_CALL(glEnable(GL_BLEND));
+//	GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	GL_CALL(glEnable(GL_STENCIL_TEST));
 	GL_CALL(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)); // replace all the stencil values when drawing original object
 	GL_CALL(glEnable(GL_DEPTH_TEST));
 	GL_CALL(glDepthFunc(GL_LEQUAL));
-	GL_CALL(glFrontFace(GL_CCW));
 }
 
 void Renderer::set_viewport(int width, int height)
