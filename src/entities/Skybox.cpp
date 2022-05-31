@@ -75,6 +75,7 @@ Skybox::Skybox(Skybox&& sb) noexcept
 
 void Skybox::draw() const
 {
+    GL_CALL(glDisable(GL_CULL_FACE));
 	GL_CALL(glDepthMask(GL_FALSE));
 	m_skybox_va.bind();
 	m_skybox_texture.bind(0);
@@ -84,6 +85,7 @@ void Skybox::draw() const
 	m_skybox_va.unbind();
 	m_skybox_texture.unbind();
 	m_skybox_shader->unbind();
+    GL_CALL(glEnable(GL_CULL_FACE));
 }
 
 void Skybox::attach_shader_program(ShaderProgram&& sp)
