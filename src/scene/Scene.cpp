@@ -69,8 +69,6 @@ void Scene::update(float elapsed_time)
 
 	if (m_skybox)
 	{
-		m_skybox->get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-		m_skybox->get_shader()->set_uniform_mat4f("u_view", m_camera->look_at_no_translate());
 		m_skybox->draw();
 	}
 
@@ -204,17 +202,12 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		auto& mesh = scene_node.entity->get_component<Mesh>();
 
 		material.get_shader()->set_uniform_mat4f("u_model", relative_transform.get_transform());
-//		material.get_shader()->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-//		material.get_shader()->set_uniform_mat4f("u_projection", m_camera->get_perspective());
         material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
 
 		if (m_selected_node && (scene_node == *m_selected_node))
 		{
 			Transform stencil_transform = relative_transform;
 			stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.03f); // scale up a tiny bit to see outline
-			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_view", m_camera->camera_look_at());
-			ShaderLib::get("flat_colour")->set_uniform_mat4f("u_projection", m_camera->get_perspective());
-
 			Renderer::stencil(stencil_transform, mesh, material);
 		}
 		else
