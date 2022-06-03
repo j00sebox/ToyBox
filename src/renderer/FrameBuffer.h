@@ -12,7 +12,7 @@ namespace AttachmentTypes {
 class FrameBuffer
 {
 public:
-    explicit FrameBuffer(int width = 800, int height = 600);
+    explicit FrameBuffer(int width = 800, int height = 600, unsigned int samples = 1);
     FrameBuffer(FrameBuffer&& fbo) noexcept;
     ~FrameBuffer();
 
@@ -35,4 +35,5 @@ private:
     unsigned int m_stencil_attachment;
 
     int m_width, m_height;
+    unsigned int m_samples;
 };
