@@ -3,14 +3,15 @@
 
 #include "Log.h"
 #include "Input.h"
-#include "events/EventList.h"
-
-#include "FrameBuffer.h"
+#include "ViewPort.h"
+#include "EventList.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 extern "C"
 {
@@ -25,13 +26,13 @@ extern "C"
 	}
 }
 
-Window::Window(int width, int height)
+Window::Window(int width, int height, int viewport_width, int viewport_height)
 	: m_width(width), m_height(height)
 {
 	if (!glfwInit())
 		fatal("Could not initialize GLFW!");
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    //glfwWindowHint(GLFW_SAMPLES, 4);
 
 	m_window_handle = glfwCreateWindow(width, height, "Toy Box", nullptr, nullptr);
 
@@ -49,7 +50,7 @@ Window::Window(int width, int height)
 	io.WantCaptureMouse = false;
 	ImGui::StyleColorsDark();
 
-	const char* glsl_version = "#version 410";
+	const char* glsl_version = "#version 420";
 	
 	// setup backends
 	ImGui_ImplGlfw_InitForOpenGL(m_window_handle, true);
@@ -64,26 +65,7 @@ Window::Window(int width, int height)
 
 	Input::m_window_handle = m_window_handle;
 
-    m_multisample_frame_buffer = std::make_unique<FrameBuffer>(800, 600, 4);
-    m_multisample_frame_buffer->bind();
-
-    m_multisample_frame_buffer->attach_texture(AttachmentTypes::Colour);
-    m_multisample_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
-
-    assert(m_multisample_frame_buffer->is_complete());
-
-    m_multisample_frame_buffer->unbind();
-
-	m_frame_buffer = std::make_unique<FrameBuffer>();
-	m_frame_buffer->bind();
-
-	// want the main buffer to have a texture colour for imgui
-	m_frame_buffer->attach_texture(AttachmentTypes::Colour);
-	m_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
-
-	assert(m_frame_buffer->is_complete());
-
-	m_frame_buffer->unbind();
+    m_main_viewport = std::make_unique<ViewPort>(ViewPort(viewport_width, viewport_height, 4));
 }
 
 Window::~Window()
@@ -99,51 +81,15 @@ Window::~Window()
 void Window::display_render_context()
 {
 	ImGui::Begin("##RenderWindow", (bool*)true, ImGuiWindowFlags_NoTitleBar);
-	ImVec2 avail_size = ImGui::GetContentRegionAvail();
-    ImVec2 pos = ImGui::GetCursorScreenPos();
 	
-	if(prev_fb_width != avail_size.x || prev_fb_height != avail_size.y)
-	{
-		info("New screen size [x: {}, y: {}]\n", avail_size.x, avail_size.y);
-        resize_frame_buffer((int)avail_size.x, (int)avail_size.y);
-		EventList::e_resize.execute_function((int)avail_size.x, (int)avail_size.y);
-		prev_fb_width = avail_size.x;
-		prev_fb_height = avail_size.y;
-	}
-	ImDrawList* drawList = ImGui::GetWindowDrawList();
-    m_multisample_frame_buffer->blit(m_frame_buffer->get_id());
-	drawList->AddImage((void*)m_frame_buffer->get_colour_attachment(),
-        pos,
-        ImVec2(pos.x + avail_size.x, pos.y + avail_size.y),
-        ImVec2(0, 1),
-        ImVec2(1, 0));
+	m_main_viewport->display();
+
     ImGui::End();
 }
 
 void Window::resize_frame_buffer(int width, int height)
 {
-    m_frame_buffer->unbind();
-    m_frame_buffer = std::make_unique<FrameBuffer>(width, height);
-    m_frame_buffer->bind();
-
-    // want the main buffer to have a texture colour for imgui
-    m_frame_buffer->attach_texture(AttachmentTypes::Colour);
-    m_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
-
-    assert(m_frame_buffer->is_complete());
-
-    m_frame_buffer->unbind();
-
-    m_multisample_frame_buffer->unbind();
-    m_multisample_frame_buffer = std::make_unique<FrameBuffer>(width, height, 4);
-    m_multisample_frame_buffer->bind();
-
-    m_multisample_frame_buffer->attach_texture(AttachmentTypes::Colour);
-    m_multisample_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
-
-    assert(m_multisample_frame_buffer->is_complete());
-
-    m_multisample_frame_buffer->unbind();
+    m_main_viewport->resize(width, height, 4);
 }
 
 void Window::begin_frame()
@@ -152,12 +98,12 @@ void Window::begin_frame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	m_multisample_frame_buffer->bind();
+	m_main_viewport->begin_frame();
 }
 
 void Window::end_frame()
 {
-    m_frame_buffer->unbind();
+    m_main_viewport->end_frame();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

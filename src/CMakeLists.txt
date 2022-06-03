@@ -37,6 +37,7 @@ list(APPEND SRCS
         ${CMAKE_CURRENT_LIST_DIR}/Input.h
         ${CMAKE_CURRENT_LIST_DIR}/Log.h
         ${CMAKE_CURRENT_LIST_DIR}/Window.h
+        ${CMAKE_CURRENT_LIST_DIR}/ViewPort.h
         ${CMAKE_CURRENT_LIST_DIR}/Application.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Camera.cpp
         ${CMAKE_CURRENT_LIST_DIR}/FileOperations.cpp
@@ -44,6 +45,7 @@ list(APPEND SRCS
         ${CMAKE_CURRENT_LIST_DIR}/GLTFLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Input.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Window.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ViewPort.cpp
 )
 
 

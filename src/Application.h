@@ -6,7 +6,7 @@
 class Application
 {
 public:
-	Application() : m_window(1920, 1080) { m_current_scene = std::make_unique<Scene>(); }
+	Application() : m_window(1920, 1080, 800, 600) { m_current_scene = std::make_unique<Scene>(); }
 	void start();
 	void switch_scene(const char* scene_path);
 
