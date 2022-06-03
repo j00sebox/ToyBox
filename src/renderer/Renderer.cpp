@@ -14,6 +14,7 @@ void Renderer::init(int width, int height)
 {
 	set_viewport(width, height);
 
+    glEnable(GL_MULTISAMPLE);
     glEnable(GL_CULL_FACE);
 //	GL_CALL(glEnable(GL_BLEND));
 //	GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));

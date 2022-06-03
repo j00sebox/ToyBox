@@ -28,5 +28,6 @@ private:
 	double prev_time = 0.0;
 	GLFWwindow* m_window_handle;
 	std::unique_ptr<FrameBuffer> m_frame_buffer;
+    std::unique_ptr<FrameBuffer> m_multisample_frame_buffer;
 };
 

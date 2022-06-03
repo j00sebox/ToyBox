@@ -31,6 +31,8 @@ Window::Window(int width, int height)
 	if (!glfwInit())
 		fatal("Could not initialize GLFW!");
 
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
 	m_window_handle = glfwCreateWindow(width, height, "Toy Box", nullptr, nullptr);
 
 	if (!m_window_handle)
@@ -61,6 +63,16 @@ Window::Window(int width, int height)
 	glfwSetWindowSizeCallback(m_window_handle, glfw_window_resize_callback);
 
 	Input::m_window_handle = m_window_handle;
+
+    m_multisample_frame_buffer = std::make_unique<FrameBuffer>(800, 600, 4);
+    m_multisample_frame_buffer->bind();
+
+    m_multisample_frame_buffer->attach_texture(AttachmentTypes::Colour);
+    m_multisample_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
+
+    assert(m_multisample_frame_buffer->is_complete());
+
+    m_multisample_frame_buffer->unbind();
 
 	m_frame_buffer = std::make_unique<FrameBuffer>();
 	m_frame_buffer->bind();
@@ -99,6 +111,7 @@ void Window::display_render_context()
 		prev_fb_height = avail_size.y;
 	}
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
+    m_multisample_frame_buffer->blit(m_frame_buffer->get_id());
 	drawList->AddImage((void*)m_frame_buffer->get_colour_attachment(),
         pos,
         ImVec2(pos.x + avail_size.x, pos.y + avail_size.y),
@@ -121,6 +134,16 @@ void Window::resize_frame_buffer(int width, int height)
 
     m_frame_buffer->unbind();
 
+    m_multisample_frame_buffer->unbind();
+    m_multisample_frame_buffer = std::make_unique<FrameBuffer>(width, height, 4);
+    m_multisample_frame_buffer->bind();
+
+    m_multisample_frame_buffer->attach_texture(AttachmentTypes::Colour);
+    m_multisample_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
+
+    assert(m_multisample_frame_buffer->is_complete());
+
+    m_multisample_frame_buffer->unbind();
 }
 
 void Window::begin_frame()
@@ -129,12 +152,12 @@ void Window::begin_frame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	m_frame_buffer->bind();
+	m_multisample_frame_buffer->bind();
 }
 
 void Window::end_frame()
 {
-	m_frame_buffer->unbind();
+    m_frame_buffer->unbind();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

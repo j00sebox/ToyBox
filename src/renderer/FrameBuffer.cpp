@@ -36,6 +36,13 @@ FrameBuffer::~FrameBuffer()
     GL_CALL(glDeleteFramebuffers(1, &m_id));
 }
 
+void FrameBuffer::blit(unsigned int dest_buffer) const
+{
+    GL_CALL(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id));
+    GL_CALL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_buffer));
+    GL_CALL(glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width, m_height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+}
+
 void FrameBuffer::attach_texture(unsigned char attachment)
 {
     switch (attachment)
@@ -47,7 +54,7 @@ void FrameBuffer::attach_texture(unsigned char attachment)
             if(m_samples > 1)
             {
                 GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_colour_attachment));
-                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
+                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
                 GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_colour_attachment, 0));
             }
             else
@@ -68,7 +75,7 @@ void FrameBuffer::attach_texture(unsigned char attachment)
             if(m_samples > 1)
             {
                 GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_depth_attachment));
-                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
+                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
                 GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_depth_attachment, 0));
             }
             else
@@ -89,7 +96,7 @@ void FrameBuffer::attach_texture(unsigned char attachment)
             if(m_samples > 1)
             {
                 GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_stencil_attachment));
-                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
+                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
                 GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_stencil_attachment, 0));
             }
             else

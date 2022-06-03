@@ -16,6 +16,7 @@ public:
     FrameBuffer(FrameBuffer&& fbo) noexcept;
     ~FrameBuffer();
 
+    void blit(unsigned int dest_buffer) const;
     void attach_texture(unsigned char attachment);
     void attach_renderbuffer(unsigned char attachment);
 
@@ -24,6 +25,7 @@ public:
 
     [[nodiscard]] bool is_complete() const;
 
+    [[nodiscard]] unsigned int get_id() const { return m_id; }
     [[nodiscard]] unsigned int get_colour_attachment() const { return m_colour_attachment; }
     [[nodiscard]] unsigned int get_depth_attachment() const { return m_depth_attachment; }
     [[nodiscard]] unsigned int get_stencil_attachment() const { return m_stencil_attachment; }
