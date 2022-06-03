@@ -137,6 +137,21 @@ void Application::display_menu()
 				display_bg_col_picker = true;
 			}
 
+            if(ImGui::BeginMenu("Anti-Aliasing"))
+            {
+                if(ImGui::MenuItem("No AA"))
+                {
+                    m_window.change_sample_amount(1);
+                }
+
+                if(ImGui::MenuItem("MSAA X4"))
+                {
+                    m_window.change_sample_amount(4);
+                }
+
+                ImGui::EndMenu();
+            }
+
 			ImGui::EndMenu();
 		}
 

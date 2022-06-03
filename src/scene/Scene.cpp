@@ -59,7 +59,7 @@ void Scene::init(int width, int height)
 void Scene::update(float elapsed_time)
 {
 #ifdef DEBUG
-    Timer timer{};
+    //Timer timer{};
 #endif
 	Renderer::clear();
 

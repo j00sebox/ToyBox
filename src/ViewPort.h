@@ -5,13 +5,16 @@
 class ViewPort
 {
 public:
-    ViewPort(int width, int height, int samples);
+    ViewPort(int width, int height, int samples = 1);
 
     void begin_frame() const;
     void end_frame() const;
 
     void display();
     void resize(int width, int height, int samples);
+
+    [[nodiscard]] std::pair<int, int> get_dimensions() const { return { m_width, m_height }; }
+    [[nodiscard]] int get_sample_amount() const { return m_samples; }
 
 private:
     int m_width, m_height;

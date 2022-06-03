@@ -14,12 +14,13 @@ public:
 	~Window();
 
 	void display_render_context();
-    void resize_frame_buffer(int width, int height);
+    void resize_viewport(int width, int height);
+    void change_sample_amount(int new_sample_amount);
 
 	void begin_frame();
 	void end_frame();
 	[[nodiscard]] float get_delta_time();
-    [[nodiscard]] std::pair<int, int> get_dimensions() { return { m_width, m_height }; }
+    [[nodiscard]] std::pair<int, int> get_dimensions() const { return { m_width, m_height }; }
 
 private:
 	int m_width, m_height;

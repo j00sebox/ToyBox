@@ -18,7 +18,10 @@ ViewPort::ViewPort(int width, int height, int samples)
 
 void ViewPort::begin_frame() const
 {
-    m_multisample_frame_buffer->bind();
+    if(m_multisample_frame_buffer)
+        m_multisample_frame_buffer->bind();
+    else
+        m_frame_buffer->bind();
 }
 
 void ViewPort::end_frame() const
@@ -40,7 +43,8 @@ void ViewPort::display()
         m_prev_fb_height = avail_size.y;
     }
     ImDrawList* drawList = ImGui::GetWindowDrawList();
-    m_multisample_frame_buffer->blit(m_frame_buffer->get_id());
+    if(m_multisample_frame_buffer)
+        m_multisample_frame_buffer->blit(m_frame_buffer->get_id());
     drawList->AddImage((void*)m_frame_buffer->get_colour_attachment(),
        pos,
        ImVec2(pos.x + avail_size.x, pos.y + avail_size.y),
@@ -50,17 +54,24 @@ void ViewPort::display()
 
 void ViewPort::resize(int width, int height, int samples)
 {
-    m_multisample_frame_buffer = std::make_unique<FrameBuffer>(width, height, 4);
-    m_multisample_frame_buffer->bind();
+    if(samples > 1)
+    {
+        m_multisample_frame_buffer = std::make_unique<FrameBuffer>(width, height, samples);
+        m_multisample_frame_buffer->bind();
 
-    m_multisample_frame_buffer->attach_texture(AttachmentTypes::Colour);
-    m_multisample_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
+        m_multisample_frame_buffer->attach_texture(AttachmentTypes::Colour);
+        m_multisample_frame_buffer->attach_renderbuffer(AttachmentTypes::Depth | AttachmentTypes::Stencil); // create one render buffer object for both
 
-    assert(m_multisample_frame_buffer->is_complete());
+        assert(m_multisample_frame_buffer->is_complete());
 
-    m_multisample_frame_buffer->unbind();
+        m_multisample_frame_buffer->unbind();
+    }
+    else
+    {
+        m_multisample_frame_buffer.reset(nullptr);
+    }
 
-    m_frame_buffer = std::make_unique<FrameBuffer>();
+    m_frame_buffer = std::make_unique<FrameBuffer>(width, height);
     m_frame_buffer->bind();
 
     // want the main buffer to have a texture colour for imgui

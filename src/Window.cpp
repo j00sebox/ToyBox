@@ -65,7 +65,7 @@ Window::Window(int width, int height, int viewport_width, int viewport_height)
 
 	Input::m_window_handle = m_window_handle;
 
-    m_main_viewport = std::make_unique<ViewPort>(ViewPort(viewport_width, viewport_height, 4));
+    m_main_viewport = std::make_unique<ViewPort>(ViewPort(viewport_width, viewport_height, 1));
 }
 
 Window::~Window()
@@ -87,9 +87,15 @@ void Window::display_render_context()
     ImGui::End();
 }
 
-void Window::resize_frame_buffer(int width, int height)
+void Window::resize_viewport(int width, int height)
 {
-    m_main_viewport->resize(width, height, 4);
+    m_main_viewport->resize(width, height, m_main_viewport->get_sample_amount());
+}
+
+void Window::change_sample_amount(int new_sample_amount)
+{
+    auto [vp_width, vp_height] = m_main_viewport->get_dimensions();
+    m_main_viewport->resize(vp_width, vp_height, new_sample_amount);
 }
 
 void Window::begin_frame()
