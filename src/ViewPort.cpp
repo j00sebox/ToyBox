@@ -54,6 +54,10 @@ void ViewPort::display()
 
 void ViewPort::resize(int width, int height, int samples)
 {
+    m_width = width;
+    m_height = height;
+    m_samples = samples;
+
     if(samples > 1)
     {
         m_multisample_frame_buffer = std::make_unique<FrameBuffer>(width, height, samples);

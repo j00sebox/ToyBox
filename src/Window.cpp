@@ -63,6 +63,8 @@ Window::Window(int width, int height, int viewport_width, int viewport_height)
 	glfwSetErrorCallback(glfw_error_callback);
 	glfwSetWindowSizeCallback(m_window_handle, glfw_window_resize_callback);
 
+    //info("Using OpenGL Version: {}", glGetString(GL_VERSION));
+
 	Input::m_window_handle = m_window_handle;
 
     m_main_viewport = std::make_unique<ViewPort>(ViewPort(viewport_width, viewport_height, 1));
