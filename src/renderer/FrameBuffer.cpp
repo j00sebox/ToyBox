@@ -2,6 +2,7 @@
 #include "FrameBuffer.h"
 
 #include "GLError.h"
+#include "Log.h"
 
 #include <cassert>
 #include <glad/glad.h>
@@ -212,6 +213,6 @@ void FrameBuffer::unbind() const
 bool FrameBuffer::is_complete() const
 {
     auto fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    printf("Frame Buffer Status: %#04x\n", fb_status);
+    info("Frame Buffer Status: {0:#x}\n", fb_status);
     return (fb_status == GL_FRAMEBUFFER_COMPLETE);
 }
