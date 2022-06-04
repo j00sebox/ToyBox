@@ -8,6 +8,12 @@ set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include)
 
 add_compile_definitions(DEBUG)
 
+if(WIN32)
+    add_compile_definitions(PLATFORM_WINDOWS)
+else()
+    add_compile_definitions(PLATFORM_LINUX)
+endif()
+
 # Download submodules
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
