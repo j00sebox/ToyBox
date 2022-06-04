@@ -28,14 +28,14 @@ void Application::start()
 
 		m_window.begin_frame();
 
+		float delta_time = m_window.get_delta_time();
+		m_current_scene->update(delta_time);
+
 		ImGui::ShowDemoWindow();
 		display_dockspace();
 		m_window.display_render_context();
 		display_menu();
 		display_fps();
-
-		float delta_time = m_window.get_delta_time();
-		m_current_scene->update(delta_time);
 
 		m_window.end_frame();
 	}
