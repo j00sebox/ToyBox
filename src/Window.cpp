@@ -10,7 +10,6 @@
 #include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
 extern "C"
@@ -72,6 +71,8 @@ Window::Window(int width, int height, int viewport_width, int viewport_height)
 
 Window::~Window()
 {
+	m_main_viewport.reset();
+
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();

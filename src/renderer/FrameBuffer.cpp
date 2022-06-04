@@ -55,10 +55,6 @@ void FrameBuffer::attach_texture(unsigned char attachment)
             {
                 GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_colour_attachment));
                 GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
-//                GL_CALL(glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-//                GL_CALL(glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-//                GL_CALL(glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-//                GL_CALL(glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
                 GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_colour_attachment, 0));
                 GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
             }
