@@ -149,6 +149,11 @@ void Application::display_menu()
                     m_window.change_sample_amount(4);
                 }
 
+				if (ImGui::MenuItem("MSAA X6"))
+				{
+					m_window.change_sample_amount(6);
+				}
+
                 ImGui::EndMenu();
             }
 

@@ -31,8 +31,6 @@ Window::Window(int width, int height, int viewport_width, int viewport_height)
 	if (!glfwInit())
 		fatal("Could not initialize GLFW!");
 
-    //glfwWindowHint(GLFW_SAMPLES, 4);
-
 	m_window_handle = glfwCreateWindow(width, height, "Toy Box", nullptr, nullptr);
 
 	if (!m_window_handle)
