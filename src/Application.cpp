@@ -31,7 +31,7 @@ void Application::start()
 		float delta_time = m_window.get_delta_time();
 		m_current_scene->update(delta_time);
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 		display_dockspace();
 		m_window.display_render_context();
 		display_menu();
