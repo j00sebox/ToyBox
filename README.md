@@ -23,4 +23,10 @@ cmake -DGLFW_BUILD_DOCS=OFF -S . -B build
 ```
 The copying of the imgui.ini file is so that your window will launch with the windows in the same arrangement as seen in the picture above.
 
-After running these commands to can build and run toy_box using the following commands
+After running these commands to can build and run toy_box using the following commands:
+
+```
+cd build
+make
+./toy_box
+```
