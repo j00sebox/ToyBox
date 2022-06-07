@@ -54,7 +54,10 @@ struct PointLight
 	float brightness;
 };
 
-uniform PointLight point_lights[MAX_POINT_LIGHTS];
+layout (std140, binding=1) uniform PointLights
+{
+	PointLight point_lights[MAX_POINT_LIGHTS];  // 128 bytes
+};
 
 out vec4 colour;
 

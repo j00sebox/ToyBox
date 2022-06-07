@@ -25,25 +25,6 @@ float ao;
 
 /*----------Lighting----------*/
 
-#define MAX_POINT_LIGHTS 2
-
-struct PointLight
-{                       // base alignment   // alignment offset
-    bool active;        // 4                // 0
-    vec4 colour;        // 16               // 16
-    vec3 position;      // 16               // 32
-    float range;        // 4                // 48
-    float radius;       // 4                // 52
-    float brightness;   // 4                // 56
-}; // 64 bytes
-
-uniform PointLight point_lights[MAX_POINT_LIGHTS]; // 128 bytes
-
-layout (std140, binding=1) uniform PointLights
-{
-    PointLight pls[MAX_POINT_LIGHTS];  // 128 bytes
-};
-
 struct DirectionalLight
 {
     bool active;
@@ -54,6 +35,24 @@ struct DirectionalLight
 
 uniform DirectionalLight directional_light;
 
+#define MAX_POINT_LIGHTS 2
+
+struct PointLight
+{                       // base alignment   // alignment offset
+    bool active;        // 4                // 0
+    vec4 colour;        // 16               // 16
+    vec3 position;      // 16               // 32
+    float range;        // 4                // 44
+    float radius;       // 4                // 48
+    float brightness;   // 4                // 52
+}; // 64 bytes
+
+layout (std140, binding=1) uniform PointLights
+{
+    PointLight point_lights[MAX_POINT_LIGHTS];  // 128 bytes
+};
+
+
 float specular_factor(vec3 n, vec3 h)
 {
     return ks * pow(max(dot(n, h), 0.0), u_shininess);
@@ -61,21 +60,21 @@ float specular_factor(vec3 n, vec3 h)
 
 vec4 point_light(int i)
 {
-    vec3 light_vec = pls[i].position - v_position;
+    vec3 light_vec = point_lights[i].position - v_position;
     float distance = length(light_vec);
     vec3 l = normalize(light_vec);
     vec3 v = normalize(u_cam_pos - v_position);
     vec3 n = normalize(v_model * normal);
     vec3 h = normalize(l + v);
 
-    if (distance > pls[i].range)
+    if (distance > point_lights[i].range)
     {
         return vec4(0.f);
     }
 
     float attenuation = 1 / (distance * distance);
 
-    return pls[i].colour * attenuation * dot(l, n) * (base_colour + specular_factor(n, h));
+    return point_lights[i].colour * attenuation * dot(l, n) * (base_colour + specular_factor(n, h));
 }
 
 vec4 direct_light()
@@ -119,7 +118,7 @@ void main()
 
     for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
     {
-        if(pls[i].active)
+        if(point_lights[i].active)
         {
             colour += point_light(i);
         }

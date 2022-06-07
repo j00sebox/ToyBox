@@ -61,23 +61,15 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
 			auto& point_light = m_point_lights[i]->get_component<PointLight>();
 			mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
 
-            // TODO: make uniform buffer for this stuff
-			ShaderLib::get("pbr_standard")->set_uniform_4f(fmt::format("point_lights[{}].colour", i), point_light.get_colour());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(fmt::format("point_lights[{}].brightness", i), point_light.get_brightness());
-			ShaderLib::get("pbr_standard")->set_uniform_3f(fmt::format("point_lights[{}].position", i), pos);
-			ShaderLib::get("pbr_standard")->set_uniform_1f(fmt::format("point_lights[{}].radius", i), point_light.get_radius());
-			ShaderLib::get("pbr_standard")->set_uniform_1f(fmt::format("point_lights[{}].range", i), point_light.get_range());
-			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
-			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
-
             m_point_light_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_colour());
             m_point_light_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * i), pos);
             m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_range());
             m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::radius + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_radius());
-            
+            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_brightness());
+
+            ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+            ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
-
-
 		}
 	}
 
@@ -102,7 +94,6 @@ void LightManager::add_point_light(const SceneNode& node)
 	int index = m_available_point_lights.front();
 	m_point_lights[index] = node.entity.get();
 	m_available_point_lights.pop();
-	ShaderLib::get("pbr_standard")->set_uniform_1i(fmt::format("point_lights[{}].active", index), true);
     m_point_light_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * index), true);
 }
 
@@ -114,7 +105,6 @@ void LightManager::remove_point_light(const SceneNode& node)
 		{
 			m_point_lights[i] = nullptr;
 			m_available_point_lights.push(i);
-			ShaderLib::get("pbr_standard")->set_uniform_1i(fmt::format("point_lights[{}].active", i), false);
             m_point_light_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * i), false);
 			break;
 		}
