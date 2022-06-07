@@ -40,8 +40,6 @@ struct DirectionalLight
 	float brightness;
 };
 
-uniform DirectionalLight directional_light;
-
 #define MAX_POINT_LIGHTS 2
 
 struct PointLight
@@ -54,9 +52,10 @@ struct PointLight
 	float brightness;
 };
 
-layout (std140, binding=1) uniform PointLights
+layout (std140, binding=1) uniform Lights
 {
 	PointLight point_lights[MAX_POINT_LIGHTS];  // 128 bytes
+	DirectionalLight directional_light;
 };
 
 out vec4 colour;

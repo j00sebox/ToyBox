@@ -176,6 +176,10 @@ void Scene::remove_node(SceneNode& node)
 	{
 		m_light_manager.remove_point_light(node);
 	}
+    else if(node.entity->has_component<DirectionalLight>())
+    {
+        m_light_manager.remove_directional_light();
+    }
 
 	if (!root.remove(node))
 	{

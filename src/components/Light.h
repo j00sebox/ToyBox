@@ -20,7 +20,7 @@ public:
 
 protected:
 	mathz::Vec4 m_colour;
-	float m_brightness;
+	float m_brightness = 1.f;
 };
 
 class DirectionalLight final : public Light

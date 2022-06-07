@@ -22,10 +22,18 @@ enum class PointLightBufferOffsets
     total_offset = 64
 };
 
+enum class DirectLightBufferOffsets
+{
+    active = 128,
+    colour = 144,
+    direction = 160,
+    brightness = 172
+};
+
 LightManager::LightManager()
 {
-    m_point_light_buffer = std::make_unique<UniformBuffer>(UniformBuffer(128));
-    m_point_light_buffer->link(1);
+    m_light_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(192));
+    m_light_uniform_buffer->link(1);
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
@@ -61,11 +69,11 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
 			auto& point_light = m_point_lights[i]->get_component<PointLight>();
 			mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
 
-            m_point_light_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_colour());
-            m_point_light_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * i), pos);
-            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_range());
-            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::radius + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_radius());
-            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_brightness());
+            m_light_uniform_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_colour());
+            m_light_uniform_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * i), pos);
+            m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_range());
+            m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::radius + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_radius());
+            m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_brightness());
 
             ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
             ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
@@ -75,32 +83,25 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
 
 	if (m_direct_light)
 	{
-		ShaderLib::get("pbr_standard")->set_uniform_4f("directional_light.colour", m_direct_light->get_colour());
-		ShaderLib::get("pbr_standard")->set_uniform_1f("directional_light.brightness", m_direct_light->get_brightness());
-		ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", m_direct_light->get_direction());
-		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
-		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", m_direct_light->get_colour());
+        m_light_uniform_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, m_direct_light->get_colour());
+        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, m_direct_light->get_direction());
+        m_light_uniform_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, m_direct_light->get_brightness());
 
-        ShaderLib::get("blinn-phong")->set_uniform_4f("directional_light.colour", m_direct_light->get_colour());
-        ShaderLib::get("blinn-phong")->set_uniform_1f("directional_light.brightness", m_direct_light->get_brightness());
-        ShaderLib::get("blinn-phong")->set_uniform_3f("directional_light.direction", m_direct_light->get_direction());
+        ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
         ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
-        ShaderLib::get("blinn-phong")->set_uniform_4f("u_emissive_colour", m_direct_light->get_colour());
-	}
+    }
 }
 
 void LightManager::set_directional_light(const DirectionalLight& dl)
 {
     m_direct_light = std::make_shared<DirectionalLight>(dl);
-    ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", true);
-    ShaderLib::get("blinn-phong")->set_uniform_1i("directional_light.active", true);
+    m_light_uniform_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
 }
 
 void LightManager::remove_directional_light()
 {
     m_direct_light.reset();
-    ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", false);
-    ShaderLib::get("blinn-phong")->set_uniform_1i("directional_light.active", false);
+    m_light_uniform_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
 }
 
 void LightManager::add_point_light(const SceneNode& node)
@@ -108,7 +109,7 @@ void LightManager::add_point_light(const SceneNode& node)
 	int index = m_available_point_lights.front();
 	m_point_lights[index] = node.entity.get();
 	m_available_point_lights.pop();
-    m_point_light_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * index), true);
+    m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * index), true);
 }
 
 void LightManager::remove_point_light(const SceneNode& node)
@@ -119,7 +120,7 @@ void LightManager::remove_point_light(const SceneNode& node)
 		{
 			m_point_lights[i] = nullptr;
 			m_available_point_lights.push(i);
-            m_point_light_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * i), false);
+            m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * i), false);
 			break;
 		}
 	}
