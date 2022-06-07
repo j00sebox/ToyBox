@@ -69,10 +69,17 @@ UniformBuffer::~UniformBuffer()
     GL_CALL(glDeleteBuffers(1, &m_id));
 }
 
-void UniformBuffer::set_data_scalar(unsigned int offset, void *data) const
+void UniformBuffer::set_data_scalar_i(unsigned int offset, int data) const
 {
     bind();
-    GL_CALL(glBufferSubData(GL_UNIFORM_BUFFER, offset, 4, data));
+    GL_CALL(glBufferSubData(GL_UNIFORM_BUFFER, offset, 4, (void*)&data));
+    unbind();
+}
+
+void UniformBuffer::set_data_scalar_f(unsigned int offset, float data) const
+{
+    bind();
+    GL_CALL(glBufferSubData(GL_UNIFORM_BUFFER, offset, 4, (void*)&data));
     unbind();
 }
 

@@ -6,7 +6,7 @@ layout(location = 2) in vec2 a_tex_coord;
 
 layout (std140, binding=0) uniform Transforms
 {
-// alignment offset
+                        // alignment offset
     mat4 u_view;		// 0
     mat4 u_projection;	// 64
 };

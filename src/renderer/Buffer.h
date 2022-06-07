@@ -39,7 +39,8 @@ public:
     UniformBuffer(UniformBuffer&& ubo) noexcept;
     ~UniformBuffer();
 
-    void set_data_scalar(unsigned int offset, void* data) const;
+    void set_data_scalar_i(unsigned int offset, int data) const;
+    void set_data_scalar_f(unsigned int offset, float data) const;
     void set_data_vec3(unsigned int offset, const mathz::Vec3& vec) const;
     void set_data_vec4(unsigned int offset, const mathz::Vec4& vec) const;
     void set_data_mat4(unsigned int offset, const mathz::Mat4& mat) const;

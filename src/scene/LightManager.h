@@ -8,6 +8,7 @@
 class SceneNode;
 class Entity;
 class Camera;
+class UniformBuffer;
 
 #define MAX_POINT_LIGHTS 2
 
@@ -24,4 +25,5 @@ private:
 	std::array<Entity*, MAX_POINT_LIGHTS> m_point_lights;
 	DirectionalLight* m_direct_light = nullptr;
 	std::queue<int> m_available_point_lights;
+    std::unique_ptr<UniformBuffer> m_point_light_buffer;
 };

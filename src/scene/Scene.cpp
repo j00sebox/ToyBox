@@ -45,7 +45,7 @@ void Scene::init(int width, int height)
 	EventList::e_resize.bind_function(std::bind(&Scene::window_resize, this, std::placeholders::_1, std::placeholders::_2));
 	m_camera->resize(width, height);
 
-    m_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(256));
+    m_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(128));
     m_uniform_buffer->link(0);
     m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());
     m_uniform_buffer->set_data_mat4(64, m_camera->get_perspective());
