@@ -348,6 +348,11 @@ void Scene::compile_shaders() const
             Shader("../resources/shaders/pbr/pbr_standard_fragment.shader", ShaderType::Fragment)
     ));
 
+    ShaderLib::add("blinn-phong", ShaderProgram(
+            Shader("../resources/shaders/blinn-phong/blinn-phong_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/blinn-phong/blinn-phong_fragment.shader", ShaderType::Fragment)
+    ));
+
     ShaderLib::add("mirror", ShaderProgram(
             Shader("../resources/shaders/mirror/mirror_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/mirror/mirror_fragment.shader", ShaderType::Fragment)

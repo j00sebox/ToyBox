@@ -37,6 +37,7 @@ void Light::imgui_render()
 DirectionalLight::DirectionalLight()
 {
 	ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", true);
+    ShaderLib::get("blinn-phong")->set_uniform_1i("directional_light.active", true);
 }
 
 void DirectionalLight::imgui_render()

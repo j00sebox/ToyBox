@@ -46,6 +46,7 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
 			auto& point_light = m_point_lights[i]->get_component<PointLight>();
 			mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
 
+            // TODO: make uniform buffer for this stuff
 			ShaderLib::get("pbr_standard")->set_uniform_4f(fmt::format("point_lights[{}].colour", i), point_light.get_colour());
 			ShaderLib::get("pbr_standard")->set_uniform_1f(fmt::format("point_lights[{}].brightness", i), point_light.get_brightness());
 			ShaderLib::get("pbr_standard")->set_uniform_3f(fmt::format("point_lights[{}].position", i), pos);
@@ -53,6 +54,14 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
 			ShaderLib::get("pbr_standard")->set_uniform_1f(fmt::format("point_lights[{}].range", i), point_light.get_range());
 			ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
 			ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+
+            ShaderLib::get("blinn-phong")->set_uniform_4f(fmt::format("point_lights[{}].colour", i), point_light.get_colour());
+            ShaderLib::get("blinn-phong")->set_uniform_1f(fmt::format("point_lights[{}].brightness", i), point_light.get_brightness());
+            ShaderLib::get("blinn-phong")->set_uniform_3f(fmt::format("point_lights[{}].position", i), pos);
+            ShaderLib::get("blinn-phong")->set_uniform_1f(fmt::format("point_lights[{}].radius", i), point_light.get_radius());
+            ShaderLib::get("blinn-phong")->set_uniform_1f(fmt::format("point_lights[{}].range", i), point_light.get_range());
+            ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
+            ShaderLib::get("blinn-phong")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
 		}
 	}
 
@@ -63,6 +72,12 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
 		ShaderLib::get("pbr_standard")->set_uniform_3f("directional_light.direction", m_direct_light->get_direction());
 		ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
 		ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", m_direct_light->get_colour());
+
+        ShaderLib::get("blinn-phong")->set_uniform_4f("directional_light.colour", m_direct_light->get_colour());
+        ShaderLib::get("blinn-phong")->set_uniform_1f("directional_light.brightness", m_direct_light->get_brightness());
+        ShaderLib::get("blinn-phong")->set_uniform_3f("directional_light.direction", m_direct_light->get_direction());
+        ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
+        ShaderLib::get("blinn-phong")->set_uniform_4f("u_emissive_colour", m_direct_light->get_colour());
 	}
 }
 
@@ -72,6 +87,7 @@ void LightManager::add_point_light(const SceneNode& node)
 	m_point_lights[index] = node.entity.get();
 	m_available_point_lights.pop();
 	ShaderLib::get("pbr_standard")->set_uniform_1i(fmt::format("point_lights[{}].active", index), true);
+    ShaderLib::get("blinn-phong")->set_uniform_1i(fmt::format("point_lights[{}].active", index), true);
 }
 
 void LightManager::remove_point_light(const SceneNode& node)
@@ -83,6 +99,7 @@ void LightManager::remove_point_light(const SceneNode& node)
 			m_point_lights[i] = nullptr;
 			m_available_point_lights.push(i);
 			ShaderLib::get("pbr_standard")->set_uniform_1i(fmt::format("point_lights[{}].active", i), false);
+            ShaderLib::get("blinn-phong")->set_uniform_1i(fmt::format("point_lights[{}].active", i), false);
 			break;
 		}
 	}
