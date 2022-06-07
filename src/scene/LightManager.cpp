@@ -75,7 +75,7 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
             m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::radius + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_radius());
             m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_brightness());
 
-            ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+            //ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
             ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
 		}

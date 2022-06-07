@@ -2,12 +2,11 @@
 
 /*----------Textures----------*/
 
-uniform sampler2D diffuse_t;
-uniform sampler2D specular_t;
-uniform sampler2D normal_t;
-uniform sampler2D occlusion_t;
-uniform sampler2D scene_t;
-uniform vec4 u_emissive_colour;
+layout (binding = 0) uniform sampler2D diffuse_t;
+layout (binding = 1) uniform sampler2D specular_t;
+layout (binding = 2) uniform sampler2D normal_t;
+layout (binding = 3) uniform sampler2D occlusion_t;
+//uniform vec4 u_emissive_colour;
 
 in vec3 v_position;
 in vec3 v_normal;

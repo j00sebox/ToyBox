@@ -10,6 +10,9 @@
 
 using namespace nlohmann;
 
+//TODO: remove later
+#include "GLError.h"
+#include <glad/glad.h>
 
 void Material::load(const std::string* const textures)
 {
@@ -33,21 +36,32 @@ void Material::bind() const
     }
     else
     {
-        for (unsigned int i = 0; i < 4; ++i)
-        {
-            m_textures[i]->bind(i);
-        }
+//        for (unsigned int i = 0; i < 4; ++i)
+//        {
+//            m_textures[i]->bind(i);
+//        }
+
+        GL_CALL(glActiveTexture(GL_TEXTURE0));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_textures[0]->get_id()));
+
+        GL_CALL(glActiveTexture(GL_TEXTURE1));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_textures[1]->get_id()));
+
+        GL_CALL(glActiveTexture(GL_TEXTURE2));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_textures[2]->get_id()));
+
+        GL_CALL(glActiveTexture(GL_TEXTURE3));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_textures[3]->get_id()));
     }
-    
-	m_shader->bind();
+
+    m_shader->bind();
 }
 
 void Material::unbind() const
 {
-
     if (!m_custom)
     {
-        for (const auto & m_texture : m_textures)
+        for (const auto& m_texture : m_textures)
         {
             m_texture->unbind();
         }

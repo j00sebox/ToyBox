@@ -2,11 +2,10 @@
 
 /*----------Textures----------*/
 
-uniform sampler2D diffuse_t;
-uniform sampler2D specular_t;
-uniform sampler2D normal_t;
-uniform sampler2D occlusion_t;
-uniform vec4 u_emissive_colour;
+layout (binding = 0) uniform sampler2D diffuse_t;
+layout (binding = 1) uniform sampler2D specular_t;
+layout (binding = 2) uniform sampler2D normal_t;
+layout (binding = 3) uniform sampler2D occlusion_t;
 
 in vec3 v_position;
 in vec3 v_normal;
@@ -17,7 +16,7 @@ uniform bool u_custom;
 uniform vec4 u_flat_colour;
 uniform vec3 u_cam_pos;
 
-uniform int u_shininess = 6;
+uniform int u_shininess = 2;
 vec4 base_colour;
 vec3 normal;
 float ks;
@@ -65,10 +64,10 @@ vec4 point_light(int i)
     vec3 n = normalize(v_model * normal);
     vec3 h = normalize(l + v);
 
-    if (distance > point_lights[i].range)
-    {
-        return vec4(0.f);
-    }
+//    if (distance > point_lights[i].range)
+//    {
+//        return vec4(0.f);
+//    }
 
     float attenuation = 1 / (distance * distance);
 
