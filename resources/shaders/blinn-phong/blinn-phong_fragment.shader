@@ -26,14 +26,12 @@ float ao;
 /*----------Lighting----------*/
 
 struct DirectionalLight
-{
-    bool active;
-    vec4 colour;
-    vec3 direction;
-    float brightness;
-};
-
-uniform DirectionalLight directional_light;
+{                       // base alignment   // alignment offset
+    bool active;        // 4                // 0
+    vec4 colour;        // 16               // 16
+    vec3 direction;     // 12               // 32
+    float brightness;   // 4                // 44
+}; // 48 bytes
 
 #define MAX_POINT_LIGHTS 2
 
@@ -41,7 +39,7 @@ struct PointLight
 {                       // base alignment   // alignment offset
     bool active;        // 4                // 0
     vec4 colour;        // 16               // 16
-    vec3 position;      // 16               // 32
+    vec3 position;      // 12               // 32
     float range;        // 4                // 44
     float radius;       // 4                // 48
     float brightness;   // 4                // 52
@@ -50,8 +48,8 @@ struct PointLight
 layout (std140, binding=1) uniform PointLights
 {
     PointLight point_lights[MAX_POINT_LIGHTS];  // 128 bytes
+    DirectionalLight directional_light;
 };
-
 
 float specular_factor(vec3 n, vec3 h)
 {

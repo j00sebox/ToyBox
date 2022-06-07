@@ -34,12 +34,6 @@ void Light::imgui_render()
 	ImGui::SliderFloat("Brightness", &m_brightness, 0.f, 10.f);
 }
 
-DirectionalLight::DirectionalLight()
-{
-	ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", true);
-    ShaderLib::get("blinn-phong")->set_uniform_1i("directional_light.active", true);
-}
-
 void DirectionalLight::imgui_render()
 {
 	Light::imgui_render();

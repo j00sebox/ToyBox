@@ -42,7 +42,7 @@ void LightManager::set_lights(const SceneNode& node)
 	}
 	else if (node.entity->has_component<DirectionalLight>())
 	{
-		m_direct_light = &node.entity->get_component<DirectionalLight>();
+        set_directional_light(node.entity->get_component<DirectionalLight>());
 	}
 
 	for (const SceneNode& n : node)
@@ -87,6 +87,20 @@ void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
         ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
         ShaderLib::get("blinn-phong")->set_uniform_4f("u_emissive_colour", m_direct_light->get_colour());
 	}
+}
+
+void LightManager::set_directional_light(const DirectionalLight& dl)
+{
+    m_direct_light = std::make_shared<DirectionalLight>(dl);
+    ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", true);
+    ShaderLib::get("blinn-phong")->set_uniform_1i("directional_light.active", true);
+}
+
+void LightManager::remove_directional_light()
+{
+    m_direct_light.reset();
+    ShaderLib::get("pbr_standard")->set_uniform_1i("directional_light.active", false);
+    ShaderLib::get("blinn-phong")->set_uniform_1i("directional_light.active", false);
 }
 
 void LightManager::add_point_light(const SceneNode& node)

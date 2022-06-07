@@ -18,12 +18,18 @@ public:
 	LightManager();
 	void set_lights(const SceneNode& node);
 	void update_lights(const std::shared_ptr<Camera>& camera);
-	void add_point_light(const SceneNode& node);
+
+    // directional light
+    void set_directional_light(const DirectionalLight& dl);
+    void remove_directional_light();
+
+    // point lights
+    void add_point_light(const SceneNode& node);
 	void remove_point_light(const SceneNode& node);
 
 private:
 	std::array<Entity*, MAX_POINT_LIGHTS> m_point_lights;
-	DirectionalLight* m_direct_light = nullptr;
-	std::queue<int> m_available_point_lights;
+	std::shared_ptr<DirectionalLight> m_direct_light;
+    std::queue<int> m_available_point_lights;
     std::unique_ptr<UniformBuffer> m_point_light_buffer;
 };

@@ -26,7 +26,6 @@ protected:
 class DirectionalLight final : public Light
 {
 public:
-	DirectionalLight();
 	void set_direction(const mathz::Vec3& dir) { m_direction = dir; m_direction.normalize(); }
 	[[nodiscard]] const mathz::Vec3& get_direction() const { return m_direction; }
 
