@@ -183,7 +183,7 @@ void Scene::remove_node(SceneNode& node)
 
 	if (!root.remove(node))
 	{
-		fprintf(stderr, "Node not apart of current scene tree!");
+		fatal("Node not apart of current scene tree!");
 	}
 	else
 	{
