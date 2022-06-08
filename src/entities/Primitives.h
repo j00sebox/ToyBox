@@ -13,28 +13,59 @@ enum class PrimitiveTypes
 std::string primitve_type_to_str(PrimitiveTypes pt);
 PrimitiveTypes str_to_primitive_type(const char* name);
 
-class Cube
+struct Cube
 {
-public:
-	Cube();
+    std::vector<float> vertices =
+    {
+            -1.0f, -1.0f,  1.0f, 0.f, 0.f, -1.f, 0.f, -1.f,		//        7--------6
+            1.0f, -1.0f,  1.0f, 0.f, 0.f, -1.f, 0.f, -1.f,		//       /|       /|
+            1.0f, -1.0f, -1.0f, 0.f, 0.f,  1.f, 0.f,  1.f,		//      4--------5 |
+            -1.0f, -1.0f, -1.0f, 0.f, 0.f,  1.f, 0.f,  1.f,		//      | |      | |
+            -1.0f,  1.0f,  1.0f, 0.f, 0.f, -1.f, 0.f, -1.f,		//      | 3------|-2
+            1.0f,  1.0f,  1.0f, 0.f, 0.f, -1.f, 0.f, -1.f,		//      |/       |/
+            1.0f,  1.0f, -1.0f, 0.f, 0.f,  1.f, 0.f,  1.f,		//      0--------1
+            -1.0f,  1.0f, -1.0f, 0.f, 0.f,  1.f, 0.f,  1.f
+    };
 
-	[[nodiscard]] VertexArray& get_va() { return m_cube_va; }
-	[[nodiscard]] unsigned int get_index_count() const { return m_index_count; }
+    std::vector<unsigned int> indices =
+    {
+            // right
+            1, 2, 6,
+            6, 5, 1,
 
-private:
-	VertexArray m_cube_va;
-	unsigned int m_index_count;
+            // left
+            0, 4, 7,
+            7, 3, 0,
+
+            // top
+            4, 5, 6,
+            6, 7, 4,
+
+            // bottom
+            0, 3, 2,
+            2, 1, 0,
+
+            // back
+            0, 1, 5,
+            5, 4, 0,
+
+            // front
+            3, 7, 6,
+            6, 2, 3
+    };
 };
 
-class Quad
+struct Quad
 {
-public:
-	Quad();
+    std::vector<float> vertices = {
+            -0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 0.f,
+            -0.5f,	0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
+            0.5f,  0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f, 1.f,
+            0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f, 0.f
+    };
 
-	[[nodiscard]]VertexArray&& get_va() { return std::move(m_quad_va); }
-	[[nodiscard]] unsigned int get_index_count() const { return m_index_count; }
-
-private:
-	VertexArray m_quad_va;
-	unsigned int m_index_count;
+    std::vector<unsigned int> indices = {
+            0, 2, 1,
+            0, 3, 2
+    };
 };

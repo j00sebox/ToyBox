@@ -53,15 +53,13 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 		case PrimitiveTypes::Cube:
 		{
 			Cube cube;
-			m_va = std::move(cube.get_va());
-			m_indices_count = cube.get_index_count();
+            load(cube.vertices, cube.indices);
 			break;
 		}
 		case PrimitiveTypes::Quad:
 		{
 			Quad plane;
-			m_va = plane.get_va();
-			m_indices_count = plane.get_index_count();
+			load(plane.vertices, plane.indices);
 			break;
 		}
 	}
