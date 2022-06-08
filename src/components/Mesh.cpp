@@ -52,14 +52,12 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
             break;
 		case PrimitiveTypes::Cube:
 		{
-			Cube cube;
-            load(cube.vertices, cube.indices);
+            load(Cube::vertices, Cube::indices);
 			break;
 		}
 		case PrimitiveTypes::Quad:
 		{
-			Quad plane;
-			load(plane.vertices, plane.indices);
+			load(Quad::vertices, Quad::indices);
 			break;
 		}
 	}
