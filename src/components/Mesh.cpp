@@ -39,6 +39,8 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 	m_va.set_layout(m_vb, layout);
 
 	unbind();
+    m_vb.unbind();
+    m_ib.unbind();
 }
 
 void Mesh::load_primitive(PrimitiveTypes primitive)
@@ -72,8 +74,6 @@ void Mesh::bind() const
 void Mesh::unbind() const
 {
 	m_va.unbind();
-    m_vb.unbind();
-    m_ib.unbind();
 }
 
 void Mesh::imgui_render()
