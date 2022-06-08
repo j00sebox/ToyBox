@@ -6,11 +6,17 @@
 class VertexBuffer
 {
 public:
+    VertexBuffer();
+    VertexBuffer(VertexBuffer&& vb);
 	explicit VertexBuffer(const std::vector<float>& buffer);
 	~VertexBuffer();
 
+    void set_data(const std::vector<float>& buffer);
+
 	void bind() const;
 	void unbind() const;
+
+    void operator= (VertexBuffer&& vb);
 
 private:
 	unsigned int m_id;
@@ -19,13 +25,19 @@ private:
 class IndexBuffer
 {
 public:
+    IndexBuffer();
+    IndexBuffer(IndexBuffer&& ib);
 	explicit IndexBuffer(const std::vector<unsigned int>& buffer);
 	~IndexBuffer();
+
+    void set_data(const std::vector<unsigned int>& buffer);
 
 	[[nodiscard]] unsigned int get_count() const { return m_count; }
 
 	void bind() const;
 	void unbind() const;
+
+    void operator= (IndexBuffer&& ib);
 
 private:
 	unsigned int m_id;

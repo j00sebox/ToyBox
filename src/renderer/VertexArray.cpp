@@ -24,6 +24,12 @@ VertexArray::VertexArray()
 	GL_CALL(glGenVertexArrays(1, &m_id));
 }
 
+VertexArray::VertexArray(VertexArray&& va)
+{
+    m_id = va.m_id;
+    va.m_id = 0;
+}
+
 VertexArray::~VertexArray()
 {
 	GL_CALL(glDeleteVertexArrays(1, &m_id));

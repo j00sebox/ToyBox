@@ -34,6 +34,7 @@ class VertexArray
 {
 public:
 	VertexArray();
+    VertexArray(VertexArray&& va);
 	~VertexArray();
 
 	void set_layout(const VertexBuffer& vb, const BufferLayout& layout);

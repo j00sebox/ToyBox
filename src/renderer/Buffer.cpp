@@ -5,16 +5,32 @@
 
 #include <glad/glad.h>
 
+VertexBuffer::VertexBuffer()
+{
+    GL_CALL(glGenBuffers(1, &m_id));
+}
+
+VertexBuffer::VertexBuffer(VertexBuffer&& vb)
+{
+    m_id = vb.m_id;
+    vb.m_id = 0;
+}
+
 VertexBuffer::VertexBuffer(const std::vector<float>& buffer)
 {
 	GL_CALL(glGenBuffers(1, &m_id));
-	bind();
-	GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), GL_STATIC_DRAW));
+    set_data(buffer);
 }
 
 VertexBuffer::~VertexBuffer()
 {
 	GL_CALL(glDeleteBuffers(1, &m_id));
+}
+
+void VertexBuffer::set_data(const std::vector<float> &buffer)
+{
+    bind();
+    GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), GL_STATIC_DRAW));
 }
 
 void VertexBuffer::bind() const
@@ -27,18 +43,41 @@ void VertexBuffer::unbind() const
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
 
+void VertexBuffer::operator=(VertexBuffer &&vb)
+{
+    m_id = vb.m_id;
+    vb.m_id = 0;
+}
+
+IndexBuffer::IndexBuffer()
+{
+    GL_CALL(glGenBuffers(1, &m_id));
+}
+
+IndexBuffer::IndexBuffer(IndexBuffer&& ib)
+{
+    m_id = ib.m_id;
+    ib.m_id = 0;
+    m_count = ib.m_count;
+}
+
 IndexBuffer::IndexBuffer(const std::vector<unsigned int>& buffer)
 {
 	m_count = buffer.size();
 
 	GL_CALL(glGenBuffers(1, &m_id));
-	bind();
-	GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned int), buffer.data(), GL_STATIC_DRAW));
+    set_data(buffer);
 }
 
 IndexBuffer::~IndexBuffer()
 {
 	GL_CALL(glDeleteBuffers(1, &m_id));
+}
+
+void IndexBuffer::set_data(const std::vector<unsigned int> &buffer)
+{
+    bind();
+    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned int), buffer.data(), GL_STATIC_DRAW));
 }
 
 void IndexBuffer::bind() const
@@ -49,6 +88,13 @@ void IndexBuffer::bind() const
 void IndexBuffer::unbind() const
 {
 	GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+}
+
+void IndexBuffer::operator=(IndexBuffer&& ib)
+{
+    m_id = ib.m_id;
+    ib.m_id = 0;
+    m_count = ib.m_count;
 }
 
 UniformBuffer::UniformBuffer(unsigned int size)

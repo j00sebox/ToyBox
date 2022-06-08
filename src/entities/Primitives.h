@@ -18,7 +18,7 @@ class Cube
 public:
 	Cube();
 
-	[[nodiscard]] VertexArray&& get_va() { return std::move(m_cube_va); }
+	[[nodiscard]] VertexArray& get_va() { return m_cube_va; }
 	[[nodiscard]] unsigned int get_index_count() const { return m_index_count; }
 
 private:

@@ -1,12 +1,10 @@
 #include "pch.h"
 #include "Mesh.h"
 
-#include "GLError.h"
 #include "Buffer.h"
 #include "VertexArray.h"
 
 #include <imgui.h>
-#include <imgui_internal.h>
 #include <mathz/Matrix.h>
 #include <glad/glad.h>
 #include <nlohmann/json.hpp>
@@ -16,6 +14,8 @@ using namespace nlohmann;
 Mesh::Mesh(Mesh&& mesh) noexcept
 {
 	m_va = std::move(mesh.m_va);
+    m_vb = std::move(mesh.m_vb);
+    m_ib = std::move(mesh.m_ib);
 	m_indices_count = mesh.m_indices_count;
 	m_gltf_path = mesh.m_gltf_path;
 	m_primitive = mesh.m_primitive;
@@ -27,8 +27,8 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 
 	m_va.bind();
 
-	VertexBuffer vb(verts);
-	IndexBuffer ib(indices);
+    m_vb.set_data(verts);
+    m_ib.set_data(indices);
 
 	BufferLayout layout = {
 		{0, 3, GL_FLOAT, false},
@@ -36,11 +36,9 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 		{2, 2, GL_FLOAT, false}
 	};
 
-	m_va.set_layout(vb, layout);
+	m_va.set_layout(m_vb, layout);
 
-	m_va.unbind();
-	ib.unbind();
-	vb.unbind();
+	unbind();
 }
 
 void Mesh::load_primitive(PrimitiveTypes primitive)
@@ -55,7 +53,7 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 		case PrimitiveTypes::Cube:
 		{
 			Cube cube;
-			m_va = cube.get_va();
+			m_va = std::move(cube.get_va());
 			m_indices_count = cube.get_index_count();
 			break;
 		}
@@ -71,12 +69,15 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 
 void Mesh::bind() const
 {
-	m_va.bind();
+    m_va.bind();
 }
+
 
 void Mesh::unbind() const
 {
 	m_va.unbind();
+    m_vb.unbind();
+    m_ib.unbind();
 }
 
 void Mesh::imgui_render()

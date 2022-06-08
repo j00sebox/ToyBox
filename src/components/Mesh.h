@@ -35,6 +35,8 @@ public:
 private:
 	unsigned int m_indices_count = 0;
 	VertexArray m_va;
+    VertexBuffer m_vb;
+    IndexBuffer m_ib;
 
 	// TODO: Remove after a better way is found
 	std::string m_gltf_path;

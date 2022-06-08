@@ -12,7 +12,7 @@ void Application::start()
 {
 	m_running = true;
 
-	m_current_scene->load("../resources/scenes/spooky.scene");
+	m_current_scene->load("../resources/scenes/something.scene");
 
 	auto [width, height] = m_window.get_dimensions();
 	m_current_scene->init(width, height);
