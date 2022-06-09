@@ -52,7 +52,7 @@ layout (std140, binding=1) uniform Lights
 
 float specular_factor(vec3 n, vec3 h)
 {
-    return ks * pow(max(dot(n, h), 0.0), u_shininess);
+    return ks * pow(max(dot(n, h), 0.0), u_shininess) * 0.1f;
 }
 
 vec4 point_light(int i)
@@ -61,13 +61,13 @@ vec4 point_light(int i)
     float distance = length(light_vec);
     vec3 l = normalize(light_vec);
     vec3 v = normalize(u_cam_pos - v_position);
-    vec3 n = normalize(v_model * normal);
+    vec3 n = normalize(normal);
     vec3 h = normalize(l + v);
 
-//    if (distance > point_lights[i].range)
-//    {
-//        return vec4(0.f);
-//    }
+    if (distance > point_lights[i].range)
+    {
+        return vec4(0.f);
+    }
 
     float attenuation = 1 / (distance * distance);
 
@@ -78,7 +78,7 @@ vec4 direct_light()
 {
     vec3 l = normalize(directional_light.direction);
     vec3 v = normalize(u_cam_pos - v_position);
-    vec3 n = normalize(v_model * normal); // TODO: will need to change once non uniform scaling is implemented
+    vec3 n = normalize(normal);
     vec3 h = normalize(l + v);
 
     return directional_light.colour * dot(l, n) * (base_colour + specular_factor(n, h));
@@ -99,7 +99,7 @@ void main()
     {
         base_colour = texture(diffuse_t, v_tex_coord);
         ks = texture(specular_t, v_tex_coord).r;
-        normal = texture(normal_t, v_tex_coord).rgb;
+        normal = v_model * texture(normal_t, v_tex_coord).rgb;
         ao = texture(occlusion_t, v_tex_coord).r;
     }
 

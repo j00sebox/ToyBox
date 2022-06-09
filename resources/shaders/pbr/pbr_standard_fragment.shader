@@ -157,7 +157,7 @@ vec4 point_light(int i)
 	float distance = length(light_vec);
 	vec3 l = normalize(light_vec);
 	vec3 v = normalize(u_cam_pos - v_position);
-	vec3 n = normalize(v_model * normal);
+	vec3 n = normalize(normal);
 	vec3 h = normalize(l + v);
 
 	if (distance > point_lights[i].range)
@@ -191,7 +191,7 @@ vec4 direct_light()
 {
 	vec3 l = normalize(directional_light.direction);
 	vec3 v = normalize(u_cam_pos - v_position);
-	vec3 n = normalize(v_model * normal); // TODO: will need to change once non uniform scaling is implemented
+	vec3 n = normalize(normal); // TODO: will need to change once non uniform scaling is implemented
 	vec3 h = normalize(l + v);
 
 	vec4 ks = fresnel(h, v);
@@ -228,7 +228,7 @@ void main()
 	{
 		base_colour = texture(diffuse_t, v_tex_coord);
 		//base_colour = apply_kernel(edge_detector, diffuse_t);
-		normal = texture(normal_t, v_tex_coord).rgb;
+		normal = v_model * texture(normal_t, v_tex_coord).rgb;
 		metallic = texture(specular_t, v_tex_coord).r;
 		roughness = texture(specular_t, v_tex_coord).g;
 		ao = texture(occlusion_t, v_tex_coord).r;
