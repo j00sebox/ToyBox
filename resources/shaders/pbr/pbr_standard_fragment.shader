@@ -33,7 +33,7 @@ const float pi = 3.14159265358f;
 
 struct DirectionalLight
 {
-	bool active;
+	bool _active;
 	vec4 colour;
 	vec3 direction;
 	float brightness;
@@ -43,7 +43,7 @@ struct DirectionalLight
 
 struct PointLight
 {
-	bool active;
+	bool _active;
 	vec4 colour;
 	vec3 position;
 	float range;
@@ -243,12 +243,12 @@ void main()
 
 	vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.f) * base_colour * ao;
 
-	if (directional_light.active)
+	if (directional_light._active)
 		colour += direct_light();
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
-		if(point_lights[i].active)
+		if(point_lights[i]._active)
 			colour += point_light(i);
 	}
 	

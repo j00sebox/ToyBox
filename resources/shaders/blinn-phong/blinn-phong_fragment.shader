@@ -26,7 +26,7 @@ float ao;
 
 struct DirectionalLight
 {                       // base alignment   // alignment offset
-    bool active;        // 4                // 0
+    bool _active;        // 4                // 0
     vec4 colour;        // 16               // 16
     vec3 direction;     // 12               // 36
     float brightness;   // 4                // 48
@@ -36,7 +36,7 @@ struct DirectionalLight
 
 struct PointLight
 {                       // base alignment   // alignment offset
-    bool active;        // 4                // 0
+    bool _active;        // 4                // 0
     vec4 colour;        // 16               // 16
     vec3 position;      // 12               // 32
     float range;        // 4                // 44
@@ -110,12 +110,12 @@ void main()
 
     vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.f) * base_colour * ao;
 
-    if (directional_light.active)
+    if (directional_light._active)
         colour += direct_light();
 
     for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
     {
-        if(point_lights[i].active)
+        if(point_lights[i]._active)
         {
             colour += point_light(i);
         }
