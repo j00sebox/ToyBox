@@ -25,7 +25,7 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 {
 	m_indices_count = indices.size();
 
-	m_va.bind();
+    m_va.bind();
 
     m_vb.set_data(verts);
     m_ib.set_data(indices);
@@ -38,7 +38,7 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 
 	m_va.set_layout(m_vb, layout);
 
-	unbind();
+    m_va.unbind();
     m_vb.unbind();
     m_ib.unbind();
 }

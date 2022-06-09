@@ -25,6 +25,7 @@ public:
 	void bind() const;
 	void unbind() const;
 
+    [[nodiscard]] unsigned int get_vertex_count() const { return m_vertex_count; }
 	[[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
 
 	[[nodiscard]] const char* get_name() const override { return "Mesh"; }
@@ -33,6 +34,7 @@ public:
 	void serialize(nlohmann::json& accessor) const override;
 
 private:
+    unsigned int m_vertex_count = 0;
 	unsigned int m_indices_count = 0;
 	VertexArray m_va;
     VertexBuffer m_vb;
