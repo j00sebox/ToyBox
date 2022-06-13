@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
-Texture2D::Texture2D(const std::string& file_name)
+Texture2D::Texture2D(const std::string& file_name, bool gamma_correct)
 {
 	stbi_set_flip_vertically_on_load(0);
 	m_data = stbi_load(file_name.c_str(), &m_width, &m_height, &m_colour_channels, 0);
@@ -35,7 +35,14 @@ Texture2D::Texture2D(const std::string& file_name)
 		break;
 	}
 
-	GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, pixel_format, GL_UNSIGNED_BYTE, m_data));
+    if(gamma_correct)
+    {
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, m_width, m_height, 0, pixel_format, GL_UNSIGNED_BYTE, m_data));
+    }
+	else
+    {
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, pixel_format, GL_UNSIGNED_BYTE, m_data));
+    }
 
 	GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
 

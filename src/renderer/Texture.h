@@ -13,7 +13,7 @@ public:
 class Texture2D : public TextureBase
 {
 public:
-	Texture2D(const std::string& file_name);
+	Texture2D(const std::string& file_name, bool gamma_correct = true);
 	Texture2D(Texture2D&& t) noexcept;
 	~Texture2D();
 	
