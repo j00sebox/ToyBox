@@ -13,9 +13,8 @@ void Application::start()
 	m_running = true;
 
 	m_current_scene->load("../resources/scenes/something.scene");
-
-	auto [width, height] = m_window.get_dimensions();
-	m_current_scene->init(width, height);
+    m_current_scene->init();
+    auto [width, height] = m_window.get_dimensions();
 	Renderer::init(width, height);
 
 	while (m_running)
@@ -43,10 +42,9 @@ void Application::start()
 
 void Application::switch_scene(const char* scene_path)
 {
-	m_current_scene = std::make_unique<Scene>();
+	m_current_scene = std::make_unique<Scene>(&m_window);
 	m_current_scene->load(scene_path);
-	auto [width, height] = m_window.get_dimensions();
-	m_current_scene->init(width, height);
+	m_current_scene->init();
 }
 
 void Application::display_dockspace()

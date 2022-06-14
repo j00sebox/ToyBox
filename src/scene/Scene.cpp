@@ -19,7 +19,8 @@
 #include <imgui_internal.h>
 #include <spdlog/fmt/bundled/format.h>
 
-Scene::Scene()
+Scene::Scene(Window* window)
+    : m_window_handle(window)
 {
 	m_camera = std::make_shared<Camera>();
 }
@@ -40,11 +41,11 @@ void Scene::save(const std::string& path)
 	SceneSerializer::save(path.c_str(), *this, m_camera, m_skybox, root);
 }
 
-void Scene::init(int width, int height)
+void Scene::init()
 {
 	EventList::e_resize.bind_function(std::bind(&Scene::window_resize, this, std::placeholders::_1, std::placeholders::_2));
+    auto [width, height] = m_window_handle->get_dimensions();
 	m_camera->resize(width, height);
-
     m_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(128));
     m_uniform_buffer->link(0);
     m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());

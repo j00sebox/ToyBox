@@ -2,8 +2,10 @@
 #include "Light.h"
 
 #include "Shader.h"
+#include "GLError.h"
 
 #include <imgui.h>
+#include <glad/glad.h>
 #include <nlohmann/json.hpp>
 
 using namespace nlohmann;
@@ -83,8 +85,13 @@ void DirectionalLight::shadow_init()
 {
     m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
 
+    m_shadow_map->bind();
     // don't check for completeness here since it will fail due to no colour attachment
     m_shadow_map->attach_texture(AttachmentTypes::Depth);
+
+    // need to tell OpenGL that this won't be given to monitor
+    GL_CALL(glDrawBuffer(GL_NONE));
+    GL_CALL(glReadBuffer(GL_NONE));
 }
 
 void PointLight::imgui_render()

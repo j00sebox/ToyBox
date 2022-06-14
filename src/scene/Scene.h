@@ -1,15 +1,15 @@
 #pragma once
 
+#include "Window.h"
 #include "Camera.h"
 #include "entities/Skybox.h"
-#include "scene/SceneNode.h"
-#include "scene/LightManager.h"
+#include "SceneNode.h"
+#include "LightManager.h"
 
 #include "components/Fwd.h"
 
 #include <map>
 #include <queue>
-
 #include <mathz/Vector.h>
 
 class Entity;
@@ -18,12 +18,12 @@ class UniformBuffer;
 class Scene
 {
 public:
-	Scene();
+	Scene(Window* window);
 	~Scene();
 
 	void load(const char* scene);
 	void save(const std::string& path);
-	void init(int width, int height);
+	void init();
 	void update(float elapsed_time);
 	void add_primitive(const char* name);
 	void window_resize(int width, int height);
@@ -45,6 +45,7 @@ private:
 	void imgui_render(SceneNode& node);
 	void display_components();
 
+    Window* m_window_handle;
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
     std::unique_ptr<UniformBuffer> m_uniform_buffer;
@@ -52,11 +53,10 @@ private:
 	std::queue<SceneNode*> m_nodes_to_remove;
 	LightManager m_light_manager;
 	
-	mathz::Vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
-
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;
-	SceneNode* m_drag_node = nullptr;
-	SceneNode* m_drop_node = nullptr;
+    SceneNode* m_drag_node = nullptr;
+    SceneNode* m_drop_node = nullptr;
+    mathz::Vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
 };
 
