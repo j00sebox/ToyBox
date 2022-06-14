@@ -362,5 +362,10 @@ void Scene::compile_shaders() const
             Shader("../resources/shaders/mirror/mirror_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/mirror/mirror_fragment.shader", ShaderType::Fragment)
     ));
+
+    ShaderLib::add("shadow_map", ShaderProgram(
+            Shader("../resources/shaders/shadow_map/shadow_map_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/shadow_map/shadow_map_fragment.shader", ShaderType::Fragment)
+    ));
 }
 

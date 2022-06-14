@@ -10,6 +10,7 @@ layout (std140, binding=0) uniform Transforms
     mat4 u_view;		// 0
     mat4 u_projection;	// 64
 };
+
 uniform mat4 u_model;
 
 out vec3 v_position;
