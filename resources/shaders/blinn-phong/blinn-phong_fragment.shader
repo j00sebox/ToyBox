@@ -69,7 +69,7 @@ vec4 point_light(int i)
         return vec4(0.f);
     }
 
-    float attenuation = 1 / (distance * distance);
+    float attenuation = 1 / distance;
 
     return point_lights[i].colour * attenuation * dot(l, n) * (base_colour + specular_factor(n, h));
 }

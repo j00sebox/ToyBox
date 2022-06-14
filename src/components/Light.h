@@ -2,12 +2,14 @@
 
 #include "Component.h"
 
+#include "FrameBuffer.h"
+
 #include <mathz/Vector.h>
 
 class Light : public Component
 {
 public:
-	Light();
+    Light();
 	void set_colour(mathz::Vec4 col) { m_colour = col; }
 	void set_brightness(float b) { m_brightness = b; }
 	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
@@ -19,8 +21,15 @@ public:
 	void serialize(nlohmann::json& accessor) const override = 0;
 
 protected:
-	mathz::Vec4 m_colour;
+    virtual void shadow_init() = 0;
+
+    mathz::Vec4 m_colour;
 	float m_brightness = 1.f;
+
+    // shadow related stuff
+    bool m_shadow_casting;
+    std::shared_ptr<FrameBuffer> m_shadow_map;
+    static const unsigned int m_shadow_width = 1024, m_shadow_height = 1024;
 };
 
 class DirectionalLight final : public Light
@@ -33,6 +42,9 @@ public:
 	[[nodiscard]] size_t get_type() const override { return typeid(DirectionalLight).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
+
+protected:
+    void shadow_init() override;
 
 private:
 	mathz::Vec3 m_direction;
@@ -50,6 +62,9 @@ public:
 	[[nodiscard]] size_t get_type() const override { return typeid(PointLight).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
+
+protected:
+    void shadow_init() override {};
 
 private:
 	float m_radius = 1.f;

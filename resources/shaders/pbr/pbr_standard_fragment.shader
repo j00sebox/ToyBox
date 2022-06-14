@@ -182,7 +182,7 @@ vec4 point_light(int i)
 
 	float h_dot_n = max(dot(h, n), 0.0f);
 	
-	float attenuation = 1 / (distance * distance);
+	float attenuation = 1 / distance;
 
 	return  brdf * attenuation * point_lights[i].colour * h_dot_n * point_lights[i].brightness;
 }
