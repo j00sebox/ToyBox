@@ -14,6 +14,8 @@ public:
 	void set_brightness(float b) { m_brightness = b; }
 	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] float get_brightness() const { return m_brightness; }
+    [[nodiscard]] bool is_casting_shadow() const { return m_shadow_casting; }
+    [[nodiscard]] unsigned int get_shadow_map() const { return m_shadow_map->get_depth_attachment(); }
 
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Light).hash_code(); }
