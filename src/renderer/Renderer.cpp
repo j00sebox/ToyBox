@@ -35,8 +35,10 @@ void Renderer::set_clear_colour(mathz::Vec4 colour)
 	GL_CALL(glClearColor(colour.x, colour.y, colour.z, colour.w));
 }
 
-void Renderer::draw_elements(const Mesh& mesh, const Material& material)
+void Renderer::draw_elements(const Transform& transform, const Mesh& mesh, const Material& material)
 {
+    material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
+    material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
 	material.bind();
 	mesh.bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
@@ -64,6 +66,31 @@ void Renderer::stencil(const Transform& stencil_transform, const Mesh& mesh, con
 	GL_CALL(glStencilMask(0xFF));
 	GL_CALL(glStencilFunc(GL_ALWAYS, 0, 0xFF));
 	GL_CALL(glEnable(GL_DEPTH_TEST));
+}
+
+void Renderer::render_pass(const std::vector<RenderObject>& render_list)
+{
+   for(const auto& render_obj : render_list)
+   {
+        switch(render_obj.render_command)
+        {
+            case RenderCommand::ElementDraw:
+            {
+                draw_elements(render_obj.transform, *render_obj.mesh, *render_obj.material);
+                break;
+            }
+
+            case RenderCommand::Stencil:
+            {
+                render_obj.material->get_shader()->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
+                render_obj.material->get_shader()->set_uniform_4f("u_flat_colour", render_obj.material->get_colour());
+                Transform stencil_transform = render_obj.transform;
+                stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.03f); // scale up a tiny bit to see outline
+                stencil(stencil_transform, *render_obj.mesh, *render_obj.material);
+                break;
+            }
+        }
+   }
 }
 
 void Renderer::clear()

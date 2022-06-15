@@ -6,6 +6,8 @@
 
 #include <mathz/Vector.h>
 
+const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
 class Light : public Component
 {
 public:
@@ -31,7 +33,6 @@ protected:
     // shadow related stuff
     bool m_shadow_casting;
     std::shared_ptr<FrameBuffer> m_shadow_map;
-    static const unsigned int m_shadow_width = 1024, m_shadow_height = 1024;
 };
 
 class DirectionalLight final : public Light

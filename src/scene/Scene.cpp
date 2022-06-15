@@ -63,6 +63,7 @@ void Scene::update(float elapsed_time)
     //Timer timer{};
 #endif
 	Renderer::clear();
+    m_render_list.clear();
 
     // if the camera moved at all we need to adjust the view uniform
 	if(m_camera->update(elapsed_time))
@@ -81,8 +82,14 @@ void Scene::update(float elapsed_time)
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
-		imgui_render(scene_node);
-	}	
+	}
+
+    Renderer::render_pass(m_render_list);
+
+    for (auto& scene_node : root)
+    {
+        imgui_render(scene_node);
+    }
 
 	ImGui::EndChild();
 
@@ -206,18 +213,13 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		auto& material = scene_node.entity->get_component<Material>();
 		auto& mesh = scene_node.entity->get_component<Mesh>();
 
-		material.get_shader()->set_uniform_mat4f("u_model", relative_transform.get_transform());
-        material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
-
 		if (m_selected_node && (scene_node == *m_selected_node))
 		{
-			Transform stencil_transform = relative_transform;
-			stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.03f); // scale up a tiny bit to see outline
-			Renderer::stencil(stencil_transform, mesh, material);
+			m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
 		}
 		else
 		{
-			Renderer::draw_elements(mesh, material);
+			m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, &mesh, &material});
 		}
 	}
 

@@ -14,6 +14,7 @@
 
 class Entity;
 class UniformBuffer;
+struct RenderObject;
 
 class Scene
 {
@@ -52,7 +53,8 @@ private:
 	SceneNode root;
 	std::queue<SceneNode*> m_nodes_to_remove;
 	LightManager m_light_manager;
-	
+	std::vector<RenderObject> m_render_list;
+
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;
     SceneNode* m_drag_node = nullptr;

@@ -83,7 +83,7 @@ void DirectionalLight::serialize(json& accessor) const
 
 void DirectionalLight::shadow_init()
 {
-    m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
+    m_shadow_map = std::make_shared<FrameBuffer>(SHADOW_WIDTH, SHADOW_HEIGHT, 1);
 
     m_shadow_map->bind();
     // don't check for completeness here since it will fail due to no colour attachment
