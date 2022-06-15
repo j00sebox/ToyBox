@@ -91,6 +91,11 @@ void Window::resize_viewport(int width, int height)
     m_main_viewport->resize(width, height, m_main_viewport->get_sample_amount());
 }
 
+void Window::bind_viewport() const
+{
+    m_main_viewport->bind_framebuffer();
+}
+
 void Window::change_sample_amount(int new_sample_amount)
 {
     auto [vp_width, vp_height] = m_main_viewport->get_dimensions();

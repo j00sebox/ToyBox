@@ -18,10 +18,7 @@ ViewPort::ViewPort(int width, int height, int samples)
 
 void ViewPort::begin_frame() const
 {
-    if(m_multisample_frame_buffer)
-        m_multisample_frame_buffer->bind();
-    else
-        m_frame_buffer->bind();
+    bind_framebuffer();
 }
 
 void ViewPort::end_frame() const
@@ -85,4 +82,12 @@ void ViewPort::resize(int width, int height, int samples)
     assert(m_frame_buffer->is_complete());
 
     m_frame_buffer->unbind();
+}
+
+void ViewPort::bind_framebuffer() const
+{
+    if(m_multisample_frame_buffer)
+        m_multisample_frame_buffer->bind();
+    else
+        m_frame_buffer->bind();
 }

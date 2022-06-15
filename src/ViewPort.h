@@ -12,6 +12,7 @@ public:
 
     void display();
     void resize(int width, int height, int samples);
+    void bind_framebuffer() const;
 
     [[nodiscard]] std::pair<int, int> get_dimensions() const { return { m_width, m_height }; }
     [[nodiscard]] int get_sample_amount() const { return m_samples; }

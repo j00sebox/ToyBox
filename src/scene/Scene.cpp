@@ -78,12 +78,14 @@ void Scene::update(float elapsed_time)
 	
 	ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 
-	m_light_manager.update_lights(m_camera);
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
 	}
 
+    m_light_manager.update_lights(m_camera);
+
+    m_window_handle->bind_viewport();
     Renderer::render_pass(m_render_list);
 
     for (auto& scene_node : root)

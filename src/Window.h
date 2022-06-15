@@ -15,7 +15,9 @@ public:
 
 	void display_render_context();
     void resize_viewport(int width, int height);
+    void bind_viewport() const;
     void change_sample_amount(int new_sample_amount);
+
 
 	void begin_frame();
 	void end_frame();
