@@ -27,6 +27,7 @@ public:
 	static void set_clear_colour(mathz::Vec4 colour);
 	static void draw_elements(const Transform& transform, const Mesh&, const Material&);
 	static void stencil(const Transform& stencil_transform, const Mesh&, const Material&);
+    static void shadow_pass(const std::vector<RenderObject>& render_list);
     static void render_pass(const std::vector<RenderObject>& render_list);
 	static void clear();
 };

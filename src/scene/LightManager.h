@@ -21,7 +21,6 @@ public:
 	void update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera);
 
     // directional light
-    void set_directional_light(const DirectionalLight& dl);
     void remove_directional_light();
 
     // point lights
@@ -30,7 +29,7 @@ public:
 
 private:
 	std::array<Entity*, MAX_POINT_LIGHTS> m_point_lights;
-	std::shared_ptr<DirectionalLight> m_direct_light;
+	Entity* m_direct_light;
     std::queue<int> m_available_point_lights;
     std::unique_ptr<UniformBuffer> m_light_uniform_buffer;
 };

@@ -51,7 +51,8 @@ void LightManager::set_lights(const SceneNode& node)
 	}
 	else if (node.entity->has_component<DirectionalLight>())
 	{
-        set_directional_light(node.entity->get_component<DirectionalLight>());
+        m_direct_light = node.entity.get();
+        m_light_uniform_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
 	}
 
 	for (const SceneNode& n : node)
@@ -84,31 +85,27 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
 	if (m_direct_light)
 	{
-        m_light_uniform_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, m_direct_light->get_colour());
-        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, m_direct_light->get_direction());
-        m_light_uniform_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, m_direct_light->get_brightness());
+        auto& direct_light = m_direct_light->get_component<DirectionalLight>();
+        m_light_uniform_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, direct_light.get_colour());
+        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, direct_light.get_direction());
+        m_light_uniform_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
 
         ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
         ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
 
-        if(m_direct_light->is_casting_shadow())
+        if(direct_light.is_casting_shadow())
         {
-            m_direct_light->bind_shadow_map();
-            ShaderLib::get("shadow_map")->bind();
-            Renderer::render_pass(render_list);
+            direct_light.bind_shadow_map();
+            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_view", direct_light.get_light_view());
+            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());;
+            Renderer::shadow_pass(render_list);
         }
     }
 }
 
-void LightManager::set_directional_light(const DirectionalLight& dl)
-{
-    m_direct_light = std::make_shared<DirectionalLight>(dl);
-    m_light_uniform_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
-}
-
 void LightManager::remove_directional_light()
 {
-    m_direct_light.reset();
+    m_direct_light = nullptr;
     m_light_uniform_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
 }
 
