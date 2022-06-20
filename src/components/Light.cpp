@@ -117,6 +117,11 @@ void PointLight::imgui_render()
 
 	ImGui::InputFloat("radius", &m_radius);
 	ImGui::InputFloat("range", &m_range);
+
+    if(m_shadow_casting)
+    {
+
+    }
 }
 
 void PointLight::serialize(json& accessor) const
