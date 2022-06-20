@@ -90,6 +90,13 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
         ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
         ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
+
+        if(m_direct_light->is_casting_shadow())
+        {
+            m_direct_light->bind_shadow_map();
+            ShaderLib::get("shadow_map")->bind();
+            Renderer::render_pass(render_list);
+        }
     }
 }
 
