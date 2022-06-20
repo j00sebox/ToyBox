@@ -5,6 +5,7 @@
 #include "FrameBuffer.h"
 
 #include <mathz/Vector.h>
+#include <mathz/Matrix.h>
 
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
@@ -18,6 +19,7 @@ public:
 	[[nodiscard]] float get_brightness() const { return m_brightness; }
     [[nodiscard]] bool is_casting_shadow() const { return m_shadow_casting; }
     [[nodiscard]] unsigned int get_shadow_map() const { return m_shadow_map->get_depth_attachment(); }
+    void bind_shadow_map() const { m_shadow_map->bind(); };
 
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Light).hash_code(); }
@@ -33,6 +35,8 @@ protected:
     // shadow related stuff
     bool m_shadow_casting;
     std::shared_ptr<FrameBuffer> m_shadow_map;
+    mathz::Mat4 m_light_projection;
+    mathz::Mat4 m_light_view;
 };
 
 class DirectionalLight final : public Light

@@ -9,6 +9,7 @@ class SceneNode;
 class Entity;
 class Camera;
 class UniformBuffer;
+struct RenderObject;
 
 #define MAX_POINT_LIGHTS 2
 
@@ -17,7 +18,7 @@ class LightManager
 public:
 	LightManager();
 	void set_lights(const SceneNode& node);
-	void update_lights(const std::shared_ptr<Camera>& camera);
+	void update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera);
 
     // directional light
     void set_directional_light(const DirectionalLight& dl);

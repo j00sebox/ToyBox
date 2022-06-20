@@ -83,7 +83,7 @@ void Scene::update(float elapsed_time)
 		update_node(scene_node, Transform{});
 	}
 
-    m_light_manager.update_lights(m_camera);
+    m_light_manager.update_lights(m_render_list, m_camera);
 
     m_window_handle->bind_viewport();
     Renderer::render_pass(m_render_list);

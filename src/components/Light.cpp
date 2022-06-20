@@ -92,6 +92,21 @@ void DirectionalLight::shadow_init()
     // need to tell OpenGL that this won't be given to monitor
     GL_CALL(glDrawBuffer(GL_NONE));
     GL_CALL(glReadBuffer(GL_NONE));
+
+    // set up light matrices
+    m_light_projection.set(
+            1.f, 0.f, 0.f, 0.f,
+            0.f, 1.f, 0.f, 0.f,
+            0.f, 0.f, 1.f / (1000.f - 0.1f), -0.1f / (1000.f - 0.1f),
+            0.f, 0.f, 0.f, 1.f
+    );
+
+    mathz::Vec3 right = m_direction.cross(mathz::Vec3(0, 1, 0));
+    mathz::Vec3 up = right.cross(m_direction);
+
+    m_light_view[0][0] = right.x;					m_light_view[0][1] = up.x;					m_light_view[0][2] = -m_direction.x;
+	m_light_view[1][0] = right.y;					m_light_view[1][1] = up.y;					m_light_view[1][2] = -m_direction.y;
+	m_light_view[2][0] = right.z;					m_light_view[2][1] = up.z;					m_light_view[2][2] = -m_direction.z;
 }
 
 void PointLight::imgui_render()

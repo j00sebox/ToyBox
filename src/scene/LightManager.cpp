@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "LightManager.h"
 
+#include "Renderer.h"
 #include "SceneNode.h"
 #include "Entity.h"
 #include "Shader.h"
@@ -59,7 +60,7 @@ void LightManager::set_lights(const SceneNode& node)
 	}
 }
 
-void LightManager::update_lights(const std::shared_ptr<Camera>& camera)
+void LightManager::update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera)
 {
 	for (int i = 0; i < m_point_lights.size(); ++i)
 	{
