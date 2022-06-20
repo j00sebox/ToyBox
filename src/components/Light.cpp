@@ -3,6 +3,7 @@
 
 #include "Shader.h"
 #include "GLError.h"
+#include "ImGuiHelper.h"
 
 #include <imgui.h>
 #include <glad/glad.h>
@@ -63,6 +64,11 @@ void DirectionalLight::imgui_render()
 	m_direction.z = direction[2];
 
 	m_direction.normalize();
+
+    if(m_shadow_casting)
+    {
+        texture_viewer(m_shadow_map->get_depth_attachment(), SHADOW_WIDTH, SHADOW_HEIGHT);
+    }
 }
 
 void DirectionalLight::serialize(json& accessor) const
@@ -117,11 +123,6 @@ void PointLight::imgui_render()
 
 	ImGui::InputFloat("radius", &m_radius);
 	ImGui::InputFloat("range", &m_range);
-
-    if(m_shadow_casting)
-    {
-
-    }
 }
 
 void PointLight::serialize(json& accessor) const
