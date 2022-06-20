@@ -17,6 +17,8 @@ public:
 	void set_brightness(float b) { m_brightness = b; }
 	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] float get_brightness() const { return m_brightness; }
+    [[nodiscard]] const mathz::Mat4& get_light_view() const { return m_light_view; }
+    [[nodiscard]] const mathz::Mat4& get_light_projection() const { return m_light_projection; }
     [[nodiscard]] bool is_casting_shadow() const { return m_shadow_casting; }
     [[nodiscard]] unsigned int get_shadow_map() const { return m_shadow_map->get_depth_attachment(); }
     void bind_shadow_map() const { m_shadow_map->bind(); };
