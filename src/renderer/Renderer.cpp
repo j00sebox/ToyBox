@@ -70,9 +70,13 @@ void Renderer::stencil(const Transform& stencil_transform, const Mesh& mesh, con
 
 void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
 {
-//    GLint viewport_size[4];
-//    glGetIntegerv( GL_VIEWPORT, viewport_size );
+    GLint viewport_size[4];
+    glGetIntegerv( GL_VIEWPORT, viewport_size );
 
+    int original_width = viewport_size[2];
+    int original_height = viewport_size[3];
+
+    glViewport(0, 0, 1024, 1024);
     for(const auto& render_obj : render_list)
     {
         ShaderLib::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
@@ -80,6 +84,8 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
         render_obj.mesh->bind();
         GL_CALL(glDrawElements(GL_TRIANGLES, render_obj.mesh->get_index_count(), GL_UNSIGNED_INT, nullptr));
     }
+    glViewport(0, 0, original_width, original_height);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::render_pass(const std::vector<RenderObject>& render_list)

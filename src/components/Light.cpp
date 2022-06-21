@@ -110,9 +110,13 @@ void DirectionalLight::shadow_init()
     mathz::Vec3 right = m_direction.cross(mathz::Vec3(0, 1, 0));
     mathz::Vec3 up = right.cross(m_direction);
 
+    // TODO: make more clear later
+    mathz::Vec3 position = { 0.f, 0.f, 100.f};
+
     m_light_view[0][0] = right.x;					m_light_view[0][1] = up.x;					m_light_view[0][2] = -m_direction.x;
 	m_light_view[1][0] = right.y;					m_light_view[1][1] = up.y;					m_light_view[1][2] = -m_direction.y;
 	m_light_view[2][0] = right.z;					m_light_view[2][1] = up.z;					m_light_view[2][2] = -m_direction.z;
+    m_light_view[3][0] = -right.dot(position);	m_light_view[3][1] = -up.dot(position);	m_light_view[3][2] = m_direction.dot(position);
 }
 
 void PointLight::imgui_render()
