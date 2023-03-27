@@ -5,7 +5,6 @@
 #include "VertexArray.h"
 
 #include <imgui.h>
-#include <mathz/Matrix.h>
 #include <glad/glad.h>
 #include <nlohmann/json.hpp>
 

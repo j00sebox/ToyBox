@@ -6,7 +6,6 @@
 #include "renderer/Shader.h"
 
 #include <imgui.h>
-#include <mathz/Vector.h>
 #include <glm/vec4.hpp>
 
 void Application::start()

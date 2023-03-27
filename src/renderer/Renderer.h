@@ -3,7 +3,6 @@
 #include "components/Fwd.h"
 #include "Transform.h"
 
-#include <mathz/Vector.h>
 #include <glm/vec4.hpp>
 
 enum class RenderCommand
