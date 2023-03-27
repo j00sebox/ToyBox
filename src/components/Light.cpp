@@ -63,7 +63,7 @@ void DirectionalLight::imgui_render()
 	m_direction.y = direction[1]; 
 	m_direction.z = direction[2];
 
-	m_direction.normalize();
+	glm::normalize(m_direction);
 
     if(m_shadow_casting)
     {
@@ -100,23 +100,23 @@ void DirectionalLight::shadow_init()
     GL_CALL(glReadBuffer(GL_NONE));
 
     // set up light matrices
-    m_light_projection.set(
+    m_light_projection = glm::mat4(
             1.f, 0.f, 0.f, 0.f,
             0.f, 1.f, 0.f, 0.f,
             0.f, 0.f, 1.f / (1000.f - 0.1f), -0.1f / (1000.f - 0.1f),
             0.f, 0.f, 0.f, 1.f
     );
 
-    mathz::Vec3 right = m_direction.cross(mathz::Vec3(0, 1, 0));
-    mathz::Vec3 up = right.cross(m_direction);
+    glm::vec3 right = glm::cross(m_direction, (glm::vec3(0, 1, 0)));
+    glm::vec3 up = glm::cross(right, m_direction);
 
     // TODO: make more clear later
-    mathz::Vec3 position = { 0.f, 0.f, 100.f};
+    glm::vec3 position = { 0.f, 0.f, 100.f};
 
-    m_light_view[0][0] = right.x;					m_light_view[0][1] = up.x;					m_light_view[0][2] = -m_direction.x;
-	m_light_view[1][0] = right.y;					m_light_view[1][1] = up.y;					m_light_view[1][2] = -m_direction.y;
-	m_light_view[2][0] = right.z;					m_light_view[2][1] = up.z;					m_light_view[2][2] = -m_direction.z;
-    m_light_view[3][0] = -right.dot(position);	m_light_view[3][1] = -up.dot(position);	m_light_view[3][2] = m_direction.dot(position);
+    m_light_view[0][0] = right.x;					    m_light_view[0][1] = up.x;					    m_light_view[0][2] = -m_direction.x;
+	m_light_view[1][0] = right.y;					    m_light_view[1][1] = up.y;					    m_light_view[1][2] = -m_direction.y;
+	m_light_view[2][0] = right.z;					    m_light_view[2][1] = up.z;					    m_light_view[2][2] = -m_direction.z;
+    m_light_view[3][0] = -glm::dot(right, position);	m_light_view[3][1] = -glm::dot(up, position);	m_light_view[3][2] = glm::dot(m_direction, position);
 }
 
 void PointLight::imgui_render()

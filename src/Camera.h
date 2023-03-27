@@ -1,7 +1,8 @@
 #pragma once
 
-#include "mathz/Matrix.h"
-#include "mathz/Quaternion.h"
+#include <glm/vec3.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 class Camera
 {
@@ -9,34 +10,34 @@ public:
 	Camera();
 	~Camera() = default;
 
-	mathz::Mat4 camera_look_at();
-	mathz::Mat4 look_at_no_translate() const;
+	glm::mat4 camera_look_at();
+    glm::mat4 look_at_no_translate() const;
 
     // true if the camera could be moved
 	bool update(float elapsed_time);
 
-	void rotate(mathz::Quaternion q);
+	void rotate(glm::quat q);
 	void move_forward(float f);
 	void move_right(float r);
 
-	void set_pos(mathz::Vec3&& pos);
-	[[nodiscard]] const mathz::Vec3& get_pos() const;
+	void set_pos(glm::vec3&& pos);
+	[[nodiscard]] const glm::vec3& get_pos() const;
 
-	inline const mathz::Vec3& get_forward() { return m_forward; }
-	inline const mathz::Mat4& get_transform() { return m_transform; }
-	inline const mathz::Mat4& get_perspective() { return m_perspective; }
-	inline const mathz::Mat4& get_orthographic() { return m_orthographic; }
+	inline const glm::vec3& get_forward() { return m_forward; }
+	inline const glm::mat4& get_transform() { return m_transform; }
+	inline const glm::mat4& get_perspective() { return m_perspective; }
+	inline const glm::mat4& get_orthographic() { return m_orthographic; }
 
 	void resize(int width, int height);
 	void reset();
 
 private:
-	mathz::Vec3 m_position;
-	mathz::Vec3 m_forward, m_up, m_right;
-	mathz::Mat4 m_transform;
+    glm::vec3 m_position;
+    glm::vec3 m_forward, m_up, m_right;
+    glm::mat4 m_transform;
 
-	mathz::Mat4 m_perspective;
-	mathz::Mat4 m_orthographic;
+    glm::mat4 m_perspective;
+    glm::mat4 m_orthographic;
 
 	int m_screen_width, m_screen_height;
 	float m_near = 0.1f, m_far = 1000.f;

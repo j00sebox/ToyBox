@@ -7,6 +7,7 @@
 
 #include <imgui.h>
 #include <mathz/Vector.h>
+#include <glm/vec4.hpp>
 
 void Application::start()
 {
@@ -168,7 +169,7 @@ void Application::display_menu()
 			{
 				display_bg_col_picker = false;
 			}
-			mathz::Vec4 bg_colour = m_current_scene->get_background_colour();
+			glm::vec4 bg_colour = m_current_scene->get_background_colour();
 			float col[4] = { bg_colour.x, bg_colour.y, bg_colour.z, bg_colour.w };
 			if(ImGui::ColorPicker4("##BGColor", col))
 			{

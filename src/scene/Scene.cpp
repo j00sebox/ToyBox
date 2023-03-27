@@ -338,7 +338,7 @@ void Scene::display_components()
 	}
 }
 
-void Scene::set_background_colour(mathz::Vec4 colour)
+void Scene::set_background_colour(glm::vec4 colour)
 {
 	m_clear_colour = colour;
 	Renderer::set_clear_colour(colour);

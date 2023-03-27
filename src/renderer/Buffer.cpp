@@ -129,7 +129,7 @@ void UniformBuffer::set_data_scalar_f(unsigned int offset, float data) const
     unbind();
 }
 
-void UniformBuffer::set_data_vec3(unsigned int offset, const mathz::Vec3& vec) const
+void UniformBuffer::set_data_vec3(unsigned int offset, const glm::vec3& vec) const
 {
     bind();
     float data[3] = {vec.x, vec.y, vec.z};
@@ -137,7 +137,7 @@ void UniformBuffer::set_data_vec3(unsigned int offset, const mathz::Vec3& vec) c
     unbind();
 }
 
-void UniformBuffer::set_data_vec4(unsigned int offset, const mathz::Vec4& vec) const
+void UniformBuffer::set_data_vec4(unsigned int offset, const glm::vec4& vec) const
 {
     bind();
     float data[4] = {vec.x, vec.y, vec.z, vec.w};
@@ -145,10 +145,10 @@ void UniformBuffer::set_data_vec4(unsigned int offset, const mathz::Vec4& vec) c
     unbind();
 }
 
-void UniformBuffer::set_data_mat4(unsigned int offset, const mathz::Mat4& mat) const
+void UniformBuffer::set_data_mat4(unsigned int offset, const glm::mat4& mat) const
 {
     bind();
-    GL_CALL(glBufferSubData(GL_UNIFORM_BUFFER, offset, 64, &mat.mat[0][0]));
+    GL_CALL(glBufferSubData(GL_UNIFORM_BUFFER, offset, 64, &mat[0][0]));
     unbind();
 }
 

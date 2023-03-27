@@ -1,9 +1,11 @@
 #pragma once
 
-#include <mathz/Matrix.h>
-
 #include <string>
 #include <unordered_map>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/matrix.hpp>
+
 
 enum class ShaderType
 {
@@ -57,9 +59,9 @@ public:
 	void set_uniform_1i(const std::string& name, int i);
 	void set_uniform_1f(const std::string& name, float x);
 	void set_uniform_2f(const std::string& name, float x, float y);
-	void set_uniform_3f(const std::string& name, const mathz::Vec3& vec);
-	void set_uniform_4f(const std::string& name, const mathz::Vec4& vec);
-	void set_uniform_mat4f(const std::string& name, const mathz::Mat4& mat);
+	void set_uniform_3f(const std::string& name, const glm::vec3& vec);
+	void set_uniform_4f(const std::string& name, const glm::vec4& vec);
+	void set_uniform_mat4f(const std::string& name, const glm::mat4& mat);
 
 	[[nodiscard]] int get_uniform_loaction(const std::string& name);
 	[[nodiscard]] const std::vector<std::string>& get_shader_locations() const { return m_shader_locations; } // TODO: Remove later

@@ -33,6 +33,7 @@ endif()
 add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
 add_subdirectory(external/mathz)
+add_subdirectory(external/glm)
 add_subdirectory(external/imgui)
 add_subdirectory(external/json)
 add_subdirectory(external/stb)
@@ -54,6 +55,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC external/glfw/include
     PUBLIC external/glad/include
     PUBLIC external/mathz/include
+    PUBLIC external/glm
     PUBLIC external/imgui
     PUBLIC external/json/include
     PUBLIC external/stb

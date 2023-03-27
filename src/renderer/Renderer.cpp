@@ -30,7 +30,7 @@ void Renderer::set_viewport(int width, int height)
 	GL_CALL(glViewport(0, 0, width, height));
 }
 
-void Renderer::set_clear_colour(mathz::Vec4 colour)
+void Renderer::set_clear_colour(glm::vec4 colour)
 {
 	GL_CALL(glClearColor(colour.x, colour.y, colour.z, colour.w));
 }

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Component.h"
-
 #include "FrameBuffer.h"
 
-#include <mathz/Vector.h>
-#include <mathz/Matrix.h>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/matrix.hpp>
 
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
@@ -13,12 +13,12 @@ class Light : public Component
 {
 public:
     Light();
-	void set_colour(mathz::Vec4 col) { m_colour = col; }
+	void set_colour(glm::vec4 col) { m_colour = col; }
 	void set_brightness(float b) { m_brightness = b; }
-	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
+	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] float get_brightness() const { return m_brightness; }
-    [[nodiscard]] const mathz::Mat4& get_light_view() const { return m_light_view; }
-    [[nodiscard]] const mathz::Mat4& get_light_projection() const { return m_light_projection; }
+    [[nodiscard]] const glm::mat4& get_light_view() const { return m_light_view; }
+    [[nodiscard]] const glm::mat4& get_light_projection() const { return m_light_projection; }
     [[nodiscard]] bool is_casting_shadow() const { return m_shadow_casting; }
     [[nodiscard]] unsigned int get_shadow_map() const { return m_shadow_map->get_depth_attachment(); }
     void bind_shadow_map() const { m_shadow_map->bind(); };
@@ -31,21 +31,21 @@ public:
 protected:
     virtual void shadow_init() = 0;
 
-    mathz::Vec4 m_colour;
+    glm::vec4 m_colour;
 	float m_brightness = 1.f;
 
     // shadow related stuff
     bool m_shadow_casting;
     std::shared_ptr<FrameBuffer> m_shadow_map;
-    mathz::Mat4 m_light_projection;
-    mathz::Mat4 m_light_view;
+    glm::mat4 m_light_projection;
+    glm::mat4 m_light_view;
 };
 
 class DirectionalLight final : public Light
 {
 public:
-	void set_direction(const mathz::Vec3& dir) { m_direction = dir; m_direction.normalize(); }
-	[[nodiscard]] const mathz::Vec3& get_direction() const { return m_direction; }
+	void set_direction(const glm::vec3& dir) { m_direction = dir; glm::normalize(m_direction); }
+	[[nodiscard]] const glm::vec3& get_direction() const { return m_direction; }
 
 	[[nodiscard]] const char* get_name() const override { return "Directional Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(DirectionalLight).hash_code(); }
@@ -56,7 +56,7 @@ protected:
     void shadow_init() override;
 
 private:
-	mathz::Vec3 m_direction;
+    glm::vec3 m_direction;
 };
 
 class PointLight final : public Light

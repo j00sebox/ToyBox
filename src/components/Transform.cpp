@@ -7,38 +7,38 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <nlohmann/json.hpp>
-
-#include <mathz/Quaternion.h>
-#include <mathz/Misc.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace nlohmann;
 
-void Transform::translate(const mathz::Vec3& pos)
+void Transform::translate(const glm::vec3& pos)
 {
 	m_position = pos;
-	m_translate[3][0] = pos.x;	m_translate[3][1] = pos.y;	m_translate[3][2] = pos.z;
+    m_translate = glm::translate(glm::mat4(1.0f), pos);
 }
 
 void Transform::scale(float s)
 {
 	m_uniform_scale = s;
-	m_scale[0][0] = s; m_scale[1][1] = s; m_scale[2][2] = s;
+    m_scale = glm::scale(glm::mat4(1), glm::vec3(s, s, s));
 }
 
-void Transform::rotate(float angle, const mathz::Vec3& axis)
+void Transform::rotate(float angle, const glm::vec3& axis)
 {
 	m_rotate_angle = angle;
 	m_rotate_axis = axis;
-	mathz::Quaternion q(mathz::radians(angle), axis);
-	m_rotation = q.convert_to_mat();
+
+    glm::quat q = glm::angleAxis(glm::radians(angle), axis);
+	m_rotation = glm::mat4_cast(q);
 }
 
-mathz::Mat4 Transform::get_transform() const
+glm::mat4 Transform::get_transform() const
 {
 	return  m_rotation * m_scale * m_translate;
 }
 
-void Transform::set_parent_offsets(mathz::Vec3 parent_pos, float parent_scale)
+void Transform::set_parent_offsets(glm::vec3 parent_pos, float parent_scale)
 {
 	m_parent_position = parent_pos;
 	m_parent_scale = parent_scale;
@@ -46,7 +46,7 @@ void Transform::set_parent_offsets(mathz::Vec3 parent_pos, float parent_scale)
 
 void Transform::imgui_render()
 {
-	mathz::Vec3 position = m_position;
+	glm::vec3 position = m_position;
 
 	float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 	ImVec2 button_size = { line_height + 3.0f, line_height };
@@ -64,7 +64,7 @@ void Transform::imgui_render()
 	translate(position);
 
 	float angle = m_rotate_angle;
-	mathz::Vec3 axis = m_rotate_axis;
+	glm::vec3 axis = m_rotate_axis;
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
 	ImGui::DragFloat("##angle", &angle);
@@ -77,7 +77,7 @@ void Transform::imgui_render()
 	coloured_label("k", ImVec4{ 0.97f, 0.04f, 1.f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
 	ImGui::SliderFloat("##k", &axis.z, -1.f, 1.f);
-	axis.normalize();
+	glm::normalize(axis);
 	rotate(angle, axis);
 
 	float uniform_scale = m_uniform_scale;

@@ -3,10 +3,9 @@
 #include "renderer/Fwd.h"
 #include "components/Component.h"
 
-#include "mathz/Vector.h"
-
 #include <vector>
 #include <memory>
+#include <glm/vec4.hpp>
 
 class Material final : public Component
 {
@@ -18,8 +17,8 @@ public:
 	void bind() const;
 	void unbind() const;
 
-	void set_colour(const mathz::Vec4& colour) { m_colour = colour; }
-	[[nodiscard]] const mathz::Vec4& get_colour() const { return m_colour; }
+	void set_colour(const glm::vec4& colour) { m_colour = colour; }
+	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] bool is_custom() const { return m_custom; }
 
 	[[nodiscard]] const char* get_name() const override { return "Material"; }
@@ -31,7 +30,7 @@ private:
 	std::shared_ptr<ShaderProgram> m_shader;
 	bool m_custom = true;
 	std::unique_ptr<Texture2D> m_textures[4];
-	mathz::Vec4 m_colour;
+    glm::vec4 m_colour;
 	float m_metallic = 0.f;
 	float m_roughness = 0.f;
 };

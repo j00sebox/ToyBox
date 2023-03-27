@@ -15,10 +15,12 @@
 #include "components/Mesh.h"
 #include "components/Material.h"
 
-#include <mathz/Matrix.h>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/matrix.hpp>
 
-static std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts);
-static std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts);
+static std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts);
+static std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts);
 
 void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& root)
 {
@@ -31,7 +33,7 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
 
 	json camera_accessor = w_json["camera"];
 	json camera_pos = camera_accessor["position"];
-	camera->set_pos(mathz::Vec3({ camera_pos[0], camera_pos[1], camera_pos[2] }));
+	camera->set_pos(glm::vec3({ camera_pos[0], camera_pos[1], camera_pos[2] }));
 
     if(!w_json["background_colour"].is_null())
     {
@@ -61,12 +63,12 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 		res_json["skybox"] = sky_box->get_resource_path();
 	}
 
-	mathz::Vec3 camera_pos = camera->get_pos();
+	glm::vec3 camera_pos = camera->get_pos();
 	res_json["camera"]["position"][0] = camera_pos.x;
 	res_json["camera"]["position"][1] = camera_pos.y;
 	res_json["camera"]["position"][2] = camera_pos.z;
 
-	mathz::Vec4 bg_col = scene.get_background_colour();
+	glm::vec4 bg_col = scene.get_background_colour();
 	res_json["background_colour"][0] = bg_col.x;
 	res_json["background_colour"][1] = bg_col.y;
 	res_json["background_colour"][2] = bg_col.z;
@@ -188,9 +190,9 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 {
 	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
 	{
-		std::vector<mathz::Vec3> positions = floats_to_vec3(loader.get_positions());
-		std::vector<mathz::Vec3> normals = floats_to_vec3(loader.get_normals());
-		std::vector<mathz::Vec2<float>> tex_coords = floats_to_vec2(loader.get_tex_coords());
+		std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
+		std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
+		std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
 		std::vector<Vertex> vertices;
 
@@ -244,7 +246,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	json info = model["transform"];
 
 	json translation = info["translate"];
-	t.translate(mathz::Vec3({ translation[0], translation[1], translation[2] }));
+	t.translate(glm::vec3({ translation[0], translation[1], translation[2] }));
 
 	json rotation = info["rotation"];
 	t.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
@@ -252,7 +254,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	t.scale(info["scale"]);
 
 	json parent_position = info["parent_position"];
-	t.set_parent_offsets(mathz::Vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
+	t.set_parent_offsets(glm::vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
 
 	e.add_component(std::move(t));
 
@@ -265,7 +267,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 			PointLight pl;
 
 			json colour = model["light"]["colour"];
-			pl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
+			pl.set_colour(glm::vec4(colour[0], colour[1], colour[2], colour[3]));
 			pl.set_radius(model["light"]["radius"]);
 			pl.set_brightness(model["light"]["brightness"]);
 
@@ -276,7 +278,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 			DirectionalLight dl;
 
 			json colour = model["light"]["colour"];
-			dl.set_colour(mathz::Vec4(colour[0], colour[1], colour[2], colour[3]));
+			dl.set_colour(glm::vec4(colour[0], colour[1], colour[2], colour[3]));
 
 			json dir = model["light"]["direction"];
 			dl.set_direction({ dir[0], dir[1], dir[2] });
@@ -333,23 +335,23 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	return current_node;
 }
 
-std::vector<mathz::Vec3> floats_to_vec3(const std::vector<float>& flts)
+std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)
 {
-	std::vector<mathz::Vec3> vec;
+	std::vector<glm::vec3> vec;
 	for (unsigned int i = 0; i < flts.size();)
 	{
-		vec.emplace_back(mathz::Vec3{ flts[i++], flts[i++], flts[i++] });
+		vec.emplace_back(glm::vec3{ flts[i++], flts[i++], flts[i++] });
 	}
 	
 	return vec;
 }
 
-std::vector<mathz::Vec2<float>> floats_to_vec2(const std::vector<float>& flts)
+std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
 {
-	std::vector<mathz::Vec2<float>> vec;
+	std::vector<glm::vec2> vec;
 	for (unsigned int i = 0; i < flts.size();)
 	{
-		vec.emplace_back(mathz::Vec2<float>{ flts[i++], flts[i++] });
+		vec.emplace_back(glm::vec2{ flts[i++], flts[i++] });
 	}
 
 	return vec;

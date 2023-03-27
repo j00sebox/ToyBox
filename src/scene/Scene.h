@@ -5,12 +5,12 @@
 #include "entities/Skybox.h"
 #include "SceneNode.h"
 #include "LightManager.h"
-
 #include "components/Fwd.h"
 
 #include <map>
 #include <queue>
-#include <mathz/Vector.h>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 class Entity;
 class UniformBuffer;
@@ -31,8 +31,8 @@ public:
 	void reset_view();
 	Camera* get_camera() { return m_camera.get(); }
 
-	void set_background_colour(mathz::Vec4 colour);
-	[[nodiscard]] const mathz::Vec4& get_background_colour() const { return m_clear_colour; }
+	void set_background_colour(glm::vec4 colour);
+	[[nodiscard]] const glm::vec4& get_background_colour() const { return m_clear_colour; }
 
 private:
     void compile_shaders() const;
@@ -59,6 +59,6 @@ private:
 	SceneNode* m_selected_node = nullptr;
     SceneNode* m_drag_node = nullptr;
     SceneNode* m_drop_node = nullptr;
-    mathz::Vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
+    glm::vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
 };
 

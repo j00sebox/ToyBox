@@ -197,24 +197,24 @@ void ShaderProgram::set_uniform_2f(const std::string& name, float x, float y)
 	unbind();
 }
 
-void ShaderProgram::set_uniform_3f(const std::string& name, const mathz::Vec3& vec)
+void ShaderProgram::set_uniform_3f(const std::string& name, const glm::vec3& vec)
 {
 	bind();
 	GL_CALL(glUniform3f(get_uniform_loaction(name), vec.x, vec.y, vec.z));
 	unbind();
 }
 
-void ShaderProgram::set_uniform_4f(const std::string& name, const mathz::Vec4& vec)
+void ShaderProgram::set_uniform_4f(const std::string& name, const glm::vec4& vec)
 {
 	bind();
 	GL_CALL(glUniform4f(get_uniform_loaction(name), vec.x, vec.y, vec.z, vec.w));
 	unbind();
 }
 
-void ShaderProgram::set_uniform_mat4f(const std::string& name, const mathz::Mat4& mat)
+void ShaderProgram::set_uniform_mat4f(const std::string& name, const glm::mat4& mat)
 {
 	bind();
-	GL_CALL(glUniformMatrix4fv(get_uniform_loaction(name), 1, GL_FALSE, &mat.mat[0][0]));
+	GL_CALL(glUniformMatrix4fv(get_uniform_loaction(name), 1, GL_FALSE, &mat[0][0]));
 	unbind();
 }
 

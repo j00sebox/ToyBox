@@ -11,6 +11,7 @@
 #include "components/Light.h"
 
 #include <spdlog/fmt/bundled/format.h>
+#include <glm/vec3.hpp>
 
 enum class PointLightBufferOffsets
 {
@@ -69,7 +70,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 		{
 			auto& transform = m_point_lights[i]->get_component<Transform>();
 			auto& point_light = m_point_lights[i]->get_component<PointLight>();
-			mathz::Vec3 pos = transform.get_parent_pos() + transform.get_position();
+			glm::vec3 pos = transform.get_parent_pos() + transform.get_position();
 
             m_light_uniform_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_colour());
             m_light_uniform_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * i), pos);

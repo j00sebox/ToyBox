@@ -4,14 +4,15 @@
 #include "renderer/Fwd.h"
 #include "components/Component.h"
 
-#include <mathz/Vector.h>
 #include <string>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 struct Vertex
 {
-	mathz::Vec3 positon;
-	mathz::Vec3 normal;
-	mathz::Vec2<float> st;
+	glm::vec3 positon;
+	glm::vec3 normal;
+	glm::vec2 st;
 };
 
 class Mesh final : public Component

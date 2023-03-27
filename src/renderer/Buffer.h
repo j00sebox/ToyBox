@@ -1,7 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <mathz/Matrix.h>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/matrix.hpp>
 
 class VertexBuffer
 {
@@ -53,9 +55,9 @@ public:
 
     void set_data_scalar_i(unsigned int offset, int data) const;
     void set_data_scalar_f(unsigned int offset, float data) const;
-    void set_data_vec3(unsigned int offset, const mathz::Vec3& vec) const;
-    void set_data_vec4(unsigned int offset, const mathz::Vec4& vec) const;
-    void set_data_mat4(unsigned int offset, const mathz::Mat4& mat) const;
+    void set_data_vec3(unsigned int offset, const glm::vec3& vec) const;
+    void set_data_vec4(unsigned int offset, const glm::vec4& vec) const;
+    void set_data_mat4(unsigned int offset, const glm::mat4& mat) const;
 
     void link(unsigned int binding_point) const;
     void bind() const;
