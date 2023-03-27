@@ -105,7 +105,21 @@ bool Camera::update(float elapsed_time)
 			float rotX = elapsed_time * m_sensitivity * (y - (float)(m_screen_height / 2)) / (float)m_screen_width;
 			float rotY = elapsed_time * m_sensitivity * (x - (float)(m_screen_width / 2)) / (float)m_screen_height;
 
-			
+			// calculate vertical orientation adjustment
+			glm::vec3 new_forward = glm::rotate(m_forward, glm::radians(-rotX), m_right);
+
+			// prevents barrel rolls
+			if (abs(glm::angle(new_forward, m_up) - glm::radians(90.0f)) <= glm::radians(85.0f))
+			{
+				m_forward = new_forward;
+			}
+
+			// get horizontal orientation adjustment and new right vector
+			m_forward = glm::rotate(m_forward, glm::radians(-rotY), m_up);
+			m_right = glm::normalize(glm::cross(m_forward, m_up));
+
+			// keep mouse in the center
+			Input::set_mouse_pos((m_screen_width / 2), (m_screen_height / 2));
 		}
 		else
 		{
