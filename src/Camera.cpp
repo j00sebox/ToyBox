@@ -13,11 +13,7 @@
 Camera::Camera()
 	: m_screen_width(0), m_screen_height(0)
 {
-	m_position = { 0.f, 0.f, 0.f };
-
-	m_forward = { 0.f, 0.f, -1.f };
-	m_up = { 0.f, 1.f, 0.f };
-	m_right = { 1.f, 0.f, 0.f };
+	reset();
 }
 
 glm::mat4 Camera::camera_look_at()
@@ -132,20 +128,6 @@ bool Camera::update(float elapsed_time)
 	}
 
     return false;
-}
-
-void Camera::rotate(glm::quat q)
-{
-	glm::mat4 rotation = glm::mat4_cast(q);
-
-	m_forward = rotation * glm::vec4(m_forward, 1.f);
-	glm::normalize(m_forward);
-
-	m_right = rotation * glm::vec4(m_right, 1.f);
-	glm::normalize(m_right);
-
-	m_up = glm::cross(m_right, m_forward);
-	glm::normalize(m_up);
 }
 
 void Camera::move_forward(float f)
