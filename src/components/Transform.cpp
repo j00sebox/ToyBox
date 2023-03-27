@@ -35,7 +35,7 @@ void Transform::rotate(float angle, const glm::vec3& axis)
 
 glm::mat4 Transform::get_transform() const
 {
-	return  m_rotation * m_scale * m_translate;
+	return  m_translate * m_rotation * m_scale;
 }
 
 void Transform::set_parent_offsets(glm::vec3 parent_pos, float parent_scale)
