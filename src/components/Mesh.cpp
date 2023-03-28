@@ -85,7 +85,7 @@ void Mesh::imgui_render()
 	}
 	else if (m_primitive != PrimitiveTypes::None)
 	{
-		ImGui::Text(primitve_type_to_str(m_primitive).c_str());
+		ImGui::Text(primitive_type_to_str(m_primitive).c_str());
 	}
 }
 
@@ -97,7 +97,7 @@ void Mesh::serialize(json& accessor) const
 	}
 	else if (m_primitive != PrimitiveTypes::None)
 	{
-		accessor["primitive"] = primitve_type_to_str(m_primitive);
+		accessor["primitive"] = primitive_type_to_str(m_primitive);
 	}
 }
 

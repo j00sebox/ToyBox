@@ -10,7 +10,7 @@ enum class PrimitiveTypes
 	Quad
 };
 
-std::string primitve_type_to_str(PrimitiveTypes pt);
+std::string primitive_type_to_str(PrimitiveTypes pt);
 PrimitiveTypes str_to_primitive_type(const char* name);
 
 struct Cube

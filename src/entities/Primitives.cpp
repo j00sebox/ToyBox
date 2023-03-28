@@ -5,7 +5,7 @@
 
 #include <cstring>
 
-std::string primitve_type_to_str(PrimitiveTypes pt)
+std::string primitive_type_to_str(PrimitiveTypes pt)
 {
 	switch (pt)
 	{
@@ -16,7 +16,7 @@ std::string primitve_type_to_str(PrimitiveTypes pt)
 	case PrimitiveTypes::Quad:
 		return "quad";
 	default:
-		break;
+        return "none";
 	}
 }
 
