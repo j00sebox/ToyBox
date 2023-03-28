@@ -11,7 +11,6 @@ public:
 	~Camera() = default;
 
 	glm::mat4 camera_look_at();
-    glm::mat4 look_at_no_translate() const;
 
     // true if the camera could be moved
 	bool update(float elapsed_time);

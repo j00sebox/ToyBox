@@ -21,32 +21,15 @@ glm::mat4 Camera::camera_look_at()
 	return glm::lookAt(m_position, m_position + m_forward, m_up);
 }
 
-glm::mat4 Camera::look_at_no_translate() const
-{
-    glm::mat4 result;
-	result[0][0] = m_right.x;					result[0][1] = m_up.x;					result[0][2] = -m_forward.x;
-	result[1][0] = m_right.y;					result[1][1] = m_up.y;					result[1][2] = -m_forward.y;
-	result[2][0] = m_right.z;					result[2][1] = m_up.z;					result[2][2] = -m_forward.z;
-
-	return result;
-}
-
 void Camera::resize(int width, int height)
 {
 	m_screen_width = width; m_screen_height = height;
 
-	float scaling_factor = 1.0f / tanf(glm::radians(m_fov) * 0.5f);
-	float aspect_ratio = (float)m_screen_height / (float)m_screen_width;
-
-	float q = -1.f / (m_far - m_near);
+	float aspect_ratio = (float)m_screen_width / (float)m_screen_height;
+    float fov_y = atanf(tanf(glm::radians(m_fov/2)) / aspect_ratio) * 2;
 
 	// create projection matrices
-    m_perspective = glm::mat4(
-		aspect_ratio * scaling_factor,	0.f,			0.f,									0.f,
-		0.f,							scaling_factor, 0.f,									0.f,
-		0.f,							0.f,			(m_far + m_near) * q,				   -1.f,
-		0.f,							0.f,			2.f * m_near * m_far * q,				0.f
-	);
+    m_perspective = glm::perspective(fov_y, aspect_ratio, m_near, m_far);
 
 	m_orthographic = glm::mat4(
 		1.f, 0.f, 0.f, 0.f,
