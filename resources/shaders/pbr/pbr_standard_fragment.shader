@@ -189,7 +189,7 @@ vec4 point_light(int i)
 
 vec4 direct_light()
 {
-	vec3 l = normalize(directional_light.direction);
+	vec3 l = normalize(-directional_light.direction);
 	vec3 v = normalize(u_cam_pos - v_position);
 	vec3 n = normalize(normal); // TODO: will need to change once non uniform scaling is implemented
 	vec3 h = normalize(l + v);

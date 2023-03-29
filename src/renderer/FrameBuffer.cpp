@@ -115,6 +115,8 @@ void FrameBuffer::attach_texture(unsigned char attachment)
     default:
         break;
     }
+
+    //assert(glCheckFramebufferStatus(m_id) == GL_FRAMEBUFFER_COMPLETE);
 }
 
 void FrameBuffer::attach_renderbuffer(unsigned char attachment)

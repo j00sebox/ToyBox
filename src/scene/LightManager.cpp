@@ -96,9 +96,9 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
         if(direct_light.is_casting_shadow())
         {
-            direct_light.bind_shadow_map();
             ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_view", direct_light.get_light_view());
-            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());;
+            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());
+            direct_light.bind_shadow_map();
             Renderer::shadow_pass(render_list);
         }
     }

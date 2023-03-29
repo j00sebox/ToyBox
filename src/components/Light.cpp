@@ -8,6 +8,8 @@
 #include <imgui.h>
 #include <glad/glad.h>
 #include <nlohmann/json.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 using namespace nlohmann;
 
@@ -63,7 +65,7 @@ void DirectionalLight::imgui_render()
 	m_direction.y = direction[1]; 
 	m_direction.z = direction[2];
 
-	glm::normalize(m_direction);
+	//glm::normalize(m_direction);
 
     if(m_shadow_casting)
     {
@@ -100,23 +102,12 @@ void DirectionalLight::shadow_init()
     GL_CALL(glReadBuffer(GL_NONE));
 
     // set up light matrices
-    m_light_projection = glm::mat4(
-            1.f, 0.f, 0.f, 0.f,
-            0.f, 1.f, 0.f, 0.f,
-            0.f, 0.f, 1.f / (1000.f - 0.1f), -0.1f / (1000.f - 0.1f),
-            0.f, 0.f, 0.f, 1.f
-    );
-
-    glm::vec3 right = glm::cross(m_direction, (glm::vec3(0, 1, 0)));
-    glm::vec3 up = glm::cross(right, m_direction);
+    m_light_projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 1000.f);
 
     // TODO: make more clear later
-    glm::vec3 position = { 0.f, 0.f, 100.f};
+    glm::vec3 position = { 0.f, 20.0f, 20.0f };
 
-    m_light_view[0][0] = right.x;					    m_light_view[0][1] = up.x;					    m_light_view[0][2] = -m_direction.x;
-	m_light_view[1][0] = right.y;					    m_light_view[1][1] = up.y;					    m_light_view[1][2] = -m_direction.y;
-	m_light_view[2][0] = right.z;					    m_light_view[2][1] = up.z;					    m_light_view[2][2] = -m_direction.z;
-    m_light_view[3][0] = -glm::dot(right, position);	m_light_view[3][1] = -glm::dot(up, position);	m_light_view[3][2] = glm::dot(m_direction, position);
+    m_light_view = glm::lookAt(position, glm::vec3(0), glm::vec3(0, 1, 0));
 }
 
 void PointLight::imgui_render()
