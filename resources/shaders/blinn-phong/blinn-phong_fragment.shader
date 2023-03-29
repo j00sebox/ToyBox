@@ -13,7 +13,7 @@ in vec2 v_tex_coord;
 in mat3 v_model;
 
 uniform bool u_custom;
-uniform vec4 u_flat_colour;
+uniform vec4 u_base_colour;
 uniform vec3 u_cam_pos;
 
 uniform int u_shininess = 2;
@@ -90,7 +90,7 @@ void main()
 {
     if (u_custom)
     {
-        base_colour = u_flat_colour;
+        base_colour = u_base_colour;
         normal = v_normal;
         ks = 1.0;
         ao = 0.5f;

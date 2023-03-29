@@ -16,7 +16,7 @@ in mat3 v_model;
 uniform vec3 u_cam_pos;
 
 uniform bool u_custom;
-uniform vec4 u_flat_colour;
+uniform vec4 u_base_colour;
 uniform float u_metallic;
 uniform float u_roughness;
 
@@ -218,7 +218,7 @@ void main()
 {
 	if (u_custom)
 	{
-		base_colour = u_flat_colour;
+		base_colour = u_base_colour;
 		normal = v_normal;
 		metallic = u_metallic;
 		roughness = u_roughness;

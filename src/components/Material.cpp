@@ -32,7 +32,7 @@ void Material::bind() const
 
     if (m_custom)
     {
-        m_shader->set_uniform_4f("u_flat_colour", m_colour);
+        m_shader->set_uniform_4f("u_base_colour", m_colour);
         m_shader->set_uniform_1f("u_metallic", m_metallic);
         m_shader->set_uniform_1f("u_roughness", m_roughness);
     }

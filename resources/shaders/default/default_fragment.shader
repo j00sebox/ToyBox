@@ -12,8 +12,8 @@ in vec2 v_tex_coord;
 
 uniform vec3 u_cam_pos;
 uniform bool u_custom;
-uniform float u_diffuse;
-uniform float u_spec;
+uniform vec4 u_base_colour;
+uniform float u_metallic;
 
 /*----------Lighting----------*/
 struct DirectionalLight
@@ -42,7 +42,7 @@ layout (std140, binding=1) uniform Lights
     DirectionalLight directional_light;
 };
 
-vec4 diffuse_val;
+vec4 base_colour;
 float spec_val;
 vec3 normal;
 
@@ -56,7 +56,7 @@ vec4 direct_light()
     float ambient = 0.2f;
     float diffuse = max(dot(normal, light_dir), 0.0f);
 
-    return (diffuse_val * (diffuse + ambient)) * directional_light.colour;
+    return (base_colour * (diffuse + ambient)) * directional_light.colour;
 }
 
 vec4 point_light(int i)
@@ -83,20 +83,20 @@ vec4 point_light(int i)
         specular = pow(max(dot(normal, h), 0.0f), 16) * 0.3f;
     };
 
-    return (diffuse_val * (diffuse * attenuation + ambient) + spec_val * specular * attenuation) * point_lights[i].colour;
+    return (base_colour * (diffuse * attenuation + ambient) + spec_val * specular * attenuation) * point_lights[i].colour;
 }
 
 void main()
 {
     if(u_custom)
     {
-        diffuse_val = vec4(1.f, 1.f, 1.f, 1.f);
-        spec_val = 0.2f;
+        base_colour = u_base_colour;
+        spec_val = u_metallic;
         normal = normalize(v_normal);
     }
     else
     {
-        diffuse_val = texture(diffuse_t, v_tex_coord);
+        base_colour = texture(diffuse_t, v_tex_coord);
         spec_val = texture(specular_t, v_tex_coord).r;
         normal = normalize(vec3(texture(normal_t, v_tex_coord)));
     }
