@@ -79,6 +79,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_brightness());
 
             //ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+            ShaderLib::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
 		}
@@ -87,10 +88,13 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 	if (m_direct_light)
 	{
         auto& direct_light = m_direct_light->get_component<DirectionalLight>();
+        auto& dl_transform = m_direct_light->get_component<Transform>();
+
         m_light_uniform_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, direct_light.get_colour());
-        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, direct_light.get_direction());
+        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, glm::vec3(0.f, 20.f, 20.f));
         m_light_uniform_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
 
+        ShaderLib::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
         ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
         ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
 

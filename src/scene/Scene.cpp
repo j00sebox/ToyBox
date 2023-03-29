@@ -347,6 +347,11 @@ void Scene::set_background_colour(glm::vec4 colour)
 // load the standard shaders
 void Scene::compile_shaders() const
 {
+    ShaderLib::add("default", ShaderProgram(
+            Shader("../resources/shaders/default/default_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/default/default_fragment.shader", ShaderType::Fragment)
+    ));
+
     ShaderLib::add("flat_colour", ShaderProgram(
             Shader("../resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
@@ -360,11 +365,6 @@ void Scene::compile_shaders() const
     ShaderLib::add("blinn-phong", ShaderProgram(
             Shader("../resources/shaders/blinn-phong/blinn-phong_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/blinn-phong/blinn-phong_fragment.shader", ShaderType::Fragment)
-    ));
-
-    ShaderLib::add("mirror", ShaderProgram(
-            Shader("../resources/shaders/mirror/mirror_vertex.shader", ShaderType::Vertex),
-            Shader("../resources/shaders/mirror/mirror_fragment.shader", ShaderType::Fragment)
     ));
 
     ShaderLib::add("shadow_map", ShaderProgram(
