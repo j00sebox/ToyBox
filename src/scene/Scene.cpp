@@ -157,7 +157,7 @@ void Scene::add_primitive(const char* name)
 	e.add_component(std::move(mesh));
 
 	Material material;
-	material.set_shader(ShaderLib::get("pbr_standard"));
+	material.set_shader(ShaderLib::get("default"));
 	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
 	e.add_component(std::move(material));
 

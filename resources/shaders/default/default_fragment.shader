@@ -9,9 +9,11 @@ layout (binding = 3) uniform sampler2D occlusion_t;
 in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_tex_coord;
-in mat3 v_model;
 
 uniform vec3 u_cam_pos;
+uniform bool u_custom;
+uniform float u_diffuse;
+uniform float u_spec;
 
 /*----------Lighting----------*/
 struct DirectionalLight
@@ -40,18 +42,21 @@ layout (std140, binding=1) uniform Lights
     DirectionalLight directional_light;
 };
 
+vec4 diffuse_val;
+float spec_val;
+vec3 normal;
+
 out vec4 colour;
 
 vec4 direct_light()
 {
     vec3 light_dir = normalize(directional_light.direction);
     vec3 view_dir = normalize(u_cam_pos - v_position);
-    vec3 normal = normalize(vec3(texture(normal_t, v_tex_coord)));
 
     float ambient = 0.2f;
     float diffuse = max(dot(normal, light_dir), 0.0f);
 
-    return (texture(diffuse_t, v_tex_coord) * (diffuse + ambient)) * directional_light.colour;
+    return (diffuse_val * (diffuse + ambient)) * directional_light.colour;
 }
 
 vec4 point_light(int i)
@@ -61,7 +66,6 @@ vec4 point_light(int i)
     vec3 light_dir = normalize(light_vec);
     vec3 view_dir = normalize(u_cam_pos - v_position);
     vec3 h = normalize(view_dir + light_dir);
-    vec3 normal = normalize(vec3(texture(normal_t, v_tex_coord)));
 
     if (distance > point_lights[i].range)
     {
@@ -79,11 +83,24 @@ vec4 point_light(int i)
         specular = pow(max(dot(normal, h), 0.0f), 16) * 0.3f;
     };
 
-    return (texture(diffuse_t, v_tex_coord) * (diffuse * attenuation + ambient) + texture(specular_t, v_tex_coord).r * specular * attenuation) * point_lights[i].colour;
+    return (diffuse_val * (diffuse * attenuation + ambient) + spec_val * specular * attenuation) * point_lights[i].colour;
 }
 
 void main()
 {
+    if(u_custom)
+    {
+        diffuse_val = vec4(1.f, 1.f, 1.f, 1.f);
+        spec_val = 0.2f;
+        normal = normalize(v_normal);
+    }
+    else
+    {
+        diffuse_val = texture(diffuse_t, v_tex_coord);
+        spec_val = texture(specular_t, v_tex_coord).r;
+        normal = normalize(vec3(texture(normal_t, v_tex_coord)));
+    }
+
     if (directional_light._active)
         colour += direct_light();
 
