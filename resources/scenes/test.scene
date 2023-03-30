@@ -1,1 +1,112 @@
-{"background_colour":[0.0,0.029629647731781006,0.023703716695308685,1.0],"camera":{"position":[-3.8858754634857178,23.643674850463867,45.21631622314453]},"model_count":2,"models":[{"light":{"brightness":0.1459999978542328,"cast_shadow":true,"colour":[1.0,1.0,1.0,1.0],"direction":[0.0,20.0,20.0],"type":"directional_light"},"name":"Direct Light","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":1.0,"translate":[0.0,0.0,0.0]}},{"gltf":{"path":"../resources/models/bunny/scene.gltf"},"name":"Bunny","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[103.0,1.0,0.0,0.0],"scale":100.0,"translate":[0.0,-1.0,-2.0]}}],"shader_count":5,"shaders":[{"fragment":"../resources/shaders/shadow_map/shadow_map_fragment.shader","name":"shadow_map","vertex":"../resources/shaders/shadow_map/shadow_map_vertex.shader"},{"fragment":"../resources/shaders/blinn-phong/blinn-phong_fragment.shader","name":"blinn-phong","vertex":"../resources/shaders/blinn-phong/blinn-phong_vertex.shader"},{"fragment":"../resources/shaders/pbr/pbr_standard_fragment.shader","name":"pbr_standard","vertex":"../resources/shaders/pbr/pbr_standard_vertex.shader"},{"fragment":"../resources/shaders/flat_colour/flat_colour_fragment.shader","name":"flat_colour","vertex":"../resources/shaders/flat_colour/flat_colour_vertex.shader"},{"fragment":"../resources/shaders/default/default_fragment.shader","name":"default","vertex":"../resources/shaders/default/default_vertex.shader"}]}
+{
+    "background_colour": [
+        0.0,
+        0.029629647731781006,
+        0.023703716695308685,
+        1.0
+    ],
+    "camera": {
+        "position": [
+            -3.8858754634857178,
+            23.643674850463867,
+            45.21631622314453
+        ]
+    },
+    "model_count": 2,
+    "models": [
+        {
+            "light": {
+                "brightness": 0.1459999978542328,
+                "cast_shadow": true,
+                "colour": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    20.0,
+                    20.0
+                ],
+                "type": "directional_light"
+            },
+            "name": "Direct Light",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "gltf": {
+                "path": "../resources/models/bunny/scene.gltf"
+            },
+            "name": "Bunny",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    103.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    0.0,
+                    -1.0,
+                    -2.0
+                ]
+            }
+        }
+    ],
+    "shader_count": 5,
+    "shaders": [
+        {
+            "fragment": "../resources/shaders/shadow_map/shadow_map_fragment.shader",
+            "name": "shadow_map",
+            "vertex": "../resources/shaders/shadow_map/shadow_map_vertex.shader"
+        },
+        {
+            "fragment": "../resources/shaders/blinn-phong/blinn-phong_fragment.shader",
+            "name": "blinn-phong",
+            "vertex": "../resources/shaders/blinn-phong/blinn-phong_vertex.shader"
+        },
+        {
+            "fragment": "../resources/shaders/pbr/pbr_standard_fragment.shader",
+            "name": "pbr_standard",
+            "vertex": "../resources/shaders/pbr/pbr_standard_vertex.shader"
+        },
+        {
+            "fragment": "../resources/shaders/flat_colour/flat_colour_fragment.shader",
+            "name": "flat_colour",
+            "vertex": "../resources/shaders/flat_colour/flat_colour_vertex.shader"
+        },
+        {
+            "fragment": "../resources/shaders/default/default_fragment.shader",
+            "name": "default",
+            "vertex": "../resources/shaders/default/default_vertex.shader"
+        }
+    ]
+}

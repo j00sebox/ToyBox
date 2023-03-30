@@ -97,7 +97,7 @@ void Application::display_menu()
 			
 			if (ImGui::BeginMenu("Save"))
 			{
-				static char buf[32] = "\x73\x6F\x6D\x65\x74\x68\x69\x6E\x67\x2E\x73\x63\x65\x6E\x65";
+				static char buf[32] = "\x74\x65\x73\x74\x2E\x73\x63\x65\x6E\x65";
 				ImGui::Text("resources/scenes/");
 				ImGui::SameLine();
 				ImGui::InputText("##LeftSide", buf, IM_ARRAYSIZE(buf));
