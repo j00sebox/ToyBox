@@ -85,7 +85,7 @@ void Skybox::draw() const
 	m_skybox_va.unbind();
 	m_skybox_texture.unbind();
 	m_skybox_shader->unbind();
-    GL_CALL(glEnable(GL_CULL_FACE));
+    //GL_CALL(glEnable(GL_CULL_FACE));
 }
 
 void Skybox::attach_shader_program(ShaderProgram&& sp)

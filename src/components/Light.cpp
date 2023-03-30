@@ -102,12 +102,12 @@ void DirectionalLight::shadow_init()
     GL_CALL(glReadBuffer(GL_NONE));
 
     // set up light matrices
-    m_light_projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 1000.f);
+    m_light_projection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 100.f);
 
     // TODO: make more clear later
-    glm::vec3 position = { 0.f, 20.0f, 20.0f };
+    glm::vec3 position = { 10.f, 10.0f, 10.0f };
 
-    m_light_view = glm::lookAt(position, glm::vec3(0), glm::vec3(0, 1, 0));
+    m_light_view = glm::lookAt(m_direction, glm::vec3(0), glm::vec3(0, 1, 0));
 }
 
 void PointLight::imgui_render()

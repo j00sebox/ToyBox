@@ -7,7 +7,7 @@
 #include <glm/vec4.hpp>
 #include <glm/matrix.hpp>
 
-const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 
 class Light : public Component
 {

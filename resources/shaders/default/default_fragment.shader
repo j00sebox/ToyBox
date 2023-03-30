@@ -5,10 +5,12 @@ layout (binding = 0) uniform sampler2D diffuse_t;
 layout (binding = 1) uniform sampler2D specular_t;
 layout (binding = 2) uniform sampler2D normal_t;
 layout (binding = 3) uniform sampler2D occlusion_t;
+layout (binding = 4) uniform sampler2D shadow_map_t;
 
 in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_tex_coord;
+in vec4 v_light_space_pos;
 
 uniform vec3 u_cam_pos;
 uniform bool u_custom;
@@ -56,7 +58,23 @@ vec4 direct_light()
     float ambient = 0.2f;
     float diffuse = max(dot(normal, light_dir), 0.0f);
 
-    return (base_colour * (diffuse + ambient)) * directional_light.colour;
+    float shadow = 0.f;
+    float shadow_bias = max(0.00002f * (1.f - dot(normal, light_dir)), 0.0005f);
+    vec3 light_pos = v_light_space_pos.xyz / v_light_space_pos.w;
+
+    if(light_pos.z <= 1.f)
+    {
+        light_pos = (light_pos + 1.f) / 2.f;
+
+        float map_depth = texture(shadow_map_t, light_pos.xy).r;
+
+        if((light_pos.z - shadow_bias) > map_depth)
+        {
+            shadow = 1.f;
+        }
+    }
+
+    return vec4((base_colour.xyz * (diffuse * (1.f - shadow) + ambient)) * directional_light.colour.xyz, 1.f);
 }
 
 vec4 point_light(int i)

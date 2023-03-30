@@ -10,12 +10,14 @@
 
 #include <glad/glad.h>
 
+unsigned int Renderer::shadow_map = 0;
+
 void Renderer::init(int width, int height)
 {
 	set_viewport(width, height);
 
     GL_CALL(glEnable(GL_MULTISAMPLE));
-    GL_CALL(glEnable(GL_CULL_FACE));
+    //GL_CALL(glEnable(GL_CULL_FACE));
 //	GL_CALL(glEnable(GL_BLEND));
 //	GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	GL_CALL(glEnable(GL_STENCIL_TEST));
@@ -39,8 +41,14 @@ void Renderer::draw_elements(const Transform& transform, const Mesh& mesh, const
 {
     material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
     material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
+
+    // TODO: figure better way to do this
+    GL_CALL(glActiveTexture(GL_TEXTURE4));
+    GL_CALL(glBindTexture(GL_TEXTURE_2D, shadow_map));
+
 	material.bind();
 	mesh.bind();
+
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 }
 
@@ -76,7 +84,7 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
     int original_width = viewport_size[2];
     int original_height = viewport_size[3];
 
-    glViewport(0, 0, 1024, 1024);
+    glViewport(0, 0, 2048, 2048);
     for(const auto& render_obj : render_list)
     {
         ShaderLib::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
@@ -86,6 +94,7 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
     }
     glViewport(0, 0, original_width, original_height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 void Renderer::render_pass(const std::vector<RenderObject>& render_list)
@@ -103,7 +112,7 @@ void Renderer::render_pass(const std::vector<RenderObject>& render_list)
             case RenderCommand::Stencil:
             {
                 render_obj.material->get_shader()->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
-                render_obj.material->get_shader()->set_uniform_4f("u_flat_colour", render_obj.material->get_colour());
+                render_obj.material->get_shader()->set_uniform_4f("u_base_colour", render_obj.material->get_colour());
                 Transform stencil_transform = render_obj.transform;
                 stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.03f); // scale up a tiny bit to see outline
                 stencil(stencil_transform, *render_obj.mesh, *render_obj.material);

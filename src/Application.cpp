@@ -12,7 +12,7 @@ void Application::start()
 {
 	m_running = true;
 
-	m_current_scene->load("../resources/scenes/something.scene");
+	m_current_scene->load("../resources/scenes/shadow_test.scene");
     m_current_scene->init();
     auto [width, height] = m_window.get_dimensions();
 	Renderer::init(width, height);

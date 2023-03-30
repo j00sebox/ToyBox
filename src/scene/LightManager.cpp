@@ -9,7 +9,9 @@
 #include "Buffer.h"
 #include "components/Transform.h"
 #include "components/Light.h"
+#include "GLError.h"
 
+#include <glad/glad.h>
 #include <spdlog/fmt/bundled/format.h>
 #include <glm/vec3.hpp>
 
@@ -91,7 +93,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
         auto& dl_transform = m_direct_light->get_component<Transform>();
 
         m_light_uniform_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, direct_light.get_colour());
-        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, glm::vec3(0.f, 20.f, 20.f));
+        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, direct_light.get_direction());
         m_light_uniform_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
 
         ShaderLib::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
@@ -102,8 +104,10 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
         {
             ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_view", direct_light.get_light_view());
             ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());
+            ShaderLib::get("default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
             direct_light.bind_shadow_map();
             Renderer::shadow_pass(render_list);
+            Renderer::shadow_map = direct_light.get_shadow_map();
         }
     }
 }

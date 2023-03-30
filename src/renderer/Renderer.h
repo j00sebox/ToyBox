@@ -30,5 +30,8 @@ public:
     static void shadow_pass(const std::vector<RenderObject>& render_list);
     static void render_pass(const std::vector<RenderObject>& render_list);
 	static void clear();
+
+	// FIXME
+	static unsigned int shadow_map;
 };
 
