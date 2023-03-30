@@ -58,20 +58,28 @@ vec4 direct_light()
     float ambient = 0.2f;
     float diffuse = max(dot(normal, light_dir), 0.0f);
 
-    float shadow = 0.f;
-    float shadow_bias = max(0.00002f * (1.f - dot(normal, light_dir)), 0.0005f);
     vec3 light_pos = v_light_space_pos.xyz / v_light_space_pos.w;
 
+    float shadow = 0.f;
     if(light_pos.z <= 1.f)
     {
         light_pos = (light_pos + 1.f) / 2.f;
+        float shadow_bias = max(0.0002f * (1.f - dot(normal, light_dir)), 0.0005f);
 
-        float map_depth = texture(shadow_map_t, light_pos.xy).r;
+        vec2 texel_size = 1.0 / textureSize(shadow_map_t, 0);
 
-        if((light_pos.z - shadow_bias) > map_depth)
+        // sample all surrounding shadow values and take the average
+        for(int x = -1; x <= 1; ++x)
         {
-            shadow = 1.f;
+            for(int y = -1; y <= 1; ++y)
+            {
+                float depth = texture(shadow_map_t, light_pos.xy + vec2(x, y) * texel_size).r;
+
+                if(light_pos.z - shadow_bias > depth)
+                    shadow += 1.f;
+            }
         }
+        shadow /= 9.0;
     }
 
     return vec4((base_colour.xyz * (diffuse * (1.f - shadow) + ambient)) * directional_light.colour.xyz, 1.f);
