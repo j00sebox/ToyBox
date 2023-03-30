@@ -87,6 +87,8 @@ void DirectionalLight::serialize(json& accessor) const
 	accessor["light"]["direction"][0] = m_direction.x;
 	accessor["light"]["direction"][1] = m_direction.y;
 	accessor["light"]["direction"][2] = m_direction.z;
+
+    accessor["light"]["cast_shadow"] = m_shadow_casting;
 }
 
 void DirectionalLight::shadow_init()

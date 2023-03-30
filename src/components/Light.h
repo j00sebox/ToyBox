@@ -15,6 +15,7 @@ public:
     Light();
 	void set_colour(glm::vec4 col) { m_colour = col; }
 	void set_brightness(float b) { m_brightness = b; }
+    void cast_shadow() { m_shadow_casting = true; shadow_init(); }
 	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] float get_brightness() const { return m_brightness; }
     [[nodiscard]] const glm::mat4& get_light_view() const { return m_light_view; }

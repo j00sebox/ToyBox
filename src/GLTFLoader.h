@@ -35,7 +35,7 @@ private:
 	unsigned int m_indices_ind;
 
 	unsigned int m_bc_tex_ind;
-	unsigned int m_spec_tex_ind;
-	unsigned int m_norm_tex_ind;
-	unsigned int m_occ_tex_ind;
+	int m_spec_tex_ind = -1;
+	int m_norm_tex_ind = -1;
+	int m_occ_tex_ind = -1;
 };

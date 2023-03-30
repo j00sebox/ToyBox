@@ -153,9 +153,15 @@ std::vector<std::string> GLTFLoader::get_textures() const
 	std::vector<std::string> vec;
 
 	vec.emplace_back(get_base_color_texture());
-	vec.emplace_back(get_specular_texture());
-	vec.emplace_back(get_normal_texture());
-	vec.emplace_back(get_occlusion_texture());
+
+    if(m_spec_tex_ind != -1)
+	    vec.emplace_back(get_specular_texture());
+
+    if(m_norm_tex_ind != -1)
+        vec.emplace_back(get_normal_texture());
+
+    if(m_occ_tex_ind != -1)
+        vec.emplace_back(get_occlusion_texture());
 	
 	return vec;
 }
@@ -170,7 +176,12 @@ std::string GLTFLoader::get_base_color_texture() const
 
 std::string GLTFLoader::get_specular_texture() const
 {
-	json uri = m_json["images"][m_spec_tex_ind];
+    json uri;
+    if(m_spec_tex_ind != -1)
+        uri = m_json["images"][m_spec_tex_ind];
+    else
+        uri = m_json["images"][m_bc_tex_ind];
+
 	std::string image = uri["uri"];
 
 	return m_base_dir + image;
@@ -178,7 +189,12 @@ std::string GLTFLoader::get_specular_texture() const
 
 std::string GLTFLoader::get_normal_texture() const
 {
-	json uri = m_json["images"][m_norm_tex_ind];
+    json uri;
+    if(m_spec_tex_ind != -1)
+        uri = m_json["images"][m_norm_tex_ind];
+    else
+        uri = m_json["images"][m_bc_tex_ind];
+
 	std::string image = uri["uri"];
 
 	return m_base_dir + image;
@@ -186,7 +202,12 @@ std::string GLTFLoader::get_normal_texture() const
 
 std::string GLTFLoader::get_occlusion_texture() const
 {
-	json uri = m_json["images"][m_occ_tex_ind];
+	json uri;
+    if(m_spec_tex_ind != -1)
+        uri = m_json["images"][m_occ_tex_ind];
+    else
+        uri = m_json["images"][m_bc_tex_ind];
+
 	std::string image = uri["uri"];
 
 	return m_base_dir + image;

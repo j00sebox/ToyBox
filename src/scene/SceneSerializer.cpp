@@ -285,6 +285,9 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
 			dl.set_brightness(model["light"]["brightness"]);
 
+            if(model["light"]["cast_shadow"])
+                dl.cast_shadow();
+
 			e.add_component(std::move(dl));
 		}
 	}
