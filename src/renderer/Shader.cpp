@@ -219,10 +219,15 @@ void ShaderProgram::set_uniform_mat4f(const std::string& name, const glm::mat4& 
 }
 
 std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLib::m_shaders;
+std::vector<std::string> ShaderLib::m_material_shaders;
 
-void ShaderLib::add(const std::string& name, ShaderProgram&& sp)
+void ShaderLib::add(const std::string& name, ShaderProgram&& sp, bool is_material)
 {
-	m_shaders[name] = std::make_shared<ShaderProgram>(std::move(sp));
+    if (!exists(name))
+    {
+        m_shaders[name] = std::make_shared<ShaderProgram>(std::move(sp));
+        if (is_material) m_material_shaders.push_back(name);
+    }
 }
 
 std::shared_ptr<ShaderProgram> ShaderLib::get(const std::string& name)
@@ -257,4 +262,5 @@ std::string ShaderLib::find(const std::shared_ptr<ShaderProgram>& s)
 void ShaderLib::release()
 {
 	m_shaders.clear();
+    m_material_shaders.clear();
 }

@@ -77,7 +77,7 @@ void Material::imgui_render()
     static std::string combo_preview = ShaderLib::find(m_shader);
     if (ImGui::BeginCombo("Shader", combo_preview.c_str()))
     {
-        for (auto [name, shader_ptr] : ShaderLib::m_shaders)
+        for (auto name : ShaderLib::get_material_shaders())
         {
             const bool is_selected = (name == combo_preview);
             if (ImGui::Selectable(name.c_str(), is_selected))

@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "LightManager.h"
-
 #include "Renderer.h"
 #include "SceneNode.h"
 #include "Entity.h"
@@ -9,9 +8,7 @@
 #include "Buffer.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-#include "GLError.h"
 
-#include <glad/glad.h>
 #include <spdlog/fmt/bundled/format.h>
 #include <glm/vec3.hpp>
 

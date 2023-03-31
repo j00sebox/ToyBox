@@ -71,7 +71,7 @@ vec4 point_light(int i)
 
     float attenuation = 1 / distance;
 
-    return point_lights[i].colour * attenuation * dot(l, n) * (base_colour + specular_factor(n, h));
+    return vec4(point_lights[i].colour.xyz * attenuation * dot(l, n) * (base_colour.xyz + specular_factor(n, h)), 1.f);
 }
 
 vec4 direct_light()
@@ -81,7 +81,7 @@ vec4 direct_light()
     vec3 n = normalize(normal);
     vec3 h = normalize(l + v);
 
-    return directional_light.colour * dot(l, n) * (base_colour + specular_factor(n, h));
+    return vec4(directional_light.colour.xyz * dot(l, n) * (base_colour.xyz + specular_factor(n, h)), 1.f);
 }
 
 out vec4 colour;

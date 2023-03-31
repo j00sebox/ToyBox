@@ -89,15 +89,17 @@ private:
 class ShaderLib
 {
 public:
-	static void add(const std::string& name, ShaderProgram&& sp);
+	static void add(const std::string& name, ShaderProgram&& sp, bool is_material = false);
 	static std::shared_ptr<ShaderProgram> get(const std::string& name);
 	static size_t get_num() { return m_shaders.size(); }
+    static std::vector<std::string> get_material_shaders() { return m_material_shaders; }
 	static bool exists(const std::string& name);
 	static std::string find(const std::shared_ptr<ShaderProgram>& s);
 	static void release();
 
 private:
 	static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;
+    static std::vector<std::string> m_material_shaders;
 
     friend class Material;
 	friend class SceneSerializer;

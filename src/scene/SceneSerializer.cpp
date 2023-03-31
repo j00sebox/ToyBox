@@ -15,10 +15,6 @@
 #include "components/Mesh.h"
 #include "components/Material.h"
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/matrix.hpp>
-
 static std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts);
 static std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts);
 

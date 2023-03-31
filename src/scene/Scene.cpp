@@ -27,7 +27,7 @@ Scene::Scene(Window* window)
 
 Scene::~Scene()
 {
-	ShaderLib::release();
+    ShaderLib::release();
 }
 
 void Scene::load(const char* scene)
@@ -350,22 +350,22 @@ void Scene::compile_shaders() const
     ShaderLib::add("default", ShaderProgram(
             Shader("../resources/shaders/default/default_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/default/default_fragment.shader", ShaderType::Fragment)
-    ));
+    ), true);
 
     ShaderLib::add("flat_colour", ShaderProgram(
             Shader("../resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
-    ));
+    ), true);
 
     ShaderLib::add("pbr_standard", ShaderProgram(
             Shader("../resources/shaders/pbr/pbr_standard_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/pbr/pbr_standard_fragment.shader", ShaderType::Fragment)
-    ));
+    ), true);
 
     ShaderLib::add("blinn-phong", ShaderProgram(
             Shader("../resources/shaders/blinn-phong/blinn-phong_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/blinn-phong/blinn-phong_fragment.shader", ShaderType::Fragment)
-    ));
+    ), true);
 
     ShaderLib::add("shadow_map", ShaderProgram(
             Shader("../resources/shaders/shadow_map/shadow_map_vertex.shader", ShaderType::Vertex),

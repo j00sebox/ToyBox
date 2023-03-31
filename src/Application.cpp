@@ -1,12 +1,8 @@
 #include "pch.h"
 #include "Application.h"
-
 #include "Input.h"
-#include "Log.h"
-#include "renderer/Shader.h"
 
 #include <imgui.h>
-#include <glm/vec4.hpp>
 
 void Application::start()
 {
