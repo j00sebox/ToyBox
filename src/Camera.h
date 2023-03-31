@@ -20,6 +20,7 @@ public:
 	void move_right(float r);
 
 	void set_pos(glm::vec3&& pos);
+    void set_forward(glm::vec3&& fwd);
 	[[nodiscard]] const glm::vec3& get_pos() const;
 
 	inline const glm::vec3& get_forward() { return m_forward; }

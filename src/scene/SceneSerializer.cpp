@@ -29,7 +29,9 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
 
 	json camera_accessor = w_json["camera"];
 	json camera_pos = camera_accessor["position"];
-	camera->set_pos(glm::vec3({ camera_pos[0], camera_pos[1], camera_pos[2] }));
+    json camera_fwd = camera_accessor["forward"];
+	camera->set_pos(glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]));
+    camera->set_forward(glm::vec3(camera_fwd[0], camera_fwd[1], camera_fwd[2]));
 
     if(!w_json["background_colour"].is_null())
     {
@@ -59,14 +61,16 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 	res_json["camera"]["position"][1] = camera_pos.y;
 	res_json["camera"]["position"][2] = camera_pos.z;
 
+    glm::vec3 camera_fwd = camera->get_forward();
+    res_json["camera"]["forward"][0] = camera_fwd.x;
+    res_json["camera"]["forward"][1] = camera_fwd.y;
+    res_json["camera"]["forward"][2] = camera_fwd.z;
+
 	glm::vec4 bg_col = scene.get_background_colour();
 	res_json["background_colour"][0] = bg_col.x;
 	res_json["background_colour"][1] = bg_col.y;
 	res_json["background_colour"][2] = bg_col.z;
 	res_json["background_colour"][3] = bg_col.w;
-
-	size_t num_shader = ShaderLib::get_num();
-	res_json["shader_count"] = num_shader;
 
 	int i = 0;
 	for (const auto& [name, shader_ptr] : ShaderLib::m_shaders)

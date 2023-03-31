@@ -128,6 +128,12 @@ void Camera::set_pos(glm::vec3&& pos)
     m_position = pos;
 }
 
+void Camera::set_forward(glm::vec3 &&fwd)
+{
+    m_forward = glm::normalize(fwd);
+    m_right = glm::normalize(glm::cross(m_forward, m_up));
+}
+
 const glm::vec3& Camera::get_pos() const
 {
 	return m_position;
@@ -141,3 +147,5 @@ void Camera::reset()
 
 	m_position = { 0.f, 0.f, 0.f };
 }
+
+
