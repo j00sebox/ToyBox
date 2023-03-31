@@ -39,11 +39,6 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
 
 	load_skybox(w_json, sky_box);
 
-	json shaders = w_json["shaders"];
-	unsigned int shader_count = w_json["shader_count"];
-
-	load_shaders(shaders, shader_count);
-
 	json models = w_json["models"];
 	unsigned int model_count = w_json["model_count"];
 
@@ -77,11 +72,6 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 	for (const auto& [name, shader_ptr] : ShaderLib::m_shaders)
 	{
 		res_json["shaders"][i]["name"] = name;
-
-		// TODO: Find better way to do this
-		std::vector<std::string> locations = shader_ptr->get_shader_locations();
-		res_json["shaders"][i]["vertex"] = locations[0];
-		res_json["shaders"][i]["fragment"] = locations[1];
 		++i;
 	}
 
@@ -146,29 +136,6 @@ void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>&
 		sb.attach_shader_program(std::move(sp));
 
 		sky_box = std::make_unique<Skybox>(std::move(sb));
-	}
-}
-
-void SceneSerializer::load_shaders(const json& accessor, unsigned int num_shaders)
-{
-	for (unsigned int s = 0; s < num_shaders; ++s)
-	{
-		// TODO: add support for other shader types
-        std::string shader_name = accessor[s]["name"];
-
-        if(!ShaderLib::exists(shader_name))
-        {
-            info("Added new shader to lib");
-            std::string vertex_src = accessor[s]["vertex"];
-            Shader vertex_shader(vertex_src.c_str(), ShaderType::Vertex);
-
-            std::string fragment_src = accessor[s]["fragment"];
-            Shader fragment_shader(fragment_src.c_str(), ShaderType::Fragment);
-
-            ShaderProgram shader_program(vertex_shader, fragment_shader);
-
-            ShaderLib::add(shader_name, std::move(shader_program));
-        }
 	}
 }
 
