@@ -175,11 +175,6 @@ void Scene::window_resize(int width, int height)
     m_uniform_buffer->set_data_mat4(64, m_camera->get_perspective());
 }
 
-void Scene::reset_view()
-{
-	m_camera->reset();
-}
-
 void Scene::remove_node(SceneNode& node)
 {
 	if (node.entity->has_component<PointLight>())

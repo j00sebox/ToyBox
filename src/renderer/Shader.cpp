@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Shader.h"
-
 #include "Log.h"
 #include "GLError.h"
 

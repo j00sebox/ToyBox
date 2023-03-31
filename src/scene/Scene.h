@@ -28,7 +28,6 @@ public:
 	void update(float elapsed_time);
 	void add_primitive(const char* name);
 	void window_resize(int width, int height);
-	void reset_view();
 	Camera* get_camera() { return m_camera.get(); }
 
 	void set_background_colour(glm::vec4 colour);

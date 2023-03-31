@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "VertexArray.h"
-
 #include "GLError.h"
 
 #include <glad/glad.h>

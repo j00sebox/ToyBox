@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Buffer.h"
-
 #include "GLError.h"
 
 #include <glad/glad.h>

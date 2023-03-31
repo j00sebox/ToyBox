@@ -1,12 +1,10 @@
 #include "pch.h"
 #include "Renderer.h"
-
 #include "GLError.h"
 #include "Shader.h"
 #include "components/Mesh.h"
 #include "components/Material.h"
 #include "components/Transform.h"
-#include "events/EventList.h"
 
 #include <glad/glad.h>
 
