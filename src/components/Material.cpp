@@ -1,13 +1,10 @@
 #include "pch.h"
 #include "Material.h"
-
 #include "Texture.h"
 #include "Shader.h"
-
 #include "ImGuiHelper.h"
 
 #include <imgui.h>
-#include <imgui_internal.h>
 #include <nlohmann/json.hpp>
 
 using namespace nlohmann;

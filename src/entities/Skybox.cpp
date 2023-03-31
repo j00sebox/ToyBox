@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Skybox.h"
-
 #include "Buffer.h"
 #include "GLError.h"
 
@@ -9,6 +8,8 @@
 Skybox::Skybox(const std::string& texture_path)
 	: m_skybox_texture(texture_path), m_path(texture_path)
 {
+    m_skybox_shader = ShaderLib::get("skybox");
+
 	std::vector<float> skybox_verts =
 	{
 		-1.0f, -1.0f,  1.0f,	//        7--------6
@@ -69,7 +70,7 @@ Skybox::Skybox(Skybox&& sb) noexcept
 {
 	m_indices_count = sb.m_indices_count;
 	m_skybox_va = std::move(sb.m_skybox_va);
-	m_skybox_shader = sb.m_skybox_shader;
+    m_skybox_shader = sb.m_skybox_shader;
 	m_path = std::move(sb.m_path);
 }
 
@@ -88,10 +89,20 @@ void Skybox::draw() const
     //GL_CALL(glEnable(GL_CULL_FACE));
 }
 
-void Skybox::attach_shader_program(ShaderProgram&& sp)
+void Skybox::bind() const
 {
-	m_skybox_shader = std::make_shared<ShaderProgram>(std::move(sp));
+    m_skybox_va.bind();
+    m_skybox_texture.bind(0);
+    m_skybox_shader->bind();
 }
+
+void Skybox::unbind() const
+{
+    m_skybox_va.unbind();
+    m_skybox_texture.unbind();
+    m_skybox_shader->unbind();
+}
+
 
 void Skybox::operator=(Skybox&& sb) noexcept
 {
@@ -100,3 +111,5 @@ void Skybox::operator=(Skybox&& sb) noexcept
 	m_skybox_texture = std::move(sb.m_skybox_texture);
 	m_skybox_shader = sb.m_skybox_shader;
 }
+
+

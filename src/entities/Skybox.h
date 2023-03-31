@@ -11,8 +11,9 @@ public:
 	Skybox(Skybox&& sb) noexcept;
 
 	void draw() const;
-	void attach_shader_program(ShaderProgram&& sp);
-	[[nodiscard]] const std::shared_ptr<ShaderProgram>& get_shader() const { return m_skybox_shader; }
+    void bind() const;
+    void unbind() const;
+    [[nodiscard]] const unsigned int get_indices() const { return m_indices_count; }
 	[[nodiscard]] const std::string& get_resource_path() const { return m_path; }
 
 	void operator= (Skybox&& sb) noexcept;

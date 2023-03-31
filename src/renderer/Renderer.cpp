@@ -50,6 +50,17 @@ void Renderer::draw_elements(const Transform& transform, const Mesh& mesh, const
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 }
 
+void Renderer::draw_skybox(const Skybox& skybox)
+{
+    GL_CALL(glDisable(GL_CULL_FACE));
+    GL_CALL(glDepthMask(GL_FALSE));
+    skybox.bind();
+    GL_CALL(glDrawElements(GL_TRIANGLES, skybox.get_indices(), GL_UNSIGNED_INT, nullptr));
+    GL_CALL(glDepthMask(GL_TRUE));
+    skybox.unbind();
+    //GL_CALL(glEnable(GL_CULL_FACE));
+}
+
 void Renderer::stencil(const Transform& stencil_transform, const Mesh& mesh, const Material& material)
 {
 	GL_CALL(glStencilFunc(GL_ALWAYS, 1, 0xFF)); // make all the fragments of the object have a stencil of 1
@@ -124,3 +135,5 @@ void Renderer::clear()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 }
+
+

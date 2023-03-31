@@ -71,7 +71,7 @@ void Scene::update(float elapsed_time)
 
 	if (m_skybox)
 	{
-		m_skybox->draw();
+		Renderer::draw_skybox(*m_skybox);
 	}
 
 	ImGui::Begin("Models");
@@ -361,6 +361,11 @@ void Scene::compile_shaders() const
             Shader("../resources/shaders/blinn-phong/blinn-phong_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/blinn-phong/blinn-phong_fragment.shader", ShaderType::Fragment)
     ), true);
+
+    ShaderLib::add("skybox", ShaderProgram(
+            Shader("../resources/shaders/skybox/skybox_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/skybox/skybox_fragment.shader", ShaderType::Fragment)
+    ));
 
     ShaderLib::add("shadow_map", ShaderProgram(
             Shader("../resources/shaders/shadow_map/shadow_map_vertex.shader", ShaderType::Vertex),

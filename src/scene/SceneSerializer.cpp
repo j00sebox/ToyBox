@@ -127,19 +127,8 @@ void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>&
 
 	if (!skybox_src.empty())
 	{
-		Skybox sb(skybox_src);
-
-		const char* v_path = "../resources/shaders/skybox/skybox_vertex.shader";
-		const char* f_path = "../resources/shaders/skybox/skybox_fragment.shader";
-
-		ShaderProgram sp(
-			Shader(v_path, ShaderType::Vertex),
-			Shader(f_path, ShaderType::Fragment)
-		);
-
-		sb.attach_shader_program(std::move(sp));
-
-		sky_box = std::make_unique<Skybox>(std::move(sb));
+		//Skybox sb(skybox_src);
+		sky_box = std::make_unique<Skybox>(skybox_src);
 	}
 }
 
