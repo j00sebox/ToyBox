@@ -54,6 +54,8 @@ void Material::unbind() const
     m_shader->unbind();
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnreachableCode"
 void Material::imgui_render()
 {
     static std::string combo_preview = ShaderLib::find(m_shader);
@@ -74,7 +76,14 @@ void Material::imgui_render()
         ImGui::EndCombo();
     }
 
+    bool prev_choice = m_custom;
     ImGui::Checkbox("Custom", &m_custom);
+
+    if(prev_choice && prev_choice != m_custom)
+    {
+        std::string textures[] = {"../resources/textures/white.png", "none", "none", "none"};
+        load(textures);
+    }
 
     if (m_custom)
     {
@@ -119,6 +128,7 @@ void Material::imgui_render()
             display_empty_texture();
     }
 }
+#pragma clang diagnostic pop
 
 void Material::serialize(json& accessor) const
 {
