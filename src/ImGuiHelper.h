@@ -8,3 +8,5 @@ class ImVec2;
 void coloured_label(const char* label, ImVec4 colour, ImVec2 size);
 
 void texture_viewer(unsigned int texture_id, float texture_width, float texture_height);
+
+void display_empty_texture();

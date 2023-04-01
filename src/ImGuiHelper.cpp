@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ImGuiHelper.h"
+#include "Texture.h"
 
 #include <imgui.h>
 
@@ -42,4 +43,10 @@ void texture_viewer(unsigned int texture_id, float texture_width, float texture_
             ImGui::EndTooltip();
         }
     }
+}
+
+void display_empty_texture()
+{
+    static Texture2D empty_texture = Texture2D("../resources/textures/empty_texture.png");
+    texture_viewer(empty_texture.get_id(), empty_texture.get_width(), empty_texture.get_height());
 }

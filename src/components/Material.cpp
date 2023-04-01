@@ -103,14 +103,20 @@ void Material::imgui_render()
         ImGui::Text("\nMetallic Roughness\n");
         if(m_textures[1])
             texture_viewer(m_textures[1]->get_id(), m_textures[1]->get_width(), m_textures[1]->get_height());
+        else
+            display_empty_texture();
 
         ImGui::Text("\nNormal Map\n");
         if(m_textures[2])
             texture_viewer(m_textures[2]->get_id(), m_textures[2]->get_width(), m_textures[2]->get_height());
+        else
+            display_empty_texture();
 
         ImGui::Text("\nOcclusion Map\n");
         if(m_textures[3])
             texture_viewer(m_textures[3]->get_id(), m_textures[3]->get_width(), m_textures[3]->get_height());
+        else
+            display_empty_texture();
     }
 }
 

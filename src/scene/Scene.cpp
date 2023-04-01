@@ -1,18 +1,15 @@
 #include "pch.h"
 #include "Scene.h"
-
 #include "Entity.h"
 #include "Renderer.h"
 #include "Buffer.h"
 #include "Input.h"
 #include "SceneSerializer.h"
 #include "Timer.h"
-
 #include "components/Transform.h"
 #include "components/Light.h"
 #include "components/Mesh.h"
 #include "components/Material.h"
-
 #include "events/EventList.h"
 
 #include <imgui.h>
