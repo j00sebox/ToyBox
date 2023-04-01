@@ -180,7 +180,7 @@ std::string GLTFLoader::get_specular_texture() const
     if(m_spec_tex_ind != -1)
         uri = m_json["images"][m_spec_tex_ind];
     else
-        uri = m_json["images"][m_bc_tex_ind];
+        return "none";
 
 	std::string image = uri["uri"];
 
@@ -193,7 +193,7 @@ std::string GLTFLoader::get_normal_texture() const
     if(m_spec_tex_ind != -1)
         uri = m_json["images"][m_norm_tex_ind];
     else
-        uri = m_json["images"][m_bc_tex_ind];
+        return "none";
 
 	std::string image = uri["uri"];
 
@@ -206,7 +206,7 @@ std::string GLTFLoader::get_occlusion_texture() const
     if(m_spec_tex_ind != -1)
         uri = m_json["images"][m_occ_tex_ind];
     else
-        uri = m_json["images"][m_bc_tex_ind];
+        return "none";
 
 	std::string image = uri["uri"];
 

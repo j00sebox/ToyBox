@@ -127,7 +127,6 @@ void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>&
 
 	if (!skybox_src.empty())
 	{
-		//Skybox sb(skybox_src);
 		sky_box = std::make_unique<Skybox>(skybox_src);
 	}
 }
@@ -180,16 +179,24 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 		mesh.load(verts, indices);
 	};
 
-	auto load_gltf_material = [](const GLTFLoader& loader, Material& material)
+	auto load_gltf_material = [](const json& accessor, const GLTFLoader& loader, Material& material)
 	{
-		std::string textures[4] = {
-			loader.get_base_color_texture(),
-			loader.get_specular_texture(),
-			loader.get_normal_texture(),
-			loader.get_occlusion_texture()
-		};
+        if(accessor.contains("custom_texture"))
+        {
+            json colour = accessor["custom_texture"]["colour"];
+            material.set_colour(glm::vec4(colour[0], colour[1], colour[2], colour[3]));
+        }
+        else
+        {
+            std::string textures[4] = {
+                    loader.get_base_color_texture(),
+                    loader.get_specular_texture(),
+                    loader.get_normal_texture(),
+                    loader.get_occlusion_texture()
+            };
 
-		material.load(textures);
+            material.load(textures);
+        }
 	};
 
 	Entity e;
@@ -261,7 +268,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 		e.add_component(std::move(mesh));
 
 		Material material;
-		load_gltf_material(loader, material);
+		load_gltf_material(model, loader, material);
 		material.set_shader(ShaderLib::get(model["shader"]));
 
 		e.add_component(std::move(material));

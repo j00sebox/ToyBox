@@ -12,9 +12,9 @@ using namespace nlohmann;
 void Material::load(const std::string* const textures)
 {
     m_textures[0] = std::make_unique<Texture2D>(Texture2D(textures[0]));
-    m_textures[1] = std::make_unique<Texture2D>(Texture2D(textures[1]));
-    m_textures[2] = std::make_unique<Texture2D>(Texture2D(textures[2]));
-    m_textures[3] = std::make_unique<Texture2D>(Texture2D(textures[3]));
+    m_textures[1] = (textures[1] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[1])) : nullptr;
+    m_textures[2] = (textures[2] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[2])) : nullptr;
+    m_textures[3] = (textures[3] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[3])) : nullptr;
 
     m_custom = false;
 }
@@ -33,7 +33,8 @@ void Material::bind() const
     {
         for (unsigned int i = 0; i < 4; ++i)
         {
-            m_textures[i]->bind(i);
+            if(m_textures[i])
+                m_textures[i]->bind(i);
         }
     }
 
@@ -100,16 +101,28 @@ void Material::imgui_render()
         texture_viewer(m_textures[0]->get_id(), m_textures[0]->get_width(), m_textures[0]->get_height());
 
         ImGui::Text("\nMetallic Roughness\n");
-        texture_viewer(m_textures[1]->get_id(), m_textures[1]->get_width(), m_textures[1]->get_height());
+        if(m_textures[1])
+            texture_viewer(m_textures[1]->get_id(), m_textures[1]->get_width(), m_textures[1]->get_height());
 
         ImGui::Text("\nNormal Map\n");
-        texture_viewer(m_textures[2]->get_id(), m_textures[2]->get_width(), m_textures[2]->get_height());
+        if(m_textures[2])
+            texture_viewer(m_textures[2]->get_id(), m_textures[2]->get_width(), m_textures[2]->get_height());
 
         ImGui::Text("\nOcclusion Map\n");
-        texture_viewer(m_textures[3]->get_id(), m_textures[3]->get_width(), m_textures[3]->get_height());
+        if(m_textures[3])
+            texture_viewer(m_textures[3]->get_id(), m_textures[3]->get_width(), m_textures[3]->get_height());
     }
 }
 
 void Material::serialize(json& accessor) const
 {
+    if(m_custom)
+    {
+        accessor["custom_texture"]["colour"][0] = m_colour.x;
+        accessor["custom_texture"]["colour"][1] = m_colour.y;
+        accessor["custom_texture"]["colour"][2] = m_colour.z;
+        accessor["custom_texture"]["colour"][3] = m_colour.w;
+    }
 }
+
+
