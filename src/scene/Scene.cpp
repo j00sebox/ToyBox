@@ -2,13 +2,13 @@
 #include "Scene.h"
 #include "Entity.h"
 #include "Renderer.h"
-#include "Buffer.h"
 #include "Input.h"
 #include "SceneSerializer.h"
 #include "Timer.h"
+#include "Mesh.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-#include "components/Mesh.h"
+#include "components/MeshObject.h"
 #include "components/Material.h"
 #include "events/EventList.h"
 
@@ -149,9 +149,11 @@ void Scene::add_primitive(const char* name)
 	e.set_name(lookup);
 	e.add_component(Transform());
 	
-	Mesh mesh;
-	mesh.load_primitive(str_to_primitive_type(name));
-	e.add_component(std::move(mesh));
+	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+	mesh->load_primitive(str_to_primitive_type(name));
+    MeshObject meshObject;
+    meshObject.set_mesh(mesh);
+	e.add_component(std::move(meshObject));
 
 	Material material;
 	material.set_shader(ShaderLib::get("default"));
@@ -202,10 +204,10 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 {
 	Transform relative_transform = scene_node.update(parent_transform);
 
-	if (scene_node.entity->has_component<Mesh>())
+	if (scene_node.entity->has_component<MeshObject>())
 	{
 		auto& material = scene_node.entity->get_component<Material>();
-		auto& mesh = scene_node.entity->get_component<Mesh>();
+		auto& mesh = scene_node.entity->get_component<MeshObject>();
 
 		if (m_selected_node && (scene_node == *m_selected_node))
 		{

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Event.h"
-
 #include "components/Fwd.h"
 
 struct EventList

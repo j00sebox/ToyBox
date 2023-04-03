@@ -2,7 +2,7 @@
 
 #include "Window.h"
 #include "Camera.h"
-#include "entities/Skybox.h"
+#include "Skybox.h"
 #include "SceneNode.h"
 #include "LightManager.h"
 #include "components/Fwd.h"

@@ -1,18 +1,16 @@
 #include "pch.h"
 #include "SceneSerializer.h"
-
 #include "GLTFLoader.h"
 #include "FileOperations.h"
-
 #include "Entity.h"
 #include "Camera.h"
 #include "Skybox.h"
 #include "Scene.h"
 #include "SceneNode.h"
-
+#include "Mesh.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-#include "components/Mesh.h"
+#include "components/MeshObject.h"
 #include "components/Material.h"
 
 static std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts);
@@ -164,9 +162,9 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
 		for (const Vertex& v : vertices)
 		{
-			verts.push_back(v.positon.x);
-			verts.push_back(v.positon.y);
-			verts.push_back(v.positon.z);
+			verts.push_back(v.position.x);
+			verts.push_back(v.position.y);
+			verts.push_back(v.position.z);
 			verts.push_back(v.normal.x);
 			verts.push_back(v.normal.y);
 			verts.push_back(v.normal.z);
@@ -260,12 +258,15 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 		std::string gltf_path = model["gltf"]["path"];
 		GLTFLoader loader(gltf_path.c_str());
 
-		Mesh mesh;
-		load_gltf_mesh(loader, mesh);
+        std::shared_ptr<Mesh> mesh_ptr = std::make_shared<Mesh>();
+		load_gltf_mesh(loader, *mesh_ptr);
+
 
 		// TODO: remove later
-		mesh.m_gltf_path = model["gltf"]["path"];
-		e.add_component(std::move(mesh));
+        MeshObject meshObject;
+        meshObject.set_mesh(mesh_ptr);
+        meshObject.m_gltf_path = model["gltf"]["path"];
+		e.add_component(std::move(meshObject));
 
 		Material material;
 		load_gltf_material(model, loader, material);
@@ -277,9 +278,11 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	{
 		std::string p_name = model["primitive"];
 
-		Mesh mesh;
-		mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
-		e.add_component(std::move(mesh));
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+		mesh->load_primitive(str_to_primitive_type(p_name.c_str()));
+        MeshObject meshObject;
+        meshObject.set_mesh(mesh);
+		e.add_component(std::move(meshObject));
 
 		Material material;
 		material.set_shader(ShaderLib::get(model["shader"]));

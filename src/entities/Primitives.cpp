@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "Primitives.h"
 
-#include "Buffer.h"
-
 #include <cstring>
 
 std::string primitive_type_to_str(PrimitiveTypes pt)

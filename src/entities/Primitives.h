@@ -1,7 +1,5 @@
 #pragma once
 
-#include "VertexArray.h"
-
 // TODO: Add more
 enum class PrimitiveTypes
 {

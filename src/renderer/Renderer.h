@@ -16,7 +16,7 @@ struct RenderObject
 {
     RenderCommand render_command;
     Transform transform;
-    Mesh* mesh;
+    MeshObject* mesh;
     Material* material;
 };
 
@@ -26,9 +26,9 @@ public:
 	static void init(int width, int height);
 	static void set_viewport(int width, int height);
 	static void set_clear_colour(glm::vec4 colour);
-	static void draw_elements(const Transform& transform, const Mesh&, const Material&);
+	static void draw_elements(const Transform& transform, const MeshObject&, const Material&);
     static void draw_skybox(const Skybox& skybox);
-	static void stencil(const Transform& stencil_transform, const Mesh&, const Material&);
+	static void stencil(const Transform& stencil_transform, const MeshObject&, const Material&);
     static void shadow_pass(const std::vector<RenderObject>& render_list);
     static void render_pass(const std::vector<RenderObject>& render_list);
 	static void clear();

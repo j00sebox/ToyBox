@@ -11,4 +11,6 @@ list(APPEND SRCS
     ${CMAKE_CURRENT_LIST_DIR}/VertexArray.cpp
     ${CMAKE_CURRENT_LIST_DIR}/FrameBuffer.h
     ${CMAKE_CURRENT_LIST_DIR}/FrameBuffer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Mesh.h
+    ${CMAKE_CURRENT_LIST_DIR}/Mesh.cpp
 )
