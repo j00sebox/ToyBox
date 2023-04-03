@@ -273,7 +273,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         MeshObject meshObject;
         meshObject.set_mesh(MeshTable::get(gltf_path));
         meshObject.m_gltf_path = model["gltf"]["path"];
-		e.add_component(std::move(meshObject));
+
 
 		Material material;
 		load_gltf_material(model, loader, material);
@@ -282,6 +282,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         {
             scene.instanced_meshes[gltf_path].push_back(model_matrix);
             material.set_shader(ShaderLib::get("inst_default"));
+            meshObject.m_instance_id = scene.instanced_meshes[gltf_path].size() - 1;
         }
         else
         {
@@ -289,6 +290,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         }
 
 		e.add_component(std::move(material));
+        e.add_component(std::move(meshObject));
 	}
 	else if (!model["primitive"].is_null())
 	{
@@ -304,7 +306,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
         MeshObject meshObject;
         meshObject.set_mesh(MeshTable::get(p_name));
-		e.add_component(std::move(meshObject));
+
 
 		Material material;
 
@@ -312,6 +314,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         {
             scene.instanced_meshes[p_name].push_back(model_matrix);
             material.set_shader(ShaderLib::get("inst_default"));
+            meshObject.m_instance_id = scene.instanced_meshes[p_name].size() - 1;
         }
         else
         {
@@ -319,6 +322,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         }
 
 		material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+        e.add_component(std::move(meshObject));
 		e.add_component(std::move(material));
 	}
 

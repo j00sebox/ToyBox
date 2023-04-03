@@ -80,7 +80,7 @@ void Scene::update(float elapsed_time)
 
     for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
     {
-
+        MeshTable::get(mesh_name)->update_instances(instance_matrices);
     }
 
 	ImGui::Begin("Models");
@@ -169,8 +169,6 @@ void Scene::add_primitive(const char* name)
         MeshTable::add(name, std::move(mesh));
     }
 
-
-
     MeshObject meshObject;
     meshObject.set_mesh(MeshTable::get(name));
     e.add_component(std::move(meshObject));
@@ -244,6 +242,7 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
         if(mesh.get_mesh()->is_instanced())
         {
             std::string mesh_name = MeshTable::find(mesh.get_mesh());
+            instanced_meshes[mesh_name][mesh.m_instance_id] = relative_transform.get_transform();
             if(!mesh_used[mesh_name])
             {
                 m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, relative_transform, &mesh, &material, (unsigned int)instanced_meshes[mesh_name].size()});

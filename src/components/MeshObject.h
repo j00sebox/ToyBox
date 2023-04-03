@@ -22,6 +22,8 @@ public:
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 
+    int m_instance_id = -1;
+
 private:
     std::shared_ptr<Mesh> m_mesh;
 
