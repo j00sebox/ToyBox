@@ -72,6 +72,7 @@ void Scene::update(float elapsed_time)
 #endif
 	Renderer::clear();
     m_render_list.clear();
+    mesh_used.clear();
 
     // if the camera moved at all we need to adjust the view uniform
 	if(m_camera->update(elapsed_time))
@@ -81,6 +82,11 @@ void Scene::update(float elapsed_time)
 	{
 		Renderer::draw_skybox(*m_skybox);
 	}
+
+    for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
+    {
+
+    }
 
 	ImGui::Begin("Models");
 	
@@ -229,7 +235,11 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
         if(mesh.get_mesh()->is_instanced())
         {
             std::string mesh_name = MeshTable::find(mesh.get_mesh());
-            m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, instanced_meshes[mesh_name], &mesh, &material});
+            if(!mesh_used[mesh_name])
+            {
+                m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, instanced_meshes[mesh_name], &mesh, &material});
+                mesh_used[mesh_name] = true;
+            }
         }
 		else if (m_selected_node && (scene_node == *m_selected_node))
 		{

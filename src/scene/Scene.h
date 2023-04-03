@@ -55,7 +55,9 @@ private:
 	std::vector<RenderObject> m_render_list;
 
     std::unordered_map<std::string, std::vector<Transform>> instanced_meshes;
-    std::vector<glm::mat4> im; // TODO: figure out better way
+    // TODO: figure out better way
+    std::unordered_map<std::string, bool> mesh_used;
+    std::vector<glm::mat4> im;
 
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;
