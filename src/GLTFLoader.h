@@ -29,7 +29,7 @@ private:
 
 	std::vector<unsigned char> m_data;
 
-	unsigned int m_postion_ind;
+	unsigned int m_position_ind;
 	unsigned int m_normal_ind;
 	unsigned int m_tex_coord_ind;
 	unsigned int m_indices_ind;

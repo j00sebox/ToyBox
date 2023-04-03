@@ -17,8 +17,8 @@ public:
 
 private:
 	static void load_skybox(const nlohmann::json& accessor, std::unique_ptr<Skybox>& sky_box);
-	static void load_models(const nlohmann::json& accessor, unsigned int model_count, SceneNode& root);
-	static SceneNode load_model(const nlohmann::json& accessor, int model_index, int& num_models_checked);
+	static void load_models(const nlohmann::json& accessor, unsigned int model_count, SceneNode& root, Scene& scene);
+	static SceneNode load_model(const nlohmann::json& accessor, int model_index, int& num_models_checked, Scene& scene);
 	static void serialize_node(nlohmann::json& accessor, int& node_index, const SceneNode& scene_node);
 };
 

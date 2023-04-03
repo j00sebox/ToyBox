@@ -42,7 +42,7 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
 	json models = w_json["models"];
 	unsigned int model_count = w_json["model_count"];
 
-	load_models(models, model_count, root);
+	load_models(models, model_count, root, scene);
 }
 
 void SceneSerializer::save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root)
@@ -129,17 +129,17 @@ void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>&
 	}
 }
 
-void SceneSerializer::load_models(const json& accessor, unsigned int model_count, SceneNode& root)
+void SceneSerializer::load_models(const json& accessor, unsigned int model_count, SceneNode& root, Scene& scene)
 {
 	int num_models_checked = 0;
 	while (num_models_checked < model_count)
 	{
-		root.add_child(load_model(accessor, num_models_checked, num_models_checked));
+		root.add_child(load_model(accessor, num_models_checked, num_models_checked, scene));
 	}
 }
 
 // TODO: Make this look less ugly
-SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked)
+SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked, Scene& scene)
 {
 	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
 	{
@@ -217,6 +217,8 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	json parent_position = info["parent_position"];
 	t.set_parent_offsets(glm::vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
 
+    Transform model_matrix = t;
+
 	e.add_component(std::move(t));
 
 	if (!model["light"].is_null())
@@ -266,6 +268,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
             MeshTable::add(gltf_path, std::move(mesh));
         }
 
+
 		// TODO: remove later
         MeshObject meshObject;
         meshObject.set_mesh(MeshTable::get(gltf_path));
@@ -274,7 +277,16 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
 		Material material;
 		load_gltf_material(model, loader, material);
-		material.set_shader(ShaderLib::get(model["shader"]));
+
+        if(!model["instanced"].is_null() && model["instanced"])
+        {
+            scene.instanced_meshes[gltf_path].push_back(model_matrix);
+            material.set_shader(ShaderLib::get("inst_default"));
+        }
+        else
+        {
+            material.set_shader(ShaderLib::get(model["shader"]));
+        }
 
 		e.add_component(std::move(material));
 	}
@@ -295,7 +307,17 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 		e.add_component(std::move(meshObject));
 
 		Material material;
-		material.set_shader(ShaderLib::get(model["shader"]));
+
+        if(!model["instanced"].is_null() && model["instanced"])
+        {
+            scene.instanced_meshes[p_name].push_back(model_matrix);
+            material.set_shader(ShaderLib::get("inst_default"));
+        }
+        else
+        {
+            material.set_shader(ShaderLib::get(model["shader"]));
+        }
+
 		material.set_colour({ 1.f, 1.f, 1.f, 1.f });
 		e.add_component(std::move(material));
 	}
@@ -307,7 +329,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	for (int i = 0; i < num_children; ++i)
 	{
 		int child_index = accessor[model_index]["children"][i];
-		current_node.add_child(load_model(accessor, child_index, num_models_checked));
+		current_node.add_child(load_model(accessor, child_index, num_models_checked, scene));
 	}
 
 	++num_models_checked;

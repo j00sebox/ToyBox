@@ -11,6 +11,7 @@ int gl_get_type_size(GLenum type)
 	case GL_FLOAT: return sizeof(float);
 	case GL_INT: return sizeof(int);
 	case GL_UNSIGNED_INT: return sizeof(unsigned int);
+    case GL_FLOAT_MAT4: return sizeof(glm::mat4);
 	default:
 		break;
 	}

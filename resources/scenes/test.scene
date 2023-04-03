@@ -1,1 +1,218 @@
-{"background_colour":[0.0,0.029629647731781006,0.023703716695308685,1.0],"camera":{"forward":[0.24166519939899445,-0.6467459201812744,-0.7234070301055908],"position":[-25.155057907104492,61.45634841918945,77.9430160522461]},"model_count":3,"models":[{"light":{"brightness":0.1459999978542328,"cast_shadow":true,"colour":[1.0,1.0,1.0,1.0],"direction":[0.0,20.0,20.0],"type":"directional_light"},"name":"Direct Light","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":1.0,"translate":[0.0,0.0,0.0]}},{"custom_texture":{"colour":[0.6617647409439087,0.28546711802482605,0.28546711802482605,1.0]},"gltf":{"path":"../resources/models/bunny/scene.gltf"},"name":"Bunny","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[103.0,1.0,0.0,0.0],"scale":100.0,"translate":[0.0,-1.0,-2.0]}},{"custom_texture":{"colour":[1.0,1.0,1.0,1.0]},"name":"quad","primitive":"quad","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[-90.0,1.0,0.0,0.0],"scale":100.0,"translate":[0.0,44.0,0.0]}}],"shaders":[{"name":"shadow_map"},{"name":"skybox"},{"name":"blinn-phong"},{"name":"pbr_standard"},{"name":"flat_colour"},{"name":"default"}]}
+{
+    "background_colour": [
+        0.0,
+        0.029629647731781006,
+        0.023703716695308685,
+        1.0
+    ],
+    "camera": {
+        "forward": [
+            0.4253765940666199,
+            -0.66781085729599,
+            -0.6108040809631348
+        ],
+        "position": [
+            -42.62876892089844,
+            47.14273452758789,
+            65.43427276611328
+        ]
+    },
+    "model_count": 5,
+    "models": [
+        {
+            "light": {
+                "brightness": 0.1459999978542328,
+                "cast_shadow": true,
+                "colour": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    20.0,
+                    20.0
+                ],
+                "type": "directional_light"
+            },
+            "name": "Direct Light",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "custom_texture": {
+                "colour": [
+                    0.6617647409439087,
+                    0.28546711802482605,
+                    0.28546711802482605,
+                    1.0
+                ]
+            },
+            "gltf": {
+                "path": "../resources/models/bunny/scene.gltf"
+            },
+            "name": "Bunny",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    103.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    0.0,
+                    -1.0,
+                    -2.0
+                ]
+            }
+        },
+        {
+            "custom_texture": {
+                "colour": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "quad",
+            "primitive": "quad",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    -90.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    0.0,
+                    44.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "custom_texture": {
+                "colour": [
+                    0.10507841408252716,
+                    0.686274528503418,
+                    0.08746637403964996,
+                    1.0
+                ]
+            },
+            "name": "cube",
+            "primitive": "cube",
+            "instanced": true,
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 2.0,
+                "translate": [
+                    -35.0,
+                    -2.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "custom_texture": {
+                "colour": [
+                    0.8186274766921997,
+                    0.07223185896873474,
+                    0.07223185896873474,
+                    1.0
+                ]
+            },
+            "name": "cube (1)",
+            "primitive": "cube",
+            "instanced": true,
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 2.0,
+                "translate": [
+                    0.0,
+                    0.0,
+                    33.0
+                ]
+            }
+        }
+    ],
+    "shaders": [
+        {
+            "name": "shadow_map"
+        },
+        {
+            "name": "skybox"
+        },
+        {
+            "name": "blinn-phong"
+        },
+        {
+            "name": "pbr_standard"
+        },
+        {
+            "name": "flat_colour"
+        },
+        {
+            "name": "default"
+        }
+    ]
+}

@@ -54,10 +54,15 @@ private:
 	LightManager m_light_manager;
 	std::vector<RenderObject> m_render_list;
 
+    std::unordered_map<std::string, std::vector<Transform>> instanced_meshes;
+    std::vector<glm::mat4> im; // TODO: figure out better way
+
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;
     SceneNode* m_drag_node = nullptr;
     SceneNode* m_drop_node = nullptr;
     glm::vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
+
+    friend class SceneSerializer;
 };
 

@@ -32,6 +32,16 @@ void Scene::load(const char* scene)
 {
     compile_shaders();
 	SceneSerializer::open(scene, *this, m_camera, m_skybox, root);
+
+    for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
+    {
+        // TODO: find better solution
+        for(auto& t : instance_matrices)
+        {
+            im.push_back(t.get_transform());
+        }
+        MeshTable::get(mesh_name)->make_instanced(instance_matrices.size(), im);
+    }
 }
 
 void Scene::save(const std::string& path)
@@ -216,13 +226,18 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		auto& material = scene_node.entity->get_component<Material>();
 		auto& mesh = scene_node.entity->get_component<MeshObject>();
 
-		if (m_selected_node && (scene_node == *m_selected_node))
+        if(mesh.get_mesh()->is_instanced())
+        {
+            std::string mesh_name = MeshTable::find(mesh.get_mesh());
+            m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, instanced_meshes[mesh_name], &mesh, &material});
+        }
+		else if (m_selected_node && (scene_node == *m_selected_node))
 		{
-			m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
+			m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, { relative_transform }, &mesh, &material});
 		}
 		else
 		{
-			m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, &mesh, &material});
+			m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, { relative_transform }, &mesh, &material});
 		}
 	}
 
@@ -353,6 +368,11 @@ void Scene::compile_shaders() const
             Shader("../resources/shaders/default/default_fragment.shader", ShaderType::Fragment)
     ), true);
 
+    ShaderLib::add("inst_default", ShaderProgram(
+            Shader("../resources/shaders/default/instanced_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/default/default_fragment.shader", ShaderType::Fragment)
+    ));
+
     ShaderLib::add("flat_colour", ShaderProgram(
             Shader("../resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
@@ -375,6 +395,11 @@ void Scene::compile_shaders() const
 
     ShaderLib::add("shadow_map", ShaderProgram(
             Shader("../resources/shaders/shadow_map/shadow_map_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/shadow_map/shadow_map_fragment.shader", ShaderType::Fragment)
+    ));
+
+    ShaderLib::add("inst_shadow_map", ShaderProgram(
+            Shader("../resources/shaders/default/instanced_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/shadow_map/shadow_map_fragment.shader", ShaderType::Fragment)
     ));
 }

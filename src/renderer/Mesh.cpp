@@ -56,6 +56,35 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
     }
 }
 
+void Mesh::make_instanced(int instances, std::vector<glm::mat4> instance_matrices)
+{
+    unsigned int instance_buffer;
+    glGenBuffers(1, &instance_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, instance_buffer);
+    glBufferData(GL_ARRAY_BUFFER, instances * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW);
+
+    m_va.bind();
+
+    std::size_t vec4Size = sizeof(glm::vec4);
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+
+    m_va.unbind();
+
+    m_instanced = true;
+}
+
 void Mesh::bind() const
 {
     m_va.bind();
@@ -104,9 +133,22 @@ std::string MeshTable::find(const std::shared_ptr<Mesh>& m)
     return "";
 }
 
+bool MeshTable::is_instance(const std::string &name)
+{
+    if (exists(name))
+    {
+        return m_meshes[name]->is_instanced();
+    }
+
+    fatal("Shader {} does not exist in library!\n", name);
+    return false;
+}
+
 void MeshTable::release()
 {
     m_meshes.clear();
 }
+
+
 
 
