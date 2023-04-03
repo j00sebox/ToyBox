@@ -104,15 +104,15 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
     glViewport(0, 0, 2048, 2048);
     for(const auto& render_obj : render_list)
     {
-        if(render_obj.transforms.size() > 1)
+        if(render_obj.mesh->get_mesh()->is_instanced())
         {
             ShaderLib::get("inst_shadow_map")->bind();
             render_obj.mesh->bind();
-            GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr, render_obj.transforms.size()));
+            GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr, render_obj.instances));
         }
         else
         {
-            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transforms[0].get_transform());
+            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
             ShaderLib::get("shadow_map")->bind();
             render_obj.mesh->bind();
             GL_CALL(glDrawElements(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
@@ -131,21 +131,21 @@ void Renderer::render_pass(const std::vector<RenderObject>& render_list)
         {
             case RenderCommand::ElementDraw:
             {
-                draw_elements(render_obj.transforms[0], *render_obj.mesh, *render_obj.material);
+                draw_elements(render_obj.transform, *render_obj.mesh, *render_obj.material);
                 break;
             }
 
             case RenderCommand::InstancedElementDraw:
             {
-                draw_elements_instanced(render_obj.transforms.size(), *render_obj.mesh, *render_obj.material);
+                draw_elements_instanced(render_obj.instances, *render_obj.mesh, *render_obj.material);
                 break;
             }
 
             case RenderCommand::Stencil:
             {
-                render_obj.material->get_shader()->set_uniform_mat4f("u_model", render_obj.transforms[0].get_transform());
+                render_obj.material->get_shader()->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
                 render_obj.material->get_shader()->set_uniform_4f("u_base_colour", render_obj.material->get_colour());
-                Transform stencil_transform = render_obj.transforms[0];
+                Transform stencil_transform = render_obj.transform;
                 stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.03f); // scale up a tiny bit to see outline
                 stencil(stencil_transform, *render_obj.mesh, *render_obj.material);
                 break;

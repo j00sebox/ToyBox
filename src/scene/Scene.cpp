@@ -35,12 +35,7 @@ void Scene::load(const char* scene)
 
     for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
     {
-        // TODO: find better solution
-        for(auto& t : instance_matrices)
-        {
-            im.push_back(t.get_transform());
-        }
-        MeshTable::get(mesh_name)->make_instanced(instance_matrices.size(), im);
+        MeshTable::get(mesh_name)->make_instanced(instance_matrices.size(), instance_matrices);
     }
 }
 
@@ -237,17 +232,17 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
             std::string mesh_name = MeshTable::find(mesh.get_mesh());
             if(!mesh_used[mesh_name])
             {
-                m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, instanced_meshes[mesh_name], &mesh, &material});
+                m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, relative_transform, &mesh, &material, (unsigned int)instanced_meshes[mesh_name].size()});
                 mesh_used[mesh_name] = true;
             }
         }
 		else if (m_selected_node && (scene_node == *m_selected_node))
 		{
-			m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, { relative_transform }, &mesh, &material});
+			m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
 		}
 		else
 		{
-			m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, { relative_transform }, &mesh, &material});
+			m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, &mesh, &material});
 		}
 	}
 

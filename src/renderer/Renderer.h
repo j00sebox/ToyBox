@@ -16,9 +16,10 @@ enum class RenderCommand
 struct RenderObject
 {
     RenderCommand render_command;
-    std::vector<Transform> transforms;
+    Transform transform;
     MeshObject* mesh;
     Material* material;
+    unsigned int instances = 1;
 };
 
 class Renderer

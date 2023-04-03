@@ -54,7 +54,7 @@ private:
 	LightManager m_light_manager;
 	std::vector<RenderObject> m_render_list;
 
-    std::unordered_map<std::string, std::vector<Transform>> instanced_meshes;
+    std::unordered_map<std::string, std::vector<glm::mat4>> instanced_meshes;
     // TODO: figure out better way
     std::unordered_map<std::string, bool> mesh_used;
     std::vector<glm::mat4> im;
