@@ -169,12 +169,26 @@ void Scene::add_primitive(const char* name)
         MeshTable::add(name, std::move(mesh));
     }
 
+
+
     MeshObject meshObject;
     meshObject.set_mesh(MeshTable::get(name));
     e.add_component(std::move(meshObject));
 
 	Material material;
-	material.set_shader(ShaderLib::get("default"));
+
+    if(MeshTable::get(name)->is_instanced())
+    {
+        Transform t;
+        instanced_meshes[name].push_back(t.get_transform());
+        material.set_shader(ShaderLib::get("inst_default"));
+        MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
+    }
+    else
+    {
+        material.set_shader(ShaderLib::get("default"));
+    }
+
 	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
 	e.add_component(std::move(material));
 

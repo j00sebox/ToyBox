@@ -57,7 +57,6 @@ private:
     std::unordered_map<std::string, std::vector<glm::mat4>> instanced_meshes;
     // TODO: figure out better way
     std::unordered_map<std::string, bool> mesh_used;
-    std::vector<glm::mat4> im;
 
 	// imgui stuff
 	SceneNode* m_selected_node = nullptr;
