@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Mesh.h"
+#include "Log.h"
 
 #include <glad/glad.h>
 
@@ -64,3 +65,48 @@ void Mesh::unbind() const
 {
     m_va.unbind();
 }
+
+std::unordered_map<std::string, std::shared_ptr<Mesh>> MeshTable::m_meshes;
+
+void MeshTable::add(const std::string& name, Mesh&& m)
+{
+    if (!exists(name))
+        m_meshes[name] = std::make_shared<Mesh>(std::move(m));
+
+}
+
+std::shared_ptr<Mesh> MeshTable::get(const std::string& name)
+{
+    if (exists(name))
+    {
+        return m_meshes[name];
+    }
+
+    fatal("Shader {} does not exist in library!\n", name);
+    return nullptr;
+}
+
+bool MeshTable::exists(const std::string &name)
+{
+    return (m_meshes.find(name) != m_meshes.end());
+}
+
+std::string MeshTable::find(const std::shared_ptr<Mesh>& m)
+{
+    for (const auto& [name, mesh_ptr] : m_meshes)
+    {
+        if (mesh_ptr == m)
+        {
+            return name;
+        }
+    }
+
+    return "";
+}
+
+void MeshTable::release()
+{
+    m_meshes.clear();
+}
+
+

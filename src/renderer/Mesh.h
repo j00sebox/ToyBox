@@ -35,3 +35,16 @@ private:
     VertexBuffer m_vb;
     IndexBuffer m_ib;
 };
+
+class MeshTable
+{
+public:
+    static void add(const std::string& name, Mesh&& m);
+    static std::shared_ptr<Mesh> get(const std::string& name);
+    static bool exists(const std::string& name);
+    static std::string find(const std::shared_ptr<Mesh>& s);
+    static void release();
+
+private:
+    static std::unordered_map<std::string, std::shared_ptr<Mesh>> m_meshes;
+};

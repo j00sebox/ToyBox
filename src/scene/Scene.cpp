@@ -25,6 +25,7 @@ Scene::Scene(Window* window)
 Scene::~Scene()
 {
     ShaderLib::release();
+    MeshTable::release();
 }
 
 void Scene::load(const char* scene)
@@ -148,12 +149,18 @@ void Scene::add_primitive(const char* name)
 	Entity e;
 	e.set_name(lookup);
 	e.add_component(Transform());
-	
-	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
-	mesh->load_primitive(str_to_primitive_type(name));
+
+    if(!MeshTable::exists(name))
+    {
+        Mesh mesh;
+        mesh.load_primitive(str_to_primitive_type(name));
+
+        MeshTable::add(name, std::move(mesh));
+    }
+
     MeshObject meshObject;
-    meshObject.set_mesh(mesh);
-	e.add_component(std::move(meshObject));
+    meshObject.set_mesh(MeshTable::get(name));
+    e.add_component(std::move(meshObject));
 
 	Material material;
 	material.set_shader(ShaderLib::get("default"));

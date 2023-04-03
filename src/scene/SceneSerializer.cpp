@@ -258,13 +258,17 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 		std::string gltf_path = model["gltf"]["path"];
 		GLTFLoader loader(gltf_path.c_str());
 
-        std::shared_ptr<Mesh> mesh_ptr = std::make_shared<Mesh>();
-		load_gltf_mesh(loader, *mesh_ptr);
+        if(!MeshTable::exists(gltf_path))
+        {
+            Mesh mesh;
+            load_gltf_mesh(loader, mesh);
 
+            MeshTable::add(gltf_path, std::move(mesh));
+        }
 
 		// TODO: remove later
         MeshObject meshObject;
-        meshObject.set_mesh(mesh_ptr);
+        meshObject.set_mesh(MeshTable::get(gltf_path));
         meshObject.m_gltf_path = model["gltf"]["path"];
 		e.add_component(std::move(meshObject));
 
@@ -278,10 +282,16 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	{
 		std::string p_name = model["primitive"];
 
-        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
-		mesh->load_primitive(str_to_primitive_type(p_name.c_str()));
+        if(!MeshTable::exists(p_name))
+        {
+            Mesh mesh;
+            mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
+
+            MeshTable::add(p_name, std::move(mesh));
+        }
+
         MeshObject meshObject;
-        meshObject.set_mesh(mesh);
+        meshObject.set_mesh(MeshTable::get(p_name));
 		e.add_component(std::move(meshObject));
 
 		Material material;
