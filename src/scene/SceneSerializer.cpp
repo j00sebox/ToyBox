@@ -118,7 +118,7 @@ void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>&
 
 	if (!skybox_src.empty())
 	{
-		sky_box = std::make_unique<Skybox>(skybox_src);
+		sky_box = std::make_unique<Skybox>(skybox_src, accessor["jpg"]);
 	}
 }
 

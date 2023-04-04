@@ -7,7 +7,7 @@
 class Skybox
 {
 public:
-	explicit Skybox(const std::string& texture_path);
+	explicit Skybox(const std::string& texture_path, bool jpg = true);
 	Skybox(Skybox&& sb) noexcept;
 
 	void draw() const;

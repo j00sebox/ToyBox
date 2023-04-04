@@ -5,8 +5,8 @@
 
 #include <glad/glad.h>
 
-Skybox::Skybox(const std::string& texture_path)
-	: m_skybox_texture(texture_path), m_path(texture_path)
+Skybox::Skybox(const std::string& texture_path, bool jpg)
+	: m_skybox_texture(texture_path, jpg), m_path(texture_path)
 {
     m_skybox_shader = ShaderLib::get("skybox");
 

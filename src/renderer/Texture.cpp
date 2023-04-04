@@ -85,14 +85,27 @@ void Texture2D::move_members(Texture2D&& t) noexcept
 	t.m_data = nullptr;
 }
 
-CubeMap::CubeMap(const std::string& dir)
+CubeMap::CubeMap(const std::string& dir, bool jpg)
 {
-	m_faces[0] = dir + "right.jpg"; 
-	m_faces[1] = dir + "left.jpg";
-	m_faces[2] = dir + "top.jpg";
-	m_faces[3] = dir + "bottom.jpg";
-	m_faces[4] = dir + "front.jpg";
-	m_faces[5] = dir + "back.jpg";
+    if(jpg)
+    {
+        m_faces[0] = dir + "right.jpg";
+        m_faces[1] = dir + "left.jpg";
+        m_faces[2] = dir + "top.jpg";
+        m_faces[3] = dir + "bottom.jpg";
+        m_faces[4] = dir + "front.jpg";
+        m_faces[5] = dir + "back.jpg";
+    }
+    else
+    {
+        m_faces[0] = dir + "right.png";
+        m_faces[1] = dir + "left.png";
+        m_faces[2] = dir + "top.png";
+        m_faces[3] = dir + "bottom.png";
+        m_faces[4] = dir + "front.png";
+        m_faces[5] = dir + "back.png";
+    }
+
 
 	GL_CALL(glGenTextures(1, &m_id));
 	GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, m_id));

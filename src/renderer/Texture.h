@@ -38,7 +38,7 @@ private:
 class CubeMap : public TextureBase
 {
 public:
-	CubeMap(const std::string& dir);
+	CubeMap(const std::string& dir, bool jpg = true);
 	CubeMap(CubeMap&& cb) noexcept;
 	~CubeMap();
 

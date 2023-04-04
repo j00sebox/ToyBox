@@ -117,22 +117,6 @@
             }
         }
     ],
-    "shaders": [
-        {
-            "name": "shadow_map"
-        },
-        {
-            "name": "blinn-phong"
-        },
-        {
-            "name": "pbr_standard"
-        },
-        {
-            "name": "flat_colour"
-        },
-        {
-            "name": "default"
-        }
-    ],
-    "skybox": "../resources/skyboxes/above_the_clouds/"
+    "skybox": "../resources/skyboxes/above_the_clouds/",
+    "jpg": true
 }
