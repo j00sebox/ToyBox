@@ -67,8 +67,10 @@
                     1.0
                 ]
             },
-            "gltf": {
-                "path": "../resources/models/bunny/scene.gltf"
+            "mesh": {
+                "mesh_name": "../resources/models/bunny/scene.gltf",
+                "mesh_type": "gltf",
+                "instanced": false
             },
             "name": "Bunny",
             "shader": "default",
@@ -103,7 +105,11 @@
                 ]
             },
             "name": "quad",
-            "primitive": "quad",
+            "mesh": {
+                "mesh_name": "quad",
+                "mesh_type": "primitive",
+                "instanced": false
+            },
             "shader": "default",
             "transform": {
                 "parent_position": [
@@ -136,8 +142,11 @@
                 ]
             },
             "name": "cube",
-            "primitive": "cube",
-            "instanced": true,
+            "mesh": {
+                "mesh_name": "cube",
+                "mesh_type": "primitive",
+                "instanced": true
+            },
             "shader": "default",
             "transform": {
                 "parent_position": [
@@ -170,8 +179,11 @@
                 ]
             },
             "name": "cube (1)",
-            "primitive": "cube",
-            "instanced": true,
+            "mesh": {
+                "mesh_name": "cube",
+                "mesh_type": "primitive",
+                "instanced": true
+            },
             "shader": "default",
             "transform": {
                 "parent_position": [

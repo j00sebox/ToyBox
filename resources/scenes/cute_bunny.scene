@@ -1,1 +1,119 @@
-{"background_colour":[0.0,0.029629647731781006,0.023703716695308685,1.0],"camera":{"forward":[0.16837382316589355,-0.30418527126312256,-0.9376148581504822],"position":[-3.8858754634857178,23.643674850463867,45.21631622314453]},"model_count":2,"models":[{"light":{"brightness":0.1459999978542328,"cast_shadow":true,"colour":[1.0,1.0,1.0,1.0],"direction":[0.0,20.0,20.0],"type":"directional_light"},"name":"Direct Light","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":1.0,"translate":[0.0,0.0,0.0]}},{"custom_texture":{"colour":[0.31799980998039246,0.22786909341812134,0.5343137383460999,4.5914945482066956e-41]},"gltf":{"path":"../resources/models/bunny/scene.gltf"},"name":"Bunny","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[103.0,1.0,0.0,0.0],"scale":100.0,"translate":[0.0,-1.0,-2.0]}}],"shaders":[{"name":"shadow_map"},{"name":"skybox"},{"name":"blinn-phong"},{"name":"pbr_standard"},{"name":"flat_colour"},{"name":"default"}]}
+{
+    "background_colour": [
+        0.0,
+        0.029629647731781006,
+        0.023703716695308685,
+        1.0
+    ],
+    "camera": {
+        "forward": [
+            0.16837382316589355,
+            -0.30418527126312256,
+            -0.9376148581504822
+        ],
+        "position": [
+            -3.8858754634857178,
+            23.643674850463867,
+            45.21631622314453
+        ]
+    },
+    "model_count": 2,
+    "models": [
+        {
+            "light": {
+                "brightness": 0.1459999978542328,
+                "cast_shadow": true,
+                "colour": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    20.0,
+                    20.0
+                ],
+                "type": "directional_light"
+            },
+            "name": "Direct Light",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "custom_texture": {
+                "colour": [
+                    0.31799980998039246,
+                    0.22786909341812134,
+                    0.5343137383460999,
+                    4.5914945482066956e-41
+                ]
+            },
+            "name": "Bunny",
+            "mesh": {
+                "mesh_name": "../resources/models/bunny/scene.gltf",
+                "mesh_type": "gltf",
+                "instanced": false
+            },
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    103.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    0.0,
+                    -1.0,
+                    -2.0
+                ]
+            }
+        }
+    ],
+    "shaders": [
+        {
+            "name": "shadow_map"
+        },
+        {
+            "name": "skybox"
+        },
+        {
+            "name": "blinn-phong"
+        },
+        {
+            "name": "pbr_standard"
+        },
+        {
+            "name": "flat_colour"
+        },
+        {
+            "name": "default"
+        }
+    ]
+}

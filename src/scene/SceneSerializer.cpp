@@ -255,76 +255,129 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 		}
 	}
 
-	if (!model["gltf"].is_null())
-	{
-		std::string gltf_path = model["gltf"]["path"];
-		GLTFLoader loader(gltf_path.c_str());
+    if(!model["mesh"].is_null())
+    {
+        json mesh_accessor = model["mesh"];
+        std::string mesh_name = mesh_accessor["mesh_name"];
 
-        if(!MeshTable::exists(gltf_path))
+        MeshObject mesh_object;
+        Material material;
+
+
+        if(mesh_accessor["mesh_type"] == "gltf")
         {
-            Mesh mesh;
-            load_gltf_mesh(loader, mesh);
+            GLTFLoader loader(mesh_name.c_str());
 
-            MeshTable::add(gltf_path, std::move(mesh));
+            if(!MeshTable::exists(mesh_name))
+            {
+                Mesh mesh;
+                load_gltf_mesh(loader, mesh);
+
+                MeshTable::add(mesh_name, std::move(mesh));
+            }
+
+            load_gltf_material(model, loader, material);
+        }
+        else if(mesh_accessor["mesh_type"] == "primitive")
+        {
+            if(!MeshTable::exists(mesh_name))
+            {
+                Mesh mesh;
+                mesh.load_primitive(str_to_primitive_type(mesh_name.c_str()));
+
+                MeshTable::add(mesh_name, std::move(mesh));
+            }
+
+            material.set_colour({ 1.f, 1.f, 1.f, 1.f });
         }
 
-
-		// TODO: remove later
-        MeshObject meshObject;
-        meshObject.set_mesh(MeshTable::get(gltf_path));
-        meshObject.m_gltf_path = model["gltf"]["path"];
-
-
-		Material material;
-		load_gltf_material(model, loader, material);
-
-        if(!model["instanced"].is_null() && model["instanced"])
+        mesh_object.set_mesh(MeshTable::get(mesh_name));
+        
+        if(mesh_accessor["instanced"])
         {
-            scene.instanced_meshes[gltf_path].push_back(model_matrix);
+            scene.instanced_meshes[mesh_name].push_back(model_matrix);
             material.set_shader(ShaderLib::get("inst_default"));
-            meshObject.m_instance_id = scene.instanced_meshes[gltf_path].size() - 1;
+            mesh_object.m_instance_id = scene.instanced_meshes[mesh_name].size() - 1;
         }
         else
         {
             material.set_shader(ShaderLib::get(model["shader"]));
         }
 
-		e.add_component(std::move(material));
-        e.add_component(std::move(meshObject));
-	}
-	else if (!model["primitive"].is_null())
-	{
-		std::string p_name = model["primitive"];
+        e.add_component(std::move(material));
+        e.add_component(std::move(mesh_object));
+    }
 
-        if(!MeshTable::exists(p_name))
-        {
-            Mesh mesh;
-            mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
-
-            MeshTable::add(p_name, std::move(mesh));
-        }
-
-        MeshObject meshObject;
-        meshObject.set_mesh(MeshTable::get(p_name));
-
-
-		Material material;
-
-        if(!model["instanced"].is_null() && model["instanced"])
-        {
-            scene.instanced_meshes[p_name].push_back(model_matrix);
-            material.set_shader(ShaderLib::get("inst_default"));
-            meshObject.m_instance_id = scene.instanced_meshes[p_name].size() - 1;
-        }
-        else
-        {
-            material.set_shader(ShaderLib::get(model["shader"]));
-        }
-
-		material.set_colour({ 1.f, 1.f, 1.f, 1.f });
-        e.add_component(std::move(meshObject));
-		e.add_component(std::move(material));
-	}
+//	if (!model["gltf"].is_null())
+//	{
+//		std::string gltf_path = model["gltf"]["path"];
+//		GLTFLoader loader(gltf_path.c_str());
+//
+//        if(!MeshTable::exists(gltf_path))
+//        {
+//            Mesh mesh;
+//            load_gltf_mesh(loader, mesh);
+//
+//            MeshTable::add(gltf_path, std::move(mesh));
+//        }
+//
+//
+//		// TODO: remove later
+//        MeshObject meshObject;
+//        meshObject.set_mesh(MeshTable::get(gltf_path));
+//        meshObject.m_gltf_path = model["gltf"]["path"];
+//
+//
+//		Material material;
+//		load_gltf_material(model, loader, material);
+//
+//        if(!model["instanced"].is_null() && model["instanced"])
+//        {
+//            scene.instanced_meshes[gltf_path].push_back(model_matrix);
+//            material.set_shader(ShaderLib::get("inst_default"));
+//            meshObject.m_instance_id = scene.instanced_meshes[gltf_path].size() - 1;
+//        }
+//        else
+//        {
+//            material.set_shader(ShaderLib::get(model["shader"]));
+//        }
+//
+//		e.add_component(std::move(material));
+//        e.add_component(std::move(meshObject));
+//	}
+//	else if (!model["primitive"].is_null())
+//	{
+//		std::string p_name = model["primitive"];
+//
+//        if(!MeshTable::exists(p_name))
+//        {
+//            Mesh mesh;
+//            mesh.load_primitive(str_to_primitive_type(p_name.c_str()));
+//
+//            MeshTable::add(p_name, std::move(mesh));
+//        }
+//
+//        MeshObject meshObject;
+//        meshObject.set_mesh(MeshTable::get(p_name));
+//
+//
+//		Material material;
+//
+//        if(!model["instanced"].is_null() && model["instanced"])
+//        {
+//            scene.instanced_meshes[p_name].push_back(model_matrix);
+//            material.set_shader(ShaderLib::get("inst_default"));
+//            meshObject.m_instance_id = scene.instanced_meshes[p_name].size() - 1;
+//        }
+//        else
+//        {
+//            material.set_shader(ShaderLib::get(model["shader"]));
+//        }
+//
+//		material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+//        e.add_component(std::move(meshObject));
+//		e.add_component(std::move(material));
+//	}
 
 	SceneNode current_node{ std::make_unique<Entity>(std::move(e)) };
 
