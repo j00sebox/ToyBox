@@ -31,9 +31,9 @@ public:
 	Transform operator* (const Transform& other) const;
 
 private:
-    glm::mat4 m_scale;
-    glm::mat4 m_rotation;
-	glm::mat4 m_translate;
+    glm::mat4 m_scale = glm::mat4(1.f);
+    glm::mat4 m_rotation = glm::mat4(1.f);;
+	glm::mat4 m_translate = glm::mat4(1.f);;
 
 	glm::vec3 m_position;
 	glm::vec3 m_rotate_axis;

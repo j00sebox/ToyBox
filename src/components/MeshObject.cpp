@@ -19,16 +19,9 @@ void MeshObject::unbind() const
 
 void MeshObject::imgui_render()
 {
-	if (!m_gltf_path.empty())
-	{
-		ImGui::Text("GLTF: ");
-		ImGui::SameLine();
-		ImGui::Text(m_gltf_path.c_str());
-	}
-	else if (m_primitive != PrimitiveTypes::None)
-	{
-		ImGui::Text(primitive_type_to_str(m_primitive).c_str());
-	}
+    ImGui::Text("name: ");
+    ImGui::SameLine();
+    ImGui::Text(m_mesh_name.c_str());
 }
 
 void MeshObject::serialize(json& accessor) const

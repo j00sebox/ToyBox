@@ -159,7 +159,8 @@ void Scene::add_primitive(const char* name)
 
 	Entity e;
 	e.set_name(lookup);
-	e.add_component(Transform());
+
+    Transform t;
 
     if(!MeshTable::exists(name))
     {
@@ -169,18 +170,18 @@ void Scene::add_primitive(const char* name)
         MeshTable::add(name, std::move(mesh));
     }
 
-    MeshObject meshObject;
-    meshObject.set_mesh(MeshTable::get(name));
-    e.add_component(std::move(meshObject));
+    MeshObject mesh_object;
+    mesh_object.set_mesh(MeshTable::get(name));
+    mesh_object.set_mesh_info(name, "primitive");
 
 	Material material;
 
     if(MeshTable::get(name)->is_instanced())
     {
-        Transform t;
         instanced_meshes[name].push_back(t.get_transform());
         material.set_shader(ShaderLib::get("inst_default"));
         MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
+        mesh_object.m_instance_id = instanced_meshes[name].size() - 1;
     }
     else
     {
@@ -188,6 +189,9 @@ void Scene::add_primitive(const char* name)
     }
 
 	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+
+    e.add_component(std::move(t));
+    e.add_component(std::move(mesh_object));
 	e.add_component(std::move(material));
 
 	if(m_selected_node)

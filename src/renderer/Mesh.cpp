@@ -58,7 +58,8 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 
 void Mesh::make_instanced(int instances, std::vector<glm::mat4> instance_matrices)
 {
-    m_instance_buffer.bind();
+    m_instance_buffer = std::make_unique<VertexBuffer>();
+    m_instance_buffer->bind();
     glBufferData(GL_ARRAY_BUFFER, instances * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW);
 
     m_va.bind();
@@ -79,20 +80,35 @@ void Mesh::make_instanced(int instances, std::vector<glm::mat4> instance_matrice
     glVertexAttribDivisor(6, 1);
 
     m_va.unbind();
-    m_instance_buffer.unbind();
+    m_instance_buffer->unbind();
 
     m_instanced = true;
 }
 
-void Mesh::update_instances(std::vector<glm::mat4> instance_matrices)
+void Mesh::add_instance(std::vector<glm::mat4> instance_matrices)
 {
-    m_instance_buffer.bind();
+    if(m_instance_buffer)
+        m_instance_buffer.reset();
+
+    m_instance_buffer = std::make_unique<VertexBuffer>();
+    m_instance_buffer->bind();
     glBufferData(GL_ARRAY_BUFFER, instance_matrices.size() * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW);
 
     m_va.bind();
 
     m_va.unbind();
-    m_instance_buffer.unbind();
+    m_instance_buffer->unbind();
+}
+
+void Mesh::update_instances(std::vector<glm::mat4> instance_matrices)
+{
+    m_instance_buffer->bind();
+    glBufferData(GL_ARRAY_BUFFER, instance_matrices.size() * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW);
+
+    m_va.bind();
+
+    m_va.unbind();
+    m_instance_buffer->unbind();
 }
 
 void Mesh::bind() const

@@ -19,10 +19,12 @@ class Mesh
 public:
     Mesh() = default;
     Mesh(Mesh&& mesh) noexcept;
+    ~Mesh() { m_instance_buffer.reset(); }
 
     void load(const std::vector<float>& verts, const std::vector<unsigned int>& indices);
     void load_primitive(PrimitiveTypes primitive);
     void make_instanced(int instances, std::vector<glm::mat4> instance_matrices);
+    void add_instance(std::vector<glm::mat4> instance_matrices);
     void update_instances(std::vector<glm::mat4> instance_matrices);
     void bind() const;
     void unbind() const;
@@ -37,7 +39,7 @@ private:
     bool m_instanced = false;
     VertexArray m_va;
     VertexBuffer m_vb;
-    VertexBuffer m_instance_buffer; // TODO: don't create with every mesh
+    std::unique_ptr<VertexBuffer> m_instance_buffer;
     IndexBuffer m_ib;
 };
 
