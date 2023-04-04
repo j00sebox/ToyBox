@@ -107,43 +107,51 @@ std::vector<unsigned int> GLTFLoader::get_indices() const
 	switch (component_type)
 	{
 	case 5125:
+    {
+        unsigned int length = count * 4;
 
-		unsigned int length = count * 4;
+        for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
+        {
+            unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
+            unsigned int val;
 
-		for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
-		{
-			unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
-			unsigned int val;
+            std::memcpy(&val, byte, sizeof(unsigned int));
 
-			std::memcpy(&val, byte, sizeof(unsigned int));
+            indices.push_back(val);
+        }
+        break;
+    }
 
-			indices.push_back(val);
-		}
-		break;
-		// TODO: add the other types
-		/*case 5123:
-			for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
-			{
-				unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
-				float val;
+    case 5123:
+    {
+        unsigned int length = count * 4;
 
-				std::memcpy(&val, byte, sizeof(unsigned short));
+        for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
+        {
+            unsigned char byte[] = { m_data[i++], m_data[i++] };
+            unsigned short val;
 
-				indices.push_back(val);
-			}
-			break;
-		case 5122:
-			for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
-			{
-				unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
-				float val;
+            std::memcpy(&val, byte, sizeof(unsigned short));
 
-				std::memcpy(&val, byte, sizeof(short));
+            indices.push_back(val);
+        }
+        break;
+    }
 
-				indices.push_back(val);
-			}
-			break;*/
-		}
+
+    // TODO: add the other types
+//		case 5122:
+//			for (unsigned int i = buffer_byte_offset; i < (buffer_byte_offset + length);)
+//			{
+//				unsigned char byte[] = { m_data[i++], m_data[i++], m_data[i++], m_data[i++] };
+//				float val;
+//
+//				std::memcpy(&val, byte, sizeof(short));
+//
+//				indices.push_back(val);
+//			}
+//			break;*/
+    }
 
 	return indices;
 }

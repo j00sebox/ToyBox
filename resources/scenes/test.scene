@@ -7,17 +7,17 @@
     ],
     "camera": {
         "forward": [
-            0.26115545630455017,
-            -0.4900763928890228,
-            -0.831638753414154
+            0.8891737461090088,
+            -0.4117724597454071,
+            -0.19953152537345886
         ],
         "position": [
-            -17.73080062866211,
-            48.52104187011719,
-            98.97178649902344
+            -43.48975372314453,
+            24.87210464477539,
+            15.909533500671387
         ]
     },
-    "model_count": 7,
+    "model_count": 2,
     "models": [
         {
             "light": {
@@ -59,94 +59,12 @@
             }
         },
         {
-            "custom_texture": {
-                "colour": [
-                    0.5428031086921692,
-                    0.8529411554336548,
-                    0.44737598299980164,
-                    1.0
-                ]
-            },
-            "mesh": {
-                "instanced": true,
-                "mesh_name": "../resources/models/bunny/scene.gltf",
-                "mesh_type": "gltf"
-            },
-            "name": "Bunny",
-            "shader": "inst_default",
-            "transform": {
-                "parent_position": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "parent_scale": 1.0,
-                "rotation": [
-                    103.0,
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": 100.0,
-                "translate": [
-                    0.0,
-                    -5.0,
-                    -17.0
-                ]
-            }
-        },
-        {
-            "custom_texture": {
-                "colour": [
-                    0.7352941036224365,
-                    0.273933082818985,
-                    0.273933082818985,
-                    1.0
-                ]
-            },
-            "mesh": {
-                "instanced": true,
-                "mesh_name": "../resources/models/bunny/scene.gltf",
-                "mesh_type": "gltf"
-            },
-            "name": "Bugs",
-            "shader": "inst_default",
-            "transform": {
-                "parent_position": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "parent_scale": 1.0,
-                "rotation": [
-                    103.0,
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": 100.0,
-                "translate": [
-                    11.0,
-                    -1.0,
-                    23.0
-                ]
-            }
-        },
-        {
-            "custom_texture": {
-                "colour": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
             "mesh": {
                 "instanced": false,
-                "mesh_name": "quad",
-                "mesh_type": "primitive"
+                "mesh_name": "../resources/models/asteroid/scene.gltf",
+                "mesh_type": "gltf"
             },
-            "name": "quad",
+            "name": "Asteroid",
             "shader": "default",
             "transform": {
                 "parent_position": [
@@ -156,126 +74,15 @@
                 ],
                 "parent_scale": 1.0,
                 "rotation": [
-                    -90.0,
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": 100.0,
-                "translate": [
-                    0.0,
-                    44.0,
-                    0.0
-                ]
-            }
-        },
-        {
-            "custom_texture": {
-                "colour": [
-                    0.8235294222831726,
-                    0.0,
-                    0.0,
-                    1.0
-                ]
-            },
-            "mesh": {
-                "instanced": true,
-                "mesh_name": "cube",
-                "mesh_type": "primitive"
-            },
-            "name": "cube",
-            "shader": "inst_default",
-            "transform": {
-                "parent_position": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "parent_scale": 1.0,
-                "rotation": [
                     0.0,
                     0.0,
                     0.0,
                     0.0
                 ],
-                "scale": 2.0,
-                "translate": [
-                    15.0,
-                    11.0,
-                    0.0
-                ]
-            }
-        },
-        {
-            "custom_texture": {
-                "colour": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "mesh": {
-                "instanced": true,
-                "mesh_name": "cube",
-                "mesh_type": "primitive"
-            },
-            "name": "cube (1)",
-            "shader": "inst_default",
-            "transform": {
-                "parent_position": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "parent_scale": 1.0,
-                "rotation": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": 2.0,
+                "scale": 1.0,
                 "translate": [
                     0.0,
                     0.0,
-                    33.0
-                ]
-            }
-        },
-        {
-            "custom_texture": {
-                "colour": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "mesh": {
-                "instanced": true,
-                "mesh_name": "cube",
-                "mesh_type": "primitive"
-            },
-            "name": "cube (2)",
-            "shader": "inst_default",
-            "transform": {
-                "parent_position": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "parent_scale": 1.0,
-                "rotation": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": 2.0,
-                "translate": [
-                    -29.0,
-                    13.0,
                     0.0
                 ]
             }

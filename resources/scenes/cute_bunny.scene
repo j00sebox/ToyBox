@@ -95,25 +95,5 @@
                 ]
             }
         }
-    ],
-    "shaders": [
-        {
-            "name": "shadow_map"
-        },
-        {
-            "name": "skybox"
-        },
-        {
-            "name": "blinn-phong"
-        },
-        {
-            "name": "pbr_standard"
-        },
-        {
-            "name": "flat_colour"
-        },
-        {
-            "name": "default"
-        }
     ]
 }
