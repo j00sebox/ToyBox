@@ -37,7 +37,8 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
         scene.set_background_colour({bg_col[0], bg_col[1], bg_col[2], bg_col[3]});
     }
 
-	load_skybox(w_json, sky_box);
+    if(!w_json["skybox"].is_null())
+        load_skybox(w_json["skybox"], sky_box);
 
 	json models = w_json["models"];
 	unsigned int model_count = w_json["model_count"];
@@ -51,7 +52,8 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 
 	if (sky_box)
 	{
-		res_json["skybox"] = sky_box->get_resource_path();
+		res_json["skybox"]["path"] = sky_box->get_resource_path();
+        res_json["skybox"]["image_format"] = (int)sky_box->get_image_format();
 	}
 
 	glm::vec3 camera_pos = camera->get_pos();
@@ -114,12 +116,7 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 
 void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>& sky_box)
 {
-	std::string skybox_src = accessor.value("skybox", "");
-
-	if (!skybox_src.empty())
-	{
-		sky_box = std::make_unique<Skybox>(skybox_src, accessor["jpg"]);
-	}
+    sky_box = std::make_unique<Skybox>(accessor["path"], accessor["image_format"]);
 }
 
 void SceneSerializer::load_models(const json& accessor, unsigned int model_count, SceneNode& root, Scene& scene)

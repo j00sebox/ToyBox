@@ -117,6 +117,8 @@
             }
         }
     ],
-    "skybox": "../resources/skyboxes/above_the_clouds/",
-    "jpg": true
+    "skybox": {
+        "path": "../resources/skyboxes/above_the_clouds/",
+        "image_format": 0
+    }
 }

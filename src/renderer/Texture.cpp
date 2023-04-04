@@ -6,6 +6,21 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
+const char* image_extension(ImageFormat fmt)
+{
+    switch (fmt)
+    {
+        case ImageFormat::JPG:
+            return ".jpg";
+
+        case ImageFormat::PNG:
+            return ".png";
+    }
+
+    return "";
+}
+
+
 Texture2D::Texture2D(const std::string& file_name, bool gamma_correct)
 {
 	stbi_set_flip_vertically_on_load(0);
@@ -85,26 +100,16 @@ void Texture2D::move_members(Texture2D&& t) noexcept
 	t.m_data = nullptr;
 }
 
-CubeMap::CubeMap(const std::string& dir, bool jpg)
+CubeMap::CubeMap(const std::string& dir, ImageFormat fmt)
 {
-    if(jpg)
-    {
-        m_faces[0] = dir + "right.jpg";
-        m_faces[1] = dir + "left.jpg";
-        m_faces[2] = dir + "top.jpg";
-        m_faces[3] = dir + "bottom.jpg";
-        m_faces[4] = dir + "front.jpg";
-        m_faces[5] = dir + "back.jpg";
-    }
-    else
-    {
-        m_faces[0] = dir + "right.png";
-        m_faces[1] = dir + "left.png";
-        m_faces[2] = dir + "top.png";
-        m_faces[3] = dir + "bottom.png";
-        m_faces[4] = dir + "front.png";
-        m_faces[5] = dir + "back.png";
-    }
+    const char* img_ext = image_extension(fmt);
+
+    m_faces[0] = dir + "right" + img_ext;
+    m_faces[1] = dir + "left" + img_ext;
+    m_faces[2] = dir + "top" + img_ext;
+    m_faces[3] = dir + "bottom" + img_ext;
+    m_faces[4] = dir + "front" + img_ext;
+    m_faces[5] = dir + "back" + img_ext;
 
 
 	GL_CALL(glGenTextures(1, &m_id));

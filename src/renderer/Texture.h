@@ -2,6 +2,13 @@
 
 #include <string>
 
+enum class ImageFormat
+{
+    JPG = 0,
+    PNG
+};
+
+
 class TextureBase
 {
 public:
@@ -38,7 +45,7 @@ private:
 class CubeMap : public TextureBase
 {
 public:
-	CubeMap(const std::string& dir, bool jpg = true);
+	CubeMap(const std::string& dir, ImageFormat fmt = ImageFormat::JPG);
 	CubeMap(CubeMap&& cb) noexcept;
 	~CubeMap();
 

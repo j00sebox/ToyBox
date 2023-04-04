@@ -5,8 +5,8 @@
 
 #include <glad/glad.h>
 
-Skybox::Skybox(const std::string& texture_path, bool jpg)
-	: m_skybox_texture(texture_path, jpg), m_path(texture_path)
+Skybox::Skybox(const std::string& texture_path, ImageFormat fmt)
+	: m_skybox_texture(texture_path, fmt), m_path(texture_path), m_img_fmt(fmt)
 {
     m_skybox_shader = ShaderLib::get("skybox");
 
@@ -72,21 +72,7 @@ Skybox::Skybox(Skybox&& sb) noexcept
 	m_skybox_va = std::move(sb.m_skybox_va);
     m_skybox_shader = sb.m_skybox_shader;
 	m_path = std::move(sb.m_path);
-}
-
-void Skybox::draw() const
-{
-    GL_CALL(glDisable(GL_CULL_FACE));
-	GL_CALL(glDepthMask(GL_FALSE));
-	m_skybox_va.bind();
-	m_skybox_texture.bind(0);
-	m_skybox_shader->bind();
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_indices_count, GL_UNSIGNED_INT, nullptr));
-	GL_CALL(glDepthMask(GL_TRUE));
-	m_skybox_va.unbind();
-	m_skybox_texture.unbind();
-	m_skybox_shader->unbind();
-    //GL_CALL(glEnable(GL_CULL_FACE));
+    m_img_fmt = std::move(sb.m_img_fmt);
 }
 
 void Skybox::bind() const
@@ -110,6 +96,7 @@ void Skybox::operator=(Skybox&& sb) noexcept
 	m_skybox_va = std::move(sb.m_skybox_va);
 	m_skybox_texture = std::move(sb.m_skybox_texture);
 	m_skybox_shader = sb.m_skybox_shader;
+    m_img_fmt = std::move(sb.m_img_fmt);
 }
 
 
