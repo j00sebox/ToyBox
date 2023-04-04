@@ -24,7 +24,6 @@ public:
     void load(const std::vector<float>& verts, const std::vector<unsigned int>& indices);
     void load_primitive(PrimitiveTypes primitive);
     void make_instanced(int instances, std::vector<glm::mat4> instance_matrices);
-    void add_instance(std::vector<glm::mat4> instance_matrices);
     void update_instances(std::vector<glm::mat4> instance_matrices);
     void bind() const;
     void unbind() const;

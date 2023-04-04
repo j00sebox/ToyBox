@@ -281,7 +281,8 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
                 MeshTable::add(mesh_name, std::move(mesh));
             }
 
-            material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+            // TODO: make it so primitives can load textures
+            material.set_colour({ model["custom_texture"]["colour"][0], model["custom_texture"]["colour"][1], model["custom_texture"]["colour"][2], model["custom_texture"]["colour"][3] });
         }
 
         mesh_object.set_mesh(MeshTable::get(mesh_name));

@@ -421,7 +421,7 @@ void Scene::compile_shaders() const
     ));
 
     ShaderLib::add("inst_shadow_map", ShaderProgram(
-            Shader("../resources/shaders/default/instanced_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/shadow_map/instanced_sm_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/shadow_map/shadow_map_fragment.shader", ShaderType::Fragment)
     ));
 }

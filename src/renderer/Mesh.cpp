@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Mesh.h"
 #include "Log.h"
+#include "GLError.h"
 
 #include <glad/glad.h>
 
@@ -58,26 +59,27 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
 
 void Mesh::make_instanced(int instances, std::vector<glm::mat4> instance_matrices)
 {
-    m_instance_buffer = std::make_unique<VertexBuffer>();
+    m_instance_buffer.reset(new VertexBuffer());
     m_instance_buffer->bind();
-    glBufferData(GL_ARRAY_BUFFER, instances * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW);
+    // TODO: move gl code to respective classes
+    GL_CALL(glBufferData(GL_ARRAY_BUFFER, instances * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW));
 
     m_va.bind();
 
-    std::size_t vec4Size = sizeof(glm::vec4);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+    std::size_t vec4_size = sizeof(glm::vec4);
+    GL_CALL(glEnableVertexAttribArray(3));
+    GL_CALL(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4_size, (void*)0));
+    GL_CALL(glEnableVertexAttribArray(4));
+    GL_CALL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4_size, (void*)(1 * vec4_size)));
+    GL_CALL(glEnableVertexAttribArray(5));
+    GL_CALL(glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4_size, (void*)(2 * vec4_size)));
+    GL_CALL(glEnableVertexAttribArray(6));
+    GL_CALL(glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4_size, (void*)(3 * vec4_size)));
 
-    glVertexAttribDivisor(3, 1);
-    glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);
-    glVertexAttribDivisor(6, 1);
+    GL_CALL(glVertexAttribDivisor(3, 1));
+    GL_CALL(glVertexAttribDivisor(4, 1));
+    GL_CALL(glVertexAttribDivisor(5, 1));
+    GL_CALL(glVertexAttribDivisor(6, 1));
 
     m_va.unbind();
     m_instance_buffer->unbind();
@@ -85,25 +87,10 @@ void Mesh::make_instanced(int instances, std::vector<glm::mat4> instance_matrice
     m_instanced = true;
 }
 
-void Mesh::add_instance(std::vector<glm::mat4> instance_matrices)
-{
-    if(m_instance_buffer)
-        m_instance_buffer.reset();
-
-    m_instance_buffer = std::make_unique<VertexBuffer>();
-    m_instance_buffer->bind();
-    glBufferData(GL_ARRAY_BUFFER, instance_matrices.size() * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW);
-
-    m_va.bind();
-
-    m_va.unbind();
-    m_instance_buffer->unbind();
-}
-
 void Mesh::update_instances(std::vector<glm::mat4> instance_matrices)
 {
     m_instance_buffer->bind();
-    glBufferData(GL_ARRAY_BUFFER, instance_matrices.size() * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW);
+    GL_CALL(glBufferData(GL_ARRAY_BUFFER, instance_matrices.size() * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW));
 
     m_va.bind();
 
