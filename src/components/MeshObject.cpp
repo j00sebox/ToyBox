@@ -33,13 +33,8 @@ void MeshObject::imgui_render()
 
 void MeshObject::serialize(json& accessor) const
 {
-	if (!m_gltf_path.empty())
-	{
-		accessor["gltf"]["path"] = m_gltf_path;
-	}
-	else if (m_primitive != PrimitiveTypes::None)
-	{
-		accessor["primitive"] = primitive_type_to_str(m_primitive);
-	}
+	accessor["mesh"]["mesh_name"] = m_mesh_name;
+    accessor["mesh"]["mesh_type"] = m_mesh_type;
+    accessor["mesh"]["instanced"] = m_mesh->is_instanced();
 }
 

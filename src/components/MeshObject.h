@@ -14,6 +14,9 @@ public:
     void set_mesh(const std::shared_ptr<Mesh>& mesh) { m_mesh = mesh; }
     [[nodiscard]] const std::shared_ptr<Mesh>& get_mesh() const { return m_mesh; }
 
+    void set_mesh_name(const std::string& name) { m_mesh_name = name; }
+    [[nodiscard]] const std::string& get_mesh_name() const { return m_mesh_name; }
+
 	void bind() const;
 	void unbind() const;
 
@@ -26,6 +29,8 @@ public:
 
 private:
     std::shared_ptr<Mesh> m_mesh;
+    std::string m_mesh_name;
+    std::string m_mesh_type; // TODO: think about using an enum
 
 	// TODO: Remove after a better way is found
 	std::string m_gltf_path;
