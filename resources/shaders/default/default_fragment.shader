@@ -50,6 +50,11 @@ vec3 normal;
 
 out vec4 colour;
 
+bool out_of_frustrum(vec3 pos)
+{
+    return (pos.x < -1.f || pos.x > 1.f) || (pos.y < -1.f || pos.y > 1.f) || (pos.z < -1.f || pos.z > 1.f);
+}
+
 vec4 direct_light()
 {
     vec3 light_dir = normalize(directional_light.direction);
@@ -61,7 +66,7 @@ vec4 direct_light()
     vec3 light_pos = v_light_space_pos.xyz / v_light_space_pos.w;
 
     float shadow = 0.f;
-    if(light_pos.z <= 1.f)
+    if(!out_of_frustrum(light_pos))
     {
         light_pos = (light_pos + 1.f) / 2.f;
         float shadow_bias = max(0.0002f * (1.f - dot(normal, light_dir)), 0.0005f);
