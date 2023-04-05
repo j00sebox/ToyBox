@@ -6,6 +6,7 @@
 #include "SceneSerializer.h"
 #include "Timer.h"
 #include "Mesh.h"
+#include "Log.h"
 #include "components/Transform.h"
 #include "components/Light.h"
 #include "components/MeshObject.h"
@@ -58,6 +59,7 @@ void Scene::init()
 	{
 		m_light_manager.set_lights(node);
 	}
+
 }
 
 void Scene::update(float elapsed_time)

@@ -9,7 +9,9 @@ class SceneNode
 {
 public:
 	SceneNode() = default;
+    SceneNode(SceneNode&& sn);
 	SceneNode(std::unique_ptr<Entity>&& e);
+    ~SceneNode();
 	void add_child(SceneNode&& s);
 	bool remove(SceneNode& node);
 	SceneNode move(SceneNode& node);

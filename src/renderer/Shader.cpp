@@ -93,9 +93,10 @@ void ShaderProgram::compile_shader(unsigned int id) const
 		char* info_log = new char[log_sz * sizeof(char)];
 		GL_CALL(glGetShaderInfoLog(id, log_sz, nullptr, info_log));
 		
-		fatal("{}\n", info_log)
+		error("{}\n", info_log);
 		delete[] info_log;
 		GL_CALL(glDeleteShader(id));
+        fatal("program shutdown");
 	}
 	else
 	{
