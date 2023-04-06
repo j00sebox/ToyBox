@@ -159,7 +159,7 @@ void ShaderProgram::get_active_uniforms() const
 	}
 }
 
-int ShaderProgram::get_uniform_loaction(const std::string& name)
+int ShaderProgram::get_uniform_location(const std::string& name)
 {
 	if (m_uniform_location_cache.find(name) != m_uniform_location_cache.end())
 		return m_uniform_location_cache[name];
@@ -179,42 +179,42 @@ int ShaderProgram::get_uniform_loaction(const std::string& name)
 void ShaderProgram::set_uniform_1i(const std::string& name, int i)
 {
 	bind();
-	GL_CALL(glUniform1i(get_uniform_loaction(name), i));
+	GL_CALL(glUniform1i(get_uniform_location(name), i));
 	unbind();
 }
 
 void ShaderProgram::set_uniform_1f(const std::string& name, float x)
 {
 	bind();
-	GL_CALL(glUniform1f(get_uniform_loaction(name), x));
+	GL_CALL(glUniform1f(get_uniform_location(name), x));
 	unbind();
 }
 
 void ShaderProgram::set_uniform_2f(const std::string& name, float x, float y)
 {
 	bind();
-	GL_CALL(glUniform2f(get_uniform_loaction(name), x, y));
+	GL_CALL(glUniform2f(get_uniform_location(name), x, y));
 	unbind();
 }
 
 void ShaderProgram::set_uniform_3f(const std::string& name, const glm::vec3& vec)
 {
 	bind();
-	GL_CALL(glUniform3f(get_uniform_loaction(name), vec.x, vec.y, vec.z));
+	GL_CALL(glUniform3f(get_uniform_location(name), vec.x, vec.y, vec.z));
 	unbind();
 }
 
 void ShaderProgram::set_uniform_4f(const std::string& name, const glm::vec4& vec)
 {
 	bind();
-	GL_CALL(glUniform4f(get_uniform_loaction(name), vec.x, vec.y, vec.z, vec.w));
+	GL_CALL(glUniform4f(get_uniform_location(name), vec.x, vec.y, vec.z, vec.w));
 	unbind();
 }
 
 void ShaderProgram::set_uniform_mat4f(const std::string& name, const glm::mat4& mat)
 {
 	bind();
-	GL_CALL(glUniformMatrix4fv(get_uniform_loaction(name), 1, GL_FALSE, &mat[0][0]));
+	GL_CALL(glUniformMatrix4fv(get_uniform_location(name), 1, GL_FALSE, &mat[0][0]));
 	unbind();
 }
 

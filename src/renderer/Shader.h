@@ -63,8 +63,7 @@ public:
 	void set_uniform_4f(const std::string& name, const glm::vec4& vec);
 	void set_uniform_mat4f(const std::string& name, const glm::mat4& mat);
 
-	[[nodiscard]] int get_uniform_loaction(const std::string& name);
-	[[nodiscard]] const std::vector<std::string>& get_shader_locations() const { return m_shader_locations; } // TODO: Remove later
+	[[nodiscard]] int get_uniform_location(const std::string& name);
 
 	void bind() const;
 	void unbind() const;
@@ -100,7 +99,4 @@ public:
 private:
 	static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> m_shaders;
     static std::vector<std::string> m_material_shaders;
-
-    friend class Material;
-	friend class SceneSerializer;
 };
