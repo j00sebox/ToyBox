@@ -25,7 +25,7 @@ Scene::Scene(Window* window)
 
 Scene::~Scene()
 {
-    ShaderLib::release();
+    ShaderTable::release();
     MeshTable::release();
 }
 
@@ -181,13 +181,13 @@ void Scene::add_primitive(const char* name)
     if(MeshTable::get(name)->is_instanced())
     {
         instanced_meshes[name].push_back(t.get_transform());
-        material.set_shader(ShaderLib::get("inst_default"));
+        material.set_shader(ShaderTable::get("inst_default"));
         MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
         mesh_object.m_instance_id = instanced_meshes[name].size() - 1;
     }
     else
     {
-        material.set_shader(ShaderLib::get("default"));
+        material.set_shader(ShaderTable::get("default"));
     }
 
 	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
@@ -387,42 +387,42 @@ void Scene::set_background_colour(glm::vec4 colour)
 // load the standard shaders
 void Scene::compile_shaders() const
 {
-    ShaderLib::add("default", ShaderProgram(
+    ShaderTable::add("default", ShaderProgram(
             Shader("../resources/shaders/default/default_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/default/default_fragment.shader", ShaderType::Fragment)
     ), true);
 
-    ShaderLib::add("inst_default", ShaderProgram(
+    ShaderTable::add("inst_default", ShaderProgram(
             Shader("../resources/shaders/default/instanced_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/default/default_fragment.shader", ShaderType::Fragment)
     ));
 
-    ShaderLib::add("flat_colour", ShaderProgram(
+    ShaderTable::add("flat_colour", ShaderProgram(
             Shader("../resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
     ), true);
 
-    ShaderLib::add("pbr_standard", ShaderProgram(
+    ShaderTable::add("pbr_standard", ShaderProgram(
             Shader("../resources/shaders/pbr/pbr_standard_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/pbr/pbr_standard_fragment.shader", ShaderType::Fragment)
     ), true);
 
-    ShaderLib::add("blinn-phong", ShaderProgram(
+    ShaderTable::add("blinn-phong", ShaderProgram(
             Shader("../resources/shaders/blinn-phong/blinn-phong_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/blinn-phong/blinn-phong_fragment.shader", ShaderType::Fragment)
     ), true);
 
-    ShaderLib::add("skybox", ShaderProgram(
+    ShaderTable::add("skybox", ShaderProgram(
             Shader("../resources/shaders/skybox/skybox_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/skybox/skybox_fragment.shader", ShaderType::Fragment)
     ));
 
-    ShaderLib::add("shadow_map", ShaderProgram(
+    ShaderTable::add("shadow_map", ShaderProgram(
             Shader("../resources/shaders/shadow_map/shadow_map_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/shadow_map/shadow_map_fragment.shader", ShaderType::Fragment)
     ));
 
-    ShaderLib::add("inst_shadow_map", ShaderProgram(
+    ShaderTable::add("inst_shadow_map", ShaderProgram(
             Shader("../resources/shaders/shadow_map/instanced_sm_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/shadow_map/shadow_map_fragment.shader", ShaderType::Fragment)
     ));

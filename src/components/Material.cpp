@@ -58,16 +58,16 @@ void Material::unbind() const
 #pragma ide diagnostic ignored "UnreachableCode"
 void Material::imgui_render()
 {
-    static std::string combo_preview = ShaderLib::find(m_shader);
+    static std::string combo_preview = ShaderTable::find(m_shader);
     if (ImGui::BeginCombo("Shader", combo_preview.c_str()))
     {
-        for (auto name : ShaderLib::get_material_shaders())
+        for (auto name : ShaderTable::get_material_shaders())
         {
             const bool is_selected = (name == combo_preview);
             if (ImGui::Selectable(name.c_str(), is_selected))
             {
                 combo_preview = name;
-                m_shader = ShaderLib::get(combo_preview);
+                m_shader = ShaderTable::get(combo_preview);
             }
 
             if (is_selected)

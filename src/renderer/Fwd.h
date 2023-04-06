@@ -7,4 +7,4 @@ class Mesh;
 class Texture2D;
 struct Shader;
 class ShaderProgram;
-class ShaderLib;
+class ShaderTable;

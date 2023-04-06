@@ -78,11 +78,11 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_brightness());
 
             // TODO: consolidate into uniform buffer
-            //ShaderLib::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
-            ShaderLib::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
-            ShaderLib::get("inst_default")->set_uniform_3f("u_cam_pos", camera->get_pos());
-            ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
-            ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
+            //ShaderTable::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
+            ShaderTable::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
+            ShaderTable::get("inst_default")->set_uniform_3f("u_cam_pos", camera->get_pos());
+            ShaderTable::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
+            ShaderTable::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
 		}
 	}
 
@@ -96,20 +96,20 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
         m_light_uniform_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
 
         // TODO: consolidate into uniform buffer
-        ShaderLib::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
-        ShaderLib::get("inst_default")->set_uniform_3f("u_cam_pos", camera->get_pos());
-        ShaderLib::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
-        ShaderLib::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
+        ShaderTable::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
+        ShaderTable::get("inst_default")->set_uniform_3f("u_cam_pos", camera->get_pos());
+        ShaderTable::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
+        ShaderTable::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
 
         if(direct_light.is_casting_shadow())
         {
-            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_view", direct_light.get_light_view());
-            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());
-            ShaderLib::get("inst_shadow_map")->set_uniform_mat4f("u_light_space_view", direct_light.get_light_view());
-            ShaderLib::get("inst_shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());
+            ShaderTable::get("shadow_map")->set_uniform_mat4f("u_light_space_view", direct_light.get_light_view());
+            ShaderTable::get("shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());
+            ShaderTable::get("inst_shadow_map")->set_uniform_mat4f("u_light_space_view", direct_light.get_light_view());
+            ShaderTable::get("inst_shadow_map")->set_uniform_mat4f("u_light_space_projection", direct_light.get_light_projection());
             // TODO: uniform buffer
-            ShaderLib::get("default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
-            ShaderLib::get("inst_default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
+            ShaderTable::get("default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
+            ShaderTable::get("inst_default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
             direct_light.bind_shadow_map();
             Renderer::shadow_pass(render_list);
             Renderer::shadow_map = direct_light.get_shadow_map();

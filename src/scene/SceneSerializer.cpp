@@ -91,7 +91,7 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 	if (scene_node.entity->has_component<Material>())
 	{
 		auto& material = scene_node.entity->get_component<Material>();
-		accessor[node_index]["shader"] = ShaderLib::find(material.get_shader());
+		accessor[node_index]["shader"] = ShaderTable::find(material.get_shader());
 	}
 
 	const auto& components = scene_node.entity->get_components();
@@ -289,12 +289,12 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         if(mesh_accessor["instanced"])
         {
             scene.instanced_meshes[mesh_name].push_back(model_matrix);
-            material.set_shader(ShaderLib::get("inst_default"));
+            material.set_shader(ShaderTable::get("inst_default"));
             mesh_object.m_instance_id = scene.instanced_meshes[mesh_name].size() - 1;
         }
         else
         {
-            material.set_shader(ShaderLib::get(model["shader"]));
+            material.set_shader(ShaderTable::get(model["shader"]));
         }
 
         e.add_component(std::move(material));

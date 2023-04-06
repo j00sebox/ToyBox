@@ -78,9 +78,9 @@ void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mes
 	mesh.bind();
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
 
-    ShaderLib::get("flat_colour")->set_uniform_mat4f("u_model", stencil_transform.get_transform());
-    ShaderLib::get("flat_colour")->set_uniform_4f("u_flat_colour", {1.f, 1.f, 0.f, 1.f});
-	ShaderLib::get("flat_colour")->bind();
+    ShaderTable::get("flat_colour")->set_uniform_mat4f("u_model", stencil_transform.get_transform());
+    ShaderTable::get("flat_colour")->set_uniform_4f("u_flat_colour", {1.f, 1.f, 0.f, 1.f});
+	ShaderTable::get("flat_colour")->bind();
 	GL_CALL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF)); // now all fragments not apart of the original object are written
 	GL_CALL(glStencilMask(0x00)); // disable writing to stencil buffer
 	GL_CALL(glDisable(GL_DEPTH_TEST));
@@ -106,14 +106,14 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
     {
         if(render_obj.mesh->get_mesh()->is_instanced())
         {
-            ShaderLib::get("inst_shadow_map")->bind();
+            ShaderTable::get("inst_shadow_map")->bind();
             render_obj.mesh->bind();
             GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr, render_obj.instances));
         }
         else
         {
-            ShaderLib::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
-            ShaderLib::get("shadow_map")->bind();
+            ShaderTable::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
+            ShaderTable::get("shadow_map")->bind();
             render_obj.mesh->bind();
             GL_CALL(glDrawElements(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
         }

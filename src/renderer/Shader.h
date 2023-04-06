@@ -86,7 +86,7 @@ private:
 	std::unordered_map<std::string, int> m_uniform_location_cache;
 };
 
-class ShaderLib
+class ShaderTable
 {
 public:
 	static void add(const std::string& name, ShaderProgram&& sp, bool is_material = false);

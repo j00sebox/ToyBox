@@ -218,10 +218,10 @@ void ShaderProgram::set_uniform_mat4f(const std::string& name, const glm::mat4& 
 	unbind();
 }
 
-std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLib::m_shaders;
-std::vector<std::string> ShaderLib::m_material_shaders;
+std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderTable::m_shaders;
+std::vector<std::string> ShaderTable::m_material_shaders;
 
-void ShaderLib::add(const std::string& name, ShaderProgram&& sp, bool is_material)
+void ShaderTable::add(const std::string& name, ShaderProgram&& sp, bool is_material)
 {
     if (!exists(name))
     {
@@ -230,7 +230,7 @@ void ShaderLib::add(const std::string& name, ShaderProgram&& sp, bool is_materia
     }
 }
 
-std::shared_ptr<ShaderProgram> ShaderLib::get(const std::string& name)
+std::shared_ptr<ShaderProgram> ShaderTable::get(const std::string& name)
 {
 	if (exists(name))
 	{
@@ -241,12 +241,12 @@ std::shared_ptr<ShaderProgram> ShaderLib::get(const std::string& name)
 	return nullptr;
 }
 
-bool ShaderLib::exists(const std::string& name)
+bool ShaderTable::exists(const std::string& name)
 {
 	return (m_shaders.find(name) != m_shaders.end());
 }
 
-std::string ShaderLib::find(const std::shared_ptr<ShaderProgram>& s)
+std::string ShaderTable::find(const std::shared_ptr<ShaderProgram>& s)
 {
 	for (const auto& [name, shader_ptr] : m_shaders)
 	{
@@ -259,7 +259,7 @@ std::string ShaderLib::find(const std::shared_ptr<ShaderProgram>& s)
 	return "";
 }
 
-void ShaderLib::release()
+void ShaderTable::release()
 {
 	m_shaders.clear();
     m_material_shaders.clear();

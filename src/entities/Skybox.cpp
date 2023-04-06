@@ -8,7 +8,7 @@
 Skybox::Skybox(const std::string& texture_path, ImageFormat fmt)
 	: m_skybox_texture(texture_path, fmt), m_path(texture_path), m_img_fmt(fmt)
 {
-    m_skybox_shader = ShaderLib::get("skybox");
+    m_skybox_shader = ShaderTable::get("skybox");
 
 	std::vector<float> skybox_verts =
 	{
