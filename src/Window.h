@@ -17,6 +17,7 @@ public:
     void resize_viewport(int width, int height);
     void bind_viewport() const;
     void change_sample_amount(int new_sample_amount);
+    void toggle_vsync();
 
 
 	void begin_frame();
@@ -27,6 +28,7 @@ public:
 private:
 	int m_width, m_height;
 	double prev_time = 0.0;
+    bool m_vsync = true;
 	GLFWwindow* m_window_handle;
     std::unique_ptr<ViewPort> m_main_viewport;
 };

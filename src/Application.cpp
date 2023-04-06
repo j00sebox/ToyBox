@@ -131,6 +131,11 @@ void Application::display_menu()
 				display_bg_col_picker = true;
 			}
 
+            if(ImGui::MenuItem("V-Sync Toggle"))
+            {
+                m_window.toggle_vsync();
+            }
+
             if(ImGui::BeginMenu("Anti-Aliasing"))
             {
                 if(ImGui::MenuItem("No AA"))

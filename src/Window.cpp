@@ -54,7 +54,7 @@ Window::Window(int width, int height, int viewport_width, int viewport_height)
 	ImGui_ImplOpenGL3_Init(glsl_version);
 	
 	// v-sync on
-	glfwSwapInterval(1);
+	glfwSwapInterval(m_vsync);
 
 	// setup callbacks
 	glfwSetErrorCallback(glfw_error_callback);
@@ -131,4 +131,10 @@ float Window::get_delta_time()
 	prev_time = time;
 
 	return delta_time;
+}
+
+void Window::toggle_vsync()
+{
+    m_vsync = !m_vsync;
+    glfwSwapInterval(m_vsync);
 }
