@@ -94,9 +94,6 @@ void Scene::update(float elapsed_time)
 		update_node(scene_node, Transform{});
 	}
 
-    if(m_selected_node && m_selected_node->entity->has_component<MeshObject>())
-        m_render_list.push_back(m_selected_render_obj);
-
     m_light_manager.update_lights(m_render_list, m_camera);
 
     m_window_handle->bind_viewport();
@@ -257,16 +254,23 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
                 m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, relative_transform, &mesh, &material, (unsigned int)instanced_meshes[mesh_name].size()});
                 mesh_used[mesh_name] = true;
             }
+
+            if (m_selected_node && (scene_node == *m_selected_node))
+            {
+                m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
+            }
         }
 		else
 		{
-			m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, &mesh, &material});
+            if (m_selected_node && (scene_node == *m_selected_node))
+            {
+                m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
+            }
+            else
+            {
+                m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, &mesh, &material});
+            }
 		}
-
-        if (m_selected_node && (scene_node == *m_selected_node))
-        {
-            m_selected_render_obj = {RenderCommand::Stencil, relative_transform, &mesh, &material};
-        }
 	}
 
 	for (SceneNode& node : scene_node)

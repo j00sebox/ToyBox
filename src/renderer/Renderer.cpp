@@ -20,10 +20,13 @@ void Renderer::init(int width, int height)
 //	GL_CALL(glEnable(GL_BLEND));
 //	GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	GL_CALL(glEnable(GL_STENCIL_TEST));
-	GL_CALL(glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE)); // replace all the stencil values when drawing original object
 	GL_CALL(glEnable(GL_DEPTH_TEST));
 	GL_CALL(glDepthFunc(GL_LEQUAL));
     GL_CALL(glEnable(GL_FRAMEBUFFER_SRGB));
+
+    GL_CALL(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+    GL_CALL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF));
+    GL_CALL(glStencilMask(0xFF));
 }
 
 void Renderer::set_viewport(int width, int height)
@@ -71,8 +74,8 @@ void Renderer::draw_skybox(const Skybox& skybox)
 
 void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mesh, const Material& material)
 {
-	GL_CALL(glStencilFunc(GL_ALWAYS, 1, 0xFF)); // make all the fragments of the object have a stencil of 1
-	GL_CALL(glStencilMask(0xFF)); // any stencil value can be written to
+    GL_CALL(glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE));
+	GL_CALL(glStencilFunc(GL_ALWAYS, 2, 0xFF)); // make all the fragments of the object have a stencil of 1
 	
 	material.bind();
 	mesh.bind();
@@ -81,16 +84,15 @@ void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mes
     ShaderTable::get("flat_colour")->set_uniform_mat4f("u_model", stencil_transform.get_transform());
     ShaderTable::get("flat_colour")->set_uniform_4f("u_flat_colour", {1.f, 1.f, 0.f, 1.f});
 	ShaderTable::get("flat_colour")->bind();
-	GL_CALL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF)); // now all fragments not apart of the original object are written
-	GL_CALL(glStencilMask(0x00)); // disable writing to stencil buffer
-	GL_CALL(glDisable(GL_DEPTH_TEST));
+    GL_CALL(glStencilOp(GL_KEEP, GL_KEEP, GL_INCR));
+	GL_CALL(glStencilFunc(GL_NOTEQUAL, 2, 0xFF)); // now all fragments not apart of the original object are written
 
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
 	
 	// set back to normal for other objects
-	GL_CALL(glStencilMask(0xFF));
-	GL_CALL(glStencilFunc(GL_ALWAYS, 0, 0xFF));
-	GL_CALL(glEnable(GL_DEPTH_TEST));
+    GL_CALL(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+	GL_CALL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF));
+
 }
 
 void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
