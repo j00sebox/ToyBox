@@ -258,14 +258,15 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
                 mesh_used[mesh_name] = true;
             }
         }
-		else if (m_selected_node && (scene_node == *m_selected_node))
-		{
-            m_selected_render_obj = {RenderCommand::Stencil, relative_transform, &mesh, &material};
-		}
 		else
 		{
 			m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, &mesh, &material});
 		}
+
+        if (m_selected_node && (scene_node == *m_selected_node))
+        {
+            m_selected_render_obj = {RenderCommand::Stencil, relative_transform, &mesh, &material};
+        }
 	}
 
 	for (SceneNode& node : scene_node)
