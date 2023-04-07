@@ -94,6 +94,9 @@ void Scene::update(float elapsed_time)
 		update_node(scene_node, Transform{});
 	}
 
+    if(m_selected_node)
+        m_render_list.push_back(m_selected_render_obj);
+
     m_light_manager.update_lights(m_render_list, m_camera);
 
     m_window_handle->bind_viewport();
@@ -257,7 +260,7 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
         }
 		else if (m_selected_node && (scene_node == *m_selected_node))
 		{
-			m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
+            m_selected_render_obj = {RenderCommand::Stencil, relative_transform, &mesh, &material};
 		}
 		else
 		{

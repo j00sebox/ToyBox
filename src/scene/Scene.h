@@ -53,6 +53,7 @@ private:
 	std::queue<SceneNode*> m_nodes_to_remove;
 	LightManager m_light_manager;
 	std::vector<RenderObject> m_render_list;
+    RenderObject m_selected_render_obj;
 
     std::unordered_map<std::string, std::vector<glm::mat4>> instanced_meshes;
     // TODO: figure out better way
