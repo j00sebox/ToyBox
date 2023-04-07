@@ -94,7 +94,7 @@ void Scene::update(float elapsed_time)
 		update_node(scene_node, Transform{});
 	}
 
-    if(m_selected_node)
+    if(m_selected_node && m_selected_node->entity->has_component<MeshObject>())
         m_render_list.push_back(m_selected_render_obj);
 
     m_light_manager.update_lights(m_render_list, m_camera);
