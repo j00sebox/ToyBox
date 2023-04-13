@@ -169,9 +169,9 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
 	auto load_gltf_material = [](const json& accessor, const GLTFLoader& loader, Material& material)
 	{
-        if(accessor.contains("custom_texture"))
+        if(accessor.contains("custom"))
         {
-            json colour = accessor["custom_texture"]["colour"];
+            json colour = accessor["custom"]["colour"];
             material.set_colour(glm::vec4(colour[0], colour[1], colour[2], colour[3]));
         }
         else
@@ -266,7 +266,8 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
                 MeshTable::add(mesh_name, std::move(mesh));
             }
 
-            load_gltf_material(model, loader, material);
+//            if(model["material"].is_null())
+//                load_gltf_material(model, loader, material);
         }
         else if(mesh_accessor["mesh_type"] == "primitive")
         {
@@ -277,9 +278,27 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
                 MeshTable::add(mesh_name, std::move(mesh));
             }
+        }
 
-            // TODO: make it so primitives can load textures
-            material.set_colour({ model["custom_texture"]["colour"][0], model["custom_texture"]["colour"][1], model["custom_texture"]["colour"][2], model["custom_texture"]["colour"][3] });
+        if(!model["material"].is_null())
+        {
+            json material_accessor = model["material"];
+
+            if(!material_accessor["custom"].is_null())
+            {
+                material.set_colour({ material_accessor["custom"]["colour"][0], material_accessor["custom"]["colour"][1], material_accessor["custom"]["colour"][2], material_accessor["custom"]["colour"][3]});
+            }
+            else
+            {
+                std::string textures[] = {
+                        material_accessor["textures"]["base_colour"],
+                        material_accessor["textures"]["specular"],
+                        material_accessor["textures"]["normal_map"],
+                        material_accessor["textures"]["occlusion"]
+                };
+
+                material.load(textures);
+            }
         }
 
         mesh_object.set_mesh(MeshTable::get(mesh_name));

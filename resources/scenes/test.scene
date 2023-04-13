@@ -1,1 +1,259 @@
-{"background_colour":[0.0,0.029629647731781006,0.023703716695308685,1.0],"camera":{"forward":[0.5152972936630249,-0.7782400846481323,-0.35890278220176697],"position":[-30.980804443359375,65.77384185791016,45.100223541259766]},"model_count":6,"models":[{"light":{"brightness":0.1459999978542328,"cast_shadow":true,"colour":[1.0,1.0,1.0,1.0],"direction":[0.0,20.0,20.0],"type":"directional_light"},"name":"Direct Light","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":1.0,"translate":[0.0,0.0,0.0]}},{"mesh":{"instanced":false,"mesh_name":"../resources/models/asteroid/scene.gltf","mesh_type":"gltf"},"name":"asteroid","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,0.0,0.0,0.0],"scale":1.0,"translate":[16.0,0.0,0.0]}},{"custom_texture":{"colour":[1.0,1.0,1.0,1.0]},"mesh":{"instanced":false,"mesh_name":"../resources/models/bunny/scene.gltf","mesh_type":"gltf"},"name":"Bunny","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[103.0,1.0,0.0,0.0],"scale":100.0,"translate":[-4.0,-1.0,-2.0]}},{"custom_texture":{"colour":[0.14626701176166534,0.1155804917216301,0.6372548937797546,1.0]},"mesh":{"instanced":false,"mesh_name":"cube","mesh_type":"primitive"},"name":"cube","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,0.0,0.0,0.0],"scale":1.0,"translate":[-22.0,2.0,-6.0]}},{"custom_texture":{"colour":[0.7990195751190186,0.0,0.0,1.0]},"mesh":{"instanced":false,"mesh_name":"quad","mesh_type":"primitive"},"name":"quad (1)","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[-90.0,1.0,0.0,0.0],"scale":20.0,"translate":[0.0,4.0,0.0]}},{"custom_texture":{"colour":[0.7038723826408386,0.8088235259056091,0.6304066181182861,1.0]},"mesh":{"instanced":false,"mesh_name":"quad","mesh_type":"primitive"},"name":"quad","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[-90.0,1.0,0.0,0.0],"scale":100.0,"translate":[0.0,33.0,0.0]}}],"skybox":{"image_format":1,"path":"../resources/skyboxes/space/"}}
+{
+    "background_colour": [
+        0.0,
+        0.029629647731781006,
+        0.023703716695308685,
+        1.0
+    ],
+    "camera": {
+        "forward": [
+            0.5152972936630249,
+            -0.7782400846481323,
+            -0.35890278220176697
+        ],
+        "position": [
+            -30.980804443359375,
+            65.77384185791016,
+            45.100223541259766
+        ]
+    },
+    "model_count": 6,
+    "models": [
+        {
+            "light": {
+                "brightness": 0.1459999978542328,
+                "cast_shadow": true,
+                "colour": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    20.0,
+                    20.0
+                ],
+                "type": "directional_light"
+            },
+            "name": "Direct Light",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "textures": {
+                    "base_colour": "../resources/models/asteroid/Default_baseColor.png",
+                    "normal_map": "none",
+                    "occlusion": "none",
+                    "specular": "none"
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "../resources/models/asteroid/scene.gltf",
+                "mesh_type": "gltf"
+            },
+            "name": "asteroid",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    16.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "../resources/models/bunny/scene.gltf",
+                "mesh_type": "gltf"
+            },
+            "name": "Bunny",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    103.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    -4.0,
+                    -1.0,
+                    -2.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.14626701176166534,
+                        0.1155804917216301,
+                        0.6372548937797546,
+                        1.0
+                    ]
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "cube",
+                "mesh_type": "primitive"
+            },
+            "name": "cube",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    -22.0,
+                    2.0,
+                    -6.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.7990195751190186,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "quad",
+                "mesh_type": "primitive"
+            },
+            "name": "quad (1)",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    -90.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 20.0,
+                "translate": [
+                    0.0,
+                    4.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.7038723826408386,
+                        0.8088235259056091,
+                        0.6304066181182861,
+                        1.0
+                    ]
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "quad",
+                "mesh_type": "primitive"
+            },
+            "name": "quad",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    -90.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    0.0,
+                    33.0,
+                    0.0
+                ]
+            }
+        }
+    ],
+    "skybox": {
+        "image_format": 1,
+        "path": "../resources/skyboxes/space/"
+    }
+}

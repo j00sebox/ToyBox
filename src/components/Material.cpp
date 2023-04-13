@@ -11,6 +11,11 @@ using namespace nlohmann;
 
 void Material::load(const std::string* const textures)
 {
+    m_texture_locations[0] = textures[0];
+    m_texture_locations[1] = textures[1];
+    m_texture_locations[2] = textures[2];
+    m_texture_locations[3] = textures[3];
+
     m_textures[0] = std::make_unique<Texture2D>(Texture2D(textures[0]));
     m_textures[1] = (textures[1] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[1])) : nullptr;
     m_textures[2] = (textures[2] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[2])) : nullptr;
@@ -54,8 +59,6 @@ void Material::unbind() const
     m_shader->unbind();
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "UnreachableCode"
 void Material::imgui_render()
 {
     static std::string combo_preview = ShaderTable::find(m_shader);
@@ -128,16 +131,22 @@ void Material::imgui_render()
             display_empty_texture();
     }
 }
-#pragma clang diagnostic pop
 
 void Material::serialize(json& accessor) const
 {
     if(m_custom)
     {
-        accessor["custom_texture"]["colour"][0] = m_colour.x;
-        accessor["custom_texture"]["colour"][1] = m_colour.y;
-        accessor["custom_texture"]["colour"][2] = m_colour.z;
-        accessor["custom_texture"]["colour"][3] = m_colour.w;
+        accessor["material"]["custom"]["colour"][0] = m_colour.x;
+        accessor["material"]["custom"]["colour"][1] = m_colour.y;
+        accessor["material"]["custom"]["colour"][2] = m_colour.z;
+        accessor["material"]["custom"]["colour"][3] = m_colour.w;
+    }
+    else
+    {
+        accessor["material"]["textures"]["base_colour"] = m_texture_locations[0];
+        accessor["material"]["textures"]["specular"]    = m_texture_locations[1];
+        accessor["material"]["textures"]["normal_map"]  = m_texture_locations[2];
+        accessor["material"]["textures"]["occlusion"]   = m_texture_locations[3];
     }
 }
 

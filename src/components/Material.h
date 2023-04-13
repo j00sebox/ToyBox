@@ -30,6 +30,9 @@ private:
 	std::shared_ptr<ShaderProgram> m_shader;
 	bool m_custom = true;
 	std::unique_ptr<Texture2D> m_textures[4];
+    std::string m_texture_locations[4];
+
+    // custom properties
     glm::vec4 m_colour = glm::vec4(1.f, 1.f, 1.f, 1.f);
 	float m_metallic = 0.f;
 	float m_roughness = 0.f;
