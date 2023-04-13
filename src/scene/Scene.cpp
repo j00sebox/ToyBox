@@ -408,17 +408,17 @@ void Scene::compile_shaders() const
     ShaderTable::add("flat_colour", ShaderProgram(
             Shader("../resources/shaders/flat_colour/flat_colour_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/flat_colour/flat_colour_fragment.shader", ShaderType::Fragment)
-    ), true);
+    ));
 
     ShaderTable::add("pbr_standard", ShaderProgram(
             Shader("../resources/shaders/pbr/pbr_standard_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/pbr/pbr_standard_fragment.shader", ShaderType::Fragment)
-    ), true);
+    ));
 
     ShaderTable::add("blinn-phong", ShaderProgram(
             Shader("../resources/shaders/blinn-phong/blinn-phong_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/blinn-phong/blinn-phong_fragment.shader", ShaderType::Fragment)
-    ), true);
+    ));
 
     ShaderTable::add("skybox", ShaderProgram(
             Shader("../resources/shaders/skybox/skybox_vertex.shader", ShaderType::Vertex),

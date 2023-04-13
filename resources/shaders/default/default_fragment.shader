@@ -128,8 +128,16 @@ void main()
     else
     {
         base_colour = texture(diffuse_t, v_tex_coord);
-        spec_val = texture(specular_t, v_tex_coord).r;
-        normal = normalize(vec3(texture(normal_t, v_tex_coord)));
+
+        if(textureSize(specular_t, 0).x > 1)
+            spec_val = texture(specular_t, v_tex_coord).r;
+        else
+            spec_val = u_metallic;
+
+        if(textureSize(normal_t, 0).x > 1)
+            normal = normalize(vec3(texture(normal_t, v_tex_coord)));
+        else
+            normal = normalize(v_normal);
     }
 
     if (directional_light._active)

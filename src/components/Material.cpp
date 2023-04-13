@@ -81,7 +81,7 @@ void Material::imgui_render()
 
     if(prev_choice && prev_choice != m_custom)
     {
-        std::string textures[] = {"../resources/textures/white.png", "none", "none", "none"};
+        std::string textures[] = {"../resources/textures/white_on_white.jpeg", "none", "none", "none"};
         load(textures);
     }
 
