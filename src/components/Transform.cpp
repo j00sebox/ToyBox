@@ -103,6 +103,8 @@ void Transform::serialize(json& accessor) const
 	accessor["transform"]["parent_position"][1] = m_parent_position.y;
 	accessor["transform"]["parent_position"][2] = m_parent_position.z;
 	accessor["transform"]["parent_scale"] = m_parent_scale;
+
+
 }
 
 Transform Transform::operator*(const Transform& other) const

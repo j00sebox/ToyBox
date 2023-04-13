@@ -149,7 +149,15 @@ void Renderer::render_pass(const std::vector<RenderObject>& render_list)
                 render_obj.material->get_shader()->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
                 render_obj.material->get_shader()->set_uniform_4f("u_base_colour", render_obj.material->get_colour());
                 Transform stencil_transform = render_obj.transform;
-                stencil_transform.scale(stencil_transform.get_uniform_scale() * 1.03f); // scale up a tiny bit to see outline
+
+                if(render_obj.mesh->is_using_scale_outline())
+                {
+                    ShaderTable::get("flat_colour")->set_uniform_1f("u_outlining_factor", 0.f);
+                    stencil_transform.scale(stencil_transform.get_uniform_scale() * (1.f + render_obj.mesh->get_scale_outline_factor())); // scale up a tiny bit to see outline
+                }
+                else
+                    ShaderTable::get("flat_colour")->set_uniform_1f("u_outlining_factor", render_obj.mesh->get_scale_outline_factor());
+
                 stencil(stencil_transform, *render_obj.mesh, *render_obj.material);
                 break;
             }

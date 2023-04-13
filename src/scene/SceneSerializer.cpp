@@ -221,6 +221,9 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
         std::string mesh_name = mesh_accessor["mesh_name"];
 
+        mesh_object.m_use_scale_outline = mesh_accessor["use_scale_outline"];
+        mesh_object.m_outlining_factor = mesh_accessor["outlining_factor"];
+
         if(mesh_accessor["instanced"])
         {
             scene.instanced_meshes[mesh_name].push_back(model_matrix);

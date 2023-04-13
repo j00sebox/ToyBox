@@ -33,6 +33,8 @@ public:
 
 	Transform operator* (const Transform& other) const;
 
+
+
 private:
     glm::mat4 m_scale;
     glm::mat4 m_rotation;
@@ -46,5 +48,7 @@ private:
 	// parent offsets
 	glm::vec3 m_parent_position;
 	float m_parent_scale;
+
+
 };
 

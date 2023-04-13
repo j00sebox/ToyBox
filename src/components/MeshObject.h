@@ -16,10 +16,12 @@ public:
 
     void set_mesh_info(const std::string& name, const std::string& type) { m_mesh_name = name; m_mesh_type = type; }
     void set_mesh_name(const std::string& name) { m_mesh_name = name; }
-    [[nodiscard]] const std::string& get_mesh_name() const { return m_mesh_name; }
 
 	void bind() const;
 	void unbind() const;
+
+    [[nodiscard]] const bool is_using_scale_outline() const { return m_use_scale_outline; }
+    [[nodiscard]] const float get_scale_outline_factor() const { return m_outlining_factor; }
 
 	[[nodiscard]] const char* get_name() const override { return "Mesh Object"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(MeshObject).hash_code(); }
@@ -32,6 +34,10 @@ private:
     std::shared_ptr<Mesh> m_mesh;
     std::string m_mesh_name;
     std::string m_mesh_type; // TODO: think about using an enum
+
+    // stenciling
+    float m_outlining_factor = 0.02f;
+    bool m_use_scale_outline = true;
 
 	friend class SceneSerializer;
 };
