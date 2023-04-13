@@ -253,7 +253,6 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         MeshObject mesh_object;
         Material material;
 
-
         if(mesh_accessor["mesh_type"] == "gltf")
         {
             GLTFLoader loader(mesh_name.c_str());
@@ -264,6 +263,12 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
                 load_gltf_mesh(loader, mesh);
 
                 MeshTable::add(mesh_name, std::move(mesh));
+
+                if(!model["material"].is_null())
+                {
+                    json material_accessor = model["material"];
+                    load_material(material_accessor, material);
+                }
             }
 
 //            if(model["material"].is_null())
@@ -277,27 +282,12 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
                 mesh.load_primitive(str_to_primitive_type(mesh_name.c_str()));
 
                 MeshTable::add(mesh_name, std::move(mesh));
-            }
-        }
 
-        if(!model["material"].is_null())
-        {
-            json material_accessor = model["material"];
-
-            if(!material_accessor["custom"].is_null())
-            {
-                material.set_colour({ material_accessor["custom"]["colour"][0], material_accessor["custom"]["colour"][1], material_accessor["custom"]["colour"][2], material_accessor["custom"]["colour"][3]});
-            }
-            else
-            {
-                std::string textures[] = {
-                        material_accessor["textures"]["base_colour"],
-                        material_accessor["textures"]["specular"],
-                        material_accessor["textures"]["normal_map"],
-                        material_accessor["textures"]["occlusion"]
-                };
-
-                material.load(textures);
+                if(!model["material"].is_null())
+                {
+                    json material_accessor = model["material"];
+                    load_material(material_accessor, material);
+                }
             }
         }
 
@@ -313,6 +303,11 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         }
         else
         {
+            if(!model["material"].is_null())
+            {
+                json material_accessor = model["material"];
+                load_material(material_accessor, material);
+            }
             material.set_shader(ShaderTable::get(model["shader"]));
         }
 
@@ -332,6 +327,25 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
 	++num_models_checked;
 	return current_node;
+}
+
+void SceneSerializer::load_material(nlohmann::json& material_accessor, Material& material)
+{
+    if(!material_accessor["custom"].is_null())
+    {
+        material.set_colour({ material_accessor["custom"]["colour"][0], material_accessor["custom"]["colour"][1], material_accessor["custom"]["colour"][2], material_accessor["custom"]["colour"][3]});
+    }
+    else
+    {
+        std::string textures[] = {
+                material_accessor["textures"]["base_colour"],
+                material_accessor["textures"]["specular"],
+                material_accessor["textures"]["normal_map"],
+                material_accessor["textures"]["occlusion"]
+        };
+
+        material.load(textures);
+    }
 }
 
 std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)
