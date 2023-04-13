@@ -131,42 +131,6 @@ void SceneSerializer::load_models(const json& accessor, unsigned int model_count
 // TODO: Make this look less ugly
 SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked, Scene& scene)
 {
-	auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
-	{
-		std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
-		std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
-		std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
-
-		std::vector<Vertex> vertices;
-
-		for (unsigned int i = 0; i < positions.size(); i++)
-		{
-			vertices.push_back({
-					positions[i],
-					normals[i],
-					tex_coords[i]
-				});
-		}
-
-		std::vector<float> verts;
-
-		for (const Vertex& v : vertices)
-		{
-			verts.push_back(v.position.x);
-			verts.push_back(v.position.y);
-			verts.push_back(v.position.z);
-			verts.push_back(v.normal.x);
-			verts.push_back(v.normal.y);
-			verts.push_back(v.normal.z);
-			verts.push_back(v.st.x);
-			verts.push_back(v.st.y);
-		}
-
-		std::vector<unsigned int> indices = loader.get_indices();
-
-		mesh.load(verts, indices);
-	};
-
 	auto load_gltf_material = [](const json& accessor, const GLTFLoader& loader, Material& material)
 	{
         if(accessor.contains("custom"))
@@ -247,67 +211,33 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
     if(!model["mesh"].is_null())
     {
-        json mesh_accessor = model["mesh"];
-        std::string mesh_name = mesh_accessor["mesh_name"];
-
         MeshObject mesh_object;
         Material material;
 
-        if(mesh_accessor["mesh_type"] == "gltf")
-        {
-            GLTFLoader loader(mesh_name.c_str());
+        json mesh_accessor = model["mesh"];
+        load_mesh(mesh_accessor, mesh_object);
 
-            if(!MeshTable::exists(mesh_name))
-            {
-                Mesh mesh;
-                load_gltf_mesh(loader, mesh);
-
-                MeshTable::add(mesh_name, std::move(mesh));
-
-                if(!model["material"].is_null())
-                {
-                    json material_accessor = model["material"];
-                    load_material(material_accessor, material);
-                }
-            }
-
-//            if(model["material"].is_null())
-//                load_gltf_material(model, loader, material);
-        }
-        else if(mesh_accessor["mesh_type"] == "primitive")
-        {
-            if(!MeshTable::exists(mesh_name))
-            {
-                Mesh mesh;
-                mesh.load_primitive(str_to_primitive_type(mesh_name.c_str()));
-
-                MeshTable::add(mesh_name, std::move(mesh));
-
-                if(!model["material"].is_null())
-                {
-                    json material_accessor = model["material"];
-                    load_material(material_accessor, material);
-                }
-            }
-        }
-
-        mesh_object.set_mesh(MeshTable::get(mesh_name));
-        mesh_object.set_mesh_name(mesh_name);
         mesh_object.m_mesh_type = mesh_accessor["mesh_type"];
+
+        std::string mesh_name = mesh_accessor["mesh_name"];
 
         if(mesh_accessor["instanced"])
         {
             scene.instanced_meshes[mesh_name].push_back(model_matrix);
             material.set_shader(ShaderTable::get("inst_default"));
             mesh_object.m_instance_id = scene.instanced_meshes[mesh_name].size() - 1;
-        }
-        else
-        {
-            if(!model["material"].is_null())
+
+            if(mesh_object.m_instance_id == 0)
             {
                 json material_accessor = model["material"];
                 load_material(material_accessor, material);
             }
+        }
+        else
+        {
+            json material_accessor = model["material"];
+            load_material(material_accessor, material);
+
             material.set_shader(ShaderTable::get(model["shader"]));
         }
 
@@ -328,6 +258,68 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	++num_models_checked;
 	return current_node;
 }
+
+void SceneSerializer::load_mesh(nlohmann::json& mesh_accessor, MeshObject& mesh_object)
+{
+    auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
+    {
+        std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
+        std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
+        std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
+
+        std::vector<Vertex> vertices;
+
+        for (unsigned int i = 0; i < positions.size(); i++)
+        {
+            vertices.push_back({
+                                       positions[i],
+                                       normals[i],
+                                       tex_coords[i]
+                               });
+        }
+
+        std::vector<float> verts;
+
+        for (const Vertex& v : vertices)
+        {
+            verts.push_back(v.position.x);
+            verts.push_back(v.position.y);
+            verts.push_back(v.position.z);
+            verts.push_back(v.normal.x);
+            verts.push_back(v.normal.y);
+            verts.push_back(v.normal.z);
+            verts.push_back(v.st.x);
+            verts.push_back(v.st.y);
+        }
+
+        std::vector<unsigned int> indices = loader.get_indices();
+
+        mesh.load(verts, indices);
+    };
+
+    std::string mesh_name = mesh_accessor["mesh_name"];
+
+    if(!MeshTable::exists(mesh_name))
+    {
+        Mesh mesh;
+
+        if(mesh_accessor["mesh_type"] == "gltf")
+        {
+            GLTFLoader loader(mesh_name.c_str());
+            load_gltf_mesh(loader, mesh);
+        }
+        else if(mesh_accessor["mesh_type"] == "primitive")
+        {
+            mesh.load_primitive(str_to_primitive_type(mesh_name.c_str()));
+        }
+
+        MeshTable::add(mesh_name, std::move(mesh));
+    }
+
+    mesh_object.set_mesh(MeshTable::get(mesh_name));
+    mesh_object.set_mesh_name(mesh_name);
+}
+
 
 void SceneSerializer::load_material(nlohmann::json& material_accessor, Material& material)
 {
