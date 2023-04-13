@@ -97,6 +97,7 @@ void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mes
 
 void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
 {
+    GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     GLint viewport_size[4];
     glGetIntegerv( GL_VIEWPORT, viewport_size );
 
