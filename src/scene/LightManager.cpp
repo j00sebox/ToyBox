@@ -9,7 +9,6 @@
 #include "components/Transform.h"
 #include "components/Light.h"
 
-#include <spdlog/fmt/bundled/format.h>
 #include <glm/vec3.hpp>
 
 enum class PointLightBufferOffsets
@@ -31,54 +30,61 @@ enum class DirectLightBufferOffsets
     brightness = 44
 };
 
-LightManager::LightManager()
-{
-    m_light_uniform_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(256));
-    m_light_uniform_buffer->link(1);
+LightManager::LightManager() {}
 
-    m_direct_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(64));
-    m_direct_light_buffer->link(2);
+void LightManager::get_lights(const SceneNode& node)
 
-	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
-	{
-		m_point_lights[i] = nullptr;
-		m_available_point_lights.push(i);
-	}
-}
-
-void LightManager::set_lights(const SceneNode& node)
 {
 	if (node.entity->has_component<PointLight>())
 	{
-		add_point_light(node);
+        m_point_lights.push_back(node.entity);
 	}
 	else if (node.entity->has_component<DirectionalLight>())
 	{
-        m_direct_light = node.entity.get();
-        m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
+        m_direct_light = node.entity;
 	}
 
 	for (const SceneNode& n : node)
 	{
-		set_lights(n);
+		get_lights(n);
 	}
+}
+
+void LightManager::init_lights()
+{
+    int num_point_lights = m_point_lights.size();
+    if(num_point_lights > 0)
+    {
+        int buffer_size = (int)PointLightBufferOffsets::total_offset * num_point_lights;
+        m_point_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(buffer_size));
+        m_point_light_buffer->link(1);
+    }
+
+    ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
+
+    if(m_direct_light)
+    {
+        m_direct_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(64));
+        m_direct_light_buffer->link(2);
+    }
 }
 
 void LightManager::update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera)
 {
-	for (int i = 0; i < m_point_lights.size(); ++i)
+    int index = 0;
+	for (std::list<std::shared_ptr<Entity>>::iterator it = m_point_lights.begin(); it != m_point_lights.end(); ++it)
 	{
-		if (m_point_lights[i] && m_point_lights[i]->has_component<PointLight>())
+		if (*it && (*it)->has_component<PointLight>())
 		{
-			auto& transform = m_point_lights[i]->get_component<Transform>();
-			auto& point_light = m_point_lights[i]->get_component<PointLight>();
+			auto& transform = (*it)->get_component<Transform>();
+			auto& point_light = (*it)->get_component<PointLight>();
 			glm::vec3 pos = transform.get_parent_pos() + transform.get_position();
 
-            m_light_uniform_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_colour());
-            m_light_uniform_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * i), pos);
-            m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_range());
-            m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::radius + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_radius());
-            m_light_uniform_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * i), point_light.get_brightness());
+            m_point_light_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_colour());
+            m_point_light_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * index), pos);
+            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_range());
+            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::radius + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_radius());
+            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_brightness());
 
             // TODO: consolidate into uniform buffer
             //ShaderTable::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
@@ -87,6 +93,8 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             ShaderTable::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderTable::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
 		}
+
+        ++index;
 	}
 
 	if (m_direct_light)
@@ -126,24 +134,25 @@ void LightManager::remove_directional_light()
     m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
 }
 
+// TODO
 void LightManager::add_point_light(const SceneNode& node)
 {
-	int index = m_available_point_lights.front();
-	m_point_lights[index] = node.entity.get();
-	m_available_point_lights.pop();
-    m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * index), true);
+//	int index = m_available_point_lights.front();
+//	m_point_lights[index] = node.entity.get();
+//	m_available_point_lights.pop();
+//    m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * index), true);
 }
 
 void LightManager::remove_point_light(const SceneNode& node)
 {
 	for (int i = 0; i < m_point_lights.size(); ++i)
 	{
-		if (m_point_lights[i] == node.entity.get())
-		{
-			m_point_lights[i] = nullptr;
-			m_available_point_lights.push(i);
-            m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * i), false);
-			break;
-		}
+//		if (m_point_lights[i] == node.entity.get())
+//		{
+//			m_point_lights[i] = nullptr;
+//			m_available_point_lights.push(i);
+//            m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * i), false);
+//			break;
+//		}
 	}
 }

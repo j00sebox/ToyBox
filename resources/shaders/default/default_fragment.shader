@@ -26,8 +26,6 @@ struct DirectionalLight
     float brightness;
 };
 
-#define MAX_POINT_LIGHTS 3
-
 struct PointLight
 {
     bool _active;
@@ -38,10 +36,11 @@ struct PointLight
     float brightness;
 };
 
+uniform int u_num_point_lights;
+
 layout (std430, binding=1) buffer Lights
 {
-    PointLight point_lights[];  // 128 bytes
-    //DirectionalLight directional_light;
+    PointLight point_lights[];
 };
 
 layout (std430, binding=2) buffer DL
@@ -148,12 +147,10 @@ void main()
             normal = normalize(v_normal);
     }
 
-    if (directional_light._active)
-        colour += direct_light();
+    colour += direct_light();
 
-    for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
+    for (int i = 0; i < u_num_point_lights; ++i)
     {
-        if(point_lights[i]._active)
-            colour += point_light(i);
+        colour += point_light(i);
     }
 }

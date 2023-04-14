@@ -1,12 +1,8 @@
 #include "pch.h"
 #include "Light.h"
-
-#include "Shader.h"
-#include "GLError.h"
 #include "ImGuiHelper.h"
 
 #include <imgui.h>
-#include <glad/glad.h>
 #include <nlohmann/json.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -98,10 +94,6 @@ void DirectionalLight::shadow_init()
     m_shadow_map->bind();
     // don't check for completeness here since it will fail due to no colour attachment
     m_shadow_map->attach_texture(AttachmentTypes::Depth);
-
-    // need to tell OpenGL that this won't be given to monitor
-    GL_CALL(glDrawBuffer(GL_NONE));
-    GL_CALL(glReadBuffer(GL_NONE));
 
     // set up light matrices
     m_light_projection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 100.f);

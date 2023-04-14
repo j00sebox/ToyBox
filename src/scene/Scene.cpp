@@ -57,9 +57,10 @@ void Scene::init()
 
 	for (const SceneNode& node : root)
 	{
-		m_light_manager.set_lights(node);
+		m_light_manager.get_lights(node);
 	}
 
+    m_light_manager.init_lights();
 }
 
 void Scene::update(float elapsed_time)
@@ -197,9 +198,9 @@ void Scene::add_primitive(const char* name)
 	e.add_component(std::move(material));
 
 	if(m_selected_node)
-		m_selected_node->add_child(std::make_unique<Entity>(std::move(e)));
+		m_selected_node->add_child(std::make_shared<Entity>(std::move(e)));
 	else
-		root.add_child(std::make_unique<Entity>(std::move(e)));
+		root.add_child(std::make_shared<Entity>(std::move(e)));
 }
 
 void Scene::window_resize(int width, int height)

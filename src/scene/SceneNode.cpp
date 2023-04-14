@@ -4,16 +4,16 @@
 
 #include "components/Transform.h"
 
-SceneNode::SceneNode(std::unique_ptr<Entity>&& e)
-{
-	entity = std::move(e);
-}
-
 SceneNode::SceneNode(SceneNode&& sn)
 {
 	entity = std::move(sn.entity);
 	m_children = std::move(sn.m_children);
 	sn.m_moved = true;
+}
+
+SceneNode::SceneNode(std::shared_ptr<Entity>&& e)
+{
+	entity = std::move(e);
 }
 
 SceneNode::~SceneNode()

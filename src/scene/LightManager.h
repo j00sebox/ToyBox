@@ -3,7 +3,8 @@
 #include "components/Fwd.h"
 
 #include <array>
-#include <queue>
+#include <list>
+#include <memory>
 
 class SceneNode;
 class Entity;
@@ -12,13 +13,12 @@ class UniformBuffer;
 class ShaderStorageBuffer;
 struct RenderObject;
 
-#define MAX_POINT_LIGHTS 3
-
 class LightManager
 {
 public:
 	LightManager();
-	void set_lights(const SceneNode& node);
+	void get_lights(const SceneNode& node);
+    void init_lights();
 	void update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera);
 
     // directional light
@@ -29,9 +29,8 @@ public:
 	void remove_point_light(const SceneNode& node);
 
 private:
-	std::array<Entity*, MAX_POINT_LIGHTS> m_point_lights;
-	Entity* m_direct_light;
-    std::queue<int> m_available_point_lights;
-    std::unique_ptr<ShaderStorageBuffer> m_light_uniform_buffer;
+	std::list<std::shared_ptr<Entity>> m_point_lights;
+	std::shared_ptr<Entity> m_direct_light;
+    std::unique_ptr<ShaderStorageBuffer> m_point_light_buffer;
     std::unique_ptr<ShaderStorageBuffer> m_direct_light_buffer;
 };

@@ -1,4 +1,4 @@
-#version 420
+#version 430
 
 /*----------Textures----------*/
 
@@ -39,8 +39,6 @@ struct DirectionalLight
 	float brightness;
 };
 
-#define MAX_POINT_LIGHTS 2
-
 struct PointLight
 {
 	bool _active;
@@ -51,9 +49,13 @@ struct PointLight
 	float brightness;
 };
 
-layout (std140, binding=1) uniform Lights
+layout (std430, binding=1) buffer Lights
 {
-	PointLight point_lights[MAX_POINT_LIGHTS];  // 128 bytes
+	PointLight point_lights[];
+};
+
+layout (std430, binding=2) buffer DL
+{
 	DirectionalLight directional_light;
 };
 
@@ -246,11 +248,11 @@ void main()
 	if (directional_light._active)
 		colour += direct_light();
 
-	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
-	{
-		if(point_lights[i]._active)
-			colour += point_light(i);
-	}
+//	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
+//	{
+//		if(point_lights[i]._active)
+//			colour += point_light(i);
+//	}
 	
 	colour += ambient;
 }

@@ -10,7 +10,7 @@ class SceneNode
 public:
 	SceneNode() = default;
     SceneNode(SceneNode&& sn);
-	SceneNode(std::unique_ptr<Entity>&& e);
+	SceneNode(std::shared_ptr<Entity>&& e);
     ~SceneNode();
 	void add_child(SceneNode&& s);
 	bool remove(SceneNode& node);
@@ -30,7 +30,7 @@ public:
 		return (entity == other.entity);
 	}
 
-	std::unique_ptr<Entity> entity;
+	std::shared_ptr<Entity> entity;
 
 private:
 	std::list<SceneNode> m_children;
