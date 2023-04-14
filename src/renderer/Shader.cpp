@@ -15,6 +15,8 @@ GLenum get_gl_shader_type(ShaderType type)
 		return GL_VERTEX_SHADER;
 	case ShaderType::Fragment:
 		return GL_FRAGMENT_SHADER;
+    case ShaderType::Geometry:
+        return GL_GEOMETRY_SHADER;
 	default:
 		break;
 	}

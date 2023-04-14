@@ -98,9 +98,6 @@ void DirectionalLight::shadow_init()
     // set up light matrices
     m_light_projection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 100.f);
 
-    // TODO: make more clear later
-    glm::vec3 position = { 10.f, 10.0f, 10.0f };
-
     m_light_view = glm::lookAt(m_direction, glm::vec3(0), glm::vec3(0, 1, 0));
 }
 

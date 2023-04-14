@@ -11,7 +11,8 @@ enum class ShaderType
 {
 	None = 0,
 	Vertex,
-	Fragment
+	Fragment,
+    Geometry
 };
 
 struct Shader

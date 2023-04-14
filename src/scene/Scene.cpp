@@ -398,6 +398,7 @@ void Scene::compile_shaders() const
 {
     ShaderTable::add("default", ShaderProgram(
             Shader("../resources/shaders/default/default_vertex.shader", ShaderType::Vertex),
+            //Shader("../resources/shaders/default/default_geometry.shader", ShaderType::Geometry),
             Shader("../resources/shaders/default/default_fragment.shader", ShaderType::Fragment)
     ), true);
 
