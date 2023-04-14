@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Application.h"
 #include "Input.h"
+#include "Timer.h"
+#include "Log.h"
 
 #include <imgui.h>
 
@@ -8,10 +10,14 @@ void Application::start()
 {
 	m_running = true;
 
-	m_current_scene->load("../resources/scenes/test.scene");
-    m_current_scene->init();
-    auto [width, height] = m_window.get_dimensions();
-	Renderer::init(width, height);
+    {
+        info("Beginning startup process...\n");
+        Timer t;
+        m_current_scene->load("../resources/scenes/test.scene");
+        m_current_scene->init();
+        auto [width, height] = m_window.get_dimensions();
+        Renderer::init(width, height);
+    }
 
 	while (m_running)
 	{
@@ -39,6 +45,8 @@ void Application::start()
 
 void Application::switch_scene(const char* scene_path)
 {
+    info("Switching scene...\n");
+    Timer t;
 	m_current_scene = std::make_unique<Scene>(&m_window);
 	m_current_scene->load(scene_path);
 	m_current_scene->init();
