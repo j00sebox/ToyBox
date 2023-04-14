@@ -49,7 +49,6 @@ public:
 		}
 
 		link();
-		delete_shaders();
 		get_active_uniforms();
 	}
 
@@ -68,6 +67,8 @@ public:
 	void bind() const;
 	void unbind() const;
 
+    void recompile();
+
 private:
 	void create_program();
 	std::string load_shader(const Shader& s);
@@ -75,13 +76,11 @@ private:
 	void compile_shader(unsigned int id) const;
 	void attach_shader(unsigned int id) const;
 	void link();
-	// also does a detach
 	void delete_shaders(); 
 	void get_active_uniforms() const;
 
 	unsigned int m_program_id = 0;
 	std::vector<Shader> m_shaders;
-	std::vector<std::string> m_shader_locations;
 	std::unordered_map<std::string, int> m_uniform_location_cache;
 };
 
@@ -94,6 +93,7 @@ public:
     static std::vector<std::string> get_material_shaders() { return m_material_shaders; }
 	static bool exists(const std::string& name);
 	static std::string find(const std::shared_ptr<ShaderProgram>& s);
+    static void recompile();
 	static void release();
 
 private:

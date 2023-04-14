@@ -26,11 +26,13 @@ ShaderProgram::ShaderProgram(ShaderProgram&& sp) noexcept
 {
 	m_program_id = sp.m_program_id;
 	sp.m_program_id = 0;
-	m_shader_locations = std::move(sp.m_shader_locations); // TODO: Remove later
+
+    m_shaders = sp.m_shaders;
 }
 
 ShaderProgram::~ShaderProgram()
 {
+    delete_shaders();
 	GL_CALL(glDeleteProgram(m_program_id));	
 }
 
@@ -52,9 +54,6 @@ void ShaderProgram::create_program()
 // TODO: Add const back in
 std::string ShaderProgram::load_shader(const Shader& s) 
 {
-	// TODO: Remove later
-	m_shader_locations.emplace_back(s.file_path);
-
 	std::string line;
 	std::ifstream stream(s.file_path);
 
@@ -136,12 +135,26 @@ void ShaderProgram::delete_shaders()
 	{
 		for (const auto& s : m_shaders)
 		{
-			GL_CALL(glDetachShader(m_program_id, s.id));
 			GL_CALL(glDeleteShader(s.id));
 		}
 
 		m_shaders.clear();
 	}	
+}
+
+void ShaderProgram::recompile()
+{
+    for (Shader& shader : m_shaders)
+    {
+        std::string src = load_shader(shader);
+        const char* shader_src = src.c_str();
+
+        GL_CALL(glShaderSource(shader.id, 1, &shader_src, nullptr));
+
+        compile_shader(shader.id);
+    }
+
+    link();
 }
 
 void ShaderProgram::get_active_uniforms() const
@@ -257,6 +270,14 @@ std::string ShaderTable::find(const std::shared_ptr<ShaderProgram>& s)
 	}
 
 	return "";
+}
+
+void ShaderTable::recompile()
+{
+    for (const auto& [name, shader_ptr] : m_shaders)
+    {
+        shader_ptr->recompile();
+    }
 }
 
 void ShaderTable::release()

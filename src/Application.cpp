@@ -27,6 +27,11 @@ void Application::start()
 			continue;
 		}
 
+        if(Input::is_key_pressed(GLFW_KEY_C))
+        {
+            m_current_scene->recompile_shaders();
+        }
+
 		m_window.begin_frame();
 
         display_dockspace();

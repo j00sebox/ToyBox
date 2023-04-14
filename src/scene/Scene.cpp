@@ -436,3 +436,8 @@ void Scene::compile_shaders() const
     ));
 }
 
+void Scene::recompile_shaders()
+{
+    ShaderTable::recompile();
+}
+
