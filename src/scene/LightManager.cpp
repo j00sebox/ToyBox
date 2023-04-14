@@ -50,15 +50,10 @@ void LightManager::get_lights(const SceneNode& node)
 
 void LightManager::init_lights()
 {
-    int num_point_lights = m_point_lights.size();
-    if(num_point_lights > 0)
-    {
-        int buffer_size = (int)PointLightBufferOffsets::total_offset * num_point_lights;
-        m_point_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(buffer_size));
-        m_point_light_buffer->link(1);
-    }
-
-    ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
+    if(m_point_lights.size() > 0)
+        adjust_point_lights_buff();
+    else
+        ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", 0);
 
     if(m_direct_light)
     {
@@ -132,13 +127,10 @@ void LightManager::remove_directional_light()
     m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
 }
 
-// TODO
 void LightManager::add_point_light(const SceneNode& node)
 {
-//	int index = m_available_point_lights.front();
-//	m_point_lights[index] = node.entity.get();
-//	m_available_point_lights.pop();
-//    m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * index), true);
+    m_point_lights.push_back(node.entity);
+    adjust_point_lights_buff();
 }
 
 void LightManager::remove_point_light(const SceneNode& node)
@@ -148,12 +140,18 @@ void LightManager::remove_point_light(const SceneNode& node)
         if(node.entity == *it)
         {
             m_point_lights.erase(it);
-            int num_point_lights = m_point_lights.size();
-            int buffer_size = (int)PointLightBufferOffsets::total_offset * num_point_lights;
-            m_point_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(buffer_size));
-            m_point_light_buffer->link(1);
-            ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
             break;
         }
     }
+
+    adjust_point_lights_buff();
+}
+
+void LightManager::adjust_point_lights_buff()
+{
+    int num_point_lights = m_point_lights.size();
+    int buffer_size = (int)PointLightBufferOffsets::total_offset * num_point_lights;
+    m_point_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(buffer_size));
+    m_point_light_buffer->link(1);
+    ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
 }

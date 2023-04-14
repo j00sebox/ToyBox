@@ -29,6 +29,8 @@ public:
 	void remove_point_light(const SceneNode& node);
 
 private:
+    void adjust_point_lights_buff();
+
 	std::list<std::shared_ptr<Entity>> m_point_lights;
 	std::shared_ptr<Entity> m_direct_light;
     std::unique_ptr<ShaderStorageBuffer> m_point_light_buffer;
