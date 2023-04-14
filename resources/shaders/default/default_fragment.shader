@@ -28,11 +28,9 @@ struct DirectionalLight
 
 struct PointLight
 {
-    bool _active;
     vec4 colour;
     vec3 position;
     float range;
-    float radius;
     float brightness;
 };
 
@@ -147,7 +145,8 @@ void main()
             normal = normalize(v_normal);
     }
 
-    colour += direct_light();
+    if(directional_light._active)
+        colour += direct_light();
 
     for (int i = 0; i < u_num_point_lights; ++i)
     {

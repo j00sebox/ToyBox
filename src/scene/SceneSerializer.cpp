@@ -185,7 +185,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
 			json colour = model["light"]["colour"];
 			pl.set_colour(glm::vec4(colour[0], colour[1], colour[2], colour[3]));
-			pl.set_radius(model["light"]["radius"]);
+			pl.set_range(model["light"]["range"]);
 			pl.set_brightness(model["light"]["brightness"]);
 
 			e.add_component(std::move(pl));

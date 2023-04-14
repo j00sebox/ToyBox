@@ -110,8 +110,7 @@ void PointLight::imgui_render()
 
 	ImGui::Text("\n");
 
-	ImGui::InputFloat("radius", &m_radius);
-	ImGui::InputFloat("range", &m_range);
+	ImGui::InputFloat("Range", &m_range);
 }
 
 void PointLight::serialize(json& accessor) const
@@ -123,9 +122,7 @@ void PointLight::serialize(json& accessor) const
 	accessor["light"]["colour"][2] = m_colour.z;
 	accessor["light"]["colour"][3] = m_colour.w;
 
-	accessor["light"]["brightness"] = m_brightness;
-
-	accessor["light"]["radius"] = m_radius;
 	accessor["light"]["range"] = m_range;
+    accessor["light"]["brightness"] = m_brightness;
 }
 

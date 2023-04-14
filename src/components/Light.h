@@ -63,9 +63,7 @@ private:
 class PointLight final : public Light
 {
 public:
-	void set_radius(float rad) { m_radius = rad; }
 	void set_range(float range) { m_range = range; }
-	[[nodiscard]] float get_radius() const { return m_radius; }
 	[[nodiscard]] float get_range() const { return m_range; }
 
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
@@ -77,7 +75,6 @@ protected:
     void shadow_init() override {};
 
 private:
-	float m_radius = 1.f;
 	float m_range = 10.f;
 
 	friend class SceneSerializer;

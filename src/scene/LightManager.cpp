@@ -13,13 +13,11 @@
 
 enum class PointLightBufferOffsets
 {
-    active = 0,
-    colour = 16,
-    position = 32,
-    range = 44,
-    radius = 48,
-    brightness = 52,
-    total_offset = 64
+    colour = 0,
+    position = 16,
+    range = 28,
+    brightness = 32,
+    total_offset = 48
 };
 
 enum class DirectLightBufferOffsets
@@ -66,6 +64,8 @@ void LightManager::init_lights()
     {
         m_direct_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(64));
         m_direct_light_buffer->link(2);
+
+        m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
     }
 }
 
@@ -83,7 +83,6 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             m_point_light_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_colour());
             m_point_light_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * index), pos);
             m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_range());
-            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::radius + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_radius());
             m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_brightness());
 
             // TODO: consolidate into uniform buffer
@@ -130,7 +129,6 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
 void LightManager::remove_directional_light()
 {
-    m_direct_light = nullptr;
     m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
 }
 
