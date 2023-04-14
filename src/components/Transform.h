@@ -8,8 +8,7 @@
 class Transform final : public Component
 {
 public:
-    Transform() : m_scale(glm::mat4(1.f)), m_rotation(glm::mat4(1.f)), m_translate(glm::mat4(1.f)),
-                  m_position(glm::vec3()), m_rotate_axis(glm::vec3()), m_rotate_angle(0.f), m_uniform_scale(1.f),
+    Transform() : m_position(glm::vec3()), m_rotate_axis(glm::vec3()), m_rotate_angle(0.f), m_uniform_scale(1.f),
                   m_parent_position(glm::vec3()), m_parent_scale(1.f) {}
 	void translate(const glm::vec3& pos);
 	void scale(float s);
@@ -33,13 +32,7 @@ public:
 
 	Transform operator* (const Transform& other) const;
 
-
-
 private:
-    glm::mat4 m_scale;
-    glm::mat4 m_rotation;
-	glm::mat4 m_translate;
-
 	glm::vec3 m_position;
 	glm::vec3 m_rotate_axis;
 	float m_rotate_angle;
@@ -48,7 +41,6 @@ private:
 	// parent offsets
 	glm::vec3 m_parent_position;
 	float m_parent_scale;
-
 
 };
 

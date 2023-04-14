@@ -15,27 +15,26 @@ using namespace nlohmann;
 void Transform::translate(const glm::vec3& pos)
 {
 	m_position = pos;
-    m_translate = glm::translate(glm::mat4(1.0f), pos);
 }
 
 void Transform::scale(float s)
 {
 	m_uniform_scale = s;
-    m_scale = glm::scale(glm::mat4(1), glm::vec3(s, s, s));
 }
 
 void Transform::rotate(float angle, const glm::vec3& axis)
 {
 	m_rotate_angle = angle;
 	m_rotate_axis = axis;
-
-    glm::quat q = glm::angleAxis(glm::radians(angle), axis);
-	m_rotation = glm::mat4_cast(q);
 }
 
 glm::mat4 Transform::get_transform() const
 {
-	return  m_translate * m_rotation * m_scale;
+	glm::mat4 transform = glm::translate(glm::mat4(1.f), m_position);
+	transform = glm::rotate(transform, glm::radians(m_rotate_angle), m_rotate_axis);
+	transform = glm::scale(transform, glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
+
+	return transform;
 }
 
 void Transform::set_parent_offsets(glm::vec3 parent_pos, float parent_scale)
@@ -46,44 +45,36 @@ void Transform::set_parent_offsets(glm::vec3 parent_pos, float parent_scale)
 
 void Transform::imgui_render()
 {
-	glm::vec3 position = m_position;
-
 	float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 	ImVec2 button_size = { line_height + 3.0f, line_height };
 
 	ImGui::Text("\nPosition: ");
 	coloured_label("x", ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f }, button_size);
 	ImGui::SameLine();
-	ImGui::DragFloat("##x", &position.x);
+	ImGui::DragFloat("##x", &m_position.x);
 	coloured_label("y", ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f }, button_size);
 	ImGui::SameLine();
-	ImGui::DragFloat("##y", &position.y);
+	ImGui::DragFloat("##y", &m_position.y);
 	coloured_label("z", ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f }, button_size);
 	ImGui::SameLine();
-	ImGui::DragFloat("##z", &position.z);
-	translate(position);
+	ImGui::DragFloat("##z", &m_position.z);
 
-	float angle = m_rotate_angle;
-	glm::vec3 axis = m_rotate_axis;
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
-	ImGui::DragFloat("##angle", &angle);
+	ImGui::DragFloat("##angle", &m_rotate_angle);
 	coloured_label("i", ImVec4{ 0.0f, 0.8f, 0.96f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
-	ImGui::SliderFloat("##i", &axis.x, -1.f, 1.f);
+	ImGui::SliderFloat("##i", &m_rotate_axis.x, -1.f, 1.f);
 	coloured_label("j", ImVec4{ 0.84f, 0.78f, 0.1f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
-	ImGui::SliderFloat("##j", &axis.y, -1.f, 1.f);
+	ImGui::SliderFloat("##j", &m_rotate_axis.y, -1.f, 1.f);
 	coloured_label("k", ImVec4{ 0.97f, 0.04f, 1.f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
-	ImGui::SliderFloat("##k", &axis.z, -1.f, 1.f);
-	glm::normalize(axis);
-	rotate(angle, axis);
+	ImGui::SliderFloat("##k", &m_rotate_axis.z, -1.f, 1.f);
+	glm::normalize(m_rotate_axis);
 
-	float uniform_scale = m_uniform_scale;
 	ImGui::Text("\nScale: ");
-	ImGui::InputFloat("uniform scale", &uniform_scale);
-	scale(uniform_scale);
+	ImGui::InputFloat("uniform scale", &m_uniform_scale);
 }
 
 void Transform::serialize(json& accessor) const
@@ -102,7 +93,7 @@ void Transform::serialize(json& accessor) const
 	accessor["transform"]["parent_position"][0] = m_parent_position.x;
 	accessor["transform"]["parent_position"][1] = m_parent_position.y;
 	accessor["transform"]["parent_position"][2] = m_parent_position.z;
-	accessor["transform"]["parent_scale"] = m_parent_scale;
+	accessor["transform"]["parent_scale"]       = m_parent_scale;
 
 
 }
