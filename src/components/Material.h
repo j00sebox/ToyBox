@@ -18,6 +18,8 @@ public:
 	void unbind() const;
 
 	void set_colour(const glm::vec4& colour) { m_colour = colour; }
+	void set_metallic_property(float new_val) { m_metallic = new_val; }
+	void set_roughness(float new_val) { m_roughness = new_val; }
 	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] bool is_custom() const { return m_custom; }
 

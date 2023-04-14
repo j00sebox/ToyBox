@@ -140,6 +140,8 @@ void Material::serialize(json& accessor) const
         accessor["material"]["custom"]["colour"][1] = m_colour.y;
         accessor["material"]["custom"]["colour"][2] = m_colour.z;
         accessor["material"]["custom"]["colour"][3] = m_colour.w;
+        accessor["material"]["custom"]["metallic_property"] = m_metallic;
+        accessor["material"]["custom"]["roughness"] = m_roughness;
     }
     else
     {

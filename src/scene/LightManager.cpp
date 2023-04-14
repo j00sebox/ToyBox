@@ -25,15 +25,15 @@ enum class PointLightBufferOffsets
 
 enum class DirectLightBufferOffsets
 {
-    active = 128,
-    colour = 144,
-    direction = 160,
-    brightness = 172
+    active = 192,
+    colour = 208,
+    direction = 224,
+    brightness = 236
 };
 
 LightManager::LightManager()
 {
-    m_light_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(192));
+    m_light_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(256));
     m_light_uniform_buffer->link(1);
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)

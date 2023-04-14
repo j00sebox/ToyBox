@@ -26,7 +26,7 @@ struct DirectionalLight
     float brightness;
 };
 
-#define MAX_POINT_LIGHTS 2
+#define MAX_POINT_LIGHTS 3
 
 struct PointLight
 {
@@ -63,8 +63,11 @@ vec4 direct_light()
     float ambient = 0.2f;
     float diffuse = max(dot(normal, light_dir), 0.0f);
 
-    vec3 light_pos = v_light_space_pos.xyz / v_light_space_pos.w;
+    vec3 h = normalize(view_dir + light_dir);
+    float spec_amount = pow(max(dot(normal, h), 0.0f), 16);
 
+
+    vec3 light_pos = v_light_space_pos.xyz / v_light_space_pos.w;
     float shadow = 0.f;
     if(!out_of_frustrum(light_pos))
     {
@@ -87,7 +90,7 @@ vec4 direct_light()
         shadow /= 9.0;
     }
 
-    return vec4((base_colour.xyz * (diffuse * (1.f - shadow) + ambient)) * directional_light.colour.xyz, 1.f);
+    return vec4(((base_colour.xyz * (diffuse * (1.f - shadow) + ambient)) + spec_val * spec_amount * (1.f - shadow)) * directional_light.colour.xyz, 1.f);
 }
 
 vec4 point_light(int i)

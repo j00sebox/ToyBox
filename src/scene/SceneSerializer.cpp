@@ -329,6 +329,8 @@ void SceneSerializer::load_material(nlohmann::json& material_accessor, Material&
     if(!material_accessor["custom"].is_null())
     {
         material.set_colour({ material_accessor["custom"]["colour"][0], material_accessor["custom"]["colour"][1], material_accessor["custom"]["colour"][2], material_accessor["custom"]["colour"][3]});
+        material.set_metallic_property(material_accessor["custom"]["metallic_property"]);
+        material.set_roughness(material_accessor["custom"]["roughness"]);
     }
     else
     {

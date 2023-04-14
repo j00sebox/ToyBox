@@ -16,9 +16,9 @@ void Renderer::init(int width, int height)
 	set_viewport(width, height);
 
     GL_CALL(glEnable(GL_MULTISAMPLE));
-    //GL_CALL(glEnable(GL_CULL_FACE));
-//	GL_CALL(glEnable(GL_BLEND));
-//	GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    GL_CALL(glEnable(GL_CULL_FACE));
+    GL_CALL(glEnable(GL_BLEND));
+    GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	GL_CALL(glEnable(GL_STENCIL_TEST));
 	GL_CALL(glEnable(GL_DEPTH_TEST));
 	GL_CALL(glDepthFunc(GL_LEQUAL));
@@ -69,7 +69,7 @@ void Renderer::draw_skybox(const Skybox& skybox)
     GL_CALL(glDrawElements(GL_TRIANGLES, skybox.get_indices(), GL_UNSIGNED_INT, nullptr));
     GL_CALL(glDepthMask(GL_TRUE));
     skybox.unbind();
-    //GL_CALL(glEnable(GL_CULL_FACE));
+    GL_CALL(glEnable(GL_CULL_FACE));
 }
 
 void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mesh, const Material& material)

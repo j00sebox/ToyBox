@@ -11,7 +11,7 @@ class Camera;
 class UniformBuffer;
 struct RenderObject;
 
-#define MAX_POINT_LIGHTS 2
+#define MAX_POINT_LIGHTS 3
 
 class LightManager
 {
