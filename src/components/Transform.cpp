@@ -1,14 +1,11 @@
 #include "pch.h"
 #include "Transform.h"
-
-
 #include "ImGuiHelper.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <nlohmann/json.hpp>
 #include <glm/ext/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 using namespace nlohmann;
 
@@ -94,7 +91,6 @@ void Transform::serialize(json& accessor) const
 	accessor["transform"]["parent_position"][1] = m_parent_position.y;
 	accessor["transform"]["parent_position"][2] = m_parent_position.z;
 	accessor["transform"]["parent_scale"]       = m_parent_scale;
-
 
 }
 
