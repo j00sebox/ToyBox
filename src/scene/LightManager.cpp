@@ -143,14 +143,17 @@ void LightManager::add_point_light(const SceneNode& node)
 
 void LightManager::remove_point_light(const SceneNode& node)
 {
-	for (int i = 0; i < m_point_lights.size(); ++i)
-	{
-//		if (m_point_lights[i] == node.entity.get())
-//		{
-//			m_point_lights[i] = nullptr;
-//			m_available_point_lights.push(i);
-//            m_light_uniform_buffer->set_data_scalar_i((int)PointLightBufferOffsets::active + ((int)PointLightBufferOffsets::total_offset * i), false);
-//			break;
-//		}
-	}
+    for (std::list<std::shared_ptr<Entity>>::iterator it = m_point_lights.begin(); it != m_point_lights.end(); ++it)
+    {
+        if(node.entity == *it)
+        {
+            m_point_lights.erase(it);
+            int num_point_lights = m_point_lights.size();
+            int buffer_size = (int)PointLightBufferOffsets::total_offset * num_point_lights;
+            m_point_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(buffer_size));
+            m_point_light_buffer->link(1);
+            ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
+            break;
+        }
+    }
 }
