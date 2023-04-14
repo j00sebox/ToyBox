@@ -165,3 +165,77 @@ void UniformBuffer::unbind() const
 {
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, 0));
 }
+
+ShaderStorageBuffer::ShaderStorageBuffer(unsigned int size)
+{
+    GL_CALL(glGenBuffers(1, &m_id));
+    bind();
+    GL_CALL(glBufferData(GL_SHADER_STORAGE_BUFFER, size, nullptr, GL_STATIC_DRAW));
+}
+
+ShaderStorageBuffer::ShaderStorageBuffer(ShaderStorageBuffer &&ssb) noexcept
+{
+    m_id = ssb.m_id;
+    ssb.m_id = 0;
+}
+
+ShaderStorageBuffer::~ShaderStorageBuffer()
+{
+    GL_CALL(glDeleteBuffers(1, &m_id));
+}
+
+
+void ShaderStorageBuffer::set_data_scalar_i(unsigned int offset, int data) const
+{
+    bind();
+    GL_CALL(glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, 4, (void*)&data));
+    unbind();
+}
+
+void ShaderStorageBuffer::set_data_scalar_f(unsigned int offset, float data) const
+{
+    bind();
+    GL_CALL(glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, 4, (void*)&data));
+    unbind();
+}
+
+void ShaderStorageBuffer::set_data_vec3(unsigned int offset, const glm::vec3& vec) const
+{
+    bind();
+    float data[3] = {vec.x, vec.y, vec.z};
+    GL_CALL(glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, 4 * 3, data));
+    unbind();
+}
+
+void ShaderStorageBuffer::set_data_vec4(unsigned int offset, const glm::vec4& vec) const
+{
+    bind();
+    float data[4] = {vec.x, vec.y, vec.z, vec.w};
+    GL_CALL(glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, 4 * 4, data));
+    unbind();
+}
+
+void ShaderStorageBuffer::set_data_mat4(unsigned int offset, const glm::mat4& mat) const
+{
+    bind();
+    GL_CALL(glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, 64, &mat[0][0]));
+    unbind();
+}
+
+void ShaderStorageBuffer::link(unsigned int binding_point) const
+{
+    GL_CALL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding_point, m_id));
+}
+
+void ShaderStorageBuffer::bind() const
+{
+    GL_CALL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_id));
+}
+
+void ShaderStorageBuffer::unbind() const
+{
+    GL_CALL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+}
+
+
+

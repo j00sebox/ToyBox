@@ -9,6 +9,7 @@ class SceneNode;
 class Entity;
 class Camera;
 class UniformBuffer;
+class ShaderStorageBuffer;
 struct RenderObject;
 
 #define MAX_POINT_LIGHTS 3
@@ -31,5 +32,6 @@ private:
 	std::array<Entity*, MAX_POINT_LIGHTS> m_point_lights;
 	Entity* m_direct_light;
     std::queue<int> m_available_point_lights;
-    std::unique_ptr<UniformBuffer> m_light_uniform_buffer;
+    std::unique_ptr<ShaderStorageBuffer> m_light_uniform_buffer;
+    std::unique_ptr<ShaderStorageBuffer> m_direct_light_buffer;
 };

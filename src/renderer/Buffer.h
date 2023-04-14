@@ -5,6 +5,8 @@
 #include <glm/vec4.hpp>
 #include <glm/matrix.hpp>
 
+// TODO: Think about combing into one class
+
 class VertexBuffer
 {
 public:
@@ -65,4 +67,26 @@ public:
 
 private:
     unsigned int m_id;
+};
+
+class ShaderStorageBuffer
+{
+public:
+    ShaderStorageBuffer(unsigned int size);
+    ShaderStorageBuffer(ShaderStorageBuffer&& ssb) noexcept;
+    ~ShaderStorageBuffer();
+
+    void set_data_scalar_i(unsigned int offset, int data) const;
+    void set_data_scalar_f(unsigned int offset, float data) const;
+    void set_data_vec3(unsigned int offset, const glm::vec3& vec) const;
+    void set_data_vec4(unsigned int offset, const glm::vec4& vec) const;
+    void set_data_mat4(unsigned int offset, const glm::mat4& mat) const;
+
+    void link(unsigned int binding_point) const;
+    void bind() const;
+    void unbind() const;
+
+private:
+    unsigned int m_id;
+
 };

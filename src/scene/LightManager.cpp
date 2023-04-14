@@ -25,16 +25,19 @@ enum class PointLightBufferOffsets
 
 enum class DirectLightBufferOffsets
 {
-    active = 192,
-    colour = 208,
-    direction = 224,
-    brightness = 236
+    active = 0,
+    colour = 16,
+    direction = 32,
+    brightness = 44
 };
 
 LightManager::LightManager()
 {
-    m_light_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(256));
+    m_light_uniform_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(256));
     m_light_uniform_buffer->link(1);
+
+    m_direct_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(64));
+    m_direct_light_buffer->link(2);
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
@@ -52,7 +55,7 @@ void LightManager::set_lights(const SceneNode& node)
 	else if (node.entity->has_component<DirectionalLight>())
 	{
         m_direct_light = node.entity.get();
-        m_light_uniform_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
+        m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
 	}
 
 	for (const SceneNode& n : node)
@@ -91,9 +94,9 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
         auto& direct_light = m_direct_light->get_component<DirectionalLight>();
         auto& dl_transform = m_direct_light->get_component<Transform>();
 
-        m_light_uniform_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, direct_light.get_colour());
-        m_light_uniform_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, direct_light.get_direction());
-        m_light_uniform_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
+        m_direct_light_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, direct_light.get_colour());
+        m_direct_light_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, direct_light.get_direction());
+        m_direct_light_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
 
         // TODO: consolidate into uniform buffer
         ShaderTable::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
@@ -120,7 +123,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 void LightManager::remove_directional_light()
 {
     m_direct_light = nullptr;
-    m_light_uniform_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
+    m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
 }
 
 void LightManager::add_point_light(const SceneNode& node)
