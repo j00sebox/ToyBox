@@ -35,4 +35,5 @@ private:
 	std::shared_ptr<Entity> m_direct_light;
     std::unique_ptr<ShaderStorageBuffer> m_point_light_buffer;
     std::unique_ptr<ShaderStorageBuffer> m_direct_light_buffer;
+    std::unique_ptr<ShaderStorageBuffer> m_point_shadow_maps;
 };

@@ -226,6 +226,14 @@ void ShaderProgram::set_uniform_4f(const std::string& name, const glm::vec4& vec
 	unbind();
 }
 
+void ShaderProgram::set_uniform_sampler(const std::string& name, const std::vector<int>& elements)
+{
+    bind();
+    GL_CALL(glUniform1iv(get_uniform_location(name), elements.size(), &elements[0]));
+    unbind();
+}
+
+
 void ShaderProgram::set_uniform_mat4f(const std::string& name, const glm::mat4& mat)
 {
 	bind();

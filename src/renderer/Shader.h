@@ -61,6 +61,7 @@ public:
 	void set_uniform_2f(const std::string& name, float x, float y);
 	void set_uniform_3f(const std::string& name, const glm::vec3& vec);
 	void set_uniform_4f(const std::string& name, const glm::vec4& vec);
+    void set_uniform_sampler(const std::string& name, const std::vector<int>& elements);
 	void set_uniform_mat4f(const std::string& name, const glm::mat4& mat);
 
 	[[nodiscard]] int get_uniform_location(const std::string& name);

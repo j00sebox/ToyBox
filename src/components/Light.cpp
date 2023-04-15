@@ -1,11 +1,16 @@
 #include "pch.h"
 #include "Light.h"
 #include "ImGuiHelper.h"
+#include "Log.h"
 
 #include <imgui.h>
 #include <nlohmann/json.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+
+// TODO: remove later
+#include "GLError.h"
+#include <glad/glad.h>
 
 using namespace nlohmann;
 
@@ -83,6 +88,8 @@ void DirectionalLight::shadow_init(const glm::vec3& light_pos)
     // don't check for completeness here since it will fail due to no colour attachment
     m_shadow_map->attach_texture(AttachmentTypes::Depth);
 
+    info(m_shadow_map->is_complete());
+
     // set up light matrices
     m_light_projection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 100.f);
 
@@ -96,6 +103,11 @@ void PointLight::imgui_render()
 	ImGui::Text("\n");
 
 	ImGui::InputFloat("Range", &m_range);
+
+    if(m_shadow_casting)
+    {
+        texture_viewer(m_shadow_cubemap, 2048, 2048);
+    }
 }
 
 void PointLight::serialize(json& accessor) const
@@ -109,5 +121,32 @@ void PointLight::serialize(json& accessor) const
 
 	accessor["light"]["range"] = m_range;
     accessor["light"]["brightness"] = m_brightness;
+}
+
+void PointLight::shadow_init(const glm::vec3 &light_pos)
+{
+    GL_CALL(glGenTextures(1, &m_shadow_cubemap));
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadow_cubemap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    m_shadow_map = std::make_shared<FrameBuffer>(SHADOW_WIDTH, SHADOW_HEIGHT, 1);
+    m_shadow_map->bind();
+    m_shadow_map->attach_texture(AttachmentTypes::Depth, m_shadow_cubemap);
+
+    glm::mat4 shadow_proj = glm::perspective(glm::radians(90.0f), 1.f, 1.f, 100.f);
+
+    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)));
+    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)));
 }
 

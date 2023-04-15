@@ -76,6 +76,7 @@ public:
     ShaderStorageBuffer(ShaderStorageBuffer&& ssb) noexcept;
     ~ShaderStorageBuffer();
 
+    void set_data_arr_i(unsigned int offset, std::vector<int>& data) const;
     void set_data_scalar_i(unsigned int offset, int data) const;
     void set_data_scalar_f(unsigned int offset, float data) const;
     void set_data_vec3(unsigned int offset, const glm::vec3& vec) const;

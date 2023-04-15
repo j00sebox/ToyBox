@@ -18,6 +18,7 @@ public:
 
     void blit(unsigned int dest_buffer) const;
     void attach_texture(unsigned char attachment);
+    void attach_texture(unsigned char attachment, unsigned int texture_id);
     void attach_renderbuffer(unsigned char attachment);
 
     void bind() const;

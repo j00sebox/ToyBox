@@ -184,6 +184,13 @@ ShaderStorageBuffer::~ShaderStorageBuffer()
     GL_CALL(glDeleteBuffers(1, &m_id));
 }
 
+void ShaderStorageBuffer::set_data_arr_i(unsigned int offset, std::vector<int>& data) const
+{
+    bind();
+    GL_CALL(glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, 4, (void*)&data[0]));
+    unbind();
+}
+
 
 void ShaderStorageBuffer::set_data_scalar_i(unsigned int offset, int data) const
 {

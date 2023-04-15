@@ -1,11 +1,14 @@
 #version 430
 
+#extension GL_ARB_bindless_texture : require
+
 /*----------Textures----------*/
 layout (binding = 0) uniform sampler2D diffuse_t;
 layout (binding = 1) uniform sampler2D specular_t;
 layout (binding = 2) uniform sampler2D normal_t;
 layout (binding = 3) uniform sampler2D occlusion_t;
 layout (binding = 4) uniform sampler2D shadow_map_t;
+layout (binding = 5) uniform samplerCube cube_map;
 
 in vec3 v_position;
 in vec3 v_normal;
@@ -32,6 +35,7 @@ struct PointLight
     vec3 position;
     float range;
     float brightness;
+    bool shadow_casting;
 };
 
 uniform int u_num_point_lights;
@@ -45,6 +49,11 @@ layout (std430, binding=2) buffer DL
 {
     DirectionalLight directional_light;
 };
+
+//layout (std430, binding=3) buffer ShadowCubeMaps
+//{
+//    samplerCube cube_map[];
+//};
 
 vec4 base_colour;
 float spec_val;
@@ -103,13 +112,26 @@ vec4 point_light(int i)
     vec3 view_dir = normalize(u_cam_pos - v_position);
     vec3 h = normalize(view_dir + light_dir);
 
-    if (distance > point_lights[i].range)
+    float shadow = 0.f;
+    if(point_lights[i].shadow_casting)
     {
-        return vec4(0.f);
+        vec3 fragToLight = v_position - point_lights[i].position;
+        float closest_depth = texture(cube_map, fragToLight).r;
+        closest_depth *= 100.f;
+
+        float current_depth = length(fragToLight);
+        float bias = 0.05;
+        shadow = current_depth - bias > closest_depth ? 1.0 : 0.0;
+       // return vec4(vec3(closest_depth / 100.f), 1.0);
     }
 
-    float attenuation = 1 / distance;
-    float ambient = 0.2f;
+//    if (distance > point_lights[i].range)
+//    {
+//        return vec4(0.f);
+//    }
+
+    float attenuation = (1 / distance) * point_lights[i].range * 0.5f;
+    float ambient = 0.1f;
     float diffuse = max(dot(normal, light_dir), 0.0f);
 
     // specular lighting
@@ -119,7 +141,7 @@ vec4 point_light(int i)
         specular = pow(max(dot(normal, h), 0.0f), 16) * 0.3f;
     };
 
-    return (base_colour * (diffuse * attenuation + ambient) + spec_val * specular * attenuation) * point_lights[i].colour;
+    return vec4((base_colour.xyz * (diffuse * attenuation * (1.f - shadow) + ambient) + spec_val * specular * attenuation * (1.f - shadow)), 1.f) * point_lights[i].colour;
 }
 
 void main()
@@ -145,8 +167,12 @@ void main()
             normal = normalize(v_normal);
     }
 
+    colour = vec4(base_colour.xyz * 0.05f, 1.f);
+
     if(directional_light._active)
         colour += direct_light();
+
+    //colour += point_light(0);
 
     for (int i = 0; i < u_num_point_lights; ++i)
     {

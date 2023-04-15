@@ -10,6 +10,7 @@
 #include <glad/glad.h>
 
 unsigned int Renderer::shadow_map = 0;
+unsigned int Renderer::shadow_cube_map = 0;
 
 void Renderer::init(int width, int height)
 {
@@ -47,6 +48,9 @@ void Renderer::draw_elements(const Transform& transform, const MeshObject& mesh,
     // TODO: figure better way to do this
     GL_CALL(glActiveTexture(GL_TEXTURE4));
     GL_CALL(glBindTexture(GL_TEXTURE_2D, shadow_map));
+
+    GL_CALL(glActiveTexture(GL_TEXTURE5));
+    GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, shadow_cube_map));
 
 	material.bind();
 	mesh.bind();
@@ -95,7 +99,7 @@ void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mes
 
 }
 
-void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
+void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, bool using_cubemap)
 {
     GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     GLint viewport_size[4];
@@ -115,8 +119,17 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list)
         }
         else
         {
-            ShaderTable::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
-            ShaderTable::get("shadow_map")->bind();
+            if(using_cubemap)
+            {
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
+                ShaderTable::get("shadow_cubemap")->bind();
+            }
+            else
+            {
+                ShaderTable::get("shadow_map")->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
+                ShaderTable::get("shadow_map")->bind();
+            }
+
             render_obj.mesh->bind();
             GL_CALL(glDrawElements(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
         }

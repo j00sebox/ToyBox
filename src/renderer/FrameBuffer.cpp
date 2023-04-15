@@ -116,6 +116,36 @@ void FrameBuffer::attach_texture(unsigned char attachment)
     }
 
     //assert(glCheckFramebufferStatus(m_id) == GL_FRAMEBUFFER_COMPLETE);
+    //info(is_complete());
+}
+
+// FIXME
+void FrameBuffer::attach_texture(unsigned char attachment, unsigned int texture_id)
+{
+    GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id));
+
+    switch (attachment)
+    {
+        case AttachmentTypes::Colour:
+        {
+            GL_CALL(glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0));
+            break;
+        }
+
+        case AttachmentTypes::Depth:
+        {
+            GL_CALL(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_id, 0));
+            break;
+        }
+
+        case AttachmentTypes::Stencil:
+        {
+            GL_CALL(glFramebufferTexture(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, texture_id, 0));
+            break;
+        }
+    }
+
+    info(is_complete());
 }
 
 void FrameBuffer::attach_renderbuffer(unsigned char attachment)

@@ -17,6 +17,7 @@ enum class PointLightBufferOffsets
     position = 16,
     range = 28,
     brightness = 32,
+    shadow_casting = 36,
     total_offset = 48
 };
 
@@ -79,13 +80,39 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             m_point_light_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * index), pos);
             m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_range());
             m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_brightness());
+            m_point_light_buffer->set_data_scalar_i((int)PointLightBufferOffsets::shadow_casting + ((int)PointLightBufferOffsets::total_offset * index), point_light.is_casting_shadow());
 
             // TODO: consolidate into uniform buffer
-            //ShaderTable::get("pbr_standard")->set_uniform_4f("u_emissive_colour", point_light.get_colour());
             ShaderTable::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderTable::get("inst_default")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderTable::get("pbr_standard")->set_uniform_3f("u_cam_pos", camera->get_pos());
             ShaderTable::get("blinn-phong")->set_uniform_3f("u_cam_pos", camera->get_pos());
+
+            if(point_light.is_casting_shadow())
+            {
+                if(!(point_light.get_shadow_buffer()))
+                {
+                    point_light.shadow_init(pos);
+                    //Renderer::shadow_cube_map.push_back(point_light.get_shadowmap());
+                }
+
+                std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[0]", shadow_transforms[0]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[1]", shadow_transforms[1]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[2]", shadow_transforms[2]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[3]", shadow_transforms[3]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[4]", shadow_transforms[4]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[5]", shadow_transforms[5]);
+
+                ShaderTable::get("shadow_cubemap")->set_uniform_3f("light_pos", pos);
+
+                point_light.bind_shadow_map();
+                Renderer::shadow_pass(render_list, true);
+
+                Renderer::shadow_cube_map = point_light.get_shadowmap();
+
+               // m_point_shadow_maps->set_data_scalar_i(4 * index, point_light.get_shadowmap());
+            }
 		}
 
         ++index;
@@ -159,4 +186,7 @@ void LightManager::adjust_point_lights_buff()
     m_point_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(buffer_size));
     m_point_light_buffer->link(1);
     ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
+
+    m_point_shadow_maps = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(4 * num_point_lights));
+    m_point_shadow_maps->link(3);
 }

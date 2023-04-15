@@ -67,14 +67,24 @@ public:
 	void set_range(float range) { m_range = range; }
 	[[nodiscard]] float get_range() const { return m_range; }
 
+    [[nodiscard]] const std::shared_ptr<FrameBuffer>& get_shadow_buffer() const { return m_shadow_map; };
+    [[nodiscard]] std::vector<glm::mat4>& get_shadow_transforms() { return m_shadow_transforms; }
+    void bind_shadow_map() const { m_shadow_map->bind(); };
+
+    unsigned int get_shadowmap() { return m_shadow_cubemap; }
+
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(PointLight).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 
-protected:
-    void shadow_init(const glm::vec3& light_pos) override {};
+    void shadow_init(const glm::vec3& light_pos) override;
 
 private:
 	float m_range = 10.f;
+
+    // TODO: remove later
+    unsigned int m_shadow_cubemap;
+    std::shared_ptr<FrameBuffer> m_shadow_map;
+    std::vector<glm::mat4> m_shadow_transforms;
 };

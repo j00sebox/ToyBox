@@ -32,11 +32,12 @@ public:
     static void draw_elements_instanced(unsigned int instances, const MeshObject&, const Material&);
     static void draw_skybox(const Skybox& skybox);
 	static void stencil(const Transform& stencil_transform, const MeshObject&, const Material&);
-    static void shadow_pass(const std::vector<RenderObject>& render_list);
+    static void shadow_pass(const std::vector<RenderObject>& render_list, bool using_cubemap = false);
     static void render_pass(const std::vector<RenderObject>& render_list);
 	static void clear();
 
 	// FIXME
 	static unsigned int shadow_map;
+    static unsigned int shadow_cube_map;
 };
 
