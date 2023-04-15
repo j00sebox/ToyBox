@@ -103,11 +103,6 @@ void PointLight::imgui_render()
 	ImGui::Text("\n");
 
 	ImGui::InputFloat("Range", &m_range);
-
-    if(m_shadow_casting)
-    {
-        texture_viewer(m_shadow_cubemap, 2048, 2048);
-    }
 }
 
 void PointLight::serialize(json& accessor) const
@@ -125,20 +120,11 @@ void PointLight::serialize(json& accessor) const
 
 void PointLight::shadow_init(const glm::vec3 &light_pos)
 {
-    GL_CALL(glGenTextures(1, &m_shadow_cubemap));
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadow_cubemap);
-    for (unsigned int i = 0; i < 6; ++i)
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    m_shadow_cubemap = std::make_shared<CubeMap>(GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT);
 
     m_shadow_map = std::make_shared<FrameBuffer>(SHADOW_WIDTH, SHADOW_HEIGHT, 1);
     m_shadow_map->bind();
-    m_shadow_map->attach_texture(AttachmentTypes::Depth, m_shadow_cubemap);
+    m_shadow_map->attach_texture(AttachmentTypes::Depth, m_shadow_cubemap->get_id());
 
     glm::mat4 shadow_proj = glm::perspective(glm::radians(90.0f), 1.f, 1.f, 100.f);
 

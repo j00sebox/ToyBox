@@ -93,7 +93,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
                 if(!(point_light.get_shadow_buffer()))
                 {
                     point_light.shadow_init(pos);
-                    //Renderer::shadow_cube_map.push_back(point_light.get_shadowmap());
+                    Renderer::shadow_cube_map.push_back(point_light.get_shadowmap());
                 }
 
                 std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
@@ -109,9 +109,9 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
                 point_light.bind_shadow_map();
                 Renderer::shadow_pass(render_list, true);
 
-                Renderer::shadow_cube_map = point_light.get_shadowmap();
+                //Renderer::shadow_cube_map = point_light.get_shadowmap();
 
-               // m_point_shadow_maps->set_data_scalar_i(4 * index, point_light.get_shadowmap());
+                // m_point_shadow_maps->set_data_scalar_ui(4 * index, point_light.get_shadowmap());
             }
 		}
 

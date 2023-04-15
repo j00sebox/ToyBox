@@ -2,6 +2,7 @@
 
 #include "Component.h"
 #include "FrameBuffer.h"
+#include "Texture.h"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -71,7 +72,7 @@ public:
     [[nodiscard]] std::vector<glm::mat4>& get_shadow_transforms() { return m_shadow_transforms; }
     void bind_shadow_map() const { m_shadow_map->bind(); };
 
-    unsigned int get_shadowmap() { return m_shadow_cubemap; }
+    unsigned int get_shadowmap() { return m_shadow_cubemap->get_id(); }
 
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(PointLight).hash_code(); }
@@ -84,7 +85,7 @@ private:
 	float m_range = 10.f;
 
     // TODO: remove later
-    unsigned int m_shadow_cubemap;
+    std::shared_ptr<CubeMap> m_shadow_cubemap;
     std::shared_ptr<FrameBuffer> m_shadow_map;
     std::vector<glm::mat4> m_shadow_transforms;
 };

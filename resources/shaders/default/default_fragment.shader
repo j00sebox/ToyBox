@@ -1,14 +1,12 @@
 #version 430
 
-#extension GL_ARB_bindless_texture : require
-
 /*----------Textures----------*/
 layout (binding = 0) uniform sampler2D diffuse_t;
 layout (binding = 1) uniform sampler2D specular_t;
 layout (binding = 2) uniform sampler2D normal_t;
 layout (binding = 3) uniform sampler2D occlusion_t;
 layout (binding = 4) uniform sampler2D shadow_map_t;
-layout (binding = 5) uniform samplerCube cube_map;
+layout (binding = 5) uniform samplerCube cube_map[3]; // TODO: find a dynamic solution
 
 in vec3 v_position;
 in vec3 v_normal;
@@ -49,11 +47,6 @@ layout (std430, binding=2) buffer DL
 {
     DirectionalLight directional_light;
 };
-
-//layout (std430, binding=3) buffer ShadowCubeMaps
-//{
-//    samplerCube cube_map[];
-//};
 
 vec4 base_colour;
 float spec_val;
@@ -116,13 +109,13 @@ vec4 point_light(int i)
     if(point_lights[i].shadow_casting)
     {
         vec3 fragToLight = v_position - point_lights[i].position;
-        float closest_depth = texture(cube_map, fragToLight).r;
+        float closest_depth = texture(cube_map[i], fragToLight).r;
         closest_depth *= 100.f;
 
         float current_depth = length(fragToLight);
         float bias = 0.05;
         shadow = current_depth - bias > closest_depth ? 1.0 : 0.0;
-       // return vec4(vec3(closest_depth / 100.f), 1.0);
+        //return vec4(vec3(closest_depth / 100.f), 1.0);
     }
 
 //    if (distance > point_lights[i].range)
@@ -171,8 +164,6 @@ void main()
 
     if(directional_light._active)
         colour += direct_light();
-
-    //colour += point_light(0);
 
     for (int i = 0; i < u_num_point_lights; ++i)
     {

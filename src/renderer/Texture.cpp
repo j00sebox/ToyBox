@@ -138,7 +138,20 @@ CubeMap::CubeMap(const std::string& dir, ImageFormat fmt)
 
 		stbi_image_free(data);
 	}
-	
+}
+
+CubeMap::CubeMap(int component_type, unsigned int width, unsigned int height)
+{
+    GL_CALL(glGenTextures(1, &m_id));
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, component_type, width, height, 0, component_type, GL_FLOAT, NULL);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }
 
 CubeMap::CubeMap(CubeMap&& cb) noexcept
@@ -168,3 +181,5 @@ void CubeMap::operator=(CubeMap&& cb) noexcept
 	m_id = cb.m_id;
 	cb.m_id = 0;
 }
+
+

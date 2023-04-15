@@ -199,6 +199,13 @@ void ShaderStorageBuffer::set_data_scalar_i(unsigned int offset, int data) const
     unbind();
 }
 
+void ShaderStorageBuffer::set_data_scalar_ui(unsigned int offset, unsigned int data) const
+{
+    bind();
+    GL_CALL(glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, 4, (void*)&data));
+    unbind();
+}
+
 void ShaderStorageBuffer::set_data_scalar_f(unsigned int offset, float data) const
 {
     bind();

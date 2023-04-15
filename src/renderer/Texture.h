@@ -12,9 +12,12 @@ enum class ImageFormat
 class TextureBase
 {
 public:
-
+    [[nodiscard]] unsigned int get_id() const { return m_id; }
 	virtual void bind(unsigned int slot) const = 0;
 	virtual void unbind() const = 0;
+
+protected:
+    unsigned int m_id;
 };
 
 class Texture2D : public TextureBase
@@ -27,7 +30,7 @@ public:
 	void bind(unsigned int slot = 0) const override;
 	void unbind() const override;
 
-	[[nodiscard]] unsigned int get_id() const { return m_id; }
+
 	[[nodiscard]] int get_width() const { return m_width; }
 	[[nodiscard]] int get_height() const { return m_height; }
 
@@ -36,7 +39,6 @@ public:
 private:
 	void move_members(Texture2D&& t) noexcept;
 
-	unsigned int m_id;
 	int m_width, m_height;
 	int m_colour_channels;
 	unsigned char* m_data;
@@ -46,6 +48,7 @@ class CubeMap : public TextureBase
 {
 public:
 	CubeMap(const std::string& dir, ImageFormat fmt = ImageFormat::JPG);
+    CubeMap(int component_type, unsigned int width, unsigned int height);
 	CubeMap(CubeMap&& cb) noexcept;
 	~CubeMap();
 
@@ -55,6 +58,5 @@ public:
 	void operator= (CubeMap&& cb) noexcept;
 
 private:
-	unsigned int m_id;
 	std::string m_faces[6];
 };
