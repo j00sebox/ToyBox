@@ -34,17 +34,7 @@ void Light::imgui_render()
 
 	ImGui::SliderFloat("Brightness", &m_brightness, 0.f, 10.f);
 
-    bool is_shadow_casting = m_shadow_casting;
     ImGui::Checkbox("Shadow Casting", &m_shadow_casting);
-
-    if(is_shadow_casting != m_shadow_casting)
-    {
-        // set up shadows if option was checked
-        if(m_shadow_casting)
-        {
-            shadow_init();
-        }
-    }
 }
 
 void DirectionalLight::imgui_render()
@@ -60,8 +50,6 @@ void DirectionalLight::imgui_render()
 	m_direction.x = direction[0];
 	m_direction.y = direction[1]; 
 	m_direction.z = direction[2];
-
-	//glm::normalize(m_direction);
 
     if(m_shadow_casting)
     {
@@ -87,7 +75,7 @@ void DirectionalLight::serialize(json& accessor) const
     accessor["light"]["cast_shadow"] = m_shadow_casting;
 }
 
-void DirectionalLight::shadow_init()
+void DirectionalLight::shadow_init(const glm::vec3& light_pos)
 {
     m_shadow_map = std::make_shared<FrameBuffer>(SHADOW_WIDTH, SHADOW_HEIGHT, 1);
 
@@ -98,7 +86,7 @@ void DirectionalLight::shadow_init()
     // set up light matrices
     m_light_projection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 100.f);
 
-    m_light_view = glm::lookAt(m_direction, glm::vec3(0), glm::vec3(0, 1, 0));
+    m_light_view = glm::lookAt(light_pos, glm::vec3(0), glm::vec3(0, 1, 0));
 }
 
 void PointLight::imgui_render()

@@ -172,8 +172,8 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	t.set_parent_offsets(glm::vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
 
     glm::mat4 model_matrix = t.get_transform();
-
-	e.add_component(std::move(t));
+    glm::vec3 position = t.get_position();
+    e.add_component(std::move(t));
 
 	if (!model["light"].is_null())
 	{
@@ -203,7 +203,10 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 			dl.set_brightness(model["light"]["brightness"]);
 
             if(model["light"]["cast_shadow"])
+            {
                 dl.cast_shadow();
+                dl.shadow_init(position);
+            }
 
 			e.add_component(std::move(dl));
 		}
@@ -247,6 +250,8 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         e.add_component(std::move(material));
         e.add_component(std::move(mesh_object));
     }
+
+
 
 	SceneNode current_node{ std::make_unique<Entity>(std::move(e)) };
 

@@ -436,6 +436,12 @@ void Scene::compile_shaders() const
             Shader("../resources/shaders/shadow_map/instanced_sm_vertex.shader", ShaderType::Vertex),
             Shader("../resources/shaders/shadow_map/shadow_map_fragment.shader", ShaderType::Fragment)
     ));
+
+    ShaderTable::add("shadow_cubemap", ShaderProgram(
+            Shader("../resources/shaders/shadow_map/shadow_cubemap_vertex.shader", ShaderType::Vertex),
+            Shader("../resources/shaders/shadow_map/shadow_cubemap_geometry.shader", ShaderType::Geometry),
+            Shader("../resources/shaders/shadow_map/shadow_cubemap_fragment.shader", ShaderType::Fragment)
+    ));
 }
 
 void Scene::recompile_shaders()
