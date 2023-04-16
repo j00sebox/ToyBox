@@ -140,12 +140,12 @@ void PointLight::shadow_update_transforms(const glm::vec3& light_pos)
 {
     m_shadow_proj = glm::perspective(glm::radians(90.0f), (float)m_shadow_width / (float)m_shadow_height, m_shadow_near, m_shadow_far);
 
-    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
-    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
-    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
-    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)));
-    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)));
-    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms[0] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0));
+    m_shadow_transforms[1] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0));
+    m_shadow_transforms[2] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+    m_shadow_transforms[3] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0));
+    m_shadow_transforms[4] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0));
+    m_shadow_transforms[5] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0));
 }
 
 
