@@ -18,6 +18,8 @@ enum class PointLightBufferOffsets
     range = 28,
     brightness = 32,
     shadow_casting = 36,
+    shadow_far_plane = 40,
+    shadow_bias = 44,
     total_offset = 48
 };
 
@@ -26,13 +28,13 @@ enum class DirectLightBufferOffsets
     active = 0,
     colour = 16,
     direction = 32,
-    brightness = 44
+    brightness = 44,
+    total_offset = 48
 };
 
 LightManager::LightManager() {}
 
 void LightManager::get_lights(const SceneNode& node)
-
 {
 	if (node.entity->has_component<PointLight>())
 	{
@@ -55,8 +57,6 @@ void LightManager::init_lights()
         adjust_point_lights_buff();
     else
         ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", 0);
-
-    Renderer::shadow_cube_map = std::vector<unsigned int>(m_point_lights.size());
 
     if(m_direct_light)
     {
@@ -93,23 +93,14 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             if(point_light.is_casting_shadow())
             {
                 if(!(point_light.get_shadow_buffer()))
-                {
                     point_light.shadow_init(pos);
 
-                    // FIXME
-                    Renderer::shadow_cube_map[index] = point_light.get_shadowmap();
-                }
-
                 if(point_light.has_shadow_info_changed())
-                {
                     point_light.shadow_resize(pos);
-                    Renderer::shadow_cube_map[index] = point_light.get_shadowmap();
-                }
 
                 if(transform.has_position_changed())
-                {
                     point_light.shadow_update_transforms(pos);
-                }
+
 
                 std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
                 ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[0]", shadow_transforms[0]);
@@ -119,7 +110,12 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
                 ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[4]", shadow_transforms[4]);
                 ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[5]", shadow_transforms[5]);
 
-                ShaderTable::get("shadow_cubemap")->set_uniform_3f("light_pos", pos);
+                ShaderTable::get("shadow_cubemap")->set_uniform_3f("u_light_pos", pos);
+                ShaderTable::get("shadow_cubemap")->set_uniform_1f("u_far_plane", point_light.get_far_plane());
+
+                m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::shadow_far_plane + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_far_plane());
+                m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::shadow_bias + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_shadow_bias());
+                m_point_shadow_maps->set_data_scalar_u64(index * sizeof(uint64_t), point_light.get_cubemap_handle());
 
                 point_light.bind_shadow_map();
                 auto [width, height] = point_light.get_shadow_dimensions();
@@ -162,6 +158,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             direct_light.bind_shadow_map();
             Renderer::shadow_pass(render_list);
             Renderer::shadow_map = direct_light.get_shadow_map();
+            m_direct_light_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::total_offset, direct_light.get_shadow_map());
         }
     }
 }
@@ -199,6 +196,6 @@ void LightManager::adjust_point_lights_buff()
     m_point_light_buffer->link(1);
     ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
 
-    m_point_shadow_maps = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(4 * num_point_lights));
+    m_point_shadow_maps = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(sizeof(uint64_t) * num_point_lights));
     m_point_shadow_maps->link(3);
 }

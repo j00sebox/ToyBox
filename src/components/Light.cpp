@@ -59,6 +59,8 @@ void DirectionalLight::imgui_render()
     if(m_shadow_casting && m_shadow_map)
     {
         texture_viewer(m_shadow_map->get_depth_attachment(), 2048, 2048);
+
+        ImGui::SliderFloat("Bias", &m_shadow_bias, 0.f, 0.5f);
     }
 }
 
@@ -85,10 +87,7 @@ void DirectionalLight::shadow_init(const glm::vec3& light_pos)
     m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
 
     m_shadow_map->bind();
-    // don't check for completeness here since it will fail due to no colour attachment
     m_shadow_map->attach_texture(AttachmentTypes::Depth);
-
-    info(m_shadow_map->is_complete());
 
     // set up light matrices
     m_light_projection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 100.f);
@@ -116,6 +115,8 @@ void PointLight::imgui_render()
         ImGui::InputFloat("Near Plane", &m_shadow_near);
         ImGui::InputFloat("Far Plane", &m_shadow_far);
         m_shadow_info_change = m_shadow_info_change || (prev_near != m_shadow_near || prev_far != m_shadow_far);
+
+        ImGui::SliderFloat("Bias", &m_shadow_bias, 0.f, 0.5f);
     }
 }
 

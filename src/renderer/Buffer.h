@@ -79,6 +79,7 @@ public:
     void set_data_arr_i(unsigned int offset, std::vector<int>& data) const;
     void set_data_scalar_i(unsigned int offset, int data) const;
     void set_data_scalar_ui(unsigned int offset, unsigned int data) const;
+    void set_data_scalar_u64(unsigned int offset, uint64_t data) const;
     void set_data_scalar_f(unsigned int offset, float data) const;
     void set_data_vec3(unsigned int offset, const glm::vec3& vec) const;
     void set_data_vec4(unsigned int offset, const glm::vec4& vec) const;

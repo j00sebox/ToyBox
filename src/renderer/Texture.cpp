@@ -20,6 +20,15 @@ const char* image_extension(ImageFormat fmt)
     return "";
 }
 
+uint64_t TextureBase::get_handle() const
+{
+    return glGetTextureHandleARB(m_id);
+}
+
+void TextureBase::make_resident() const
+{
+    glMakeTextureHandleResidentARB(get_handle());
+}
 
 Texture2D::Texture2D(const std::string& file_name, bool gamma_correct)
 {
@@ -138,6 +147,8 @@ CubeMap::CubeMap(const std::string& dir, ImageFormat fmt)
 
 		stbi_image_free(data);
 	}
+
+    make_resident();
 }
 
 CubeMap::CubeMap(int component_type, unsigned int width, unsigned int height)
@@ -152,6 +163,8 @@ CubeMap::CubeMap(int component_type, unsigned int width, unsigned int height)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    make_resident();
 }
 
 CubeMap::CubeMap(CubeMap&& cb) noexcept
@@ -181,5 +194,6 @@ void CubeMap::operator=(CubeMap&& cb) noexcept
 	m_id = cb.m_id;
 	cb.m_id = 0;
 }
+
 
 

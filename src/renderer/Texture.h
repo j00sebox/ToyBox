@@ -16,6 +16,9 @@ public:
 	virtual void bind(unsigned int slot) const = 0;
 	virtual void unbind() const = 0;
 
+    void make_resident() const;
+    [[nodiscard]] uint64_t get_handle() const;
+
 protected:
     unsigned int m_id;
 };

@@ -10,7 +10,6 @@
 #include <glad/glad.h>
 
 unsigned int Renderer::shadow_map = 0;
-std::vector<unsigned int> Renderer::shadow_cube_map;
 
 void Renderer::init(int width, int height)
 {
@@ -48,12 +47,6 @@ void Renderer::draw_elements(const Transform& transform, const MeshObject& mesh,
     // TODO: figure better way to do this
     GL_CALL(glActiveTexture(GL_TEXTURE4));
     GL_CALL(glBindTexture(GL_TEXTURE_2D, shadow_map));
-
-    for (int i = 0; i < shadow_cube_map.size(); ++i)
-    {
-        GL_CALL(glActiveTexture(GL_TEXTURE5 + i));
-        GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, shadow_cube_map[i]));
-    }
 
 	material.bind();
 	mesh.bind();

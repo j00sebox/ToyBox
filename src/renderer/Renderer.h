@@ -39,6 +39,5 @@ public:
 
 	// FIXME
 	static unsigned int shadow_map;
-    static std::vector<unsigned int> shadow_cube_map;
 };
 

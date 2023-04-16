@@ -1,4 +1,6 @@
-#version 430
+#version 460
+
+#extension GL_ARB_bindless_texture : require
 
 /*----------Textures----------*/
 layout (binding = 0) uniform sampler2D diffuse_t;
@@ -6,7 +8,6 @@ layout (binding = 1) uniform sampler2D specular_t;
 layout (binding = 2) uniform sampler2D normal_t;
 layout (binding = 3) uniform sampler2D occlusion_t;
 layout (binding = 4) uniform sampler2D shadow_map_t;
-layout (binding = 5) uniform samplerCube cube_map[3]; // TODO: find a dynamic solution
 
 in vec3 v_position;
 in vec3 v_normal;
@@ -34,18 +35,25 @@ struct PointLight
     float range;
     float brightness;
     bool shadow_casting;
+    float shadow_far_plane;
+    float shadow_bias;
 };
 
 uniform int u_num_point_lights;
 
-layout (std430, binding=1) buffer Lights
+layout (std430, binding=1) buffer PointLights
 {
     PointLight point_lights[];
 };
 
-layout (std430, binding=2) buffer DL
+layout (std430, binding=2) buffer DirectLight
 {
     DirectionalLight directional_light;
+};
+
+layout (std430, binding=3) buffer PointShadowMaps
+{
+    samplerCube shadow_cubemaps[];
 };
 
 vec4 base_colour;
@@ -109,12 +117,11 @@ vec4 point_light(int i)
     if(point_lights[i].shadow_casting)
     {
         vec3 fragToLight = v_position - point_lights[i].position;
-        float closest_depth = texture(cube_map[i], fragToLight).r;
-        closest_depth *= 100.f;
+        float closest_depth = texture(shadow_cubemaps[i], fragToLight).r;
+        closest_depth *= point_lights[i].shadow_far_plane;
 
         float current_depth = length(fragToLight);
-        float bias = 0.05;
-        shadow = current_depth - bias > closest_depth ? 1.0 : 0.0;
+        shadow = current_depth - point_lights[i].shadow_bias > closest_depth ? 1.0 : 0.0;
     }
 
 //    if (distance > point_lights[i].range)

@@ -18,7 +18,8 @@ public:
 	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] float get_brightness() const { return m_brightness; }
     [[nodiscard]] bool is_casting_shadow() const { return m_shadow_casting; }
-    [[nodiscard]] std::pair<unsigned int, unsigned int> get_shadow_dimensions() { return { m_shadow_width, m_shadow_height }; }
+    [[nodiscard]] std::pair<unsigned int, unsigned int> get_shadow_dimensions() const { return { m_shadow_width, m_shadow_height }; }
+    [[nodiscard]] float get_shadow_bias() const { return m_shadow_bias; }
 
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Light).hash_code(); }
@@ -32,6 +33,7 @@ protected:
 	float m_brightness = 1.f;
     bool m_shadow_casting;
     unsigned int m_shadow_width = 2048, m_shadow_height = 2048;
+    float m_shadow_bias = 0.05f;
 };
 
 class DirectionalLight final : public Light
@@ -68,12 +70,13 @@ public:
 	void set_range(float range) { m_range = range; }
 	[[nodiscard]] float get_range() const { return m_range; }
 
-    [[nodiscard]] const std::shared_ptr<FrameBuffer>& get_shadow_buffer() const { return m_shadow_map; };
-    [[nodiscard]] std::vector<glm::mat4>& get_shadow_transforms() { return m_shadow_transforms; }
     void bind_shadow_map() const { m_shadow_map->bind(); };
-
-    unsigned int get_shadowmap() { return m_shadow_cubemap->get_id(); }
     [[nodiscard]] bool has_shadow_info_changed() const { return m_shadow_info_change; }
+    [[nodiscard]] float get_far_plane() const { return m_shadow_far; }
+    [[nodiscard]]unsigned int get_shadowmap() { return m_shadow_cubemap->get_id(); }
+    [[nodiscard]] std::vector<glm::mat4>& get_shadow_transforms() { return m_shadow_transforms; }
+    [[nodiscard]] const std::shared_ptr<FrameBuffer>& get_shadow_buffer() const { return m_shadow_map; };
+    [[nodiscard]] const uint64_t get_cubemap_handle() const { return m_shadow_cubemap->get_handle(); }
 
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(PointLight).hash_code(); }
