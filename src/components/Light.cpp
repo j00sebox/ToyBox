@@ -56,7 +56,7 @@ void DirectionalLight::imgui_render()
 	m_direction.y = direction[1]; 
 	m_direction.z = direction[2];
 
-    if(m_shadow_casting)
+    if(m_shadow_casting && m_shadow_map)
     {
         texture_viewer(m_shadow_map->get_depth_attachment(), 2048, 2048);
     }
