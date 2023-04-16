@@ -8,13 +8,14 @@
 class Transform final : public Component
 {
 public:
-    Transform() : m_position(glm::vec3()), m_rotate_axis(glm::vec3()), m_rotate_angle(0.f), m_uniform_scale(1.f),
+    Transform() : m_position(glm::vec3()), m_rotate_axis(glm::vec3()), m_rotate_angle(0.f), m_uniform_scale(1.f), m_position_changed(false),
                   m_parent_position(glm::vec3()), m_parent_scale(1.f) {}
 	void translate(const glm::vec3& pos);
 	void scale(float s);
 	void rotate(float angle, const glm::vec3& axis);
 
 	[[nodiscard]] const glm::vec3& get_position() const { return m_position; }
+    [[nodiscard]] const bool has_position_changed() const { return m_position_changed; }
 	[[nodiscard]] const glm::vec3& get_rotate_axis() const { return m_rotate_axis; }
 	[[nodiscard]] float get_rotate_angle() const { return m_rotate_angle; }
 	[[nodiscard]] float get_uniform_scale() const { return m_uniform_scale; }
@@ -37,6 +38,8 @@ private:
 	glm::vec3 m_rotate_axis;
 	float m_rotate_angle;
 	float m_uniform_scale;
+
+    bool m_position_changed;
 
 	// parent offsets
 	glm::vec3 m_parent_position;

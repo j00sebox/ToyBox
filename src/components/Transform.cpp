@@ -12,6 +12,7 @@ using namespace nlohmann;
 void Transform::translate(const glm::vec3& pos)
 {
 	m_position = pos;
+	m_position_changed = true;
 }
 
 void Transform::scale(float s)
@@ -45,6 +46,7 @@ void Transform::imgui_render()
 	float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 	ImVec2 button_size = { line_height + 3.0f, line_height };
 
+    glm::vec3 prev_pos = m_position;
 	ImGui::Text("\nPosition: ");
 	coloured_label("x", ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f }, button_size);
 	ImGui::SameLine();
@@ -55,6 +57,7 @@ void Transform::imgui_render()
 	coloured_label("z", ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f }, button_size);
 	ImGui::SameLine();
 	ImGui::DragFloat("##z", &m_position.z);
+    m_position_changed = (m_position != prev_pos);
 
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
@@ -101,6 +104,8 @@ Transform Transform::operator*(const Transform& other) const
 	new_transform.translate(m_position + other.m_position);
 	new_transform.rotate(m_rotate_angle + other.m_rotate_angle, m_rotate_axis + other.m_rotate_axis);
 	new_transform.scale(m_uniform_scale * other.m_uniform_scale);
+
+    new_transform.m_position_changed = (other.m_position_changed || m_position_changed);
 
 	return new_transform;
 }

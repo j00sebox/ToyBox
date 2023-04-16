@@ -82,7 +82,7 @@ void DirectionalLight::serialize(json& accessor) const
 
 void DirectionalLight::shadow_init(const glm::vec3& light_pos)
 {
-    m_shadow_map = std::make_shared<FrameBuffer>(SHADOW_WIDTH, SHADOW_HEIGHT, 1);
+    m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
 
     m_shadow_map->bind();
     // don't check for completeness here since it will fail due to no colour attachment
@@ -120,19 +120,33 @@ void PointLight::serialize(json& accessor) const
 
 void PointLight::shadow_init(const glm::vec3 &light_pos)
 {
-    m_shadow_cubemap = std::make_shared<CubeMap>(GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT);
+    m_shadow_cubemap = std::make_shared<CubeMap>(GL_DEPTH_COMPONENT, m_shadow_width, m_shadow_height);
 
-    m_shadow_map = std::make_shared<FrameBuffer>(SHADOW_WIDTH, SHADOW_HEIGHT, 1);
+    m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
     m_shadow_map->bind();
     m_shadow_map->attach_texture(AttachmentTypes::Depth, m_shadow_cubemap->get_id());
 
-    glm::mat4 shadow_proj = glm::perspective(glm::radians(90.0f), 1.f, 1.f, 100.f);
+    m_shadow_proj = glm::perspective(glm::radians(90.0f), (float)m_shadow_width / (float)m_shadow_height, m_shadow_near, m_shadow_far);
 
-    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
-    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
-    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
-    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)));
-    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)));
-    m_shadow_transforms.push_back(shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)));
 }
+
+void PointLight::shadow_update_transforms(const glm::vec3& light_pos)
+{
+    m_shadow_proj = glm::perspective(glm::radians(90.0f), (float)m_shadow_width / (float)m_shadow_height, m_shadow_near, m_shadow_far);
+
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)));
+    m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)));
+}
+
+
 

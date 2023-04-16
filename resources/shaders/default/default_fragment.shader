@@ -115,7 +115,6 @@ vec4 point_light(int i)
         float current_depth = length(fragToLight);
         float bias = 0.05;
         shadow = current_depth - bias > closest_depth ? 1.0 : 0.0;
-        //return vec4(vec3(closest_depth / 100.f), 1.0);
     }
 
 //    if (distance > point_lights[i].range)

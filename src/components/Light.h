@@ -8,8 +8,6 @@
 #include <glm/vec4.hpp>
 #include <glm/matrix.hpp>
 
-const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
-
 class Light : public Component
 {
 public:
@@ -20,6 +18,7 @@ public:
 	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
 	[[nodiscard]] float get_brightness() const { return m_brightness; }
     [[nodiscard]] bool is_casting_shadow() const { return m_shadow_casting; }
+    [[nodiscard]] std::pair<unsigned int, unsigned int> get_shadow_dimensions() { return { m_shadow_width, m_shadow_height }; }
 
 	[[nodiscard]] const char* get_name() const override { return "Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Light).hash_code(); }
@@ -32,6 +31,7 @@ protected:
     glm::vec4 m_colour;
 	float m_brightness = 1.f;
     bool m_shadow_casting;
+    unsigned int m_shadow_width = 2048, m_shadow_height = 2048;
 };
 
 class DirectionalLight final : public Light
@@ -80,6 +80,7 @@ public:
 	void serialize(nlohmann::json& accessor) const override;
 
     void shadow_init(const glm::vec3& light_pos) override;
+    void shadow_update_transforms(const glm::vec3& light_pos);
 
 private:
 	float m_range = 10.f;
@@ -87,5 +88,9 @@ private:
     // TODO: remove later
     std::shared_ptr<CubeMap> m_shadow_cubemap;
     std::shared_ptr<FrameBuffer> m_shadow_map;
+    float m_shadow_near = 1.f, m_shadow_far = 100.f;
+    glm::mat4 m_shadow_proj;
     std::vector<glm::mat4> m_shadow_transforms;
+
+    void shadow_resize() {}
 };

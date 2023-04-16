@@ -49,7 +49,7 @@ void Renderer::draw_elements(const Transform& transform, const MeshObject& mesh,
     GL_CALL(glActiveTexture(GL_TEXTURE4));
     GL_CALL(glBindTexture(GL_TEXTURE_2D, shadow_map));
 
-    for(int i = 0; i < shadow_cube_map.size(); ++i)
+    for (int i = 0; i < shadow_cube_map.size(); ++i)
     {
         GL_CALL(glActiveTexture(GL_TEXTURE5 + i));
         GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, shadow_cube_map[i]));

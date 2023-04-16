@@ -4,6 +4,7 @@
 #include "Transform.h"
 #include "Skybox.h"
 
+#include <list>
 #include <glm/vec4.hpp>
 
 enum class RenderCommand

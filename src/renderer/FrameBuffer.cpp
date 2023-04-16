@@ -114,9 +114,6 @@ void FrameBuffer::attach_texture(unsigned char attachment)
     default:
         break;
     }
-
-    //assert(glCheckFramebufferStatus(m_id) == GL_FRAMEBUFFER_COMPLETE);
-    //info(is_complete());
 }
 
 // FIXME
@@ -144,8 +141,6 @@ void FrameBuffer::attach_texture(unsigned char attachment, unsigned int texture_
             break;
         }
     }
-
-    info(is_complete());
 }
 
 void FrameBuffer::attach_renderbuffer(unsigned char attachment)

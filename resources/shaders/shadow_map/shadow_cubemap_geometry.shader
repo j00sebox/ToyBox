@@ -15,7 +15,6 @@ void main()
         {
             frag_pos = gl_in[v_idx].gl_Position;
             gl_Position = u_shadow_transforms[face] * frag_pos;
-            //frag_pos = gl_Position;
             EmitVertex();
         }
         EndPrimitive();
