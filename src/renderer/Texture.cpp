@@ -74,6 +74,25 @@ Texture2D::Texture2D(const std::string& file_name, bool gamma_correct)
     make_resident();
 }
 
+Texture2D::Texture2D(unsigned int component_type, unsigned int width, unsigned int height, int samples)
+{
+    m_width = width; m_height = height;
+    m_multisample = (samples > 1);
+
+    GL_CALL(glGenTextures(1, &m_id));
+    bind();
+    if(m_multisample)
+    {
+        GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, component_type, m_width, m_height, GL_TRUE));
+    }
+    else
+    {
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, component_type, m_width, m_height, 0, component_type, GL_UNSIGNED_INT, nullptr));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    }
+}
+
 Texture2D::Texture2D(Texture2D&& t) noexcept
 {
 	move_members(std::move(t));
@@ -87,12 +106,27 @@ Texture2D::~Texture2D()
 void Texture2D::bind(unsigned int slot /* = 0 */) const
 {
 	GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
-	GL_CALL(glBindTexture(GL_TEXTURE_2D, m_id));
+
+    if(m_multisample)
+    {
+        GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_id));
+    }
+    else
+    {
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_id));
+    }
 }
 
 void Texture2D::unbind() const
 {
-	GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+    if(m_multisample)
+    {
+        GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
+    }
+    else
+    {
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+    }
 }
 
 void Texture2D::operator=(Texture2D&& t) noexcept

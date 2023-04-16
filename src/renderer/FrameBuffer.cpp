@@ -49,65 +49,61 @@ void FrameBuffer::attach_texture(unsigned char attachment)
     {
         case AttachmentTypes::Colour:
         {
-            GL_CALL(glGenTextures(1, &m_colour_attachment));
+            Texture2D texture(GL_RGBA, m_width, m_height, m_samples);
+            texture.bind();
 
             if(m_samples > 1)
             {
-                GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_colour_attachment));
-                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_colour_attachment, 0));
-                GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture.m_id, 0));
             }
             else
             {
-                GL_CALL(glBindTexture(GL_TEXTURE_2D, m_colour_attachment));
-                GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_INT, nullptr));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colour_attachment, 0));
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.m_id, 0));
             }
+            texture.unbind();
+
+            m_colour_attachment = texture.m_id;
+            texture.m_id = 0;
             break;
         }
 
         case AttachmentTypes::Depth:
         {
-            GL_CALL(glGenTextures(1, &m_depth_attachment));
+            Texture2D texture(GL_DEPTH_COMPONENT, m_width, m_height, m_samples);
+            texture.bind();
 
             if(m_samples > 1)
             {
-                GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_depth_attachment));
-                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_DEPTH_COMPONENT, m_width, m_height, GL_TRUE));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_depth_attachment, 0));
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, texture.m_id, 0));
             }
             else
             {
-                GL_CALL(glBindTexture(GL_TEXTURE_2D, m_depth_attachment));
-                GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth_attachment, 0));
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture.m_id, 0));
             }
+            texture.unbind();
+
+            m_depth_attachment = texture.m_id;
+            texture.m_id = 0;
             break;
         }
 
         case AttachmentTypes::Stencil:
         {
-            GL_CALL(glGenTextures(1, &m_stencil_attachment));
+            Texture2D texture(GL_STENCIL_INDEX, m_width, m_height, m_samples);
+            texture.bind();
 
             if(m_samples > 1)
             {
-                GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_stencil_attachment));
-                GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA, m_width, m_height, GL_TRUE));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_stencil_attachment, 0));
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, texture.m_id, 0));
             }
             else
             {
-                GL_CALL(glBindTexture(GL_TEXTURE_2D, m_stencil_attachment));
-                GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX, m_width, m_height, 0, GL_STENCIL_INDEX, GL_UNSIGNED_INT, nullptr));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_stencil_attachment, 0));
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture.m_id, 0));
             }
+            texture.unbind();
+
+            m_stencil_attachment = texture.m_id;
+            texture.m_id = 0;
             break;
         }
     

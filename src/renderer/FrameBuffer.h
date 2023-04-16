@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Texture.h"
+
 namespace AttachmentTypes {
     enum : unsigned char 
     {

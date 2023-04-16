@@ -8,7 +8,6 @@ enum class ImageFormat
     PNG
 };
 
-
 class TextureBase
 {
 public:
@@ -21,12 +20,15 @@ public:
 
 protected:
     unsigned int m_id;
+
+    friend class FrameBuffer;
 };
 
 class Texture2D : public TextureBase
 {
 public:
 	Texture2D(const std::string& file_name, bool gamma_correct = true);
+    Texture2D(unsigned int component_type, unsigned int width, unsigned int height, int samples = 1);
 	Texture2D(Texture2D&& t) noexcept;
 	~Texture2D();
 	
@@ -44,6 +46,7 @@ private:
 
 	int m_width, m_height;
 	int m_colour_channels;
+    bool m_multisample = false;
 	unsigned char* m_data;
 };
 
