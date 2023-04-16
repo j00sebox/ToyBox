@@ -11,6 +11,9 @@
 
 #include <glm/vec3.hpp>
 
+// TODO: remove later
+#include <glad/glad.h>
+
 enum class PointLightBufferOffsets
 {
     colour = 0,
@@ -29,7 +32,8 @@ enum class DirectLightBufferOffsets
     colour = 16,
     direction = 32,
     brightness = 44,
-    total_offset = 48
+    shadow_map = 48,
+    total_offset = 64
 };
 
 LightManager::LightManager() {}
@@ -60,7 +64,7 @@ void LightManager::init_lights()
 
     if(m_direct_light)
     {
-        m_direct_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(64));
+        m_direct_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer((int)DirectLightBufferOffsets::total_offset));
         m_direct_light_buffer->link(2);
 
         m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
@@ -157,8 +161,10 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             ShaderTable::get("inst_default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
             direct_light.bind_shadow_map();
             Renderer::shadow_pass(render_list);
-            Renderer::shadow_map = direct_light.get_shadow_map();
-            m_direct_light_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::total_offset, direct_light.get_shadow_map());
+            // FIXME
+            uint64_t handle = glGetTextureHandleARB(direct_light.get_shadow_map());
+            glMakeTextureHandleResidentARB(handle);
+            m_direct_light_buffer->set_data_scalar_u64((int)DirectLightBufferOffsets::shadow_map, handle);
         }
     }
 }

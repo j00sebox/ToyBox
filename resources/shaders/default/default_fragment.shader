@@ -7,7 +7,6 @@ layout (binding = 0) uniform sampler2D diffuse_t;
 layout (binding = 1) uniform sampler2D specular_t;
 layout (binding = 2) uniform sampler2D normal_t;
 layout (binding = 3) uniform sampler2D occlusion_t;
-layout (binding = 4) uniform sampler2D shadow_map_t;
 
 in vec3 v_position;
 in vec3 v_normal;
@@ -49,6 +48,7 @@ layout (std430, binding=1) buffer PointLights
 layout (std430, binding=2) buffer DirectLight
 {
     DirectionalLight directional_light;
+    sampler2D shadow_map;
 };
 
 layout (std430, binding=3) buffer PointShadowMaps
@@ -86,14 +86,14 @@ vec4 direct_light()
         light_pos = (light_pos + 1.f) / 2.f;
         float shadow_bias = max(0.0002f * (1.f - dot(normal, light_dir)), 0.0005f);
 
-        vec2 texel_size = 1.0 / textureSize(shadow_map_t, 0);
+        vec2 texel_size = 1.0 / textureSize(shadow_map, 0);
 
         // sample all surrounding shadow values and take the average
         for(int x = -1; x <= 1; ++x)
         {
             for(int y = -1; y <= 1; ++y)
             {
-                float depth = texture(shadow_map_t, light_pos.xy + vec2(x, y) * texel_size).r;
+                float depth = texture(shadow_map, light_pos.xy + vec2(x, y) * texel_size).r;
 
                 if(light_pos.z - shadow_bias > depth)
                     shadow += 1.f;

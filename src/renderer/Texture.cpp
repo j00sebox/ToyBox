@@ -70,6 +70,8 @@ Texture2D::Texture2D(const std::string& file_name, bool gamma_correct)
 	GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
 
 	stbi_image_free(m_data);
+
+    make_resident();
 }
 
 Texture2D::Texture2D(Texture2D&& t) noexcept

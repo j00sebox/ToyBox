@@ -9,8 +9,6 @@
 
 #include <glad/glad.h>
 
-unsigned int Renderer::shadow_map = 0;
-
 void Renderer::init(int width, int height)
 {
 	set_viewport(width, height);
@@ -43,10 +41,6 @@ void Renderer::draw_elements(const Transform& transform, const MeshObject& mesh,
 {
     material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
     material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
-
-    // TODO: figure better way to do this
-    GL_CALL(glActiveTexture(GL_TEXTURE4));
-    GL_CALL(glBindTexture(GL_TEXTURE_2D, shadow_map));
 
 	material.bind();
 	mesh.bind();
