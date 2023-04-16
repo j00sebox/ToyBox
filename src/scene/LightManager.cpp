@@ -98,35 +98,32 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
                     // FIXME
                     Renderer::shadow_cube_map[index] = point_light.get_shadowmap();
+                }
 
-                    std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[0]", shadow_transforms[0]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[1]", shadow_transforms[1]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[2]", shadow_transforms[2]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[3]", shadow_transforms[3]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[4]", shadow_transforms[4]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[5]", shadow_transforms[5]);
-
-                    ShaderTable::get("shadow_cubemap")->set_uniform_3f("light_pos", pos);
+                if(point_light.has_shadow_info_changed())
+                {
+                    point_light.shadow_resize(pos);
+                    Renderer::shadow_cube_map[index] = point_light.get_shadowmap();
                 }
 
                 if(transform.has_position_changed())
                 {
                     point_light.shadow_update_transforms(pos);
-
-                    std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[0]", shadow_transforms[0]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[1]", shadow_transforms[1]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[2]", shadow_transforms[2]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[3]", shadow_transforms[3]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[4]", shadow_transforms[4]);
-                    ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[5]", shadow_transforms[5]);
-
-                    ShaderTable::get("shadow_cubemap")->set_uniform_3f("light_pos", pos);
                 }
 
+                std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[0]", shadow_transforms[0]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[1]", shadow_transforms[1]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[2]", shadow_transforms[2]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[3]", shadow_transforms[3]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[4]", shadow_transforms[4]);
+                ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[5]", shadow_transforms[5]);
+
+                ShaderTable::get("shadow_cubemap")->set_uniform_3f("light_pos", pos);
+
                 point_light.bind_shadow_map();
-                Renderer::shadow_pass(render_list, true);
+                auto [width, height] = point_light.get_shadow_dimensions();
+                Renderer::shadow_pass(render_list, width, height, true);
             }
 		}
 

@@ -103,6 +103,20 @@ void PointLight::imgui_render()
 	ImGui::Text("\n");
 
 	ImGui::InputFloat("Range", &m_range);
+
+    if(m_shadow_casting)
+    {
+        int dimensions = (int)m_shadow_width;
+        ImGui::InputInt("Shadow Dimensions", &dimensions);
+        ImGui::Text("\n");
+        m_shadow_info_change = (dimensions != (int)m_shadow_width);
+        m_shadow_width = (unsigned int)dimensions; m_shadow_height = (unsigned int)dimensions;
+
+        float prev_near = m_shadow_near, prev_far = m_shadow_far;
+        ImGui::InputFloat("Near Plane", &m_shadow_near);
+        ImGui::InputFloat("Far Plane", &m_shadow_far);
+        m_shadow_info_change = m_shadow_info_change || (prev_near != m_shadow_near || prev_far != m_shadow_far);
+    }
 }
 
 void PointLight::serialize(json& accessor) const
@@ -136,10 +150,21 @@ void PointLight::shadow_init(const glm::vec3 &light_pos)
     m_shadow_transforms.push_back(m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)));
 }
 
-void PointLight::shadow_update_transforms(const glm::vec3& light_pos)
+void PointLight::shadow_resize(const glm::vec3& light_pos)
 {
+    m_shadow_cubemap = std::make_shared<CubeMap>(GL_DEPTH_COMPONENT, m_shadow_width, m_shadow_height);
+
+    m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
+    m_shadow_map->bind();
+    m_shadow_map->attach_texture(AttachmentTypes::Depth, m_shadow_cubemap->get_id());
+
     m_shadow_proj = glm::perspective(glm::radians(90.0f), (float)m_shadow_width / (float)m_shadow_height, m_shadow_near, m_shadow_far);
 
+    shadow_update_transforms(light_pos);
+}
+
+void PointLight::shadow_update_transforms(const glm::vec3& light_pos)
+{
     m_shadow_transforms[0] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0));
     m_shadow_transforms[1] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0));
     m_shadow_transforms[2] = m_shadow_proj * glm::lookAt(light_pos, light_pos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));

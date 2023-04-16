@@ -33,7 +33,7 @@ public:
     static void draw_elements_instanced(unsigned int instances, const MeshObject&, const Material&);
     static void draw_skybox(const Skybox& skybox);
 	static void stencil(const Transform& stencil_transform, const MeshObject&, const Material&);
-    static void shadow_pass(const std::vector<RenderObject>& render_list, bool using_cubemap = false);
+    static void shadow_pass(const std::vector<RenderObject>& render_list, unsigned int shadow_width = 2048, unsigned int shadow_height = 2048, bool using_cubemap = false);
     static void render_pass(const std::vector<RenderObject>& render_list);
 	static void clear();
 

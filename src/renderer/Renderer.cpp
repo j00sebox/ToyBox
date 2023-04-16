@@ -102,7 +102,7 @@ void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mes
 
 }
 
-void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, bool using_cubemap)
+void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, unsigned int shadow_width, unsigned int shadow_height, bool using_cubemap)
 {
     GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     GLint viewport_size[4];
@@ -111,7 +111,7 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, bool us
     int original_width = viewport_size[2];
     int original_height = viewport_size[3];
 
-    glViewport(0, 0, 2048, 2048);
+    glViewport(0, 0, shadow_width, shadow_height);
     for(const auto& render_obj : render_list)
     {
         if(render_obj.mesh->get_mesh()->is_instanced())
