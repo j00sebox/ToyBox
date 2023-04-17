@@ -10,7 +10,7 @@ Skybox::Skybox(const std::string& texture_path, ImageFormat fmt)
 {
     m_skybox_shader = ShaderTable::get("skybox");
 
-	std::vector<float> skybox_verts =
+	const std::vector<float> skybox_verts =
 	{
 		-1.0f, -1.0f,  1.0f,	//        7--------6
 		 1.0f, -1.0f,  1.0f,	//       /|       /|
@@ -22,7 +22,7 @@ Skybox::Skybox(const std::string& texture_path, ImageFormat fmt)
 		-1.0f,  1.0f, -1.0f
 	};
 
-	std::vector<unsigned int> skybox_indices =
+	const std::vector<unsigned int> skybox_indices =
 	{
 		// right
 		1, 2, 6,
@@ -51,18 +51,19 @@ Skybox::Skybox(const std::string& texture_path, ImageFormat fmt)
 
 	m_skybox_va.bind();
 
-	VertexBuffer skybox_vb(skybox_verts);
-	IndexBuffer skybox_ib(skybox_indices);
+    Buffer skybox_vertex_buff(skybox_verts.size() * sizeof(float), BufferType::VERTEX);
+	skybox_vertex_buff.set_data(0, skybox_verts);
+
+    IndexBuffer skybox_ib(skybox_indices);
 
 	m_indices_count = skybox_ib.get_count();
 
 	BufferLayout sb_layout = { {0, 3, GL_FLOAT, false} };
 
-	m_skybox_va.set_layout(skybox_vb, sb_layout);
+    m_skybox_va.set_layout(skybox_vertex_buff, sb_layout);
 
 	m_skybox_va.unbind();
 	skybox_ib.unbind();
-	skybox_vb.unbind();
 }
 
 Skybox::Skybox(Skybox&& sb) noexcept

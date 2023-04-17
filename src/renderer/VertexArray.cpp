@@ -35,16 +35,16 @@ VertexArray::~VertexArray()
 	GL_CALL(glDeleteVertexArrays(1, &m_id));
 }
 
-void VertexArray::set_layout(const VertexBuffer& vb, const BufferLayout& layout)
+void VertexArray::set_layout(const Buffer& vertex_buffer, const BufferLayout& layout)
 {
-	bind();
-	vb.bind();
+    bind();
+    vertex_buffer.bind();
 
-	for (const auto& attrib : layout.get_layout())
-	{
-		GL_CALL(glEnableVertexAttribArray(attrib.id));
-		GL_CALL(glVertexAttribPointer(attrib.id, attrib.num, attrib.type, attrib.normalized, layout.get_stride(), (void*)attrib.offset));
-	}
+    for (const auto& attrib : layout.get_layout())
+    {
+        GL_CALL(glEnableVertexAttribArray(attrib.id));
+        GL_CALL(glVertexAttribPointer(attrib.id, attrib.num, attrib.type, attrib.normalized, layout.get_stride(), (void*)attrib.offset));
+    }
 }
 
 void VertexArray::bind() const

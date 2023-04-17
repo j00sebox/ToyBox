@@ -23,7 +23,7 @@ public:
 
     void load(const std::vector<float>& verts, const std::vector<unsigned int>& indices);
     void load_primitive(PrimitiveTypes primitive);
-    void make_instanced(int instances, std::vector<glm::mat4> instance_matrices);
+    void make_instanced(int instances, const std::vector<glm::mat4> instance_matrices);
     void update_instances(std::vector<glm::mat4> instance_matrices);
     void bind() const;
     void unbind() const;
@@ -37,8 +37,7 @@ private:
     unsigned int m_indices_count = 0;
     bool m_instanced = false;
     VertexArray m_va;
-    VertexBuffer m_vb;
-    std::unique_ptr<VertexBuffer> m_instance_buffer;
+    std::unique_ptr<Buffer> m_instance_buffer;
     IndexBuffer m_ib;
 };
 

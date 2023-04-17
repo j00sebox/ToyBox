@@ -8,7 +8,6 @@
 Mesh::Mesh(Mesh&& mesh) noexcept
 {
     m_va = std::move(mesh.m_va);
-    m_vb = std::move(mesh.m_vb);
     m_ib = std::move(mesh.m_ib);
     m_indices_count = mesh.m_indices_count;
 }
@@ -19,7 +18,8 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 
     m_va.bind();
 
-    m_vb.set_data(verts);
+    Buffer vertex_buffer{verts.size() * sizeof(float), BufferType::VERTEX};
+    vertex_buffer.set_data(0, verts);
     m_ib.set_data(indices);
 
     BufferLayout layout = {
@@ -28,10 +28,9 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
             {2, 2, GL_FLOAT, false}
     };
 
-    m_va.set_layout(m_vb, layout);
+    m_va.set_layout(vertex_buffer, layout);
 
     m_va.unbind();
-    m_vb.unbind();
     m_ib.unbind();
 }
 
@@ -57,12 +56,11 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
     }
 }
 
-void Mesh::make_instanced(int instances, std::vector<glm::mat4> instance_matrices)
+void Mesh::make_instanced(int instances, const std::vector<glm::mat4> instance_matrices)
 {
-    m_instance_buffer.reset(new VertexBuffer());
+    m_instance_buffer.reset(new Buffer(instances * sizeof(glm::mat4), BufferType::VERTEX));
+    m_instance_buffer->set_data(0, instance_matrices);
     m_instance_buffer->bind();
-    // TODO: move gl code to respective classes
-    GL_CALL(glBufferData(GL_ARRAY_BUFFER, instances * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW));
 
     m_va.bind();
 
