@@ -48,48 +48,38 @@ private:
 	unsigned int m_count;
 };
 
-class UniformBuffer
+enum class BufferType : int
+{
+    UNIFORM = 0,
+    SHADER_STORAGE
+};
+
+class Buffer
 {
 public:
-    explicit UniformBuffer(unsigned int size);
-    UniformBuffer(UniformBuffer&& ubo) noexcept;
-    ~UniformBuffer();
-
-    void set_data_scalar_i(unsigned int offset, int data) const;
-    void set_data_scalar_f(unsigned int offset, float data) const;
-    void set_data_vec3(unsigned int offset, const glm::vec3& vec) const;
-    void set_data_vec4(unsigned int offset, const glm::vec4& vec) const;
-    void set_data_mat4(unsigned int offset, const glm::mat4& mat) const;
+    explicit Buffer(unsigned int size, BufferType buffer_type);
+    Buffer(Buffer&& ubo) noexcept;
+    ~Buffer();
 
     void link(unsigned int binding_point) const;
     void bind() const;
     void unbind() const;
 
+    template<typename T>
+    void set_data(int offset, T&& data) const;
+
+    void operator= (Buffer&& other_buffer);
+
 private:
     unsigned int m_id;
+    BufferType m_buffer_type;
+
+    void set_data(int offset, uint64_t size, const void* data) const;
 };
 
-class ShaderStorageBuffer
+template<typename T>
+void Buffer::set_data(int offset, T&& data) const
 {
-public:
-    ShaderStorageBuffer(unsigned int size);
-    ShaderStorageBuffer(ShaderStorageBuffer&& ssb) noexcept;
-    ~ShaderStorageBuffer();
-
-    void set_data_arr_i(unsigned int offset, std::vector<int>& data) const;
-    void set_data_scalar_i(unsigned int offset, int data) const;
-    void set_data_scalar_ui(unsigned int offset, unsigned int data) const;
-    void set_data_scalar_u64(unsigned int offset, uint64_t data) const;
-    void set_data_scalar_f(unsigned int offset, float data) const;
-    void set_data_vec3(unsigned int offset, const glm::vec3& vec) const;
-    void set_data_vec4(unsigned int offset, const glm::vec4& vec) const;
-    void set_data_mat4(unsigned int offset, const glm::mat4& mat) const;
-
-    void link(unsigned int binding_point) const;
-    void bind() const;
-    void unbind() const;
-
-private:
-    unsigned int m_id;
-
-};
+    uint64_t size = sizeof(T);
+    set_data(offset, size, (void*)&data);
+}

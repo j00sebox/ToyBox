@@ -13,7 +13,7 @@
 #include <glm/vec4.hpp>
 
 class Entity;
-class UniformBuffer;
+class Buffer;
 struct RenderObject;
 
 class Scene
@@ -49,7 +49,7 @@ private:
     Window* m_window_handle;
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
-    std::unique_ptr<UniformBuffer> m_uniform_buffer;
+    std::unique_ptr<Buffer> m_transforms_buffer;
 	SceneNode root;
 	std::queue<SceneNode*> m_nodes_to_remove;
 	LightManager m_light_manager;

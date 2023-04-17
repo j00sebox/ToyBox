@@ -9,8 +9,7 @@
 class SceneNode;
 class Entity;
 class Camera;
-class UniformBuffer;
-class ShaderStorageBuffer;
+class Buffer;
 struct RenderObject;
 
 class LightManager
@@ -33,7 +32,7 @@ private:
 
 	std::list<std::shared_ptr<Entity>> m_point_lights;
 	std::shared_ptr<Entity> m_direct_light;
-    std::unique_ptr<ShaderStorageBuffer> m_point_light_buffer;
-    std::unique_ptr<ShaderStorageBuffer> m_direct_light_buffer;
-    std::unique_ptr<ShaderStorageBuffer> m_point_shadow_maps;
+    std::unique_ptr<Buffer> m_point_light_buffer;
+    std::unique_ptr<Buffer> m_direct_light_buffer;
+    std::unique_ptr<Buffer> m_point_shadow_maps;
 };

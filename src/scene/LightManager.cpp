@@ -14,7 +14,7 @@
 // TODO: remove later
 #include <glad/glad.h>
 
-enum class PointLightBufferOffsets
+enum class PointLightBufferOffsets : int
 {
     colour = 0,
     position = 16,
@@ -64,10 +64,10 @@ void LightManager::init_lights()
 
     if(m_direct_light)
     {
-        m_direct_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer((int)DirectLightBufferOffsets::total_offset));
+        m_direct_light_buffer = std::make_unique<Buffer>((int)DirectLightBufferOffsets::total_offset, BufferType::SHADER_STORAGE);
         m_direct_light_buffer->link(2);
 
-        m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, true);
+        m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::active, true);
     }
 }
 
@@ -82,11 +82,11 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 			auto& point_light = (*it)->get_component<PointLight>();
 			glm::vec3 pos = transform.get_parent_pos() + transform.get_position();
 
-            m_point_light_buffer->set_data_vec4((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_colour());
-            m_point_light_buffer->set_data_vec3((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * index), pos);
-            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_range());
-            m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_brightness());
-            m_point_light_buffer->set_data_scalar_i((int)PointLightBufferOffsets::shadow_casting + ((int)PointLightBufferOffsets::total_offset * index), point_light.is_casting_shadow());
+            m_point_light_buffer->set_data((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_colour());
+            m_point_light_buffer->set_data((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * index), pos);
+            m_point_light_buffer->set_data((int)PointLightBufferOffsets::range + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_range());
+            m_point_light_buffer->set_data((int)PointLightBufferOffsets::brightness + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_brightness());
+            m_point_light_buffer->set_data((int)PointLightBufferOffsets::shadow_casting + ((int)PointLightBufferOffsets::total_offset * index), point_light.is_casting_shadow());
 
             // TODO: consolidate into uniform buffer
             ShaderTable::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
@@ -105,7 +105,6 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
                 if(transform.has_position_changed())
                     point_light.shadow_update_transforms(pos);
 
-
                 std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
                 ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[0]", shadow_transforms[0]);
                 ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[1]", shadow_transforms[1]);
@@ -117,9 +116,9 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
                 ShaderTable::get("shadow_cubemap")->set_uniform_3f("u_light_pos", pos);
                 ShaderTable::get("shadow_cubemap")->set_uniform_1f("u_far_plane", point_light.get_far_plane());
 
-                m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::shadow_far_plane + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_far_plane());
-                m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::shadow_bias + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_shadow_bias());
-                m_point_shadow_maps->set_data_scalar_u64(index * sizeof(uint64_t), glGetTextureHandleARB(point_light.get_shadow_cubemap()));
+                m_point_light_buffer->set_data((int)PointLightBufferOffsets::shadow_far_plane + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_far_plane());
+                m_point_light_buffer->set_data((int)PointLightBufferOffsets::shadow_bias + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_shadow_bias());
+                m_point_shadow_maps->set_data(index * sizeof(uint64_t), glGetTextureHandleARB(point_light.get_shadow_cubemap()));
 
                 point_light.bind_shadow_map();
                 auto [width, height] = point_light.get_shadow_dimensions();
@@ -135,9 +134,9 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
         auto& direct_light = m_direct_light->get_component<DirectionalLight>();
         auto& dl_transform = m_direct_light->get_component<Transform>();
 
-        m_direct_light_buffer->set_data_vec4((int)DirectLightBufferOffsets::colour, direct_light.get_colour());
-        m_direct_light_buffer->set_data_vec3((int)DirectLightBufferOffsets::direction, direct_light.get_direction());
-        m_direct_light_buffer->set_data_scalar_f((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
+        m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::colour, direct_light.get_colour());
+        m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::direction, direct_light.get_direction());
+        m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::brightness, direct_light.get_brightness());
 
         // TODO: consolidate into uniform buffer
         ShaderTable::get("default")->set_uniform_3f("u_cam_pos", camera->get_pos());
@@ -161,14 +160,14 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             ShaderTable::get("inst_default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
             direct_light.bind_shadow_map();
             Renderer::shadow_pass(render_list);
-            m_direct_light_buffer->set_data_scalar_u64((int)DirectLightBufferOffsets::shadow_map, glGetTextureHandleARB(direct_light.get_shadow_map()));
+            m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::shadow_map, glGetTextureHandleARB(direct_light.get_shadow_map()));
         }
     }
 }
 
 void LightManager::remove_directional_light()
 {
-    m_direct_light_buffer->set_data_scalar_i((int)DirectLightBufferOffsets::active, false);
+    m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::active, false);
 }
 
 void LightManager::add_point_light(const SceneNode& node)
@@ -195,10 +194,10 @@ void LightManager::adjust_point_lights_buff()
 {
     int num_point_lights = m_point_lights.size();
     int buffer_size = (int)PointLightBufferOffsets::total_offset * num_point_lights;
-    m_point_light_buffer = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(buffer_size));
+    m_point_light_buffer = std::make_unique<Buffer>(buffer_size, BufferType::SHADER_STORAGE);
     m_point_light_buffer->link(1);
     ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", num_point_lights);
 
-    m_point_shadow_maps = std::make_unique<ShaderStorageBuffer>(ShaderStorageBuffer(sizeof(uint64_t) * num_point_lights));
+    m_point_shadow_maps = std::make_unique<Buffer>(sizeof(uint64_t) * num_point_lights, BufferType::SHADER_STORAGE);
     m_point_shadow_maps->link(3);
 }

@@ -50,10 +50,10 @@ void Scene::init()
 	EventList::e_resize.bind_function(std::bind(&Scene::window_resize, this, std::placeholders::_1, std::placeholders::_2));
     auto [width, height] = m_window_handle->get_dimensions();
 	m_camera->resize(width, height);
-    m_uniform_buffer = std::make_unique<UniformBuffer>(UniformBuffer(128));
-    m_uniform_buffer->link(0);
-    m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());
-    m_uniform_buffer->set_data_mat4(64, m_camera->get_perspective());
+    m_transforms_buffer = std::make_unique<Buffer>(128, BufferType::UNIFORM);
+    m_transforms_buffer->link(0);
+    m_transforms_buffer->set_data(0, m_camera->camera_look_at());
+    m_transforms_buffer->set_data(64, m_camera->get_perspective());
 
 	for (const SceneNode& node : root)
 	{
@@ -74,7 +74,7 @@ void Scene::update(float elapsed_time)
 
     // if the camera moved at all we need to adjust the view uniform
 	if(m_camera->update(elapsed_time))
-        m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());
+        m_transforms_buffer->set_data(0, m_camera->camera_look_at());
 
 	if (m_skybox)
 	{
@@ -207,8 +207,8 @@ void Scene::window_resize(int width, int height)
 {
 	m_camera->resize(width, height);
 	Renderer::set_viewport(width, height);
-    m_uniform_buffer->set_data_mat4(0, m_camera->camera_look_at());
-    m_uniform_buffer->set_data_mat4(64, m_camera->get_perspective());
+    m_transforms_buffer->set_data(0, m_camera->camera_look_at());
+    m_transforms_buffer->set_data(64, m_camera->get_perspective());
 }
 
 void Scene::remove_node(SceneNode& node)
