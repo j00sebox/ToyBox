@@ -24,21 +24,19 @@ public:
     void load(const std::vector<float>& verts, const std::vector<unsigned int>& indices);
     void load_primitive(PrimitiveTypes primitive);
     void make_instanced(int instances, const std::vector<glm::mat4> instance_matrices);
-    void update_instances(std::vector<glm::mat4> instance_matrices);
+    void update_instances(const std::vector<glm::mat4>& instance_matrices);
+
     void bind() const;
     void unbind() const;
 
-    [[nodiscard]] unsigned int get_vertex_count() const { return m_vertex_count; }
     [[nodiscard]] unsigned int get_index_count() const { return m_indices_count; }
     [[nodiscard]] bool is_instanced() const { return m_instanced; }
 
 private:
-    unsigned int m_vertex_count = 0;
     unsigned int m_indices_count = 0;
     bool m_instanced = false;
     VertexArray m_va;
     std::unique_ptr<Buffer> m_instance_buffer;
-    IndexBuffer m_ib;
 };
 
 class MeshTable

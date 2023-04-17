@@ -8,7 +8,6 @@
 Mesh::Mesh(Mesh&& mesh) noexcept
 {
     m_va = std::move(mesh.m_va);
-    m_ib = std::move(mesh.m_ib);
     m_indices_count = mesh.m_indices_count;
 }
 
@@ -20,7 +19,12 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
 
     Buffer vertex_buffer{verts.size() * sizeof(float), BufferType::VERTEX};
     vertex_buffer.set_data(0, verts);
-    m_ib.set_data(indices);
+
+    Buffer index_buffer{indices.size() * sizeof(unsigned int), BufferType::INDEX};
+    index_buffer.set_data(0, indices);
+
+    vertex_buffer.bind();
+    index_buffer.bind();
 
     BufferLayout layout = {
             {0, 3, GL_FLOAT, false},
@@ -28,17 +32,15 @@ void Mesh::load(const std::vector<float>& verts, const std::vector<unsigned int>
             {2, 2, GL_FLOAT, false}
     };
 
-    m_va.set_layout(vertex_buffer, layout);
+    m_va.set_layout(layout);
 
     m_va.unbind();
-    m_ib.unbind();
+    vertex_buffer.unbind();
+    index_buffer.unbind();
 }
 
 void Mesh::load_primitive(PrimitiveTypes primitive)
 {
-    // TODO: Figure out better way to do this
-    //m_primitive = primitive;
-
     switch (primitive)
     {
         case PrimitiveTypes::None:
@@ -85,15 +87,9 @@ void Mesh::make_instanced(int instances, const std::vector<glm::mat4> instance_m
     m_instanced = true;
 }
 
-void Mesh::update_instances(std::vector<glm::mat4> instance_matrices)
+void Mesh::update_instances(const std::vector<glm::mat4>& instance_matrices)
 {
-    m_instance_buffer->bind();
-    GL_CALL(glBufferData(GL_ARRAY_BUFFER, instance_matrices.size() * sizeof(glm::mat4), &instance_matrices[0], GL_STATIC_DRAW));
-
-    m_va.bind();
-
-    m_va.unbind();
-    m_instance_buffer->unbind();
+    m_instance_buffer->set_data(0, instance_matrices);
 }
 
 void Mesh::bind() const

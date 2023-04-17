@@ -37,7 +37,7 @@ public:
     VertexArray(VertexArray&& va);
 	~VertexArray();
 
-    void set_layout(const Buffer& vb, const BufferLayout& layout);
+    void set_layout(/*const Buffer& vb,*/ const BufferLayout& layout);
 
 	void bind() const;
 	void unbind() const;

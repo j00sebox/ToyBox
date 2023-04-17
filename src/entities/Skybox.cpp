@@ -49,21 +49,26 @@ Skybox::Skybox(const std::string& texture_path, ImageFormat fmt)
 		6, 2, 3
 	};
 
+    m_indices_count = skybox_indices.size();
+
 	m_skybox_va.bind();
 
     Buffer skybox_vertex_buff(skybox_verts.size() * sizeof(float), BufferType::VERTEX);
 	skybox_vertex_buff.set_data(0, skybox_verts);
 
-    IndexBuffer skybox_ib(skybox_indices);
+    Buffer skybox_index_buff(skybox_indices.size() * sizeof(unsigned int), BufferType::INDEX);
+    skybox_index_buff.set_data(0, skybox_indices);
 
-	m_indices_count = skybox_ib.get_count();
+    skybox_vertex_buff.bind();
+    skybox_index_buff.bind();
 
 	BufferLayout sb_layout = { {0, 3, GL_FLOAT, false} };
 
-    m_skybox_va.set_layout(skybox_vertex_buff, sb_layout);
+    m_skybox_va.set_layout(sb_layout);
 
 	m_skybox_va.unbind();
-	skybox_ib.unbind();
+	skybox_vertex_buff.unbind();
+    skybox_index_buff.unbind();
 }
 
 Skybox::Skybox(Skybox&& sb) noexcept

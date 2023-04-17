@@ -5,59 +5,12 @@
 
 #include <glad/glad.h>
 
-IndexBuffer::IndexBuffer()
-{
-    GL_CALL(glGenBuffers(1, &m_id));
-}
-
-IndexBuffer::IndexBuffer(IndexBuffer&& ib)
-{
-    m_id = ib.m_id;
-    ib.m_id = 0;
-    m_count = ib.m_count;
-}
-
-IndexBuffer::IndexBuffer(const std::vector<unsigned int>& buffer)
-{
-	m_count = buffer.size();
-
-	GL_CALL(glGenBuffers(1, &m_id));
-    set_data(buffer);
-}
-
-IndexBuffer::~IndexBuffer()
-{
-	GL_CALL(glDeleteBuffers(1, &m_id));
-}
-
-void IndexBuffer::set_data(const std::vector<unsigned int>& buffer)
-{
-    bind();
-    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned int), buffer.data(), GL_STATIC_DRAW));
-}
-
-void IndexBuffer::bind() const
-{
-	GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id));
-}
-
-void IndexBuffer::unbind() const
-{
-	GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-}
-
-void IndexBuffer::operator=(IndexBuffer&& ib)
-{
-    m_id = ib.m_id;
-    ib.m_id = 0;
-    m_count = ib.m_count;
-}
-
 GLenum convert_buffer_type(BufferType type)
 {
     switch (type)
     {
         case BufferType::VERTEX :           return GL_ARRAY_BUFFER;
+        case BufferType::INDEX :            return GL_ELEMENT_ARRAY_BUFFER;
         case BufferType::UNIFORM :          return GL_UNIFORM_BUFFER;
         case BufferType::SHADER_STORAGE :   return GL_SHADER_STORAGE_BUFFER;
     }

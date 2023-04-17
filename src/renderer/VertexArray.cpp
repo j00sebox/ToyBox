@@ -35,10 +35,10 @@ VertexArray::~VertexArray()
 	GL_CALL(glDeleteVertexArrays(1, &m_id));
 }
 
-void VertexArray::set_layout(const Buffer& vertex_buffer, const BufferLayout& layout)
+void VertexArray::set_layout( /*const Buffer& vertex_buffer,*/ const BufferLayout& layout)
 {
     bind();
-    vertex_buffer.bind();
+    //vertex_buffer.bind();
 
     for (const auto& attrib : layout.get_layout())
     {

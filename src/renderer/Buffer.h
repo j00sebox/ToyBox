@@ -7,31 +7,10 @@
 
 #include "Log.h"
 
-class IndexBuffer
-{
-public:
-    IndexBuffer();
-    IndexBuffer(IndexBuffer&& ib);
-	explicit IndexBuffer(const std::vector<unsigned int>& buffer);
-	~IndexBuffer();
-
-    void set_data(const std::vector<unsigned int>& buffer);
-
-	[[nodiscard]] unsigned int get_count() const { return m_count; }
-
-	void bind() const;
-	void unbind() const;
-
-    void operator= (IndexBuffer&& ib);
-
-private:
-	unsigned int m_id;
-	unsigned int m_count;
-};
-
 enum class BufferType : int
 {
     VERTEX = 0,
+    INDEX,
     UNIFORM,
     SHADER_STORAGE
 };
