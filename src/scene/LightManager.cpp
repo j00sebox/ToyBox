@@ -161,10 +161,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             ShaderTable::get("inst_default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
             direct_light.bind_shadow_map();
             Renderer::shadow_pass(render_list);
-            // FIXME
-            uint64_t handle = glGetTextureHandleARB(direct_light.get_shadow_map());
-            glMakeTextureHandleResidentARB(handle);
-            m_direct_light_buffer->set_data_scalar_u64((int)DirectLightBufferOffsets::shadow_map, handle);
+            m_direct_light_buffer->set_data_scalar_u64((int)DirectLightBufferOffsets::shadow_map, glGetTextureHandleARB(direct_light.get_shadow_map()));
         }
     }
 }

@@ -44,9 +44,10 @@ public:
 
     [[nodiscard]] const glm::mat4& get_light_view() const { return m_light_view; }
     [[nodiscard]] const glm::mat4& get_light_projection() const { return m_light_projection; }
+
+    void bind_shadow_map() const { m_shadow_map->bind(); };
     [[nodiscard]] const std::shared_ptr<FrameBuffer>& get_shadow_buffer() const { return m_shadow_map; };
     [[nodiscard]] unsigned int get_shadow_map() const { return m_shadow_map->get_depth_attachment(); }
-    void bind_shadow_map() const { m_shadow_map->bind(); };
 
 	[[nodiscard]] const char* get_name() const override { return "Directional Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(DirectionalLight).hash_code(); }

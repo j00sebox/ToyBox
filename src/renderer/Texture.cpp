@@ -91,6 +91,8 @@ Texture2D::Texture2D(unsigned int component_type, unsigned int width, unsigned i
         GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
         GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
     }
+
+    make_resident();
 }
 
 Texture2D::Texture2D(Texture2D&& t) noexcept

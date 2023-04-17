@@ -1,1 +1,439 @@
-{"background_colour":[0.0,0.029629647731781006,0.023703716695308685,1.0],"camera":{"forward":[-0.05402033403515816,-0.6914002299308777,-0.7204495668411255],"position":[-18.416015625,38.005306243896484,71.71564483642578]},"model_count":9,"models":[{"light":{"brightness":0.1459999978542328,"cast_shadow":false,"colour":[1.0,1.0,1.0,1.0],"direction":[0.0,20.0,20.0],"type":"directional_light"},"name":"Direct Light","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":1.0,"translate":[0.0,20.0,20.0]}},{"material":{"textures":{"base_colour":"../resources/models/asteroid/Default_baseColor.png","normal_map":"none","occlusion":"none","specular":"none"}},"mesh":{"instanced":false,"mesh_name":"../resources/models/asteroid/scene.gltf","mesh_type":"gltf","outlining_factor":0.1899999976158142,"use_scale_outline":false},"name":"asteroid","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":1.0,"translate":[1.0,6.0,3.0]}},{"material":{"custom":{"colour":[0.8872548937797546,0.4088331460952759,0.4088331460952759,1.0],"metallic_property":0.46399998664855957,"roughness":0.0}},"mesh":{"instanced":false,"mesh_name":"../resources/models/bunny/scene.gltf","mesh_type":"gltf","outlining_factor":0.0010000000474974513,"use_scale_outline":false},"name":"Bunny","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[103.0,1.0,0.0,0.0],"scale":100.0,"translate":[-36.0,-18.0,28.0]}},{"material":{"custom":{"colour":[0.14626701176166534,0.1155804917216301,0.6372548937797546,1.0],"metallic_property":0.0,"roughness":0.0}},"mesh":{"instanced":false,"mesh_name":"cube","mesh_type":"primitive","outlining_factor":0.13600000739097595,"use_scale_outline":true},"name":"cube","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":1.0,"translate":[-22.0,2.0,-6.0]}},{"material":{"custom":{"colour":[0.7990195751190186,0.0,0.0,1.0],"metallic_property":0.0,"roughness":0.0}},"mesh":{"instanced":false,"mesh_name":"quad","mesh_type":"primitive","outlining_factor":0.019999999552965164,"use_scale_outline":true},"name":"quad (1)","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[-90.0,1.0,0.0,0.0],"scale":20.0,"translate":[0.0,4.0,0.0]}},{"material":{"custom":{"colour":[0.7038723826408386,0.8088235259056091,0.6304066181182861,1.0],"metallic_property":0.0,"roughness":0.0}},"mesh":{"instanced":false,"mesh_name":"quad","mesh_type":"primitive","outlining_factor":0.019999999552965164,"use_scale_outline":true},"name":"quad","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[-90.0,1.0,0.0,0.0],"scale":100.0,"translate":[0.0,33.0,0.0]}},{"light":{"brightness":3.3329999446868896,"colour":[0.08024628460407257,0.5588235259056091,0.06574393808841705,1.0],"range":20.0,"type":"point_light"},"material":{"custom":{"colour":[0.0,0.7450979948043823,0.021914489567279816,1.0],"metallic_property":0.0,"roughness":0.0}},"mesh":{"instanced":false,"mesh_name":"cube","mesh_type":"primitive","outlining_factor":0.019999999552965164,"use_scale_outline":true},"name":"Point Light","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":0.10000000149011612,"translate":[-29.0,-3.0,30.0]}},{"light":{"brightness":3.3329999446868896,"colour":[0.07785466313362122,0.43598631024360657,0.7941176295280457,1.0],"range":10.0,"type":"point_light"},"material":{"custom":{"colour":[0.0,0.12975791096687317,0.7352941036224365,1.0],"metallic_property":0.0,"roughness":0.0}},"mesh":{"instanced":false,"mesh_name":"cube","mesh_type":"primitive","outlining_factor":0.019999999552965164,"use_scale_outline":true},"name":"Point Light (1)","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":0.10000000149011612,"translate":[3.0,-10.0,29.0]}},{"light":{"brightness":3.3329999446868896,"colour":[0.843137264251709,0.0,0.0,1.0],"range":5.0,"type":"point_light"},"material":{"custom":{"colour":[0.8480392098426819,0.0,0.0,1.0],"metallic_property":0.0,"roughness":0.0}},"mesh":{"instanced":false,"mesh_name":"cube","mesh_type":"primitive","outlining_factor":0.019999999552965164,"use_scale_outline":true},"name":"Point Light (2)","shader":"default","transform":{"parent_position":[0.0,0.0,0.0],"parent_scale":1.0,"rotation":[0.0,1.0,0.0,0.0],"scale":0.10000000149011612,"translate":[21.0,-10.0,28.0]}}],"skybox":{"image_format":1,"path":"../resources/skyboxes/space/"}}
+{
+    "background_colour": [
+        0.0,
+        0.029629647731781006,
+        0.023703716695308685,
+        1.0
+    ],
+    "camera": {
+        "forward": [
+            -0.05402033403515816,
+            -0.6914002299308777,
+            -0.7204495668411255
+        ],
+        "position": [
+            -18.416015625,
+            38.005306243896484,
+            71.71564483642578
+        ]
+    },
+    "model_count": 9,
+    "models": [
+        {
+            "light": {
+                "brightness": 0.1459999978542328,
+                "cast_shadow": true,
+                "colour": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    20.0,
+                    20.0
+                ],
+                "type": "directional_light"
+            },
+            "name": "Direct Light",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    0.0,
+                    20.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "textures": {
+                    "base_colour": "../resources/models/asteroid/Default_baseColor.png",
+                    "normal_map": "none",
+                    "occlusion": "none",
+                    "specular": "none"
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "../resources/models/asteroid/scene.gltf",
+                "mesh_type": "gltf",
+                "outlining_factor": 0.1899999976158142,
+                "use_scale_outline": false
+            },
+            "name": "asteroid",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    1.0,
+                    6.0,
+                    3.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.8872548937797546,
+                        0.4088331460952759,
+                        0.4088331460952759,
+                        1.0
+                    ],
+                    "metallic_property": 0.46399998664855957,
+                    "roughness": 0.0
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "../resources/models/bunny/scene.gltf",
+                "mesh_type": "gltf",
+                "outlining_factor": 0.0010000000474974513,
+                "use_scale_outline": false
+            },
+            "name": "Bunny",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    103.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    -36.0,
+                    -18.0,
+                    28.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.14626701176166534,
+                        0.1155804917216301,
+                        0.6372548937797546,
+                        1.0
+                    ],
+                    "metallic_property": 0.0,
+                    "roughness": 0.0
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "cube",
+                "mesh_type": "primitive",
+                "outlining_factor": 0.13600000739097595,
+                "use_scale_outline": true
+            },
+            "name": "cube",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 1.0,
+                "translate": [
+                    -22.0,
+                    2.0,
+                    -6.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.7990195751190186,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "metallic_property": 0.0,
+                    "roughness": 0.0
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "quad",
+                "mesh_type": "primitive",
+                "outlining_factor": 0.019999999552965164,
+                "use_scale_outline": true
+            },
+            "name": "quad (1)",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    -90.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 20.0,
+                "translate": [
+                    0.0,
+                    4.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.7038723826408386,
+                        0.8088235259056091,
+                        0.6304066181182861,
+                        1.0
+                    ],
+                    "metallic_property": 0.0,
+                    "roughness": 0.0
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "quad",
+                "mesh_type": "primitive",
+                "outlining_factor": 0.019999999552965164,
+                "use_scale_outline": true
+            },
+            "name": "quad",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    -90.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 100.0,
+                "translate": [
+                    0.0,
+                    33.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "light": {
+                "brightness": 3.3329999446868896,
+                "colour": [
+                    0.08024628460407257,
+                    0.5588235259056091,
+                    0.06574393808841705,
+                    1.0
+                ],
+                "range": 20.0,
+                "type": "point_light"
+            },
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.0,
+                        0.7450979948043823,
+                        0.021914489567279816,
+                        1.0
+                    ],
+                    "metallic_property": 0.0,
+                    "roughness": 0.0
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "cube",
+                "mesh_type": "primitive",
+                "outlining_factor": 0.019999999552965164,
+                "use_scale_outline": true
+            },
+            "name": "Point Light",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 0.10000000149011612,
+                "translate": [
+                    -29.0,
+                    -3.0,
+                    30.0
+                ]
+            }
+        },
+        {
+            "light": {
+                "brightness": 3.3329999446868896,
+                "colour": [
+                    0.07785466313362122,
+                    0.43598631024360657,
+                    0.7941176295280457,
+                    1.0
+                ],
+                "range": 10.0,
+                "type": "point_light"
+            },
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.0,
+                        0.12975791096687317,
+                        0.7352941036224365,
+                        1.0
+                    ],
+                    "metallic_property": 0.0,
+                    "roughness": 0.0
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "cube",
+                "mesh_type": "primitive",
+                "outlining_factor": 0.019999999552965164,
+                "use_scale_outline": true
+            },
+            "name": "Point Light (1)",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 0.10000000149011612,
+                "translate": [
+                    3.0,
+                    -10.0,
+                    29.0
+                ]
+            }
+        },
+        {
+            "light": {
+                "brightness": 3.3329999446868896,
+                "colour": [
+                    0.843137264251709,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "range": 5.0,
+                "type": "point_light"
+            },
+            "material": {
+                "custom": {
+                    "colour": [
+                        0.8480392098426819,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "metallic_property": 0.0,
+                    "roughness": 0.0
+                }
+            },
+            "mesh": {
+                "instanced": false,
+                "mesh_name": "cube",
+                "mesh_type": "primitive",
+                "outlining_factor": 0.019999999552965164,
+                "use_scale_outline": true
+            },
+            "name": "Point Light (2)",
+            "shader": "default",
+            "transform": {
+                "parent_position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parent_scale": 1.0,
+                "rotation": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": 0.10000000149011612,
+                "translate": [
+                    21.0,
+                    -10.0,
+                    28.0
+                ]
+            }
+        }
+    ],
+    "skybox": {
+        "image_format": 1,
+        "path": "../resources/skyboxes/space/"
+    }
+}

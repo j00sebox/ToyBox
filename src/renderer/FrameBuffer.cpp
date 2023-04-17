@@ -33,6 +33,9 @@ FrameBuffer::FrameBuffer(FrameBuffer&& fbo) noexcept
 
 FrameBuffer::~FrameBuffer()
 {
+//    GL_CALL(glDeleteTextures(1, &m_colour_attachment));
+//    GL_CALL(glDeleteTextures(1, &m_depth_attachment));
+//    GL_CALL(glDeleteTextures(1, &m_stencil_attachment));
     GL_CALL(glDeleteFramebuffers(1, &m_id));
 }
 
@@ -61,7 +64,7 @@ void FrameBuffer::attach_texture(unsigned char attachment)
         }
         texture.unbind();
 
-        m_colour_attachment = texture.m_id;
+        attachment = texture.m_id;
         texture.m_id = 0;
     };
 
@@ -76,10 +79,8 @@ void FrameBuffer::attach_texture(unsigned char attachment)
             break;
 
         case AttachmentTypes::Stencil:
-        {
             create_and_attach(m_stencil_attachment, GL_STENCIL_INDEX, GL_STENCIL_ATTACHMENT);
             break;
-        }
     
     default:
         break;
