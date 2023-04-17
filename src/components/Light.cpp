@@ -135,11 +135,9 @@ void PointLight::serialize(json& accessor) const
 
 void PointLight::shadow_init(const glm::vec3 &light_pos)
 {
-    m_shadow_cubemap = std::make_shared<CubeMap>(GL_DEPTH_COMPONENT, m_shadow_width, m_shadow_height);
-
     m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
     m_shadow_map->bind();
-    m_shadow_map->attach_texture(AttachmentTypes::Depth, m_shadow_cubemap->get_id());
+    m_shadow_map->attach_texture(AttachmentTypes::Depth, CubeMap(GL_DEPTH_COMPONENT, m_shadow_width, m_shadow_height));
 
     m_shadow_proj = glm::perspective(glm::radians(90.0f), (float)m_shadow_width / (float)m_shadow_height, m_shadow_near, m_shadow_far);
 
@@ -153,11 +151,9 @@ void PointLight::shadow_init(const glm::vec3 &light_pos)
 
 void PointLight::shadow_resize(const glm::vec3& light_pos)
 {
-    m_shadow_cubemap = std::make_shared<CubeMap>(GL_DEPTH_COMPONENT, m_shadow_width, m_shadow_height);
-
     m_shadow_map = std::make_shared<FrameBuffer>(m_shadow_width, m_shadow_height, 1);
     m_shadow_map->bind();
-    m_shadow_map->attach_texture(AttachmentTypes::Depth, m_shadow_cubemap->get_id());
+    m_shadow_map->attach_texture(AttachmentTypes::Depth, CubeMap(GL_DEPTH_COMPONENT, m_shadow_width, m_shadow_height));
 
     m_shadow_proj = glm::perspective(glm::radians(90.0f), (float)m_shadow_width / (float)m_shadow_height, m_shadow_near, m_shadow_far);
 

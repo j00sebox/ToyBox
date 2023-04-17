@@ -45,65 +45,39 @@ void FrameBuffer::blit(unsigned int dest_buffer) const
 
 void FrameBuffer::attach_texture(unsigned char attachment)
 {
+    auto create_and_attach = [&](unsigned int& attachment, unsigned int type, unsigned int component)
+    {
+        GL_CALL(glDeleteTextures(1, &attachment));
+        Texture2D texture(type, m_width, m_height, m_samples);
+        texture.bind();
+
+        if(m_samples > 1)
+        {
+            GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D_MULTISAMPLE, texture.m_id, 0));
+        }
+        else
+        {
+            GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D, texture.m_id, 0));
+        }
+        texture.unbind();
+
+        m_colour_attachment = texture.m_id;
+        texture.m_id = 0;
+    };
+
     switch (attachment)
     {
         case AttachmentTypes::Colour:
-        {
-            Texture2D texture(GL_RGBA, m_width, m_height, m_samples);
-            texture.bind();
-
-            if(m_samples > 1)
-            {
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture.m_id, 0));
-            }
-            else
-            {
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.m_id, 0));
-            }
-            texture.unbind();
-
-            m_colour_attachment = texture.m_id;
-            texture.m_id = 0;
+            create_and_attach(m_colour_attachment, GL_RGBA, GL_COLOR_ATTACHMENT0);
             break;
-        }
 
         case AttachmentTypes::Depth:
-        {
-            Texture2D texture(GL_DEPTH_COMPONENT, m_width, m_height, m_samples);
-            texture.bind();
-
-            if(m_samples > 1)
-            {
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, texture.m_id, 0));
-            }
-            else
-            {
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture.m_id, 0));
-            }
-            texture.unbind();
-
-            m_depth_attachment = texture.m_id;
-            texture.m_id = 0;
+            create_and_attach(m_depth_attachment, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
             break;
-        }
 
         case AttachmentTypes::Stencil:
         {
-            Texture2D texture(GL_STENCIL_INDEX, m_width, m_height, m_samples);
-            texture.bind();
-
-            if(m_samples > 1)
-            {
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, texture.m_id, 0));
-            }
-            else
-            {
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture.m_id, 0));
-            }
-            texture.unbind();
-
-            m_stencil_attachment = texture.m_id;
-            texture.m_id = 0;
+            create_and_attach(m_stencil_attachment, GL_STENCIL_INDEX, GL_STENCIL_ATTACHMENT);
             break;
         }
     
@@ -112,31 +86,36 @@ void FrameBuffer::attach_texture(unsigned char attachment)
     }
 }
 
-// FIXME
-void FrameBuffer::attach_texture(unsigned char attachment, unsigned int texture_id)
+void FrameBuffer::attach_texture(unsigned char attachment, TextureBase&& texture)
 {
-    GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id));
+    texture.bind(0);
+
+    auto attach = [&](unsigned int& attachment, unsigned int component)
+    {
+        GL_CALL(glDeleteTextures(1, &attachment));
+        GL_CALL(glFramebufferTexture(GL_FRAMEBUFFER, component, texture.m_id, 0));
+        texture.unbind();
+
+        attachment = texture.m_id;
+        texture.m_id = 0;
+    };
 
     switch (attachment)
     {
         case AttachmentTypes::Colour:
-        {
-            GL_CALL(glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0));
+            attach(m_colour_attachment, GL_COLOR_ATTACHMENT0);
             break;
-        }
 
         case AttachmentTypes::Depth:
-        {
-            GL_CALL(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_id, 0));
+            attach(m_depth_attachment, GL_DEPTH_ATTACHMENT);
             break;
-        }
 
         case AttachmentTypes::Stencil:
-        {
-            GL_CALL(glFramebufferTexture(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, texture_id, 0));
+            attach(m_stencil_attachment, GL_STENCIL_ATTACHMENT);
             break;
-        }
     }
+
+
 }
 
 void FrameBuffer::attach_renderbuffer(unsigned char attachment)

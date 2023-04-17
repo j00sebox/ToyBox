@@ -71,12 +71,11 @@ public:
 	[[nodiscard]] float get_range() const { return m_range; }
 
     void bind_shadow_map() const { m_shadow_map->bind(); };
+    [[nodiscard]] const unsigned int get_shadow_cubemap() const { return m_shadow_map->get_depth_attachment(); };
     [[nodiscard]] bool has_shadow_info_changed() const { return m_shadow_info_change; }
     [[nodiscard]] float get_far_plane() const { return m_shadow_far; }
-    [[nodiscard]]unsigned int get_shadowmap() { return m_shadow_cubemap->get_id(); }
     [[nodiscard]] std::vector<glm::mat4>& get_shadow_transforms() { return m_shadow_transforms; }
     [[nodiscard]] const std::shared_ptr<FrameBuffer>& get_shadow_buffer() const { return m_shadow_map; };
-    [[nodiscard]] const uint64_t get_cubemap_handle() const { return m_shadow_cubemap->get_handle(); }
 
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(PointLight).hash_code(); }
@@ -91,7 +90,6 @@ private:
 	float m_range = 10.f;
 
     // shadow info
-    std::shared_ptr<CubeMap> m_shadow_cubemap;
     std::shared_ptr<FrameBuffer> m_shadow_map;
     float m_shadow_near = 1.f, m_shadow_far = 100.f;
     glm::mat4 m_shadow_proj;

@@ -119,7 +119,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
                 m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::shadow_far_plane + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_far_plane());
                 m_point_light_buffer->set_data_scalar_f((int)PointLightBufferOffsets::shadow_bias + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_shadow_bias());
-                m_point_shadow_maps->set_data_scalar_u64(index * sizeof(uint64_t), point_light.get_cubemap_handle());
+                m_point_shadow_maps->set_data_scalar_u64(index * sizeof(uint64_t), glGetTextureHandleARB(point_light.get_shadow_cubemap()));
 
                 point_light.bind_shadow_map();
                 auto [width, height] = point_light.get_shadow_dimensions();
