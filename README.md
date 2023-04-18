@@ -18,7 +18,7 @@ This scene is rendering 10,000 objects with instances.
 
 If on Windows you can run the windows_config.bat script to do all the setup. It will create a Visual Studio solution file located in the build folder. Once opened you can set the toy_box project as the start up one. After that is done then you can build and run it from there.
 
-There is also currently a Windows release version available.
+There is also currently a Windows release version available but it is very far behind the source.
 
 ### Linux
 
