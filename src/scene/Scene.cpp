@@ -9,7 +9,7 @@
 #include "Log.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-#include "components/MeshObject.h"
+#include "components/MeshView.h"
 #include "components/Material.h"
 #include "events/EventList.h"
 
@@ -173,7 +173,7 @@ void Scene::add_primitive(const char* name)
         MeshTable::add(name, std::move(mesh));
     }
 
-    MeshObject mesh_object;
+    MeshView mesh_object;
     mesh_object.set_mesh(MeshTable::get(name));
     mesh_object.set_mesh_info(name, "primitive");
 
@@ -241,10 +241,10 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 {
 	Transform relative_transform = scene_node.update(parent_transform);
 
-	if (scene_node.entity->has_component<MeshObject>())
+	if (scene_node.entity->has_component<MeshView>())
 	{
 		auto& material = scene_node.entity->get_component<Material>();
-		auto& mesh = scene_node.entity->get_component<MeshObject>();
+		auto& mesh = scene_node.entity->get_component<MeshView>();
 
         if(mesh.get_mesh()->is_instanced())
         {
@@ -318,7 +318,7 @@ void Scene::imgui_render(SceneNode& scene_node)
 	{
 		ImGui::SetDragDropPayload("_TREENODE", nullptr, 0);
 		m_drag_node = &scene_node;
-		ImGui::Text(scene_node.entity->get_name().c_str());
+		ImGui::TextUnformatted(scene_node.entity->get_name().c_str());
 		ImGui::EndDragDropSource();
 	}
 	

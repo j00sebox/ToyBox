@@ -8,7 +8,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-class MeshObject final : public Component
+class MeshView final : public Component
 {
 public:
     void set_mesh(const std::shared_ptr<Mesh>& mesh) { m_mesh = mesh; }
@@ -23,8 +23,8 @@ public:
     [[nodiscard]] const bool is_using_scale_outline() const { return m_use_scale_outline; }
     [[nodiscard]] const float get_scale_outline_factor() const { return m_outlining_factor; }
 
-	[[nodiscard]] const char* get_name() const override { return "Mesh Object"; }
-	[[nodiscard]] size_t get_type() const override { return typeid(MeshObject).hash_code(); }
+	[[nodiscard]] const char* get_name() const override { return "Mesh View"; }
+	[[nodiscard]] size_t get_type() const override { return typeid(MeshView).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 

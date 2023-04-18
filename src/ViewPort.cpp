@@ -40,7 +40,7 @@ void ViewPort::display()
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     if(m_multisample_frame_buffer)
         m_multisample_frame_buffer->blit(m_frame_buffer->get_id());
-    drawList->AddImage((void*)m_frame_buffer->get_colour_attachment(),
+    drawList->AddImage((void*)(uintptr_t)m_frame_buffer->get_colour_attachment(),
        pos,
        ImVec2(pos.x + avail_size.x, pos.y + avail_size.y),
        ImVec2(0, 1),

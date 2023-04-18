@@ -3,5 +3,5 @@
 class PointLight;
 class DirectionalLight;
 class Material;
-class MeshObject;
+class MeshView;
 class Transform;

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "MeshObject.h"
+#include "MeshView.h"
 #include "Mesh.h"
 
 #include <imgui.h>
@@ -7,28 +7,28 @@
 
 using namespace nlohmann;
 
-void MeshObject::bind() const
+void MeshView::bind() const
 {
     m_mesh->bind();
 }
 
-void MeshObject::unbind() const
+void MeshView::unbind() const
 {
     m_mesh->unbind();
 }
 
-void MeshObject::imgui_render()
+void MeshView::imgui_render()
 {
     ImGui::Text("name: ");
     ImGui::SameLine();
-    ImGui::Text(m_mesh_name.c_str());
+    ImGui::TextUnformatted(m_mesh_name.c_str());
 
     ImGui::Text("\nStenciling: ");
     ImGui::SliderFloat("Outlining Factor", &m_outlining_factor, 0.f, 0.3f);
     ImGui::Checkbox("Use Scale Outline", &m_use_scale_outline);
 }
 
-void MeshObject::serialize(json& accessor) const
+void MeshView::serialize(json& accessor) const
 {
 	accessor["mesh"]["mesh_name"] = m_mesh_name;
     accessor["mesh"]["mesh_type"] = m_mesh_type;

@@ -58,7 +58,7 @@ void Mesh::load_primitive(PrimitiveTypes primitive)
     }
 }
 
-void Mesh::make_instanced(int instances, const std::vector<glm::mat4> instance_matrices)
+void Mesh::make_instanced(int instances, const std::vector<glm::mat4>& instance_matrices)
 {
     m_instance_buffer.reset(new Buffer(instances * sizeof(glm::mat4), BufferType::VERTEX));
     m_instance_buffer->set_data(0, instance_matrices);

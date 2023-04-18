@@ -3,7 +3,7 @@
 #include "GLError.h"
 #include "Shader.h"
 #include "Mesh.h"
-#include "components/MeshObject.h"
+#include "components/MeshView.h"
 #include "components/Material.h"
 #include "components/Transform.h"
 
@@ -37,7 +37,7 @@ void Renderer::set_clear_colour(glm::vec4 colour)
 	GL_CALL(glClearColor(colour.x, colour.y, colour.z, colour.w));
 }
 
-void Renderer::draw_elements(const Transform& transform, const MeshObject& mesh, const Material& material)
+void Renderer::draw_elements(const Transform& transform, const MeshView& mesh, const Material& material)
 {
     material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
     material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
@@ -48,7 +48,7 @@ void Renderer::draw_elements(const Transform& transform, const MeshObject& mesh,
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::draw_elements_instanced(unsigned int instances, const MeshObject& mesh_obj, const Material& material)
+void Renderer::draw_elements_instanced(unsigned int instances, const MeshView& mesh_obj, const Material& material)
 {
     material.bind();
     mesh_obj.bind();
@@ -66,7 +66,7 @@ void Renderer::draw_skybox(const Skybox& skybox)
     GL_CALL(glEnable(GL_CULL_FACE));
 }
 
-void Renderer::stencil(const Transform& stencil_transform, const MeshObject& mesh, const Material& material)
+void Renderer::stencil(const Transform& stencil_transform, const MeshView& mesh, const Material& material)
 {
     GL_CALL(glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE));
 	GL_CALL(glStencilFunc(GL_ALWAYS, 2, 0xFF)); // make all the fragments of the object have a stencil of 1

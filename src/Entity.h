@@ -71,7 +71,7 @@ public:
 protected:
 	static bool is_removeable(size_t type_hash)
 	{
-		return (type_hash == typeid(MeshObject).hash_code() || type_hash == typeid(Material).hash_code() || type_hash == typeid(PointLight).hash_code() || type_hash == typeid(DirectionalLight).hash_code());
+		return (type_hash == typeid(MeshView).hash_code() || type_hash == typeid(Material).hash_code() || type_hash == typeid(PointLight).hash_code() || type_hash == typeid(DirectionalLight).hash_code());
 	}
 
 	std::string m_name;

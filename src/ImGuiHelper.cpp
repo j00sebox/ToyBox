@@ -23,7 +23,7 @@ void texture_viewer(unsigned int texture_id, float texture_width, float texture_
         ImVec2 uv_max = ImVec2(1.0f, 1.0f);
         ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
         ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);
-        ImGui::Image((ImTextureID)texture_id, ImVec2(texture_width * 0.05f, texture_height * 0.05f), uv_min, uv_max, tint_col, border_col);
+        ImGui::Image((ImTextureID)(uintptr_t)texture_id, ImVec2(texture_width * 0.05f, texture_height * 0.05f), uv_min, uv_max, tint_col, border_col);
         if (ImGui::IsItemHovered())
         {
             ImGui::BeginTooltip();
@@ -39,7 +39,7 @@ void texture_viewer(unsigned int texture_id, float texture_width, float texture_
             ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
             ImVec2 uv0 = ImVec2((region_x) / texture_width, (region_y) / texture_height);
             ImVec2 uv1 = ImVec2((region_x + region_sz) / texture_width, (region_y + region_sz) / texture_height);
-            ImGui::Image((ImTextureID)texture_id, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, tint_col, border_col);
+            ImGui::Image((ImTextureID)(uintptr_t)texture_id, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, tint_col, border_col);
             ImGui::EndTooltip();
         }
     }

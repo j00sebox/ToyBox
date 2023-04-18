@@ -5,8 +5,6 @@
 #include <glm/vec4.hpp>
 #include <glm/matrix.hpp>
 
-#include "Log.h"
-
 enum class BufferType : int
 {
     VERTEX = 0,

@@ -10,7 +10,7 @@
 #include "Mesh.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-#include "components/MeshObject.h"
+#include "components/MeshView.h"
 #include "components/Material.h"
 
 static std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts);
@@ -214,7 +214,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
     if(!model["mesh"].is_null())
     {
-        MeshObject mesh_object;
+        MeshView mesh_object;
         Material material;
 
         json mesh_accessor = model["mesh"];
@@ -267,7 +267,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	return current_node;
 }
 
-void SceneSerializer::load_mesh(nlohmann::json& mesh_accessor, MeshObject& mesh_object)
+void SceneSerializer::load_mesh(nlohmann::json& mesh_accessor, MeshView& mesh_object)
 {
     auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
     {

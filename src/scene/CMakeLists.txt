@@ -7,4 +7,8 @@ list(APPEND SRCS
     ${CMAKE_CURRENT_LIST_DIR}/SceneNode.cpp
     ${CMAKE_CURRENT_LIST_DIR}/SceneSerializer.h
     ${CMAKE_CURRENT_LIST_DIR}/SceneSerializer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Skybox.h
+    ${CMAKE_CURRENT_LIST_DIR}/Skybox.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Primitives.h
+    ${CMAKE_CURRENT_LIST_DIR}/Primitives.cpp
 )

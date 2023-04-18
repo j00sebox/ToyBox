@@ -13,6 +13,7 @@ GLenum convert_buffer_type(BufferType type)
         case BufferType::INDEX :            return GL_ELEMENT_ARRAY_BUFFER;
         case BufferType::UNIFORM :          return GL_UNIFORM_BUFFER;
         case BufferType::SHADER_STORAGE :   return GL_SHADER_STORAGE_BUFFER;
+        default:                            return GL_NONE;
     }
 }
 

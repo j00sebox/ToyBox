@@ -94,3 +94,6 @@ _deps
 # CLion
 .idea/
 cmake-build-debug/
+
+# large models
+resources/large_models
