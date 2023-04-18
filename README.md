@@ -4,7 +4,11 @@
 
 This project is a sandbox for learning more about how rendering is done and OpenGL. 
 
+![Test_Scene](/screenshots/test_scene.png)
+
 ![Airplane](/screenshots/airplane.png)
+
+![Asteroid_Field](/screenshots/asteroid_field.png)
 
 ## Build
 
@@ -32,3 +36,10 @@ cd build
 make
 ./toy_box
 ```
+## Controls
+
+WASD to move around
+By holding the right mouse button you can rotate the camera
+R is to reset the camera to the origin
+C can recompile shaders
+ESC will shut the program down
