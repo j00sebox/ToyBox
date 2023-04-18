@@ -2,7 +2,7 @@
 
 ## About
 
-This project is a sandbox for learning more about how rendering architecture and interfacign with graphics APIs like OpenGL. This is an ongoing project as there are many more features I want to add and improve upon.  
+This project is a sandbox for learning more about rendering architecture and interfacing with graphics APIs like OpenGL. This is an ongoing project as there are many more features I want to add and improve upon.  
 
 ![Test_Scene](/screenshots/test_scene.png)
 
