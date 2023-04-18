@@ -13,6 +13,9 @@
 #include "components/Material.h"
 #include "events/EventList.h"
 
+// TODO: remove later
+#include "GLTFLoader.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <spdlog/fmt/bundled/format.h>
@@ -202,6 +205,124 @@ void Scene::add_primitive(const char* name)
 	else
 		root.add_child(std::make_shared<Entity>(std::move(e)));
 }
+
+// TODO: remove later
+std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)
+{
+    std::vector<glm::vec3> vec;
+    for (unsigned int i = 0; i < flts.size();)
+    {
+        vec.emplace_back(glm::vec3{ flts[i++], flts[i++], flts[i++] });
+    }
+
+    return vec;
+}
+
+std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
+{
+    std::vector<glm::vec2> vec;
+    for (unsigned int i = 0; i < flts.size();)
+    {
+        vec.emplace_back(glm::vec2{ flts[i++], flts[i++] });
+    }
+
+    return vec;
+}
+
+void Scene::add_model(const char *name)
+{
+    std::string lookup{ "model" };
+
+    if(root.exists(lookup))
+    {
+        int i = 1;
+        while (root.exists(lookup))
+        {
+            lookup = std::string(name) + fmt::format(" ({})", i);
+            ++i;
+        }
+    }
+
+    Entity e;
+    e.set_name(lookup);
+
+    Transform t;
+
+    GLTFLoader loader(name);
+
+    if(!MeshTable::exists(name))
+    {
+        std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
+        std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
+        std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
+
+        std::vector<Vertex> vertices;
+
+        for (unsigned int i = 0; i < positions.size(); i++)
+        {
+            vertices.push_back({
+                                       positions[i],
+                                       normals[i],
+                                       tex_coords[i]
+                               });
+        }
+
+        std::vector<float> verts;
+
+        for (const Vertex& v : vertices)
+        {
+            verts.push_back(v.position.x);
+            verts.push_back(v.position.y);
+            verts.push_back(v.position.z);
+            verts.push_back(v.normal.x);
+            verts.push_back(v.normal.y);
+            verts.push_back(v.normal.z);
+            verts.push_back(v.st.x);
+            verts.push_back(v.st.y);
+        }
+
+        std::vector<unsigned int> indices = loader.get_indices();
+
+        Mesh mesh;
+        mesh.load(verts, indices);
+
+        MeshTable::add(name, std::move(mesh));
+    }
+
+    MeshView mesh_object;
+    mesh_object.set_mesh(MeshTable::get(name));
+    mesh_object.set_mesh_info(name, "primitive");
+
+    Material material;
+
+    if(MeshTable::get(name)->is_instanced())
+    {
+        instanced_meshes[name].push_back(t.get_transform());
+        material.set_shader(ShaderTable::get("inst_default"));
+        MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
+        mesh_object.m_instance_id = instanced_meshes[name].size() - 1;
+    }
+    else
+    {
+        material.set_shader(ShaderTable::get("default"));
+    }
+
+    std::string textures[4] = {
+            loader.get_base_color_texture(),
+            loader.get_specular_texture(),
+            loader.get_normal_texture(),
+            loader.get_occlusion_texture()
+    };
+
+    material.load(textures);
+
+    e.add_component(std::move(t));
+    e.add_component(std::move(mesh_object));
+    e.add_component(std::move(material));
+
+    root.add_child(std::make_shared<Entity>(std::move(e)));
+}
+
 
 void Scene::window_resize(int width, int height)
 {
@@ -448,4 +569,5 @@ void Scene::recompile_shaders()
 {
     ShaderTable::recompile();
 }
+
 

@@ -27,6 +27,7 @@ public:
 	void init();
 	void update(float elapsed_time);
 	void add_primitive(const char* name);
+    void add_model(const char* name);
 	void window_resize(int width, int height);
     void recompile_shaders();
 	Camera* get_camera() { return m_camera.get(); }

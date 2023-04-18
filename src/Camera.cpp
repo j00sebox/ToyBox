@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Camera.h"
-
 #include "Input.h"
 
 #include <glm/geometric.hpp>

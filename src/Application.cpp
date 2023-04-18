@@ -121,7 +121,7 @@ void Application::display_menu()
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenu();
-		}	
+		}
 
 		if (ImGui::BeginMenu("Add"))
 		{
@@ -135,6 +135,22 @@ void Application::display_menu()
 				m_current_scene->add_primitive("quad");
 			}
 
+            if (ImGui::BeginMenu("Open Model"))
+            {
+                if (ImGui::BeginMenu("Choose model to open"))
+                {
+                    static char buf[64] = "";
+                    ImGui::InputText("##LeftSide", buf, IM_ARRAYSIZE(buf));
+
+                    if (ImGui::Button("Open"))
+                    {
+                        std::string path = std::string(buf);
+                        m_current_scene->add_model(path.c_str());
+                    }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenu();
+            }
 			ImGui::EndMenu();
 		}
 
