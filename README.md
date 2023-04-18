@@ -2,13 +2,15 @@
 
 ## About
 
-This project is a sandbox for learning more about how rendering is done and OpenGL. 
+This project is a sandbox for learning more about how rendering architecture and interfacign with graphics APIs like OpenGL. This is an ongoing project as there are many more features I want to add and improve upon.  
 
 ![Test_Scene](/screenshots/test_scene.png)
 
 ![Airplane](/screenshots/airplane.png)
 
 ![Asteroid_Field](/screenshots/asteroid_field.png)
+
+This scene is rendering 10,000 objects with instances.
 
 ## Build
 
@@ -38,8 +40,8 @@ make
 ```
 ## Controls
 
-WASD to move around
-By holding the right mouse button you can rotate the camera
-R is to reset the camera to the origin
-C can recompile shaders
-ESC will shut the program down
+WASD to move around.
+By holding the right mouse button you can rotate the camera.
+R is to reset the camera to the origin.
+C can recompile shaders.
+ESC will shut the program down.
