@@ -40,8 +40,8 @@ make
 ```
 ## Controls
 
-WASD to move around.
-By holding the right mouse button you can rotate the camera.
-R is to reset the camera to the origin.
-C can recompile shaders.
-ESC will shut the program down.
+* WASD to move around
+* By holding the right mouse button you can rotate the camera.
+* R is to reset the camera to the origin.
+* C can recompile shaders.
+* ESC will shut the program down.
