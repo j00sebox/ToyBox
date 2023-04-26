@@ -244,16 +244,15 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
             json material_accessor = model["material"];
             load_material(material_accessor, material);
 
-            material.set_shader(ShaderTable::get(model["shader"]));
+            material.set_shader(ShaderTable::get(material_accessor["shader"]));
         }
 
         MaterialComponent material_component(std::move(material));
+        material_component.set_texturing_mode((TexturingMode)model["material"]["texturing_mode"]);
 
         entity.add_component(std::move(material_component));
         entity.add_component(std::move(mesh_component));
     }
-
-
 
 	SceneNode current_node{ std::make_unique<Entity>(std::move(entity)) };
 
@@ -333,23 +332,20 @@ void SceneSerializer::load_mesh(nlohmann::json& mesh_accessor, MeshComponent& me
 
 void SceneSerializer::load_material(nlohmann::json& material_accessor, Material& material)
 {
-    if(!material_accessor["custom"].is_null())
-    {
-        material.set_colour({ material_accessor["custom"]["colour"][0], material_accessor["custom"]["colour"][1], material_accessor["custom"]["colour"][2], material_accessor["custom"]["colour"][3]});
-        material.set_metallic_property(material_accessor["custom"]["metallic_property"]);
-        material.set_roughness(material_accessor["custom"]["roughness"]);
-    }
-    else
-    {
-        std::string textures[] = {
-                material_accessor["textures"]["base_colour"],
-                material_accessor["textures"]["specular"],
-                material_accessor["textures"]["normal_map"],
-                material_accessor["textures"]["occlusion"]
-        };
+    material.set_colour({ material_accessor["properties"]["colour"][0], material_accessor["properties"]["colour"][1], material_accessor["properties"]["colour"][2], material_accessor["properties"]["colour"][3]});
+    material.set_metallic_property(material_accessor["properties"]["metallic_property"]);
+    material.set_roughness(material_accessor["properties"]["roughness"]);
 
-        material.load(textures);
-    }
+    std::string base_colour_location = (material_accessor["textures"]["base_colour"] == "") ? "../resources/textures/white_on_white.jpeg" : material_accessor["textures"]["base_colour"];
+
+    std::string textures[] = {
+            base_colour_location,
+            material_accessor["textures"]["specular"],
+            material_accessor["textures"]["normal_map"],
+            material_accessor["textures"]["occlusion"]
+    };
+
+    material.load(textures);
 }
 
 std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)

@@ -3,11 +3,19 @@
 #include "Component.h"
 #include "renderer/Fwd.h"
 
+enum class TexturingMode
+{
+    NO_TEXTURE = 0,
+    CUSTOM_TEXTURES,
+    MODEL_DEFAULT
+};
+
 class MaterialComponent final : public Component
 {
 public:
     MaterialComponent(Material&& material);
     MaterialComponent(std::shared_ptr<Material> material_ptr);
+    void set_texturing_mode(TexturingMode mode);
     [[nodiscard]] const Material& get() const { return m_material.operator*(); }
     [[nodiscard]] std::shared_ptr<Material> get_ptr() { return m_material; }
 
@@ -18,5 +26,6 @@ public:
 
 private:
     std::shared_ptr<Material> m_material;
+    TexturingMode m_texturing_mode = TexturingMode::NO_TEXTURE;
 };
 

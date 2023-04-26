@@ -20,6 +20,12 @@ MaterialComponent::MaterialComponent(std::shared_ptr<Material> material_ptr)
     m_material = material_ptr;
 }
 
+void MaterialComponent::set_texturing_mode(TexturingMode mode)
+{
+    m_texturing_mode = mode;
+    m_material->m_using_textures = (mode == TexturingMode::CUSTOM_TEXTURES || mode == TexturingMode::MODEL_DEFAULT);
+}
+
 void MaterialComponent::imgui_render()
 {
     static std::string combo_preview = ShaderTable::find(m_material->m_shader);
@@ -40,16 +46,12 @@ void MaterialComponent::imgui_render()
         ImGui::EndCombo();
     }
 
-    bool prev_choice = m_material->m_custom;
-    ImGui::Checkbox("Custom", &m_material->m_custom);
+    ImGui::Checkbox("Textured", &m_material->m_using_textures);
 
-    if(prev_choice && prev_choice != m_material->m_custom)
-    {
-        std::string textures[] = {"../resources/textures/white_on_white.jpeg", "none", "none", "none"};
-        m_material->load(textures);
-    }
+    // TODO: figure out what it is that you do
+    m_texturing_mode = (m_material->m_using_textures) ? TexturingMode::CUSTOM_TEXTURES : TexturingMode::NO_TEXTURE;
 
-    if (m_material->m_custom)
+    if (!m_material->m_using_textures)
     {
         float colour[4] = {
                 m_material->m_colour.x,
@@ -95,21 +97,20 @@ void MaterialComponent::imgui_render()
 
 void MaterialComponent::serialize(json& accessor) const
 {
-    if(m_material->m_custom)
-    {
-        accessor["material"]["custom"]["colour"][0] = m_material->m_colour.x;
-        accessor["material"]["custom"]["colour"][1] = m_material->m_colour.y;
-        accessor["material"]["custom"]["colour"][2] = m_material->m_colour.z;
-        accessor["material"]["custom"]["colour"][3] = m_material->m_colour.w;
-        accessor["material"]["custom"]["metallic_property"] = m_material->m_metallic;
-        accessor["material"]["custom"]["roughness"] = m_material->m_roughness;
-    }
-    else
-    {
-        accessor["material"]["textures"]["base_colour"] = m_material->m_texture_locations[0];
-        accessor["material"]["textures"]["specular"]    = m_material->m_texture_locations[1];
-        accessor["material"]["textures"]["normal_map"]  = m_material->m_texture_locations[2];
-        accessor["material"]["textures"]["occlusion"]   = m_material->m_texture_locations[3];
-    }
+    accessor["material"]["texturing_mode"] = (int)m_texturing_mode;
+
+    accessor["material"]["properties"]["colour"][0] = m_material->m_colour.x;
+    accessor["material"]["properties"]["colour"][1] = m_material->m_colour.y;
+    accessor["material"]["properties"]["colour"][2] = m_material->m_colour.z;
+    accessor["material"]["properties"]["colour"][3] = m_material->m_colour.w;
+    accessor["material"]["properties"]["metallic_property"] = m_material->m_metallic;
+    accessor["material"]["properties"]["roughness"] = m_material->m_roughness;
+
+    accessor["material"]["textures"]["base_colour"] = m_material->m_texture_locations[0];
+    accessor["material"]["textures"]["specular"]    = m_material->m_texture_locations[1];
+    accessor["material"]["textures"]["normal_map"]  = m_material->m_texture_locations[2];
+    accessor["material"]["textures"]["occlusion"]   = m_material->m_texture_locations[3];
+
+    accessor["material"]["shader"] = ShaderTable::find(m_material->m_shader);
 }
 

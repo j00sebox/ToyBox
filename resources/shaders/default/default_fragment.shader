@@ -14,7 +14,7 @@ in vec2 v_tex_coord;
 in vec4 v_light_space_pos;
 
 uniform vec3 u_cam_pos;
-uniform bool u_custom;
+uniform bool u_using_textures;
 uniform vec4 u_base_colour;
 uniform float u_metallic;
 
@@ -145,7 +145,7 @@ vec4 point_light(int i)
 
 void main()
 {
-    if(u_custom)
+    if(!u_using_textures)
     {
         base_colour = u_base_colour;
         spec_val = u_metallic;

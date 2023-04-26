@@ -20,11 +20,11 @@ public:
 	void set_metallic_property(float new_val) { m_metallic = new_val; }
 	void set_roughness(float new_val) { m_roughness = new_val; }
 	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
-	[[nodiscard]] bool is_custom() const { return m_custom; }
+	//[[nodiscard]] bool is_custom() const { return m_custom; }
 
 private:
 	std::shared_ptr<ShaderProgram> m_shader;
-	bool m_custom = true;
+	bool m_using_textures = false;
 	std::unique_ptr<Texture2D> m_textures[4];
     std::string m_texture_locations[4];
 

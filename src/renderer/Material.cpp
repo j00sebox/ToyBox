@@ -12,18 +12,16 @@ void Material::load(const std::string* const textures)
     m_texture_locations[3] = textures[3];
 
     m_textures[0] = std::make_unique<Texture2D>(Texture2D(textures[0]));
-    m_textures[1] = (textures[1] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[1])) : nullptr;
-    m_textures[2] = (textures[2] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[2])) : nullptr;
-    m_textures[3] = (textures[3] != "none") ? std::make_unique<Texture2D>(Texture2D(textures[3])) : nullptr;
-
-    m_custom = false;
+    m_textures[1] = (textures[1] != "none" && textures[1] != "") ? std::make_unique<Texture2D>(Texture2D(textures[1])) : nullptr;
+    m_textures[2] = (textures[2] != "none" && textures[2] != "") ? std::make_unique<Texture2D>(Texture2D(textures[2])) : nullptr;
+    m_textures[3] = (textures[3] != "none" && textures[3] != "") ? std::make_unique<Texture2D>(Texture2D(textures[3])) : nullptr;
 }
 
 void Material::bind() const
 {
-    m_shader->set_uniform_1i("u_custom", m_custom);
+    m_shader->set_uniform_1i("u_using_textures", m_using_textures);
 
-    if (m_custom)
+    if (!m_using_textures)
     {
         m_shader->set_uniform_4f("u_base_colour", m_colour);
         m_shader->set_uniform_1f("u_metallic", m_metallic);
@@ -43,7 +41,7 @@ void Material::bind() const
 
 void Material::unbind() const
 {
-    if (!m_custom)
+    if (m_using_textures)
     {
         for (const auto& m_texture : m_textures)
         {
