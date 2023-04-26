@@ -2,6 +2,6 @@
 
 class PointLight;
 class DirectionalLight;
-class Material;
-class MeshView;
+class MaterialComponent;
+class MeshComponent;
 class Transform;

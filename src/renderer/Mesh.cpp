@@ -140,17 +140,6 @@ std::string MeshTable::find(const std::shared_ptr<Mesh>& m)
     return "";
 }
 
-bool MeshTable::is_instance(const std::string &name)
-{
-    if (exists(name))
-    {
-        return m_meshes[name]->is_instanced();
-    }
-
-    fatal("Shader {} does not exist in library!\n", name);
-    return false;
-}
-
 void MeshTable::release()
 {
     m_meshes.clear();

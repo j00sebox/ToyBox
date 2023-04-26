@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "MeshView.h"
+#include "MeshComponent.h"
 #include "Mesh.h"
 
 #include <imgui.h>
@@ -7,17 +7,17 @@
 
 using namespace nlohmann;
 
-void MeshView::bind() const
+void MeshComponent::bind() const
 {
     m_mesh->bind();
 }
 
-void MeshView::unbind() const
+void MeshComponent::unbind() const
 {
     m_mesh->unbind();
 }
 
-void MeshView::imgui_render()
+void MeshComponent::imgui_render()
 {
     ImGui::Text("name: ");
     ImGui::SameLine();
@@ -28,7 +28,7 @@ void MeshView::imgui_render()
     ImGui::Checkbox("Use Scale Outline", &m_use_scale_outline);
 }
 
-void MeshView::serialize(json& accessor) const
+void MeshComponent::serialize(json& accessor) const
 {
 	accessor["mesh"]["mesh_name"] = m_mesh_name;
     accessor["mesh"]["mesh_type"] = m_mesh_type;

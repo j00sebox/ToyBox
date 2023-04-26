@@ -13,4 +13,6 @@ list(APPEND SRCS
     ${CMAKE_CURRENT_LIST_DIR}/FrameBuffer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Mesh.h
     ${CMAKE_CURRENT_LIST_DIR}/Mesh.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Material.h
+    ${CMAKE_CURRENT_LIST_DIR}/Material.cpp
 )

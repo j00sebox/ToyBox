@@ -46,7 +46,6 @@ public:
     static std::shared_ptr<Mesh> get(const std::string& name);
     static bool exists(const std::string& name);
     static std::string find(const std::shared_ptr<Mesh>& s);
-    static bool is_instance(const std::string& name);
     static void release();
 
 private:

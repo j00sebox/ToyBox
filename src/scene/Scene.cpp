@@ -9,8 +9,8 @@
 #include "Log.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-#include "components/MeshView.h"
-#include "components/Material.h"
+#include "components/MeshComponent.h"
+#include "renderer/Material.h"
 #include "events/EventList.h"
 
 // TODO: remove later
@@ -176,7 +176,7 @@ void Scene::add_primitive(const char* name)
         MeshTable::add(name, std::move(mesh));
     }
 
-    MeshView mesh_object;
+    MeshComponent mesh_object;
     mesh_object.set_mesh(MeshTable::get(name));
     mesh_object.set_mesh_info(name, "primitive");
 
@@ -198,7 +198,7 @@ void Scene::add_primitive(const char* name)
 
     e.add_component(std::move(t));
     e.add_component(std::move(mesh_object));
-	e.add_component(std::move(material));
+	//e.add_component(std::move(material));
 
 	if(m_selected_node)
 		m_selected_node->add_child(std::make_shared<Entity>(std::move(e)));
@@ -289,7 +289,7 @@ void Scene::add_model(const char *name)
         MeshTable::add(name, std::move(mesh));
     }
 
-    MeshView mesh_object;
+    MeshComponent mesh_object;
     mesh_object.set_mesh(MeshTable::get(name));
     mesh_object.set_mesh_info(name, "primitive");
 
@@ -318,7 +318,7 @@ void Scene::add_model(const char *name)
 
     e.add_component(std::move(t));
     e.add_component(std::move(mesh_object));
-    e.add_component(std::move(material));
+    //e.add_component(std::move(material));
 
     root.add_child(std::make_shared<Entity>(std::move(e)));
 }
@@ -362,35 +362,35 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 {
 	Transform relative_transform = scene_node.update(parent_transform);
 
-	if (scene_node.entity->has_component<MeshView>())
+	if (scene_node.entity->has_component<MeshComponent>())
 	{
-		auto& material = scene_node.entity->get_component<Material>();
-		auto& mesh = scene_node.entity->get_component<MeshView>();
+		auto& material_component = scene_node.entity->get_component<MaterialComponent>();
+		auto& mesh_component = scene_node.entity->get_component<MeshComponent>();
 
-        if(mesh.get_mesh()->is_instanced())
+        if(mesh_component.get_mesh()->is_instanced())
         {
-            std::string mesh_name = MeshTable::find(mesh.get_mesh());
-            instanced_meshes[mesh_name][mesh.m_instance_id] = relative_transform.get_transform();
+            std::string mesh_name = MeshTable::find(mesh_component.get_mesh());
+            instanced_meshes[mesh_name][mesh_component.m_instance_id] = relative_transform.get_transform();
             if(!mesh_used[mesh_name])
             {
-                m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, relative_transform, &mesh, &material, (unsigned int)instanced_meshes[mesh_name].size()});
+                m_render_list.emplace_back(RenderObject{RenderCommand::InstancedElementDraw, relative_transform, mesh_component, material_component, (unsigned int)instanced_meshes[mesh_name].size()});
                 mesh_used[mesh_name] = true;
             }
 
             if (m_selected_node && (scene_node == *m_selected_node))
             {
-                m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
+                m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, mesh_component, material_component});
             }
         }
 		else
 		{
             if (m_selected_node && (scene_node == *m_selected_node))
             {
-                m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, &mesh, &material});
+                m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, mesh_component, material_component});
             }
             else
             {
-                m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, &mesh, &material});
+                m_render_list.emplace_back(RenderObject{RenderCommand::ElementDraw, relative_transform, mesh_component, material_component});
             }
 		}
 	}

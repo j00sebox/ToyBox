@@ -3,8 +3,8 @@
 #include "GLError.h"
 #include "Shader.h"
 #include "Mesh.h"
-#include "components/MeshView.h"
-#include "components/Material.h"
+#include "components/MeshComponent.h"
+#include "Material.h"
 #include "components/Transform.h"
 
 #include <glad/glad.h>
@@ -37,7 +37,7 @@ void Renderer::set_clear_colour(glm::vec4 colour)
 	GL_CALL(glClearColor(colour.x, colour.y, colour.z, colour.w));
 }
 
-void Renderer::draw_elements(const Transform& transform, const MeshView& mesh, const Material& material)
+void Renderer::draw_elements(const Transform& transform, const Mesh& mesh, const Material& material)
 {
     material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
     material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
@@ -45,14 +45,14 @@ void Renderer::draw_elements(const Transform& transform, const MeshView& mesh, c
 	material.bind();
 	mesh.bind();
 
-	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
+	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::draw_elements_instanced(unsigned int instances, const MeshView& mesh_obj, const Material& material)
+void Renderer::draw_elements_instanced(unsigned int instances, const Mesh& mesh_obj, const Material& material)
 {
     material.bind();
     mesh_obj.bind();
-    GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, mesh_obj.get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr, instances));
+    GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, mesh_obj.get_index_count(), GL_UNSIGNED_INT, nullptr, instances));
 }
 
 void Renderer::draw_skybox(const Skybox& skybox)
@@ -66,14 +66,14 @@ void Renderer::draw_skybox(const Skybox& skybox)
     GL_CALL(glEnable(GL_CULL_FACE));
 }
 
-void Renderer::stencil(const Transform& stencil_transform, const MeshView& mesh, const Material& material)
+void Renderer::stencil(const Transform& stencil_transform, const Mesh& mesh, const Material& material)
 {
     GL_CALL(glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE));
 	GL_CALL(glStencilFunc(GL_ALWAYS, 2, 0xFF)); // make all the fragments of the object have a stencil of 1
 	
 	material.bind();
 	mesh.bind();
-	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
+	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 
     ShaderTable::get("flat_colour")->set_uniform_mat4f("u_model", stencil_transform.get_transform());
     ShaderTable::get("flat_colour")->set_uniform_4f("u_flat_colour", {1.f, 1.f, 0.f, 1.f});
@@ -81,7 +81,7 @@ void Renderer::stencil(const Transform& stencil_transform, const MeshView& mesh,
     GL_CALL(glStencilOp(GL_KEEP, GL_KEEP, GL_INCR));
 	GL_CALL(glStencilFunc(GL_NOTEQUAL, 2, 0xFF)); // now all fragments not apart of the original object are written
 
-	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
+	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 	
 	// set back to normal for other objects
     GL_CALL(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
@@ -101,11 +101,13 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, unsigne
     glViewport(0, 0, shadow_width, shadow_height);
     for(const auto& render_obj : render_list)
     {
-        if(render_obj.mesh->get_mesh()->is_instanced())
+        const Mesh& mesh = render_obj.mesh.get_mesh().operator*();
+
+        if(mesh.is_instanced())
         {
             ShaderTable::get("inst_shadow_map")->bind();
-            render_obj.mesh->bind();
-            GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr, render_obj.instances));
+            mesh.bind();
+            GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr, render_obj.instances));
         }
         else
         {
@@ -120,8 +122,8 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, unsigne
                 ShaderTable::get("shadow_map")->bind();
             }
 
-            render_obj.mesh->bind();
-            GL_CALL(glDrawElements(GL_TRIANGLES, render_obj.mesh->get_mesh()->get_index_count(), GL_UNSIGNED_INT, nullptr));
+            mesh.bind();
+            GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
         }
     }
     glViewport(0, 0, original_width, original_height);
@@ -133,35 +135,38 @@ void Renderer::render_pass(const std::vector<RenderObject>& render_list)
 {
    for(const auto& render_obj : render_list)
    {
+        const Mesh& mesh = render_obj.mesh.get_mesh().operator*();
+        const Material& material = render_obj.material.get();
+
         switch(render_obj.render_command)
         {
             case RenderCommand::ElementDraw:
             {
-                draw_elements(render_obj.transform, *render_obj.mesh, *render_obj.material);
+                draw_elements(render_obj.transform, mesh, material);
                 break;
             }
 
             case RenderCommand::InstancedElementDraw:
             {
-                draw_elements_instanced(render_obj.instances, *render_obj.mesh, *render_obj.material);
+                draw_elements_instanced(render_obj.instances, mesh, material);
                 break;
             }
 
             case RenderCommand::Stencil:
             {
-                render_obj.material->get_shader()->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
-                render_obj.material->get_shader()->set_uniform_4f("u_base_colour", render_obj.material->get_colour());
+                material.get_shader()->set_uniform_mat4f("u_model", render_obj.transform.get_transform());
+                material.get_shader()->set_uniform_4f("u_base_colour", material.get_colour());
                 Transform stencil_transform = render_obj.transform;
 
-                if(render_obj.mesh->is_using_scale_outline())
+                if(render_obj.mesh.is_using_scale_outline())
                 {
                     ShaderTable::get("flat_colour")->set_uniform_1f("u_outlining_factor", 0.f);
-                    stencil_transform.scale(stencil_transform.get_uniform_scale() * (1.f + render_obj.mesh->get_scale_outline_factor())); // scale up a tiny bit to see outline
+                    stencil_transform.scale(stencil_transform.get_uniform_scale() * (1.f + render_obj.mesh.get_scale_outline_factor())); // scale up a tiny bit to see outline
                 }
                 else
-                    ShaderTable::get("flat_colour")->set_uniform_1f("u_outlining_factor", render_obj.mesh->get_scale_outline_factor());
+                    ShaderTable::get("flat_colour")->set_uniform_1f("u_outlining_factor", render_obj.mesh.get_scale_outline_factor());
 
-                stencil(stencil_transform, *render_obj.mesh, *render_obj.material);
+                stencil(stencil_transform, mesh, material);
                 break;
             }
         }

@@ -10,8 +10,8 @@
 #include "Mesh.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-#include "components/MeshView.h"
-#include "components/Material.h"
+#include "components/MeshComponent.h"
+#include "renderer/Material.h"
 
 static std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts);
 static std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts);
@@ -151,29 +151,29 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         }
 	};
 
-	Entity e;
+	Entity entity;
 
 	json model = accessor[model_index];
 
-	e.set_name(model.value("name", "no_name"));
+    entity.set_name(model.value("name", "no_name"));
 
-	Transform t{};
+	Transform transform{};
 	json info = model["transform"];
 
 	json translation = info["translate"];
-	t.translate(glm::vec3({ translation[0], translation[1], translation[2] }));
+    transform.translate(glm::vec3({ translation[0], translation[1], translation[2] }));
 
 	json rotation = info["rotation"];
-	t.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
+    transform.rotate(rotation[0], { rotation[1], rotation[2], rotation[3] });
 
-	t.scale(info["scale"]);
+    transform.scale(info["scale"]);
 
 	json parent_position = info["parent_position"];
-	t.set_parent_offsets(glm::vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
+    transform.set_parent_offsets(glm::vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
 
-    glm::mat4 model_matrix = t.get_transform();
-    glm::vec3 position = t.get_position();
-    e.add_component(std::move(t));
+    glm::mat4 model_matrix = transform.get_transform();
+    glm::vec3 position = transform.get_position();
+    entity.add_component(std::move(transform));
 
 	if (!model["light"].is_null())
 	{
@@ -188,7 +188,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 			pl.set_range(model["light"]["range"]);
 			pl.set_brightness(model["light"]["brightness"]);
 
-			e.add_component(std::move(pl));
+            entity.add_component(std::move(pl));
 		}
 		else if (type == "directional_light")
 		{
@@ -208,32 +208,32 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
                 dl.shadow_init(position);
             }
 
-			e.add_component(std::move(dl));
+            entity.add_component(std::move(dl));
 		}
 	}
 
     if(!model["mesh"].is_null())
     {
-        MeshView mesh_object;
+        MeshComponent mesh_component;
         Material material;
 
         json mesh_accessor = model["mesh"];
-        load_mesh(mesh_accessor, mesh_object);
+        load_mesh(mesh_accessor, mesh_component);
 
-        mesh_object.m_mesh_type = mesh_accessor["mesh_type"];
+        mesh_component.m_mesh_type = mesh_accessor["mesh_type"];
 
         std::string mesh_name = mesh_accessor["mesh_name"];
 
-        mesh_object.m_use_scale_outline = mesh_accessor["use_scale_outline"];
-        mesh_object.m_outlining_factor = mesh_accessor["outlining_factor"];
+        mesh_component.m_use_scale_outline = mesh_accessor["use_scale_outline"];
+        mesh_component.m_outlining_factor = mesh_accessor["outlining_factor"];
 
         if(mesh_accessor["instanced"])
         {
             scene.instanced_meshes[mesh_name].push_back(model_matrix);
             material.set_shader(ShaderTable::get("inst_default"));
-            mesh_object.m_instance_id = scene.instanced_meshes[mesh_name].size() - 1;
+            mesh_component.m_instance_id = scene.instanced_meshes[mesh_name].size() - 1;
 
-            if(mesh_object.m_instance_id == 0)
+            if(mesh_component.m_instance_id == 0)
             {
                 json material_accessor = model["material"];
                 load_material(material_accessor, material);
@@ -247,13 +247,15 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
             material.set_shader(ShaderTable::get(model["shader"]));
         }
 
-        e.add_component(std::move(material));
-        e.add_component(std::move(mesh_object));
+        MaterialComponent material_component(std::move(material));
+
+        entity.add_component(std::move(material_component));
+        entity.add_component(std::move(mesh_component));
     }
 
 
 
-	SceneNode current_node{ std::make_unique<Entity>(std::move(e)) };
+	SceneNode current_node{ std::make_unique<Entity>(std::move(entity)) };
 
 	int num_children = accessor[model_index].value("child_count", 0);
 
@@ -267,7 +269,7 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 	return current_node;
 }
 
-void SceneSerializer::load_mesh(nlohmann::json& mesh_accessor, MeshView& mesh_object)
+void SceneSerializer::load_mesh(nlohmann::json& mesh_accessor, MeshComponent& mesh_object)
 {
     auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
     {
