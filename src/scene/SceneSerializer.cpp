@@ -286,7 +286,10 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
             json material_accessor = model["material"];
             TexturingMode texturing_mode = (TexturingMode)material_accessor["texturing_mode"];
 
-            if(!MaterialTable::exists(entity.get_name()))
+            // if the mesh is being instanced then make one material that can be shared by all those instances
+            std::string mat_name = (mesh_accessor["instanced"]) ? mesh_name : entity.get_name();
+
+            if(!MaterialTable::exists(mat_name))
             {
                 Material material;
 
@@ -318,10 +321,10 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
                 else
                     material.set_shader(ShaderTable::get(material_accessor["shader"]));
 
-                MaterialTable::add(entity.get_name(), std::move(material));
+                MaterialTable::add(mat_name, std::move(material));
             }
 
-            MaterialComponent material_component(MaterialTable::get(entity.get_name()));
+            MaterialComponent material_component(MaterialTable::get(mat_name));
             material_component.set_texturing_mode(texturing_mode);
 
             entity.add_component(std::move(material_component));
