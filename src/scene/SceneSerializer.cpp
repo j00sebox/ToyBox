@@ -246,7 +246,6 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         GLTFLoader loader;
 
         json mesh_accessor = model["mesh"];
-       //load_mesh(mesh_accessor, mesh_component);
 
         mesh_component.m_mesh_type = mesh_accessor["mesh_type"];
         std::string mesh_name = mesh_accessor["mesh_name"];
@@ -313,13 +312,17 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
                     material.load(textures);
                 }
 
-                material.set_shader(ShaderTable::get(material_accessor["shader"]));
+                // FIXME
+                if(mesh_accessor["instanced"])
+                    material.set_shader(ShaderTable::get("inst_default"));
+                else
+                    material.set_shader(ShaderTable::get(material_accessor["shader"]));
 
                 MaterialTable::add(entity.get_name(), std::move(material));
             }
 
             MaterialComponent material_component(MaterialTable::get(entity.get_name()));
-            material_component.set_texturing_mode((TexturingMode)model["material"]["texturing_mode"]);
+            material_component.set_texturing_mode(texturing_mode);
 
             entity.add_component(std::move(material_component));
         }

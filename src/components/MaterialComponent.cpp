@@ -49,7 +49,14 @@ void MaterialComponent::imgui_render()
     ImGui::Checkbox("Textured", &m_material->m_using_textures);
 
     // TODO: figure out what it is that you do
-    m_texturing_mode = (m_material->m_using_textures) ? TexturingMode::CUSTOM_TEXTURES : TexturingMode::NO_TEXTURE;
+    if(!m_material->m_using_textures)
+    {
+        m_texturing_mode = TexturingMode::NO_TEXTURE;
+    }
+    else
+    {
+        m_texturing_mode = TexturingMode::CUSTOM_TEXTURES;
+    }
 
     if (!m_material->m_using_textures)
     {

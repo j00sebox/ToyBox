@@ -164,10 +164,10 @@ void Scene::add_primitive(const char* name)
 		++i;
 	}
 
-	Entity e;
-	e.set_name(lookup);
+	Entity entity;
+    entity.set_name(lookup);
 
-    Transform t;
+    Transform transform;
 
     if(!MeshTable::exists(name))
     {
@@ -177,34 +177,47 @@ void Scene::add_primitive(const char* name)
         MeshTable::add(name, std::move(mesh));
     }
 
-    MeshComponent mesh_object;
-    mesh_object.set_mesh(MeshTable::get(name));
-    mesh_object.set_mesh_info(name, "primitive");
+    MeshComponent mesh_component;
+    mesh_component.set_mesh(MeshTable::get(name));
+    mesh_component.set_mesh_info(name, "primitive");
 
-	Material material;
+    Material material;
+
+    material.set_colour({1.f, 1.f, 1.f, 1.f});
+    material.set_metallic_property(0.f);
+    material.set_roughness(0.f);
+
+    std::string textures[] = {
+            "../resources/textures/white_on_white.jpeg",
+            "none",
+            "none",
+            "none"
+    };
+
+    material.load(textures);
 
     if(MeshTable::get(name)->is_instanced())
     {
-        instanced_meshes[name].push_back(t.get_transform());
+        instanced_meshes[name].push_back(transform.get_transform());
         material.set_shader(ShaderTable::get("inst_default"));
         MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
-        mesh_object.m_instance_id = instanced_meshes[name].size() - 1;
+        mesh_component.m_instance_id = instanced_meshes[name].size() - 1;
     }
     else
     {
         material.set_shader(ShaderTable::get("default"));
     }
 
-	material.set_colour({ 1.f, 1.f, 1.f, 1.f });
+    MaterialTable::add(lookup, std::move(material));
 
-    e.add_component(std::move(t));
-    e.add_component(std::move(mesh_object));
-	//e.add_component(std::move(material));
+    MaterialComponent material_component(MaterialTable::get(lookup));
+    material_component.set_texturing_mode(TexturingMode::NO_TEXTURE);
 
-	if(m_selected_node)
-		m_selected_node->add_child(std::make_shared<Entity>(std::move(e)));
-	else
-		root.add_child(std::make_shared<Entity>(std::move(e)));
+    entity.add_component(std::move(transform));
+    entity.add_component(std::move(mesh_component));
+	entity.add_component(std::move(material_component));
+
+    root.add_child(std::make_shared<Entity>(std::move(entity)));
 }
 
 // TODO: remove later
@@ -244,10 +257,10 @@ void Scene::add_model(const char *name)
         }
     }
 
-    Entity e;
-    e.set_name(lookup);
+    Entity entity;
+    entity.set_name(lookup);
 
-    Transform t;
+    Transform transform;
 
     GLTFLoader loader(name);
 
@@ -290,23 +303,15 @@ void Scene::add_model(const char *name)
         MeshTable::add(name, std::move(mesh));
     }
 
-    MeshComponent mesh_object;
-    mesh_object.set_mesh(MeshTable::get(name));
-    mesh_object.set_mesh_info(name, "primitive");
+    MeshComponent meshComponent;
+    meshComponent.set_mesh(MeshTable::get(name));
+    meshComponent.set_mesh_info(name, "gltf");
 
     Material material;
 
-    if(MeshTable::get(name)->is_instanced())
-    {
-        instanced_meshes[name].push_back(t.get_transform());
-        material.set_shader(ShaderTable::get("inst_default"));
-        MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
-        mesh_object.m_instance_id = instanced_meshes[name].size() - 1;
-    }
-    else
-    {
-        material.set_shader(ShaderTable::get("default"));
-    }
+    material.set_colour({1.f, 1.f, 1.f, 1.f});
+    material.set_metallic_property(0.f);
+    material.set_roughness(0.f);
 
     std::string textures[4] = {
             loader.get_base_color_texture(),
@@ -317,11 +322,28 @@ void Scene::add_model(const char *name)
 
     material.load(textures);
 
-    e.add_component(std::move(t));
-    e.add_component(std::move(mesh_object));
-    //e.add_component(std::move(material));
+    if(MeshTable::get(name)->is_instanced())
+    {
+        instanced_meshes[name].push_back(transform.get_transform());
+        material.set_shader(ShaderTable::get("inst_default"));
+        MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
+        meshComponent.m_instance_id = instanced_meshes[name].size() - 1;
+    }
+    else
+    {
+        material.set_shader(ShaderTable::get("default"));
+    }
 
-    root.add_child(std::make_shared<Entity>(std::move(e)));
+    MaterialTable::add(lookup, std::move(material));
+
+    MaterialComponent materialComponent(MaterialTable::get(lookup));
+    materialComponent.set_texturing_mode(TexturingMode::MODEL_DEFAULT);
+
+    entity.add_component(std::move(transform));
+    entity.add_component(std::move(meshComponent));
+    entity.add_component(std::move(materialComponent));
+
+    root.add_child(std::make_shared<Entity>(std::move(entity)));
 }
 
 

@@ -139,7 +139,7 @@ void Application::display_menu()
             {
                 if (ImGui::BeginMenu("Choose model to open"))
                 {
-                    static char buf[64] = "";
+                    static char buf[128] = "";
                     ImGui::InputText("##LeftSide", buf, IM_ARRAYSIZE(buf));
 
                     if (ImGui::Button("Open"))

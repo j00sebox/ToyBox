@@ -8,7 +8,7 @@
 class Transform final : public Component
 {
 public:
-    Transform() : m_position(glm::vec3()), m_rotate_axis(glm::vec3()), m_rotate_angle(0.f), m_uniform_scale(1.f), m_position_changed(false),
+    Transform() : m_position(glm::vec3()), m_rotate_axis(glm::vec3(1.f, 0.f, 0.f)), m_rotate_angle(0.f), m_uniform_scale(1.f), m_position_changed(false),
                   m_parent_position(glm::vec3()), m_parent_scale(1.f) {}
 	void translate(const glm::vec3& pos);
 	void scale(float s);
