@@ -10,28 +10,31 @@ This project is a sandbox for learning more about rendering architecture and int
 
 ![Asteroid_Field](/screenshots/asteroid_field.png)
 
-This scene is rendering 10,000 objects with instances.
+This scene is rendering 10,000 objects with instances!
 
-## Build
+## Requirements
+
+You will need a GPU with drivers that supports at least up to OpenGL version 4.3 and a compiler that supports C++20 features. Also cmake will be required to create all the build files.
+
+## Building for Windows and Linux
+
+By running:
+
+```
+python project_config.py
+```
+
+It will do all the cmake configuration and create the build folder.
 
 ### Windows
 
-If on Windows you can run the windows_config.bat script to do all the setup. It will create a Visual Studio solution file located in the build folder. Once opened you can set the toy_box project as the start up one. After that is done then you can build and run it from there.
+If on Windows t will create a Visual Studio solution file located in the build folder. Once opened you can set the toy_box project as the start up one. After that is done then you can build and run it from there.
 
 There is also currently a Windows release version available but it is very far behind the source.
 
 ### Linux
 
-If using a Linux system there is currently no script to create all the makefiles but here is what you need:
-
-```
-mkdir build
-cp imgui.ini build
-cmake -DGLFW_BUILD_DOCS=OFF -S . -B build
-```
-The copying of the imgui.ini file is so that your window will launch with the windows in the same arrangement as seen in the picture above.
-
-After running these commands to can build and run toy_box using the following commands:
+On linux after configuring the project you can build and run using the following commands:
 
 ```
 cd build
