@@ -7,7 +7,10 @@ using namespace nlohmann;
 class GLTFLoader
 {
 public:
+    GLTFLoader() {}
 	explicit GLTFLoader(const char* path);
+
+    void read_file(const char* path);
 
 	[[nodiscard]] std::vector<float> get_positions() const;
 	[[nodiscard]] std::vector<float> get_normals() const;

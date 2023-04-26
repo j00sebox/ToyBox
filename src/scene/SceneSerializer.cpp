@@ -131,24 +131,52 @@ void SceneSerializer::load_models(const json& accessor, unsigned int model_count
 // TODO: Make this look less ugly
 SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked, Scene& scene)
 {
-	auto load_gltf_material = [](const json& accessor, const GLTFLoader& loader, Material& material)
-	{
-        if(accessor.contains("custom"))
-        {
-            json colour = accessor["custom"]["colour"];
-            material.set_colour(glm::vec4(colour[0], colour[1], colour[2], colour[3]));
-        }
-        else
-        {
-            std::string textures[4] = {
-                    loader.get_base_color_texture(),
-                    loader.get_specular_texture(),
-                    loader.get_normal_texture(),
-                    loader.get_occlusion_texture()
-            };
+    auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
+    {
+        std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
+        std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
+        std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
 
-            material.load(textures);
+        std::vector<Vertex> vertices;
+
+        for (unsigned int i = 0; i < positions.size(); i++)
+        {
+            vertices.push_back({
+                                       positions[i],
+                                       normals[i],
+                                       tex_coords[i]
+                               });
         }
+
+        std::vector<float> verts;
+
+        for (const Vertex& v : vertices)
+        {
+            verts.push_back(v.position.x);
+            verts.push_back(v.position.y);
+            verts.push_back(v.position.z);
+            verts.push_back(v.normal.x);
+            verts.push_back(v.normal.y);
+            verts.push_back(v.normal.z);
+            verts.push_back(v.st.x);
+            verts.push_back(v.st.y);
+        }
+
+        std::vector<unsigned int> indices = loader.get_indices();
+
+        mesh.load(verts, indices);
+    };
+
+	auto load_gltf_material = [](const GLTFLoader& loader, Material& material)
+	{
+        std::string textures[4] = {
+                loader.get_base_color_texture(),
+                loader.get_specular_texture(),
+                loader.get_normal_texture(),
+                loader.get_occlusion_texture()
+        };
+
+        material.load(textures);
 	};
 
 	Entity entity;
@@ -215,43 +243,86 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
     if(!model["mesh"].is_null())
     {
         MeshComponent mesh_component;
-        Material material;
+        GLTFLoader loader;
 
         json mesh_accessor = model["mesh"];
-        load_mesh(mesh_accessor, mesh_component);
+       //load_mesh(mesh_accessor, mesh_component);
 
         mesh_component.m_mesh_type = mesh_accessor["mesh_type"];
-
         std::string mesh_name = mesh_accessor["mesh_name"];
+
+        if(!MeshTable::exists(mesh_name))
+        {
+            Mesh mesh;
+
+            if(mesh_accessor["mesh_type"] == "gltf")
+            {
+                loader.read_file(mesh_name.c_str());
+                load_gltf_mesh(loader, mesh);
+            }
+            else if(mesh_accessor["mesh_type"] == "primitive")
+            {
+                mesh.load_primitive(str_to_primitive_type(mesh_name.c_str()));
+            }
+
+            MeshTable::add(mesh_name, std::move(mesh));
+        }
 
         mesh_component.m_use_scale_outline = mesh_accessor["use_scale_outline"];
         mesh_component.m_outlining_factor = mesh_accessor["outlining_factor"];
 
+        mesh_component.set_mesh(MeshTable::get(mesh_name));
+        mesh_component.set_mesh_name(mesh_name);
+
         if(mesh_accessor["instanced"])
         {
             scene.instanced_meshes[mesh_name].push_back(model_matrix);
-            material.set_shader(ShaderTable::get("inst_default"));
             mesh_component.m_instance_id = scene.instanced_meshes[mesh_name].size() - 1;
-
-            if(mesh_component.m_instance_id == 0)
-            {
-                json material_accessor = model["material"];
-                load_material(material_accessor, material);
-            }
         }
-        else
+
+        entity.add_component(std::move(mesh_component));
+
+        if(!model["material"].is_null())
         {
             json material_accessor = model["material"];
-            load_material(material_accessor, material);
+            TexturingMode texturing_mode = (TexturingMode)material_accessor["texturing_mode"];
 
-            material.set_shader(ShaderTable::get(material_accessor["shader"]));
+            if(!MaterialTable::exists(entity.get_name()))
+            {
+                Material material;
+
+                material.set_colour({ material_accessor["properties"]["colour"][0], material_accessor["properties"]["colour"][1], material_accessor["properties"]["colour"][2], material_accessor["properties"]["colour"][3]});
+                material.set_metallic_property(material_accessor["properties"]["metallic_property"]);
+                material.set_roughness(material_accessor["properties"]["roughness"]);
+
+                if(texturing_mode == TexturingMode::MODEL_DEFAULT)
+                {
+                    load_gltf_material(loader, material);
+                }
+                else
+                {
+                    std::string base_colour_location = (material_accessor["textures"]["base_colour"] == "") ? "../resources/textures/white_on_white.jpeg" : material_accessor["textures"]["base_colour"];
+
+                    std::string textures[] = {
+                            base_colour_location,
+                            material_accessor["textures"]["specular"],
+                            material_accessor["textures"]["normal_map"],
+                            material_accessor["textures"]["occlusion"]
+                    };
+
+                    material.load(textures);
+                }
+
+                material.set_shader(ShaderTable::get(material_accessor["shader"]));
+
+                MaterialTable::add(entity.get_name(), std::move(material));
+            }
+
+            MaterialComponent material_component(MaterialTable::get(entity.get_name()));
+            material_component.set_texturing_mode((TexturingMode)model["material"]["texturing_mode"]);
+
+            entity.add_component(std::move(material_component));
         }
-
-        MaterialComponent material_component(std::move(material));
-        material_component.set_texturing_mode((TexturingMode)model["material"]["texturing_mode"]);
-
-        entity.add_component(std::move(material_component));
-        entity.add_component(std::move(mesh_component));
     }
 
 	SceneNode current_node{ std::make_unique<Entity>(std::move(entity)) };

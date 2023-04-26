@@ -60,6 +60,18 @@
         },
         {
             "material": {
+                "texturing_mode": 3,
+                "properties": {
+                    "colour": [
+                        0.8872548937797546,
+                        0.4088331460952759,
+                        0.4088331460952759,
+                        1.0
+                    ],
+                    "metallic_property": 0.46399998664855957,
+                    "roughness": 0.0
+                },
+                "shader": "default",
                 "textures": {
                     "base_colour": "../resources/models/airplane_biplane/textures/13_-_Default_baseColor.png",
                     "normal_map": "../resources/models/airplane_biplane/textures/13_-_Default_normal.png",
@@ -75,7 +87,6 @@
                 "use_scale_outline": false
             },
             "name": "Biplane",
-            "shader": "default",
             "transform": {
                 "parent_position": [
                     0.0,
@@ -99,6 +110,18 @@
         },
         {
             "material": {
+                "texturing_mode": 3,
+                "properties": {
+                    "colour": [
+                        0.8872548937797546,
+                        0.4088331460952759,
+                        0.4088331460952759,
+                        1.0
+                    ],
+                    "metallic_property": 0.46399998664855957,
+                    "roughness": 0.0
+                },
+                "shader": "default",
                 "textures": {
                     "base_colour": "../resources/models/green_airplane/textures/airplane_mat_baseColor.png",
                     "normal_map": "none",
@@ -114,7 +137,6 @@
                 "use_scale_outline": true
             },
             "name": "Plane",
-            "shader": "default",
             "transform": {
                 "parent_position": [
                     0.0,

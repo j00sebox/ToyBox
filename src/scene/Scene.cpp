@@ -30,6 +30,7 @@ Scene::~Scene()
 {
     ShaderTable::release();
     MeshTable::release();
+    MaterialTable::release();
 }
 
 void Scene::load(const char* scene)

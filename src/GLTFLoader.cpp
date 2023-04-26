@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "GLTFLoader.h"
-
-#include "Log.h"
 #include "FileOperations.h"
+#include "Log.h"
 
 int get_num_verts(const std::string& type)
 {
@@ -20,43 +19,48 @@ int get_num_verts(const std::string& type)
 
 GLTFLoader::GLTFLoader(const char* path)
 {
-	std::string src = file_to_string(path);
+    read_file(path);
+}
 
-	m_json = json::parse(src);
+void GLTFLoader::read_file(const char* path)
+{
+    std::string src = file_to_string(path);
 
-	std::string uri = m_json["buffers"][0]["uri"];
+    m_json = json::parse(src);
 
-	std::string p(path);
-	m_base_dir = p.substr(0, (p.find_last_of('/') + 1));
-	std::string bin_path = m_base_dir + uri;
+    std::string uri = m_json["buffers"][0]["uri"];
 
-	load_bin(bin_path.c_str());
+    std::string p(path);
+    m_base_dir = p.substr(0, (p.find_last_of('/') + 1));
+    std::string bin_path = m_base_dir + uri;
 
-	json attributes = m_json["meshes"][0]["primitives"][0]["attributes"];
+    load_bin(bin_path.c_str());
+
+    json attributes = m_json["meshes"][0]["primitives"][0]["attributes"];
 
     m_position_ind = attributes["POSITION"];
-	m_tex_coord_ind = attributes["TEXCOORD_0"];
-	m_normal_ind = attributes["NORMAL"];
-	m_indices_ind = m_json["meshes"][0]["primitives"][0]["indices"];
+    m_tex_coord_ind = attributes["TEXCOORD_0"];
+    m_normal_ind = attributes["NORMAL"];
+    m_indices_ind = m_json["meshes"][0]["primitives"][0]["indices"];
 
-	json materials = m_json["materials"][0];
+    json materials = m_json["materials"][0];
 
-	m_bc_tex_ind = materials["pbrMetallicRoughness"]["baseColorTexture"]["index"];
+    m_bc_tex_ind = materials["pbrMetallicRoughness"]["baseColorTexture"]["index"];
 
-	if (!materials["pbrMetallicRoughness"]["metallicRoughnessTexture"].is_null())
-	{
-		m_spec_tex_ind = materials["pbrMetallicRoughness"]["metallicRoughnessTexture"]["index"];
-	}
+    if (!materials["pbrMetallicRoughness"]["metallicRoughnessTexture"].is_null())
+    {
+        m_spec_tex_ind = materials["pbrMetallicRoughness"]["metallicRoughnessTexture"]["index"];
+    }
 
-	if (!materials["normalTexture"].is_null())
-	{
-		m_norm_tex_ind = materials["normalTexture"]["index"];
-	}
+    if (!materials["normalTexture"].is_null())
+    {
+        m_norm_tex_ind = materials["normalTexture"]["index"];
+    }
 
-	if (!materials["occlusionTexture"].is_null())
-	{
-		m_occ_tex_ind = materials["occlusionTexture"]["index"];
-	}
+    if (!materials["occlusionTexture"].is_null())
+    {
+        m_occ_tex_ind = materials["occlusionTexture"]["index"];
+    }
 }
 
 std::vector<float> GLTFLoader::get_positions() const
@@ -259,3 +263,5 @@ void GLTFLoader::extract_floats(const json& accessor, std::vector<float>& flts) 
 		flts.push_back(val);
 	}
 }
+
+

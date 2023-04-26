@@ -68,7 +68,7 @@ std::shared_ptr<Material> MaterialTable::get(const std::string& name)
         return m_materials[name];
     }
 
-    fatal("Shader {} does not exist in library!\n", name);
+    fatal("Material {} does not exist in library!\n", name);
     return nullptr;
 }
 
