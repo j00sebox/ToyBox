@@ -28,9 +28,7 @@ It will do all the cmake configuration and create the build folder.
 
 ### Windows
 
-If on Windows t will create a Visual Studio solution file located in the build folder. Once opened you can set the toy_box project as the start up one. After that is done then you can build and run it from there.
-
-There is also currently a Windows release version available but it is very far behind the source.
+If on Windows it will create a Visual Studio solution file located in the build folder. Once opened you can set the toy_box project as the start up one. After that is done then you can build and run it from there.
 
 ### Linux
 
