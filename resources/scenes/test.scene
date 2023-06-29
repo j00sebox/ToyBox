@@ -17,7 +17,7 @@
             46.58108139038086
         ]
     },
-    "model_count": 10,
+    "model_count": 9,
     "models": [
         {
             "light": {
@@ -470,56 +470,6 @@
                 "use_scale_outline": true
             },
             "name": "cube (1)",
-            "transform": {
-                "parent_position": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "parent_scale": 1.0,
-                "rotation": [
-                    0.0,
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": 1.0,
-                "translate": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            }
-        },
-        {
-            "material": {
-                "properties": {
-                    "colour": [
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "metallic_property": 0.0,
-                    "roughness": 0.0
-                },
-                "shader": "default",
-                "textures": {
-                    "base_colour": "/home/josh/dev/ToyBox/resources/models/airplane_biplane/textures/13_-_Default_baseColor.png",
-                    "normal_map": "/home/josh/dev/ToyBox/resources/models/airplane_biplane/textures/13_-_Default_normal.png",
-                    "occlusion": "/home/josh/dev/ToyBox/resources/models/airplane_biplane/textures/13_-_Default_metallicRoughness.png",
-                    "specular": "/home/josh/dev/ToyBox/resources/models/airplane_biplane/textures/13_-_Default_metallicRoughness.png"
-                },
-                "texturing_mode": 2
-            },
-            "mesh": {
-                "instanced": false,
-                "mesh_name": "/home/josh/dev/ToyBox/resources/models/airplane_biplane/scene.gltf",
-                "mesh_type": "gltf",
-                "outlining_factor": 0.019999999552965164,
-                "use_scale_outline": true
-            },
-            "name": "model",
             "transform": {
                 "parent_position": [
                     0.0,

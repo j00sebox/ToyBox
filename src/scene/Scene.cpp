@@ -90,10 +90,6 @@ void Scene::update(float elapsed_time)
         MeshTable::get(mesh_name)->update_instances(instance_matrices);
     }
 
-	ImGui::Begin("Models");
-	
-	ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
-
 	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
@@ -104,48 +100,7 @@ void Scene::update(float elapsed_time)
     m_window_handle->bind_viewport();
     Renderer::render_pass(m_render_list);
 
-    for (auto& scene_node : root)
-    {
-        imgui_render(scene_node);
-    }
-
-	ImGui::EndChild();
-
-	ImGui::SameLine();
-	ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-	ImGui::SameLine();
-
-	ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
-	{
-		if (m_selected_node)
-		{
-			char buf[32];
-			strcpy(buf, m_selected_node->entity->get_name().c_str());
-			if (ImGui::InputText("##EntityName", buf, IM_ARRAYSIZE(buf)))
-			{
-				m_selected_node->entity->set_name(buf);
-			}
-
-			display_components();
-		}
-	}
-	ImGui::EndChild();
-
-	ImGui::End();
-
-	// resolve drag and drop
-	if (m_drag_node && !m_drop_node && !Input::is_button_pressed(GLFW_MOUSE_BUTTON_1))
-	{
-		m_drop_node = &root;
-	}
-
-	if (m_drag_node && m_drop_node)
-	{
-		m_drop_node->add_child(move_node(*m_drag_node));
-		m_selected_node = nullptr;
-		m_drag_node = nullptr;
-		m_drop_node = nullptr;
-	}
+    inspector.render(root);
 
 	while (!m_nodes_to_remove.empty())
 	{
@@ -372,7 +327,9 @@ void Scene::remove_node(SceneNode& node)
 	}
 	else
 	{
-		m_selected_node = nullptr;
+        // FIXME
+        SceneNode* selectedNode = inspector.getSelectedNode();
+        selectedNode = nullptr;
 	}
 }
 
@@ -389,6 +346,7 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 	{
 		auto& material_component = scene_node.entity->get_component<MaterialComponent>();
 		auto& mesh_component = scene_node.entity->get_component<MeshComponent>();
+        SceneNode* selectedNode = inspector.getSelectedNode();
 
         if(mesh_component.get_mesh()->is_instanced())
         {
@@ -400,14 +358,14 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
                 mesh_used[mesh_name] = true;
             }
 
-            if (m_selected_node && (scene_node == *m_selected_node))
+            if (selectedNode && (scene_node == *selectedNode))
             {
                 m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, mesh_component, material_component});
             }
         }
 		else
 		{
-            if (m_selected_node && (scene_node == *m_selected_node))
+            if (selectedNode && (scene_node == *selectedNode))
             {
                 m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, mesh_component, material_component});
             }
@@ -424,112 +382,112 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 	}
 }
 
-void Scene::imgui_render(SceneNode& scene_node)
-{
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
-	if (!scene_node.has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
-	bool opened = ImGui::TreeNodeEx(scene_node.entity->get_name().c_str(), flags);
-
-	if (ImGui::IsItemClicked())
-	{
-		m_selected_node = &scene_node;
-	}
-
-	if (ImGui::BeginPopupContextItem())
-	{
-		m_selected_node = &scene_node;
-		
-		if (ImGui::MenuItem("Delete"))
-		{
-			m_nodes_to_remove.push(&scene_node);
-		}
-
-		if (ImGui::BeginMenu("Add Component"))
-		{
-			if (ImGui::MenuItem("Point Light"))
-			{
-				m_selected_node->entity->add_component(PointLight{});
-				m_light_manager.add_point_light(*m_selected_node);
-			}
-
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndPopup();
-	}
-
-	if (ImGui::BeginDragDropSource())
-	{
-		ImGui::SetDragDropPayload("_TREENODE", nullptr, 0);
-		m_drag_node = &scene_node;
-		ImGui::TextUnformatted(scene_node.entity->get_name().c_str());
-		ImGui::EndDragDropSource();
-	}
-	
-	if (ImGui::BeginDragDropTarget())
-	{
-		if (ImGui::AcceptDragDropPayload("_TREENODE"))
-		{
-			m_drop_node = &scene_node;
-		}
-		ImGui::EndDragDropTarget();
-	}
-	
-	if (opened)
-	{
-		for (SceneNode& node : scene_node)
-		{
-			imgui_render(node);
-		}
-		ImGui::TreePop();
-	}
-}
-
-void Scene::display_components()
-{
-	std::vector<std::shared_ptr<Component>> components = m_selected_node->entity->get_components();
-
-	for (unsigned int i = 0; i < components.size(); ++i)
-	{
-		ImVec2 content_region = ImGui::GetContentRegionAvail();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 5, 5 });
-		float line_width = GImGui->Font->FontSize + GImGui->Style.FramePadding.x * 3.0f;
-		float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y;
-		ImGui::PopStyleVar();
-
-		if (ImGui::TreeNodeEx(components[i]->get_name(), ImGuiTreeNodeFlags_DefaultOpen))
-		{
-			bool remove_component = false;
-
-			ImGui::SameLine(content_region.x - line_width);
-
-			if (ImGui::Button("...", ImVec2{ line_width, line_height }))
-			{
-				ImGui::OpenPopup("component_settings");
-			}
-
-			if (ImGui::BeginPopup("component_settings"))
-			{
-				if (ImGui::MenuItem("Remove component"))
-				{
-					remove_component = true;
-				}
-
-				ImGui::EndPopup();
-			}
-
-			if (remove_component)
-			{
-				if (m_selected_node->entity->has_component<PointLight>()) m_light_manager.remove_point_light(*m_selected_node);
-				if (m_selected_node->entity->remove_component(*components[i])) --i;
-			}
-
-			components[i]->imgui_render();
-			ImGui::TreePop();
-		}
-	}
-}
+//void Scene::imgui_render(SceneNode& scene_node)
+//{
+//	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
+//	if (!scene_node.has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
+//	bool opened = ImGui::TreeNodeEx(scene_node.entity->get_name().c_str(), flags);
+//
+//	if (ImGui::IsItemClicked())
+//	{
+//		m_selected_node = &scene_node;
+//	}
+//
+//	if (ImGui::BeginPopupContextItem())
+//	{
+//		m_selected_node = &scene_node;
+//
+//		if (ImGui::MenuItem("Delete"))
+//		{
+//			m_nodes_to_remove.push(&scene_node);
+//		}
+//
+//		if (ImGui::BeginMenu("Add Component"))
+//		{
+//			if (ImGui::MenuItem("Point Light"))
+//			{
+//				m_selected_node->entity->add_component(PointLight{});
+//				m_light_manager.add_point_light(*m_selected_node);
+//			}
+//
+//			ImGui::EndMenu();
+//		}
+//
+//		ImGui::EndPopup();
+//	}
+//
+//	if (ImGui::BeginDragDropSource())
+//	{
+//		ImGui::SetDragDropPayload("_TREENODE", nullptr, 0);
+//		m_drag_node = &scene_node;
+//		ImGui::TextUnformatted(scene_node.entity->get_name().c_str());
+//		ImGui::EndDragDropSource();
+//	}
+//
+//	if (ImGui::BeginDragDropTarget())
+//	{
+//		if (ImGui::AcceptDragDropPayload("_TREENODE"))
+//		{
+//			m_drop_node = &scene_node;
+//		}
+//		ImGui::EndDragDropTarget();
+//	}
+//
+//	if (opened)
+//	{
+//		for (SceneNode& node : scene_node)
+//		{
+//			imgui_render(node);
+//		}
+//		ImGui::TreePop();
+//	}
+//}
+//
+//void Scene::display_components()
+//{
+//	std::vector<std::shared_ptr<Component>> components = m_selected_node->entity->get_components();
+//
+//	for (unsigned int i = 0; i < components.size(); ++i)
+//	{
+//		ImVec2 content_region = ImGui::GetContentRegionAvail();
+//
+//		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 5, 5 });
+//		float line_width = GImGui->Font->FontSize + GImGui->Style.FramePadding.x * 3.0f;
+//		float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y;
+//		ImGui::PopStyleVar();
+//
+//		if (ImGui::TreeNodeEx(components[i]->get_name(), ImGuiTreeNodeFlags_DefaultOpen))
+//		{
+//			bool remove_component = false;
+//
+//			ImGui::SameLine(content_region.x - line_width);
+//
+//			if (ImGui::Button("...", ImVec2{ line_width, line_height }))
+//			{
+//				ImGui::OpenPopup("component_settings");
+//			}
+//
+//			if (ImGui::BeginPopup("component_settings"))
+//			{
+//				if (ImGui::MenuItem("Remove component"))
+//				{
+//					remove_component = true;
+//				}
+//
+//				ImGui::EndPopup();
+//			}
+//
+//			if (remove_component)
+//			{
+//				if (m_selected_node->entity->has_component<PointLight>()) m_light_manager.remove_point_light(*m_selected_node);
+//				if (m_selected_node->entity->remove_component(*components[i])) --i;
+//			}
+//
+//			components[i]->imgui_render();
+//			ImGui::TreePop();
+//		}
+//	}
+//}
 
 void Scene::set_background_colour(glm::vec4 colour)
 {
