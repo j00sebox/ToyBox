@@ -13,6 +13,8 @@ public:
 	SceneNode(std::shared_ptr<Entity>&& e);
     ~SceneNode();
 	void add_child(SceneNode&& s);
+    void addExistingChild(SceneNode& s);
+    void updateTransform(SceneNode& s);
 	bool remove(SceneNode& node);
 	SceneNode move(SceneNode& node);
 	Transform update(const Transform& parent_transform);
@@ -34,6 +36,7 @@ public:
 
 private:
 	std::list<SceneNode> m_children;
+    SceneNode* parent = nullptr;
 	bool m_moved = false;
 };
 

@@ -4,25 +4,28 @@
 
 #include "Log.h"
 
-template<typename ... Args>
+template<typename R, typename ... Args>
 class Event
 {
 public:
 	Event() = default;
 
-	void bind_function(std::function<void(Args...)> func)
+    template<typename T>
+	void bind(T* instance, R (T::*cb)(Args...))
 	{
-		m_function = func;
+        this->callback = [instance, cb](Args... args) {
+            return (instance->*cb)(args...);
+        };
 	}
 
-	void execute_function(Args... args)
+	void execute(Args... args)
 	{
-		if (!m_function)
+		if (!callback)
 			fatal("No function was bound!\n");
 
-		m_function(args...);
+		callback(args...);
 	}
 
 private:
-	std::function<void(Args...)> m_function;
+	std::function<R(Args...)> callback;
 };

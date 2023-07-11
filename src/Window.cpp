@@ -20,7 +20,7 @@ extern "C"
 
 	void glfw_window_resize_callback(GLFWwindow* window, int width, int height)
 	{
-		EventList::e_resize.execute_function(width, height);
+		//EventList::eResize.execute(width, height);
 	}
 }
 

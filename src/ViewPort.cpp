@@ -33,7 +33,7 @@ void ViewPort::display()
     {
         info("New screen size [x: {}, y: {}]\n", avail_size.x, avail_size.y);
         resize((int)avail_size.x, (int)avail_size.y, m_samples);
-        EventList::e_resize.execute_function((int)avail_size.x, (int)avail_size.y);
+        EventList::eResize.execute((int)avail_size.x, (int)avail_size.y);
         m_prev_fb_width = avail_size.x;
         m_prev_fb_height = avail_size.y;
     }

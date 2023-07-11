@@ -8,7 +8,7 @@
 class Transform final : public Component
 {
 public:
-    Transform() : m_position(glm::vec3()), m_rotate_axis(glm::vec3(1.f, 0.f, 0.f)), m_rotate_angle(0.f), m_uniform_scale(1.f), m_position_changed(false),
+    Transform() : m_position(glm::vec3()), localPosition(glm::vec3()), m_rotate_axis(glm::vec3(1.f, 0.f, 0.f)), m_rotate_angle(0.f), m_uniform_scale(1.f), m_position_changed(false),
                   m_parent_position(glm::vec3()), m_parent_scale(1.f) {}
 	void translate(const glm::vec3& pos);
 	void scale(float s);
@@ -20,6 +20,9 @@ public:
 	[[nodiscard]] float get_rotate_angle() const { return m_rotate_angle; }
 	[[nodiscard]] float get_uniform_scale() const { return m_uniform_scale; }
 	[[nodiscard]] glm::mat4 get_transform() const;
+    void resolveParentChange(const Transform& oldParent, const Transform& parent);
+    void setTransform(const glm::mat4& _transform);
+    void setTransforms(const glm::mat4& posMat, const glm::mat4& scaleMat, const glm::mat4& rotMat);
 
 	// TODO: add solution for rotation
 	void set_parent_offsets(glm::vec3 parent_pos, float parent_scale);
@@ -34,12 +37,19 @@ public:
 	Transform operator* (const Transform& other) const;
 
 private:
+    void updateTransform();
+    glm::mat4 transform = glm::mat4(1.f);
+    glm::mat4 positionMatrix = glm::mat4(1.f);
+    glm::mat4 rotationMatrix = glm::mat4(1.f);;
+    glm::mat4 scaleMatrix = glm::mat4(1.f);;
 	glm::vec3 m_position;
+    glm::vec3 localPosition;
 	glm::vec3 m_rotate_axis;
 	float m_rotate_angle;
 	float m_uniform_scale;
 
     bool m_position_changed;
+    bool updateNeeded = false;
 
 	// parent offsets
 	glm::vec3 m_parent_position;

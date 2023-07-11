@@ -13,8 +13,8 @@ void Application::start()
     {
         info("Beginning startup process...\n");
         Timer t;
-        m_current_scene->load("../resources/scenes/test.scene");
-        m_current_scene->init();
+        currentScene->load("../resources/scenes/test.scene");
+        currentScene->init();
         auto [width, height] = m_window.get_dimensions();
         Renderer::init(width, height);
     }
@@ -29,7 +29,7 @@ void Application::start()
 
         if(Input::is_key_pressed(GLFW_KEY_C))
         {
-            m_current_scene->recompile_shaders();
+            currentScene->recompile_shaders();
         }
 
 		m_window.begin_frame();
@@ -37,7 +37,8 @@ void Application::start()
         display_dockspace();
 
 		float delta_time = m_window.get_delta_time();
-		m_current_scene->update(delta_time);
+        currentScene->update(delta_time);
+        inspector.render();
 
 		//ImGui::ShowDemoWindow();
 		m_window.display_render_context();
@@ -46,15 +47,24 @@ void Application::start()
 
 		m_window.end_frame();
 	}
+
+    shutdown();
 }
 
 void Application::switch_scene(const char* scene_path)
 {
     info("Switching scene...\n");
     Timer t;
-	m_current_scene = std::make_unique<Scene>(&m_window);
-	m_current_scene->load(scene_path);
-	m_current_scene->init();
+    delete currentScene;
+    currentScene = new Scene(&m_window);
+    currentScene->load(scene_path);
+    currentScene->init();
+    inspector.scene = currentScene;
+}
+
+void Application::shutdown()
+{
+    delete currentScene;
 }
 
 void Application::display_dockspace()
@@ -115,7 +125,7 @@ void Application::display_menu()
 				if (ImGui::Button("Save As"))
 				{
 					std::string path = std::string("../resources/scenes/") + std::string(buf);
-					m_current_scene->save(path);
+                    currentScene->save(path);
 				}
 
 				ImGui::EndMenu();
@@ -127,12 +137,12 @@ void Application::display_menu()
 		{
 			if (ImGui::MenuItem("Cube"))
 			{
-				m_current_scene->add_primitive("cube");
+                currentScene->add_primitive("cube");
 			}
 
 			if (ImGui::MenuItem("Quad"))
 			{
-				m_current_scene->add_primitive("quad");
+                currentScene->add_primitive("quad");
 			}
 
             if (ImGui::BeginMenu("Open Model"))
@@ -145,7 +155,7 @@ void Application::display_menu()
                     if (ImGui::Button("Open"))
                     {
                         std::string path = std::string(buf);
-                        m_current_scene->add_model(path.c_str());
+                        currentScene->add_model(path.c_str());
                     }
                     ImGui::EndMenu();
                 }
@@ -199,11 +209,11 @@ void Application::display_menu()
 			{
 				display_bg_col_picker = false;
 			}
-			glm::vec4 bg_colour = m_current_scene->get_background_colour();
+			glm::vec4 bg_colour = currentScene->get_background_colour();
 			float col[4] = { bg_colour.x, bg_colour.y, bg_colour.z, bg_colour.w };
 			if(ImGui::ColorPicker4("##BGColor", col))
 			{
-				m_current_scene->set_background_colour({ col[0], col[1], col[2], col[3] });
+                currentScene->set_background_colour({ col[0], col[1], col[2], col[3] });
 			}
 			ImGui::End();
 		}

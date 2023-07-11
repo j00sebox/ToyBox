@@ -2,21 +2,30 @@
 
 #include "Window.h"
 #include "Scene.h"
+#include "Inspector.h"
 
 class Application
 {
 public:
-	Application() : m_window(1920, 1080, 600, 600) { m_current_scene = std::make_unique<Scene>(&m_window); }
+	Application()
+        : m_window(1920, 1080, 600, 600)
+    {
+        currentScene = new Scene(&m_window);
+        inspector.scene = currentScene;
+    }
 	void start();
 	void switch_scene(const char* scene_path);
+    void shutdown();
 
 private:
 	void display_dockspace();
 	void display_menu();
 	void display_fps();
-	
-	Window m_window;
-	std::unique_ptr<Scene> m_current_scene;
+
+    Scene* currentScene;
+    Window m_window;
+    Inspector inspector;
+
 	bool m_running = false;
 	bool m_show_dock_space = true;
 };

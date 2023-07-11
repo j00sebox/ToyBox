@@ -5,7 +5,6 @@
 #include "Skybox.h"
 #include "SceneNode.h"
 #include "LightManager.h"
-#include "Inspector.h"
 #include "components/Fwd.h"
 
 #include <map>
@@ -43,11 +42,6 @@ private:
 	void update_node(SceneNode& node, const Transform& parent_transform);
 	void remove_node(SceneNode& node);
 	SceneNode move_node(SceneNode& node);
-    Inspector inspector;
-
-//	// imgui helpers
-//	void imgui_render(SceneNode& node);
-//	void display_components();
 
     Window* m_window_handle;
 	std::shared_ptr<Camera> m_camera;
@@ -62,12 +56,10 @@ private:
     // TODO: figure out better way
     std::unordered_map<std::string, bool> mesh_used;
 
-	// imgui stuff
-//	SceneNode* m_selected_node = nullptr;
-//    SceneNode* m_drag_node = nullptr;
-//    SceneNode* m_drop_node = nullptr;
+    SceneNode* selectedNode = nullptr;
     glm::vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
 
+    friend class Inspector;
     friend class SceneSerializer;
 };
 

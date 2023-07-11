@@ -6,6 +6,6 @@
 struct EventList
 {
 	// window events
-	static Event<int, int> e_resize;
+	static Event<void, int, int> eResize;
 
 };

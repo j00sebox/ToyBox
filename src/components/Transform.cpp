@@ -6,6 +6,7 @@
 #include <imgui_internal.h>
 #include <nlohmann/json.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace nlohmann;
 
@@ -13,26 +14,59 @@ void Transform::translate(const glm::vec3& pos)
 {
 	m_position = pos;
 	m_position_changed = true;
+    updateTransform();
+    positionMatrix = glm::translate(glm::mat4(1.f), m_position);
 }
 
 void Transform::scale(float s)
 {
 	m_uniform_scale = s;
+    scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
 }
 
 void Transform::rotate(float angle, const glm::vec3& axis)
 {
 	m_rotate_angle = angle;
 	m_rotate_axis = axis;
+    rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(m_rotate_angle), m_rotate_axis);
 }
 
 glm::mat4 Transform::get_transform() const
 {
-	glm::mat4 transform = glm::translate(glm::mat4(1.f), m_position);
-	transform = glm::rotate(transform, glm::radians(m_rotate_angle), m_rotate_axis);
-	transform = glm::scale(transform, glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
+	return positionMatrix * scaleMatrix * rotationMatrix;
+}
 
-	return transform;
+void Transform::resolveParentChange(const Transform& oldParent, const Transform& newParent)
+{
+    positionMatrix = oldParent.positionMatrix * positionMatrix;
+    positionMatrix = glm::inverse(newParent.positionMatrix) * positionMatrix;
+    m_position.x = positionMatrix[3][0];
+    m_position.y = positionMatrix[3][1];
+    m_position.z = positionMatrix[3][2];
+
+    scaleMatrix = oldParent.scaleMatrix * scaleMatrix;
+    scaleMatrix = glm::inverse(newParent.scaleMatrix) * scaleMatrix;
+    m_uniform_scale = scaleMatrix[0][0];
+
+    rotationMatrix = oldParent.rotationMatrix * rotationMatrix;
+    rotationMatrix = glm::inverse(newParent.rotationMatrix) * rotationMatrix;
+    glm::quat newQuat = glm::quat_cast(rotationMatrix);
+    m_rotate_angle = glm::degrees(glm::angle(newQuat));
+    m_rotate_axis = glm::axis(newQuat);
+}
+
+void Transform::setTransform(const glm::mat4& _transform)
+{
+    transform = _transform;
+}
+
+void Transform::setTransforms(const glm::mat4& posMat, const glm::mat4& scaleMat, const glm::mat4& rotMat)
+{
+    positionMatrix = posMat;
+    m_position.x = positionMatrix[3][0];
+    m_position.y = positionMatrix[3][1];
+    m_position.z = positionMatrix[3][2];
+
 }
 
 void Transform::set_parent_offsets(glm::vec3 parent_pos, float parent_scale)
@@ -75,6 +109,8 @@ void Transform::imgui_render()
 
 	ImGui::Text("\nScale: ");
 	ImGui::InputFloat("uniform scale", &m_uniform_scale);
+
+    updateTransform();
 }
 
 void Transform::serialize(json& accessor) const
@@ -97,15 +133,29 @@ void Transform::serialize(json& accessor) const
 
 }
 
+void Transform::updateTransform()
+{
+    positionMatrix = glm::translate(glm::mat4(1.f), m_position);
+    scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
+    rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(m_rotate_angle), m_rotate_axis);
+}
+
 Transform Transform::operator*(const Transform& other) const
 {
 	Transform new_transform{};
 
-	new_transform.translate(m_position + other.m_position);
-	new_transform.rotate(m_rotate_angle + other.m_rotate_angle, m_rotate_axis + other.m_rotate_axis);
-	new_transform.scale(m_uniform_scale * other.m_uniform_scale);
+//	new_transform.translate(m_position + other.m_position);
+//	new_transform.m_rotate_angle = m_rotate_angle + other.m_rotate_angle;
+//    new_transform.m_rotate_axis = m_rotate_axis + other.m_rotate_axis;
+//	new_transform.scale(m_uniform_scale * other.m_uniform_scale);
+
+    // new_transform.m_position = m_position + other.m_position;
 
     new_transform.m_position_changed = (other.m_position_changed || m_position_changed);
+
+    new_transform.positionMatrix = positionMatrix * other.positionMatrix;
+    new_transform.scaleMatrix = scaleMatrix * other.scaleMatrix;
+    new_transform.rotationMatrix = rotationMatrix * other.rotationMatrix;
 
 	return new_transform;
 }

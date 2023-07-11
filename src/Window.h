@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/Renderer.h"
+#include "Renderer.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -18,7 +18,6 @@ public:
     void bind_viewport() const;
     void change_sample_amount(int new_sample_amount);
     void toggle_vsync();
-
 
 	void begin_frame();
 	void end_frame();
