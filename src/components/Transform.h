@@ -38,6 +38,7 @@ public:
 
 private:
     void updateTransform();
+    void resolveVectors();
     glm::mat4 transform = glm::mat4(1.f);
     glm::mat4 positionMatrix = glm::mat4(1.f);
     glm::mat4 rotationMatrix = glm::mat4(1.f);;

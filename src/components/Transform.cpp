@@ -40,19 +40,14 @@ void Transform::resolveParentChange(const Transform& oldParent, const Transform&
 {
     positionMatrix = oldParent.positionMatrix * positionMatrix;
     positionMatrix = glm::inverse(newParent.positionMatrix) * positionMatrix;
-    m_position.x = positionMatrix[3][0];
-    m_position.y = positionMatrix[3][1];
-    m_position.z = positionMatrix[3][2];
 
     scaleMatrix = oldParent.scaleMatrix * scaleMatrix;
     scaleMatrix = glm::inverse(newParent.scaleMatrix) * scaleMatrix;
-    m_uniform_scale = scaleMatrix[0][0];
 
     rotationMatrix = oldParent.rotationMatrix * rotationMatrix;
     rotationMatrix = glm::inverse(newParent.rotationMatrix) * rotationMatrix;
-    glm::quat newQuat = glm::quat_cast(rotationMatrix);
-    m_rotate_angle = glm::degrees(glm::angle(newQuat));
-    m_rotate_axis = glm::axis(newQuat);
+
+    resolveVectors();
 }
 
 void Transform::setTransform(const glm::mat4& _transform)
@@ -140,22 +135,28 @@ void Transform::updateTransform()
     rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(m_rotate_angle), m_rotate_axis);
 }
 
+// helper function to pull the necessary vectors from the transform matrices
+void Transform::resolveVectors()
+{
+    m_position.x = positionMatrix[3][0];
+    m_position.y = positionMatrix[3][1];
+    m_position.z = positionMatrix[3][2];
+
+    m_uniform_scale = scaleMatrix[0][0];
+
+    glm::quat newQuat = glm::quat_cast(rotationMatrix);
+    m_rotate_angle = glm::degrees(glm::angle(newQuat));
+    m_rotate_axis = glm::axis(newQuat);
+}
+
 Transform Transform::operator*(const Transform& other) const
 {
 	Transform new_transform{};
-
-//	new_transform.translate(m_position + other.m_position);
-//	new_transform.m_rotate_angle = m_rotate_angle + other.m_rotate_angle;
-//    new_transform.m_rotate_axis = m_rotate_axis + other.m_rotate_axis;
-//	new_transform.scale(m_uniform_scale * other.m_uniform_scale);
-
-    // new_transform.m_position = m_position + other.m_position;
-
-    new_transform.m_position_changed = (other.m_position_changed || m_position_changed);
-
     new_transform.positionMatrix = positionMatrix * other.positionMatrix;
     new_transform.scaleMatrix = scaleMatrix * other.scaleMatrix;
     new_transform.rotationMatrix = rotationMatrix * other.rotationMatrix;
+
+    new_transform.resolveVectors();
 
 	return new_transform;
 }
