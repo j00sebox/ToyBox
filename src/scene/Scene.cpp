@@ -76,6 +76,12 @@ void Scene::update(float elapsed_time)
     m_render_list.clear();
     mesh_used.clear();
 
+    while (!m_nodes_to_remove.empty())
+    {
+        remove_node(*m_nodes_to_remove.front());
+        m_nodes_to_remove.pop();
+    }
+
     // if the camera moved at all we need to adjust the view uniform
 	if(m_camera->update(elapsed_time))
         m_transforms_buffer->set_data(0, m_camera->camera_look_at());
@@ -100,11 +106,6 @@ void Scene::update(float elapsed_time)
     m_window_handle->bind_viewport();
     Renderer::render_pass(m_render_list);
 
-	while (!m_nodes_to_remove.empty())
-	{
-		remove_node(*m_nodes_to_remove.front());
-		m_nodes_to_remove.pop();
-	}
 }
 
 void Scene::add_primitive(const char* name)

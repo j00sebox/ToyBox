@@ -34,6 +34,8 @@ void SceneNode::add_child(SceneNode&& s)
 
 void SceneNode::addExistingChild(SceneNode& s)
 {
+    if(this == s.parent) return;
+
     for (auto it = s.parent->m_children.begin(); it != s.parent->m_children.end(); ++it)
     {
         if (*it == s)

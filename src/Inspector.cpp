@@ -48,7 +48,6 @@ void Inspector::render()
 
     if (dragNode && dropNode)
     {
-        // dropNode->add_child(scene->move_node(*dragNode));
         dropNode->addExistingChild(*dragNode);
         scene->selectedNode = nullptr;
         dragNode = nullptr;
@@ -73,7 +72,7 @@ void Inspector::imguiRender(SceneNode& currentNode)
 
         if (ImGui::MenuItem("Delete"))
         {
-            m_nodes_to_remove.push(&currentNode);
+            scene->m_nodes_to_remove.push(&currentNode);
         }
 
         if (ImGui::BeginMenu("Add Component"))
@@ -81,9 +80,7 @@ void Inspector::imguiRender(SceneNode& currentNode)
             if (ImGui::MenuItem("Point Light"))
             {
                 scene->selectedNode->entity->add_component(PointLight{});
-
-                // FIXME
-                //m_light_manager.add_point_light(*selectedNode);
+                scene->m_light_manager.add_point_light(*scene->selectedNode);
             }
 
             ImGui::EndMenu();
@@ -123,7 +120,7 @@ void Inspector::displayComponents()
 {
     std::vector<std::shared_ptr<Component>> components = scene->selectedNode->entity->get_components();
 
-    for (auto & component : components)
+    for (auto& component : components)
     {
         ImVec2 content_region = ImGui::GetContentRegionAvail();
 
@@ -154,12 +151,13 @@ void Inspector::displayComponents()
             }
 
             // FIXME
-//            if (remove_component)
-//            {
-//                if (m_selected_node->entity->has_component<PointLight>())
-//                    m_light_manager.remove_point_light(*m_selected_node);
-//                if (m_selected_node->entity->remove_component(*components[i])) --i;
-//            }
+            if (remove_component)
+            {
+                if (scene->selectedNode->entity->has_component<PointLight>())
+                    scene->m_light_manager.remove_point_light(*scene->selectedNode);
+
+                scene->selectedNode->entity->remove_component(*component);
+            }
 
             component->imgui_render();
             ImGui::TreePop();
