@@ -328,11 +328,6 @@ void Scene::remove_node(SceneNode& node)
 	}
 }
 
-SceneNode Scene::move_node(SceneNode& node)
-{
-	return root.move(node);
-}
-
 void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
 {
     auto& transform = scene_node.entity->get_component<Transform>();

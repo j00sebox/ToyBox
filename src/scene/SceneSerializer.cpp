@@ -196,9 +196,6 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
 
     transform.scale(info["scale"]);
 
-	json parent_position = info["parent_position"];
-    transform.set_parent_offsets(glm::vec3{ parent_position[0], parent_position[1], parent_position[2] }, info["parent_scale"]);
-
     glm::mat4 model_matrix = transform.get_transform();
     glm::vec3 position = transform.get_position();
     entity.add_component(std::move(transform));

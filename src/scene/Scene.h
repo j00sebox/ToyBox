@@ -41,7 +41,6 @@ private:
 	// scene management
 	void update_node(SceneNode& node, const Transform& parent_transform);
 	void remove_node(SceneNode& node);
-	SceneNode move_node(SceneNode& node);
 
     Window* m_window_handle;
 	std::shared_ptr<Camera> m_camera;

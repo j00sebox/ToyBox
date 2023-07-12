@@ -80,7 +80,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 		{
 			auto& transform = (*it)->get_component<Transform>();
 			auto& point_light = (*it)->get_component<PointLight>();
-			glm::vec3 pos = transform.get_parent_pos() + transform.get_position();
+			glm::vec3 pos = transform.get_position();
 
             m_point_light_buffer->set_data((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_colour());
             m_point_light_buffer->set_data((int)PointLightBufferOffsets::position + ((int)PointLightBufferOffsets::total_offset * index), pos);
@@ -102,8 +102,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
                 if(point_light.has_shadow_info_changed())
                     point_light.shadow_resize(pos);
 
-                if(transform.has_position_changed())
-                    point_light.shadow_update_transforms(pos);
+                point_light.shadow_update_transforms(pos);
 
                 std::vector<glm::mat4> shadow_transforms = point_light.get_shadow_transforms();
                 ShaderTable::get("shadow_cubemap")->set_uniform_mat4f("u_shadow_transforms[0]", shadow_transforms[0]);
