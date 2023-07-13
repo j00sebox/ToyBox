@@ -15,7 +15,6 @@ struct RenderObject;
 class LightManager
 {
 public:
-	LightManager();
 	void get_lights(const SceneNodePtr& node);
     void init_lights();
 	void update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera);
@@ -24,7 +23,7 @@ public:
     void remove_directional_light();
 
     // point lights
-    void add_point_light(const SceneNode& node);
+    void add_point_light(SceneNode& node);
 	void remove_point_light(const SceneNodePtr& node);
 
 private:

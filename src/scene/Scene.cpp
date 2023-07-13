@@ -1,10 +1,7 @@
-#include "pch.h"
 #include "Scene.h"
 #include "Entity.h"
 #include "Renderer.h"
-#include "Input.h"
 #include "SceneSerializer.h"
-#include "Timer.h"
 #include "Mesh.h"
 #include "Log.h"
 #include "components/Transform.h"
@@ -39,7 +36,7 @@ void Scene::load(const char* scene)
 
     for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
     {
-        MeshTable::get(mesh_name)->make_instanced(instance_matrices.size(), instance_matrices);
+        MeshTable::get(mesh_name)->make_instanced((int)instance_matrices.size(), instance_matrices);
     }
 }
 
@@ -154,8 +151,8 @@ void Scene::add_primitive(const char* name)
     {
         instanced_meshes[name].push_back(transform.get_transform());
         material.set_shader(ShaderTable::get("inst_default"));
-        MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
-        mesh_component.m_instance_id = instanced_meshes[name].size() - 1;
+        MeshTable::get(name)->make_instanced((int)instanced_meshes[name].size(), instanced_meshes[name]);
+        mesh_component.m_instance_id = (int)instanced_meshes[name].size() - 1;
     }
     else
     {
@@ -171,7 +168,7 @@ void Scene::add_primitive(const char* name)
     entity.add_component(std::move(mesh_component));
 	entity.add_component(std::move(material_component));
 
-    root->add_child(std::make_shared<Entity>(std::move(entity)));
+    root->add_child(SceneNode{std::make_shared<Entity>(std::move(entity))});
 }
 
 // TODO: remove later
@@ -180,7 +177,8 @@ std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)
     std::vector<glm::vec3> vec;
     for (unsigned int i = 0; i < flts.size();)
     {
-        vec.emplace_back(glm::vec3{ flts[i++], flts[i++], flts[i++] });
+        vec.emplace_back(flts[i], flts[i+1], flts[i+2]);
+        i += 3;
     }
 
     return vec;
@@ -191,7 +189,8 @@ std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
     std::vector<glm::vec2> vec;
     for (unsigned int i = 0; i < flts.size();)
     {
-        vec.emplace_back(glm::vec2{ flts[i++], flts[i++] });
+        vec.emplace_back(flts[i], flts[i+1]);
+        i += 2;
     }
 
     return vec;
@@ -280,8 +279,8 @@ void Scene::add_model(const char *name)
     {
         instanced_meshes[name].push_back(transform.get_transform());
         material.set_shader(ShaderTable::get("inst_default"));
-        MeshTable::get(name)->make_instanced(instanced_meshes[name].size(), instanced_meshes[name]);
-        meshComponent.m_instance_id = instanced_meshes[name].size() - 1;
+        MeshTable::get(name)->make_instanced((int)instanced_meshes[name].size(), instanced_meshes[name]);
+        meshComponent.m_instance_id = (int)instanced_meshes[name].size() - 1;
     }
     else
     {
@@ -297,7 +296,7 @@ void Scene::add_model(const char *name)
     entity.add_component(std::move(meshComponent));
     entity.add_component(std::move(materialComponent));
 
-    root->add_child(std::make_shared<Entity>(std::move(entity)));
+    root->add_child(SceneNode{std::make_shared<Entity>(std::move(entity))});
 }
 
 void Scene::window_resize(int width, int height)
@@ -310,11 +309,11 @@ void Scene::window_resize(int width, int height)
 
 void Scene::remove_node(SceneNodePtr& node)
 {
-	if (node->entity->has_component<PointLight>())
+	if (node->entity()->has_component<PointLight>())
 	{
 		m_light_manager.remove_point_light(node);
 	}
-    else if(node->entity->has_component<DirectionalLight>())
+    else if(node->entity()->has_component<DirectionalLight>())
     {
         m_light_manager.remove_directional_light();
     }
@@ -331,13 +330,13 @@ void Scene::remove_node(SceneNodePtr& node)
 
 void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transform)
 {
-    auto& transform = scene_node->entity->get_component<Transform>();
+    auto& transform = scene_node->entity()->get_component<Transform>();
 	Transform relative_transform = parent_transform * transform;
 
-	if (scene_node->entity->has_component<MeshComponent>())
+	if (scene_node->entity()->has_component<MeshComponent>())
 	{
-		auto& material_component = scene_node->entity->get_component<MaterialComponent>();
-		auto& mesh_component = scene_node->entity->get_component<MeshComponent>();
+		auto& material_component = scene_node->entity()->get_component<MaterialComponent>();
+		auto& mesh_component = scene_node->entity()->get_component<MeshComponent>();
 
         if(mesh_component.get_mesh()->is_instanced())
         {
@@ -380,7 +379,7 @@ void Scene::set_background_colour(glm::vec4 colour)
 }
 
 // load the standard shaders
-void Scene::compile_shaders() const
+void Scene::compile_shaders()
 {
     ShaderTable::add("default", ShaderProgram(
             Shader("../resources/shaders/default/default_vertex.shader", ShaderType::Vertex),

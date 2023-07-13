@@ -23,7 +23,7 @@ struct RenderObject
     Transform transform;
     MeshComponent mesh;
     MaterialComponent material;
-    unsigned int instances = 1;
+    unsigned instances = 1;
 };
 
 class Renderer

@@ -11,7 +11,14 @@
 class Light : public Component
 {
 public:
-    Light();
+    Light() :
+    m_colour(1.f, 1.f, 1.f, 1.f),
+    m_brightness(1.f),
+    m_shadow_casting(false),
+    m_shadow_width(2048),
+    m_shadow_height(2048),
+    m_shadow_bias(0.05f)
+    {}
 	void set_colour(glm::vec4 col) { m_colour = col; }
 	void set_brightness(float b) { m_brightness = b; }
     void cast_shadow() { m_shadow_casting = true; }
@@ -30,10 +37,10 @@ public:
 
 protected:
     glm::vec4 m_colour;
-	float m_brightness = 1.f;
+	float m_brightness;
     bool m_shadow_casting;
-    unsigned int m_shadow_width = 2048, m_shadow_height = 2048;
-    float m_shadow_bias = 0.05f;
+    unsigned m_shadow_width, m_shadow_height;
+    float m_shadow_bias;
 };
 
 class DirectionalLight final : public Light
@@ -68,31 +75,38 @@ private:
 class PointLight final : public Light
 {
 public:
+    PointLight() :
+    m_range(10.f),
+    m_shadow_near(1.f),
+    m_shadow_far(100.f),
+    m_shadow_proj(glm::mat4(1.f)),
+    m_shadow_info_change(false)
+    {}
 	void set_range(float range) { m_range = range; }
 	[[nodiscard]] float get_range() const { return m_range; }
 
     void bind_shadow_map() const { m_shadow_map->bind(); };
-    [[nodiscard]] const unsigned int get_shadow_cubemap() const { return m_shadow_map->get_depth_attachment(); };
+    [[nodiscard]] unsigned get_shadow_cubemap() const { return m_shadow_map->get_depth_attachment(); };
     [[nodiscard]] bool has_shadow_info_changed() const { return m_shadow_info_change; }
     [[nodiscard]] float get_far_plane() const { return m_shadow_far; }
     [[nodiscard]] std::vector<glm::mat4>& get_shadow_transforms() { return m_shadow_transforms; }
     [[nodiscard]] const std::shared_ptr<FrameBuffer>& get_shadow_buffer() const { return m_shadow_map; };
+
+    void shadow_init(const glm::vec3& light_pos) override;
+    void shadow_resize(const glm::vec3& light_pos);
+    void shadow_update_transforms(const glm::vec3& light_pos);
 
 	[[nodiscard]] const char* get_name() const override { return "Point Light"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(PointLight).hash_code(); }
 	void imgui_render() override;
 	void serialize(nlohmann::json& accessor) const override;
 
-    void shadow_init(const glm::vec3& light_pos) override;
-    void shadow_resize(const glm::vec3& light_pos);
-    void shadow_update_transforms(const glm::vec3& light_pos);
-
 private:
-	float m_range = 10.f;
+	float m_range;
 
     // shadow info
     std::shared_ptr<FrameBuffer> m_shadow_map;
-    float m_shadow_near = 1.f, m_shadow_far = 100.f;
+    float m_shadow_near, m_shadow_far;
     glm::mat4 m_shadow_proj;
     std::vector<glm::mat4> m_shadow_transforms;
     bool m_shadow_info_change;

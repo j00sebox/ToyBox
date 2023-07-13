@@ -16,7 +16,7 @@ enum class BufferType : int
 class Buffer
 {
 public:
-    Buffer(BufferType buffer_type);
+    explicit Buffer(BufferType buffer_type);
     explicit Buffer(uint64_t size, BufferType buffer_type);
     Buffer(Buffer&& ubo) noexcept;
     ~Buffer();
@@ -30,7 +30,7 @@ public:
     template<typename T> void set_data(int offset, T&& data) const;
     template<typename T> void set_data(int offset, const std::vector<T>& data) const;
 
-    void operator= (Buffer&& other_buffer);
+    Buffer& operator= (Buffer&& other_buffer) noexcept;
 
 private:
     unsigned int m_id;

@@ -13,19 +13,20 @@ class SceneNode
 {
 public:
 	SceneNode() = default;
-	SceneNode(std::shared_ptr<Entity>&& e);
+	explicit SceneNode(std::shared_ptr<Entity>&& e);
     ~SceneNode();
 
 	void add_child(SceneNode&& s);
-    void addChild(SceneNodePtr s);
-    void addExistingChild(SceneNodePtr s);
-    void updateTransform(SceneNodePtr s);
+    void add_child(SceneNodePtr s);
+    void move_child(const SceneNodePtr& s);
+    void update_transform(const SceneNodePtr& current_parent);
 	bool remove(SceneNodePtr& node);
-	SceneNode move(SceneNodePtr node);
-	Transform update(const Transform& parent_transform);
+
 	[[nodiscard]] bool exists(const std::string& name) const;
 	[[nodiscard]] bool has_children() const { return (!m_children.empty()); }
 	[[nodiscard]] size_t size() const;
+
+    std::shared_ptr<Entity> entity() { return m_entity; }
 
 	[[nodiscard]] inline std::vector<SceneNodePtr>::iterator begin() { return m_children.begin(); }
     [[nodiscard]] inline std::vector<SceneNodePtr>::iterator end() { return m_children.end(); }
@@ -34,16 +35,13 @@ public:
 
 	bool operator== (const SceneNode& other) const
 	{
-		return (entity == other.entity);
+		return (m_entity == other.m_entity);
 	}
 
-	std::shared_ptr<Entity> entity;
-
 private:
+    std::shared_ptr<Entity> m_entity;
 	std::vector<SceneNodePtr> m_children;
-    SceneNode* parent = nullptr;
-
-    friend class SceneSerializer;
+    SceneNode* m_parent = nullptr;
 };
 
 

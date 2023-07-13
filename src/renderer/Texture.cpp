@@ -74,7 +74,7 @@ Texture2D::Texture2D(const std::string& file_name, bool gamma_correct)
     make_resident();
 }
 
-Texture2D::Texture2D(unsigned int component_type, unsigned int width, unsigned int height, int samples)
+Texture2D::Texture2D(unsigned component_type, unsigned width, unsigned int height, int samples)
 {
     m_width = width; m_height = height;
     m_multisample = (samples > 1);
@@ -105,7 +105,7 @@ Texture2D::~Texture2D()
 	GL_CALL(glDeleteTextures(1, &m_id));
 }
 
-void Texture2D::bind(unsigned int slot /* = 0 */) const
+void Texture2D::bind(unsigned slot /* = 0 */) const
 {
 	GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 

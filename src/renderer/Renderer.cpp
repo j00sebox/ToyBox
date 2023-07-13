@@ -3,7 +3,6 @@
 #include "GLError.h"
 #include "Shader.h"
 #include "Mesh.h"
-#include "components/MeshComponent.h"
 #include "Material.h"
 #include "components/Transform.h"
 
@@ -98,7 +97,7 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, unsigne
     int original_width = viewport_size[2];
     int original_height = viewport_size[3];
 
-    glViewport(0, 0, shadow_width, shadow_height);
+    glViewport(0, 0, (int)shadow_width, (int)shadow_height);
     for(const auto& render_obj : render_list)
     {
         const Mesh& mesh = render_obj.mesh.get_mesh().operator*();

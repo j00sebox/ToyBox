@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Inspector.h"
 #include "Entity.h"
 #include "Component.h"
@@ -28,10 +27,10 @@ void Inspector::render()
         if (scene->selectedNode)
         {
             char buf[32];
-            strcpy(buf, scene->selectedNode->entity->get_name().c_str());
+            strcpy(buf, scene->selectedNode->entity()->get_name().c_str());
             if (ImGui::InputText("##EntityName", buf, IM_ARRAYSIZE(buf)))
             {
-                scene->selectedNode->entity->set_name(buf);
+                scene->selectedNode->entity()->set_name(buf);
             }
 
             displayComponents();
@@ -48,7 +47,7 @@ void Inspector::render()
 
     if (dragNode && dropNode)
     {
-        dropNode->addExistingChild(dragNode);
+        dropNode->move_child(dragNode);
         scene->selectedNode = nullptr;
         dragNode = nullptr;
         dropNode = nullptr;
@@ -59,7 +58,7 @@ void Inspector::imguiRender(SceneNodePtr& currentNode)
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
     if (!currentNode->has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
-    bool opened = ImGui::TreeNodeEx(currentNode->entity->get_name().c_str(), flags);
+    bool opened = ImGui::TreeNodeEx(currentNode->entity()->get_name().c_str(), flags);
 
     if (ImGui::IsItemClicked())
     {
@@ -79,7 +78,7 @@ void Inspector::imguiRender(SceneNodePtr& currentNode)
         {
             if (ImGui::MenuItem("Point Light"))
             {
-                scene->selectedNode->entity->add_component(PointLight{});
+                scene->selectedNode->entity()->add_component(PointLight{});
                 scene->m_light_manager.add_point_light(*scene->selectedNode);
             }
 
@@ -93,7 +92,7 @@ void Inspector::imguiRender(SceneNodePtr& currentNode)
     {
         ImGui::SetDragDropPayload("_TREENODE", nullptr, 0);
         dragNode = currentNode;
-        ImGui::TextUnformatted(currentNode->entity->get_name().c_str());
+        ImGui::TextUnformatted(currentNode->entity()->get_name().c_str());
         ImGui::EndDragDropSource();
     }
 
@@ -118,7 +117,7 @@ void Inspector::imguiRender(SceneNodePtr& currentNode)
 
 void Inspector::displayComponents()
 {
-    std::vector<std::shared_ptr<Component>> components = scene->selectedNode->entity->get_components();
+    std::vector<std::shared_ptr<Component>> components = scene->selectedNode->entity()->get_components();
 
     for (auto& component : components)
     {
@@ -153,10 +152,10 @@ void Inspector::displayComponents()
             // FIXME
             if (remove_component)
             {
-                if (scene->selectedNode->entity->has_component<PointLight>())
+                if (scene->selectedNode->entity()->has_component<PointLight>())
                     scene->m_light_manager.remove_point_light(scene->selectedNode);
 
-                scene->selectedNode->entity->remove_component(*component);
+                scene->selectedNode->entity()->remove_component(*component);
             }
 
             component->imgui_render();

@@ -4,9 +4,9 @@
 
 struct VertexAttribute
 {
-	unsigned int id;
+	unsigned id;
 	int num;
-	unsigned int type;
+	unsigned type;
 	bool normalized;
 	int offset = 0;
 };
@@ -14,8 +14,7 @@ struct VertexAttribute
 class BufferLayout
 {
 public:
-	BufferLayout() {}
-
+	BufferLayout() = default;
 	BufferLayout(std::initializer_list<VertexAttribute> attribs);
 
 	void add_attribute(VertexAttribute& attrib);
@@ -34,10 +33,10 @@ class VertexArray
 {
 public:
 	VertexArray();
-    VertexArray(VertexArray&& va);
+    VertexArray(VertexArray&& va) noexcept;
 	~VertexArray();
 
-    void set_layout(const BufferLayout& layout);
+    void set_layout(const BufferLayout& layout) const;
 
 	void bind() const;
 	void unbind() const;

@@ -7,6 +7,7 @@
 
 #include <imgui.h>
 #include <nlohmann/json.hpp>
+#include <utility>
 
 using namespace nlohmann;
 
@@ -17,7 +18,7 @@ MaterialComponent::MaterialComponent(Material&& material)
 
 MaterialComponent::MaterialComponent(std::shared_ptr<Material> material_ptr)
 {
-    m_material = material_ptr;
+    m_material = std::move(material_ptr);
 }
 
 void MaterialComponent::set_texturing_mode(TexturingMode mode)
@@ -80,23 +81,23 @@ void MaterialComponent::imgui_render()
     else
     {
         ImGui::Text("\nBase Colour\n");
-        texture_viewer(m_material->m_textures[0]->get_id(), m_material->m_textures[0]->get_width(), m_material->m_textures[0]->get_height());
+        texture_viewer(m_material->m_textures[0]->get_id(), (float)m_material->m_textures[0]->get_width(), (float)m_material->m_textures[0]->get_height());
 
         ImGui::Text("\nMetallic Roughness\n");
         if(m_material->m_textures[1])
-            texture_viewer(m_material->m_textures[1]->get_id(), m_material->m_textures[1]->get_width(), m_material->m_textures[1]->get_height());
+            texture_viewer(m_material->m_textures[1]->get_id(), (float)m_material->m_textures[1]->get_width(), (float)m_material->m_textures[1]->get_height());
         else
             display_empty_texture();
 
         ImGui::Text("\nNormal Map\n");
         if(m_material->m_textures[2])
-            texture_viewer(m_material->m_textures[2]->get_id(), m_material->m_textures[2]->get_width(), m_material->m_textures[2]->get_height());
+            texture_viewer(m_material->m_textures[2]->get_id(), (float)m_material->m_textures[2]->get_width(), (float)m_material->m_textures[2]->get_height());
         else
             display_empty_texture();
 
         ImGui::Text("\nOcclusion Map\n");
         if(m_material->m_textures[3])
-            texture_viewer(m_material->m_textures[3]->get_id(), m_material->m_textures[3]->get_width(), m_material->m_textures[3]->get_height());
+            texture_viewer(m_material->m_textures[3]->get_id(), (float)m_material->m_textures[3]->get_width(), (float)m_material->m_textures[3]->get_height());
         else
             display_empty_texture();
     }

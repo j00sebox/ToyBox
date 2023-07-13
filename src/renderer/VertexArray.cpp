@@ -24,7 +24,7 @@ VertexArray::VertexArray()
 	GL_CALL(glGenVertexArrays(1, &m_id));
 }
 
-VertexArray::VertexArray(VertexArray&& va)
+VertexArray::VertexArray(VertexArray&& va) noexcept
 {
     m_id = va.m_id;
     va.m_id = 0;
@@ -35,7 +35,7 @@ VertexArray::~VertexArray()
 	GL_CALL(glDeleteVertexArrays(1, &m_id));
 }
 
-void VertexArray::set_layout(const BufferLayout& layout)
+void VertexArray::set_layout(const BufferLayout& layout) const
 {
     bind();
 

@@ -9,17 +9,9 @@
 #include <glm/ext/matrix_clip_space.hpp>
 
 // TODO: remove later
-#include "GLError.h"
 #include <glad/glad.h>
 
 using namespace nlohmann;
-
-Light::Light()
-{
-	m_colour = { 1.f, 1.f, 1.f, 1.f };
-    m_brightness = 1.f;
-    m_shadow_casting = false;
-}
 
 void Light::imgui_render()
 {
@@ -109,7 +101,7 @@ void PointLight::imgui_render()
         ImGui::InputInt("Shadow Dimensions", &dimensions);
         ImGui::Text("\n");
         m_shadow_info_change = (dimensions != (int)m_shadow_width);
-        m_shadow_width = (unsigned int)dimensions; m_shadow_height = (unsigned int)dimensions;
+        m_shadow_width = (unsigned)dimensions; m_shadow_height = (unsigned)dimensions;
 
         float prev_near = m_shadow_near, prev_far = m_shadow_far;
         ImGui::InputFloat("Near Plane", &m_shadow_near);

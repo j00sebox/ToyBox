@@ -7,7 +7,24 @@
 class Camera
 {
 public:
-	Camera();
+    Camera() :
+    m_position(glm::vec3()),
+    m_forward(glm::vec3(0.f, 0.f, -1.f)),
+    m_up(glm::vec3(0.f, 1.f, 0.f)),
+    m_right(glm::vec3(1.f, 0.f, 0.f)),
+    m_transform(glm::mat4(1.f)),
+    m_perspective(glm::mat4(1.f)),
+    m_orthographic(glm::mat4(1.f)),
+    m_screen_width(0),
+    m_screen_height(0),
+    m_near(0.1f),
+    m_far(1000.f),
+    m_fov(90.f),
+    m_speed(0.01f),
+    m_sensitivity(30.f),
+    m_mouse_down(false)
+    {
+    }
 	~Camera() = default;
 
 	glm::mat4 camera_look_at();
@@ -15,7 +32,6 @@ public:
     // true if the camera could be moved
 	bool update(float elapsed_time);
 
-	void rotate(glm::quat q);
 	void move_forward(float f);
 	void move_right(float r);
 
@@ -40,9 +56,9 @@ private:
     glm::mat4 m_orthographic;
 
 	int m_screen_width, m_screen_height;
-	float m_near = 0.1f, m_far = 1000.f;
-	float m_fov = 90.f;
-	float m_speed = 0.01f;
-	float m_sensitivity = 30.f;
-	bool m_mouse_down = false;
+	float m_near, m_far;
+	float m_fov;
+	float m_speed;
+	float m_sensitivity;
+	bool m_mouse_down;
 };

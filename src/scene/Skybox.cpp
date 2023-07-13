@@ -95,13 +95,15 @@ void Skybox::unbind() const
 }
 
 
-void Skybox::operator=(Skybox&& sb) noexcept
+Skybox& Skybox::operator=(Skybox&& sb) noexcept
 {
 	m_indices_count = sb.m_indices_count;
 	m_skybox_va = std::move(sb.m_skybox_va);
 	m_skybox_texture = std::move(sb.m_skybox_texture);
 	m_skybox_shader = sb.m_skybox_shader;
-    m_img_fmt = std::move(sb.m_img_fmt);
+    m_img_fmt = sb.m_img_fmt;
+
+    return *this;
 }
 
 

@@ -21,8 +21,8 @@ public:
 	void bind() const;
 	void unbind() const;
 
-    [[nodiscard]] const bool is_using_scale_outline() const { return m_use_scale_outline; }
-    [[nodiscard]] const float get_scale_outline_factor() const { return m_outlining_factor; }
+    [[nodiscard]] bool is_using_scale_outline() const { return m_use_scale_outline; }
+    [[nodiscard]] float get_scale_outline_factor() const { return m_outlining_factor; }
 
 	[[nodiscard]] const char* get_name() const override { return "Mesh"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(MeshComponent).hash_code(); }

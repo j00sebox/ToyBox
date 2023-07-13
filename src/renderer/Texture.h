@@ -27,7 +27,7 @@ protected:
 class Texture2D : public TextureBase
 {
 public:
-	Texture2D(const std::string& file_name, bool gamma_correct = true);
+	explicit Texture2D(const std::string& file_name, bool gamma_correct = true);
     Texture2D(unsigned int component_type, unsigned int width, unsigned int height, int samples = 1);
 	Texture2D(Texture2D&& t) noexcept;
 	~Texture2D();
@@ -53,7 +53,7 @@ private:
 class CubeMap : public TextureBase
 {
 public:
-	CubeMap(const std::string& dir, ImageFormat fmt = ImageFormat::JPG);
+	explicit CubeMap(const std::string& dir, ImageFormat fmt = ImageFormat::JPG);
     CubeMap(int component_type, unsigned int width, unsigned int height);
 	CubeMap(CubeMap&& cb) noexcept;
 	~CubeMap();

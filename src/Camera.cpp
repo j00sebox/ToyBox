@@ -9,12 +9,6 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <imgui.h>
 
-Camera::Camera()
-	: m_screen_width(0), m_screen_height(0)
-{
-	reset();
-}
-
 glm::mat4 Camera::camera_look_at()
 {
 	return glm::lookAt(m_position, m_position + m_forward, m_up);
@@ -87,7 +81,7 @@ bool Camera::update(float elapsed_time)
 			glm::vec3 new_forward = glm::rotate(m_forward, glm::radians(-rotX), m_right);
 
 			// prevents barrel rolls
-			if (abs(glm::angle(new_forward, m_up) - glm::radians(90.0f)) <= glm::radians(85.0f))
+			if (std::abs(glm::angle(new_forward, m_up) - glm::radians(90.0f)) <= glm::radians(85.0f))
 			{
 				m_forward = new_forward;
 			}

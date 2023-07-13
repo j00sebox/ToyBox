@@ -12,40 +12,40 @@ using namespace nlohmann;
 
 void Transform::translate(const glm::vec3& pos)
 {
-    position = pos;
-    positionMatrix = glm::translate(glm::mat4(1.f), position);
+    m_position = pos;
+    m_position_matrix = glm::translate(glm::mat4(1.f), m_position);
 }
 
 void Transform::scale(float s)
 {
-    uniformScale = s;
-    scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(uniformScale, uniformScale, uniformScale));
+    m_uniform_scale = s;
+    m_scale_matrix = glm::scale(glm::mat4(1.f), glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
 }
 
 void Transform::rotate(float angle, const glm::vec3& axis)
 {
-    rotateAngle = angle;
-    rotateAxis = axis;
-    rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(rotateAngle), rotateAxis);
+    m_rotate_angle = angle;
+    m_rotate_axis = axis;
+    m_rotation_matrix = glm::rotate(glm::mat4(1.f), glm::radians(m_rotate_angle), m_rotate_axis);
 }
 
 glm::mat4 Transform::get_transform() const
 {
-	return positionMatrix * scaleMatrix * rotationMatrix;
+	return m_position_matrix * m_scale_matrix * m_rotation_matrix;
 }
 
-void Transform::resolveParentChange(const Transform& oldParent, const Transform& newParent)
+void Transform::resolve_parent_change(const Transform& oldParent, const Transform& parent)
 {
-    positionMatrix = oldParent.positionMatrix * positionMatrix;
-    positionMatrix = glm::inverse(newParent.positionMatrix) * positionMatrix;
+    m_position_matrix = oldParent.m_position_matrix * m_position_matrix;
+    m_position_matrix = glm::inverse(parent.m_position_matrix) * m_position_matrix;
 
-    scaleMatrix = oldParent.scaleMatrix * scaleMatrix;
-    scaleMatrix = glm::inverse(newParent.scaleMatrix) * scaleMatrix;
+    m_scale_matrix = oldParent.m_scale_matrix * m_scale_matrix;
+    m_scale_matrix = glm::inverse(parent.m_scale_matrix) * m_scale_matrix;
 
-    rotationMatrix = oldParent.rotationMatrix * rotationMatrix;
-    rotationMatrix = glm::inverse(newParent.rotationMatrix) * rotationMatrix;
+    m_rotation_matrix = oldParent.m_rotation_matrix * m_rotation_matrix;
+    m_rotation_matrix = glm::inverse(parent.m_rotation_matrix) * m_rotation_matrix;
 
-    resolveVectors();
+    resolve_vectors();
 }
 
 void Transform::imgui_render()
@@ -53,81 +53,81 @@ void Transform::imgui_render()
 	float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 	ImVec2 button_size = { line_height + 3.0f, line_height };
 
-    glm::vec3 prev_pos = position;
+    glm::vec3 prev_pos = m_position;
 	ImGui::Text("\nPosition: ");
 	coloured_label("x", ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f }, button_size);
 	ImGui::SameLine();
-	ImGui::DragFloat("##x", &position.x);
+	ImGui::DragFloat("##x", &m_position.x);
 	coloured_label("y", ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f }, button_size);
 	ImGui::SameLine();
-	ImGui::DragFloat("##y", &position.y);
+	ImGui::DragFloat("##y", &m_position.y);
 	coloured_label("z", ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f }, button_size);
 	ImGui::SameLine();
-	ImGui::DragFloat("##z", &position.z);
+	ImGui::DragFloat("##z", &m_position.z);
 
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
-	ImGui::DragFloat("##angle", &rotateAngle);
+	ImGui::DragFloat("##angle", &m_rotate_angle);
 	coloured_label("i", ImVec4{ 0.0f, 0.8f, 0.96f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
-	ImGui::SliderFloat("##i", &rotateAxis.x, -1.f, 1.f);
+	ImGui::SliderFloat("##i", &m_rotate_axis.x, -1.f, 1.f);
 	coloured_label("j", ImVec4{ 0.84f, 0.78f, 0.1f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
-	ImGui::SliderFloat("##j", &rotateAxis.y, -1.f, 1.f);
+	ImGui::SliderFloat("##j", &m_rotate_axis.y, -1.f, 1.f);
 	coloured_label("k", ImVec4{ 0.97f, 0.04f, 1.f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
-	ImGui::SliderFloat("##k", &rotateAxis.z, -1.f, 1.f);
-	glm::normalize(rotateAxis);
+	ImGui::SliderFloat("##k", &m_rotate_axis.z, -1.f, 1.f);
+	glm::normalize(m_rotate_axis);
 
 	ImGui::Text("\nScale: ");
-	ImGui::InputFloat("uniform scale", &uniformScale);
+	ImGui::InputFloat("uniform scale", &m_uniform_scale);
 
-    updateTransform();
+    update_transform();
 }
 
 void Transform::serialize(json& accessor) const
 {
-	accessor["transform"]["translate"][0] = position.x;
-	accessor["transform"]["translate"][1] = position.y;
-	accessor["transform"]["translate"][2] = position.z;
+	accessor["transform"]["translate"][0] = m_position.x;
+	accessor["transform"]["translate"][1] = m_position.y;
+	accessor["transform"]["translate"][2] = m_position.z;
 
-	accessor["transform"]["rotation"][0] = rotateAngle;
-	accessor["transform"]["rotation"][1] = rotateAxis.x;
-	accessor["transform"]["rotation"][2] = rotateAxis.y;
-	accessor["transform"]["rotation"][3] = rotateAxis.z;
+	accessor["transform"]["rotation"][0] = m_rotate_angle;
+	accessor["transform"]["rotation"][1] = m_rotate_axis.x;
+	accessor["transform"]["rotation"][2] = m_rotate_axis.y;
+	accessor["transform"]["rotation"][3] = m_rotate_axis.z;
 
-	accessor["transform"]["scale"] = uniformScale;
+	accessor["transform"]["scale"] = m_uniform_scale;
 }
 
-void Transform::updateTransform()
+void Transform::update_transform()
 {
-    positionMatrix = glm::translate(glm::mat4(1.f), position);
-    scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(uniformScale, uniformScale, uniformScale));
-    rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(rotateAngle), rotateAxis);
+    m_position_matrix = glm::translate(glm::mat4(1.f), m_position);
+    m_scale_matrix = glm::scale(glm::mat4(1.f), glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
+    m_rotation_matrix = glm::rotate(glm::mat4(1.f), glm::radians(m_rotate_angle), m_rotate_axis);
 }
 
 // helper function to pull the necessary vectors from the transform matrices
-void Transform::resolveVectors()
+void Transform::resolve_vectors()
 {
-    position.x = positionMatrix[3][0];
-    position.y = positionMatrix[3][1];
-    position.z = positionMatrix[3][2];
+    m_position.x = m_position_matrix[3][0];
+    m_position.y = m_position_matrix[3][1];
+    m_position.z = m_position_matrix[3][2];
 
-    uniformScale = scaleMatrix[0][0];
+    m_uniform_scale = m_scale_matrix[0][0];
 
-    glm::quat newQuat = glm::quat_cast(rotationMatrix);
-    rotateAngle = glm::degrees(glm::angle(newQuat));
-    rotateAxis = glm::axis(newQuat);
+    glm::quat newQuat = glm::quat_cast(m_rotation_matrix);
+    m_rotate_angle = glm::degrees(glm::angle(newQuat));
+    m_rotate_axis = glm::axis(newQuat);
 }
 
 Transform Transform::operator*(const Transform& other) const
 {
 	Transform new_transform{};
-    new_transform.positionMatrix = positionMatrix * other.positionMatrix;
-    new_transform.scaleMatrix = scaleMatrix * other.scaleMatrix;
-    new_transform.rotationMatrix = rotationMatrix * other.rotationMatrix;
+    new_transform.m_position_matrix = m_position_matrix * other.m_position_matrix;
+    new_transform.m_scale_matrix = m_scale_matrix * other.m_scale_matrix;
+    new_transform.m_rotation_matrix = m_rotation_matrix * other.m_rotation_matrix;
 
-    new_transform.resolveVectors();
+    new_transform.resolve_vectors();
 
 	return new_transform;
 }

@@ -12,9 +12,9 @@ void Material::load(const std::string* const textures)
     m_texture_locations[3] = textures[3];
 
     m_textures[0] = std::make_unique<Texture2D>(Texture2D(textures[0]));
-    m_textures[1] = (textures[1] != "none" && textures[1] != "") ? std::make_unique<Texture2D>(Texture2D(textures[1])) : nullptr;
-    m_textures[2] = (textures[2] != "none" && textures[2] != "") ? std::make_unique<Texture2D>(Texture2D(textures[2])) : nullptr;
-    m_textures[3] = (textures[3] != "none" && textures[3] != "") ? std::make_unique<Texture2D>(Texture2D(textures[3])) : nullptr;
+    m_textures[1] = (textures[1] != "none" && !textures[1].empty()) ? std::make_unique<Texture2D>(Texture2D(textures[1])) : nullptr;
+    m_textures[2] = (textures[2] != "none" && !textures[2].empty()) ? std::make_unique<Texture2D>(Texture2D(textures[2])) : nullptr;
+    m_textures[3] = (textures[3] != "none" && !textures[3].empty()) ? std::make_unique<Texture2D>(Texture2D(textures[3])) : nullptr;
 }
 
 void Material::bind() const

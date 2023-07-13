@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "SceneSerializer.h"
 #include "GLTFLoader.h"
 #include "FileOperations.h"
@@ -86,15 +85,15 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 
 void SceneSerializer::serialize_node(json& accessor, int& node_index, const SceneNodePtr& scene_node)
 {
-	accessor[node_index]["name"] = scene_node->entity->get_name();
+	accessor[node_index]["name"] = scene_node->entity()->get_name();
 
-	if (scene_node->entity->has_component<Material>())
+	if (scene_node->entity()->has_component<Material>())
 	{
-		auto& material = scene_node->entity->get_component<Material>();
+		auto& material = scene_node->entity()->get_component<Material>();
 		accessor[node_index]["shader"] = ShaderTable::find(material.get_shader());
 	}
 
-	const auto& components = scene_node->entity->get_components();
+	const auto& components = scene_node->entity()->get_components();
 
 	for (const auto& c : components)
 	{
@@ -124,7 +123,7 @@ void SceneSerializer::load_models(const json& accessor, unsigned int model_count
 	int num_models_checked = 0;
 	while (num_models_checked < model_count)
 	{
-		root->addChild(load_model(accessor, num_models_checked, num_models_checked, scene));
+        root->add_child(load_model(accessor, num_models_checked, num_models_checked, scene));
 	}
 }
 
@@ -273,7 +272,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
         if(mesh_accessor["instanced"])
         {
             scene.instanced_meshes[mesh_name].push_back(model_matrix);
-            mesh_component.m_instance_id = scene.instanced_meshes[mesh_name].size() - 1;
+            mesh_component.m_instance_id = (int)scene.instanced_meshes[mesh_name].size() - 1;
         }
 
         entity.add_component(std::move(mesh_component));
@@ -281,7 +280,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
         if(!model["material"].is_null())
         {
             json material_accessor = model["material"];
-            TexturingMode texturing_mode = (TexturingMode)material_accessor["texturing_mode"];
+            auto texturing_mode = (TexturingMode)material_accessor["texturing_mode"];
 
             // if the mesh is being instanced then make one material that can be shared by all those instances
             std::string mat_name = (mesh_accessor["instanced"]) ? mesh_name : entity.get_name();
@@ -300,7 +299,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
                 }
                 else
                 {
-                    std::string base_colour_location = (material_accessor["textures"]["base_colour"] == "") ? "../resources/textures/white_on_white.jpeg" : material_accessor["textures"]["base_colour"];
+                    std::string base_colour_location = (material_accessor["textures"]["base_colour"].empty()) ? "../resources/textures/white_on_white.jpeg" : material_accessor["textures"]["base_colour"];
 
                     std::string textures[] = {
                             base_colour_location,
@@ -335,111 +334,33 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
 	for (int i = 0; i < num_children; ++i)
 	{
 		int child_index = accessor[model_index]["children"][i];
-		current_node->addChild(load_model(accessor, child_index, num_models_checked, scene));
+        current_node->add_child(load_model(accessor, child_index, num_models_checked, scene));
 	}
 
 	++num_models_checked;
 	return current_node;
 }
 
-void SceneSerializer::load_mesh(nlohmann::json& mesh_accessor, MeshComponent& mesh_object)
+std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
 {
-    auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
+	std::vector<glm::vec2> vec;
+    for (unsigned int i = 0; i < flts.size();)
     {
-        std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
-        std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
-        std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
-
-        std::vector<Vertex> vertices;
-
-        for (unsigned int i = 0; i < positions.size(); i++)
-        {
-            vertices.push_back({
-                                       positions[i],
-                                       normals[i],
-                                       tex_coords[i]
-                               });
-        }
-
-        std::vector<float> verts;
-
-        for (const Vertex& v : vertices)
-        {
-            verts.push_back(v.position.x);
-            verts.push_back(v.position.y);
-            verts.push_back(v.position.z);
-            verts.push_back(v.normal.x);
-            verts.push_back(v.normal.y);
-            verts.push_back(v.normal.z);
-            verts.push_back(v.st.x);
-            verts.push_back(v.st.y);
-        }
-
-        std::vector<unsigned int> indices = loader.get_indices();
-
-        mesh.load(verts, indices);
-    };
-
-    std::string mesh_name = mesh_accessor["mesh_name"];
-
-    if(!MeshTable::exists(mesh_name))
-    {
-        Mesh mesh;
-
-        if(mesh_accessor["mesh_type"] == "gltf")
-        {
-            GLTFLoader loader(mesh_name.c_str());
-            load_gltf_mesh(loader, mesh);
-        }
-        else if(mesh_accessor["mesh_type"] == "primitive")
-        {
-            mesh.load_primitive(str_to_primitive_type(mesh_name.c_str()));
-        }
-
-        MeshTable::add(mesh_name, std::move(mesh));
+        vec.emplace_back(flts[i], flts[i+1]);
+        i += 2;
     }
 
-    mesh_object.set_mesh(MeshTable::get(mesh_name));
-    mesh_object.set_mesh_name(mesh_name);
-}
-
-
-void SceneSerializer::load_material(nlohmann::json& material_accessor, Material& material)
-{
-    material.set_colour({ material_accessor["properties"]["colour"][0], material_accessor["properties"]["colour"][1], material_accessor["properties"]["colour"][2], material_accessor["properties"]["colour"][3]});
-    material.set_metallic_property(material_accessor["properties"]["metallic_property"]);
-    material.set_roughness(material_accessor["properties"]["roughness"]);
-
-    std::string base_colour_location = (material_accessor["textures"]["base_colour"] == "") ? "../resources/textures/white_on_white.jpeg" : material_accessor["textures"]["base_colour"];
-
-    std::string textures[] = {
-            base_colour_location,
-            material_accessor["textures"]["specular"],
-            material_accessor["textures"]["normal_map"],
-            material_accessor["textures"]["occlusion"]
-    };
-
-    material.load(textures);
+    return vec;
 }
 
 std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)
 {
-	std::vector<glm::vec3> vec;
-	for (unsigned int i = 0; i < flts.size();)
-	{
-		vec.emplace_back(glm::vec3{ flts[i++], flts[i++], flts[i++] });
-	}
-	
-	return vec;
-}
+    std::vector<glm::vec3> vec;
+    for (unsigned int i = 0; i < flts.size();)
+    {
+        vec.emplace_back(flts[i], flts[i+1], flts[i+2]);
+        i += 3;
+    }
 
-std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
-{
-	std::vector<glm::vec2> vec;
-	for (unsigned int i = 0; i < flts.size();)
-	{
-		vec.emplace_back(glm::vec2{ flts[i++], flts[i++] });
-	}
-
-	return vec;
+    return vec;
 }

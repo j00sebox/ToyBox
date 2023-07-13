@@ -13,8 +13,8 @@ enum class TexturingMode
 class MaterialComponent final : public Component
 {
 public:
-    MaterialComponent(Material&& material);
-    MaterialComponent(std::shared_ptr<Material> material_ptr);
+    explicit MaterialComponent(Material&& material);
+    explicit MaterialComponent(std::shared_ptr<Material> material_ptr);
     void set_texturing_mode(TexturingMode mode);
     [[nodiscard]] const Material& get() const { return m_material.operator*(); }
     [[nodiscard]] std::shared_ptr<Material> get_ptr() { return m_material; }

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "LightManager.h"
 #include "Renderer.h"
 #include "Entity.h"
@@ -7,8 +6,6 @@
 #include "Buffer.h"
 #include "components/Transform.h"
 #include "components/Light.h"
-
-#include <glm/vec3.hpp>
 
 // TODO: remove later
 #include <glad/glad.h>
@@ -35,17 +32,15 @@ enum class DirectLightBufferOffsets
     total_offset = 64
 };
 
-LightManager::LightManager() {}
-
 void LightManager::get_lights(const SceneNodePtr& node)
 {
-	if (node->entity->has_component<PointLight>())
+	if (node->entity()->has_component<PointLight>())
 	{
-        m_point_lights.push_back(node->entity);
+        m_point_lights.push_back(node->entity());
 	}
-	else if (node->entity->has_component<DirectionalLight>())
+	else if (node->entity()->has_component<DirectionalLight>())
 	{
-        m_direct_light = node->entity;
+        m_direct_light = node->entity();
 	}
 
 	for (auto& n : *node)
@@ -56,7 +51,7 @@ void LightManager::get_lights(const SceneNodePtr& node)
 
 void LightManager::init_lights()
 {
-    if(m_point_lights.size() > 0)
+    if(!m_point_lights.empty())
         adjust_point_lights_buff();
     else
         ShaderTable::get("default")->set_uniform_1i("u_num_point_lights", 0);
@@ -73,12 +68,12 @@ void LightManager::init_lights()
 void LightManager::update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera)
 {
     int index = 0;
-	for (std::list<std::shared_ptr<Entity>>::iterator it = m_point_lights.begin(); it != m_point_lights.end(); ++it)
+	for (auto& m_point_light : m_point_lights)
 	{
-		if (*it && (*it)->has_component<PointLight>())
+		if (m_point_light && m_point_light->has_component<PointLight>())
 		{
-			auto& transform = (*it)->get_component<Transform>();
-			auto& point_light = (*it)->get_component<PointLight>();
+			auto& transform = m_point_light->get_component<Transform>();
+			auto& point_light = m_point_light->get_component<PointLight>();
 			glm::vec3 pos = transform.get_position();
 
             m_point_light_buffer->set_data((int)PointLightBufferOffsets::colour + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_colour());
@@ -116,7 +111,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
                 m_point_light_buffer->set_data((int)PointLightBufferOffsets::shadow_far_plane + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_far_plane());
                 m_point_light_buffer->set_data((int)PointLightBufferOffsets::shadow_bias + ((int)PointLightBufferOffsets::total_offset * index), point_light.get_shadow_bias());
-                m_point_shadow_maps->set_data(index * sizeof(uint64_t), glGetTextureHandleARB(point_light.get_shadow_cubemap()));
+                m_point_shadow_maps->set_data((int)(index * sizeof(uint64_t)), glGetTextureHandleARB(point_light.get_shadow_cubemap()));
 
                 point_light.bind_shadow_map();
                 auto [width, height] = point_light.get_shadow_dimensions();
@@ -168,17 +163,17 @@ void LightManager::remove_directional_light()
     m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::active, false);
 }
 
-void LightManager::add_point_light(const SceneNode& node)
+void LightManager::add_point_light(SceneNode& node)
 {
-    m_point_lights.push_back(node.entity);
+    m_point_lights.push_back(node.entity());
     adjust_point_lights_buff();
 }
 
 void LightManager::remove_point_light(const SceneNodePtr& node)
 {
-    for (std::list<std::shared_ptr<Entity>>::iterator it = m_point_lights.begin(); it != m_point_lights.end(); ++it)
+    for (auto it = m_point_lights.begin(); it != m_point_lights.end(); ++it)
     {
-        if(node->entity == *it)
+        if(node->entity() == *it)
         {
             m_point_lights.erase(it);
             break;
@@ -190,7 +185,7 @@ void LightManager::remove_point_light(const SceneNodePtr& node)
 
 void LightManager::adjust_point_lights_buff()
 {
-    int num_point_lights = m_point_lights.size();
+    int num_point_lights = (int)m_point_lights.size();
     int buffer_size = (int)PointLightBufferOffsets::total_offset * num_point_lights;
     m_point_light_buffer = std::make_unique<Buffer>(buffer_size, BufferType::SHADER_STORAGE);
     m_point_light_buffer->link(1);

@@ -29,7 +29,7 @@ void Application::start()
 
         if(Input::is_key_pressed(GLFW_KEY_C))
         {
-            currentScene->recompile_shaders();
+            Scene::recompile_shaders();
         }
 
 		m_window.begin_frame();
@@ -117,7 +117,7 @@ void Application::display_menu()
 			
 			if (ImGui::BeginMenu("Save"))
 			{
-				static char buf[32] = "\x74\x65\x73\x74\x2E\x73\x63\x65\x6E\x65";
+				static char buf[32] = R"(test.scene)";
 				ImGui::Text("resources/scenes/");
 				ImGui::SameLine();
 				ImGui::InputText("##LeftSide", buf, IM_ARRAYSIZE(buf));

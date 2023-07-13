@@ -6,8 +6,10 @@
 #include <cassert>
 #include <glad/glad.h>
 
-FrameBuffer::FrameBuffer(int width, int height, unsigned int samples)
-    : m_width(width), m_height(height), m_samples(samples)
+FrameBuffer::FrameBuffer(int width, int height, unsigned int samples) :
+    m_width(width),
+    m_height(height),
+    m_samples(samples)
 {
     assert(samples != 0);
     GL_CALL(glGenFramebuffers(1, &m_id));
@@ -33,9 +35,6 @@ FrameBuffer::FrameBuffer(FrameBuffer&& fbo) noexcept
 
 FrameBuffer::~FrameBuffer()
 {
-//    GL_CALL(glDeleteTextures(1, &m_colour_attachment));
-//    GL_CALL(glDeleteTextures(1, &m_depth_attachment));
-//    GL_CALL(glDeleteTextures(1, &m_stencil_attachment));
     GL_CALL(glDeleteFramebuffers(1, &m_id));
 }
 

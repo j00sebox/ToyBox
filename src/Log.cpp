@@ -5,7 +5,7 @@
 #include <csignal>
 #endif
 
-void __stop_program__()
+void stop_program_()
 {
 #ifdef PLATFORM_WINDOWS
 	__debugbreak();

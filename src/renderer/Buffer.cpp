@@ -71,11 +71,12 @@ void Buffer::set_data(int offset, uint64_t size, const void* data) const
     unbind();
 }
 
-void Buffer::operator=(Buffer&& other_buffer)
+Buffer& Buffer::operator=(Buffer&& other_buffer) noexcept
 {
     m_id = other_buffer.m_id;
     m_buffer_type = other_buffer.m_buffer_type;
     other_buffer.m_id = 0;
+    return *this;
 }
 
 

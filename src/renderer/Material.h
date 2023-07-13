@@ -12,7 +12,7 @@ public:
 	void set_shader(const std::shared_ptr<ShaderProgram>& shader) { m_shader = shader; }
 	[[nodiscard]] const std::shared_ptr<ShaderProgram>& get_shader() const { return m_shader; }
 
-	void load(const std::string* const textures);
+	void load(const std::string* textures);
 	void bind() const;
 	void unbind() const;
 
@@ -20,7 +20,6 @@ public:
 	void set_metallic_property(float new_val) { m_metallic = new_val; }
 	void set_roughness(float new_val) { m_roughness = new_val; }
 	[[nodiscard]] const glm::vec4& get_colour() const { return m_colour; }
-	//[[nodiscard]] bool is_custom() const { return m_custom; }
 
 private:
 	std::shared_ptr<ShaderProgram> m_shader;

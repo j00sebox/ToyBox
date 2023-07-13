@@ -19,7 +19,7 @@ struct RenderObject;
 class Scene
 {
 public:
-	Scene(Window* window);
+	explicit Scene(Window* window);
 	~Scene();
 
 	void load(const char* scene);
@@ -29,14 +29,13 @@ public:
 	void add_primitive(const char* name);
     void add_model(const char* name);
 	void window_resize(int width, int height);
-    void recompile_shaders();
-	Camera* get_camera() { return m_camera.get(); }
+    static void recompile_shaders();
 
 	void set_background_colour(glm::vec4 colour);
 	[[nodiscard]] const glm::vec4& get_background_colour() const { return m_clear_colour; }
 
 private:
-    void compile_shaders() const;
+    static void compile_shaders() ;
 
 	// scene management
 	void update_node(SceneNodePtr& node, const Transform& parent_transform);

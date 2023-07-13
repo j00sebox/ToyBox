@@ -7,105 +7,105 @@
 
 SceneNode::SceneNode(std::shared_ptr<Entity>&& e)
 {
-	entity = std::move(e);
+    m_entity = std::move(e);
 }
 
 SceneNode::~SceneNode()
 {
-	entity.reset();
+	m_entity.reset();
 }
 
 void SceneNode::add_child(SceneNode&& s)
 {
 	m_children.emplace_back(std::make_shared<SceneNode>(std::move(s)));
-    m_children.back()->parent = this;
+    m_children.back()->m_parent = this;
 }
 
-void SceneNode::addChild(SceneNodePtr s)
+void SceneNode::add_child(SceneNodePtr s)
 {
     m_children.emplace_back(std::move(s));
-    m_children.back()->parent = this;
+    m_children.back()->m_parent = this;
 }
 
-void SceneNode::addExistingChild(SceneNodePtr s)
+void SceneNode::move_child(const SceneNodePtr& s)
 {
-    if(this == s->parent) return;
+    if(this == s->m_parent) return;
 
-    for (auto it = s->parent->m_children.begin(); it != s->parent->m_children.end(); ++it)
+    for (auto it = s->m_parent->m_children.begin(); it != s->m_parent->m_children.end(); ++it)
     {
         if (*it == s)
         {
-            SceneNode* oldParent = s->parent;
-            updateTransform(s);
-            addChild(s);
-            oldParent->m_children.erase(it);
+            SceneNode* old_parent = s->m_parent;
+            update_transform(s);
+            add_child(s);
+            old_parent->m_children.erase(it);
             break;
         }
     }
 }
 
-// TODO: add comments
-void SceneNode::updateTransform(SceneNodePtr s)
+void SceneNode::update_transform(const SceneNodePtr& s)
 {
-    auto& childTransform = s->entity->get_component<Transform>();
-    Transform childCopy = childTransform;
+    auto& child_transform = s->m_entity->get_component<Transform>();
+    Transform child_copy = child_transform; // needed to convert the nodes transform back to world space
 
-    std::stack<Transform> transformsToApply;
+    std::stack<Transform> transforms_to_apply;
 
-    const auto& getRelativeTransform = [&](SceneNode* currentParent)
+    // goes up the parent chain to grab all the transforms needed to make the parent switch
+    const auto& get_relative_transform = [&](SceneNode* current_parent)
     {
-        Transform relativeTransform{};
+        Transform relative_transform{};
 
-        while(currentParent && currentParent->entity)
+        while(current_parent && current_parent->m_entity)
         {
-            const auto& transformToApply = currentParent->entity->get_component<Transform>();
-            transformsToApply.push(transformToApply);
-            currentParent = currentParent->parent;
+            const auto& transformToApply = current_parent->m_entity->get_component<Transform>();
+            transforms_to_apply.push(transformToApply);
+            current_parent = current_parent->m_parent;
         }
 
-        while(!transformsToApply.empty())
+        while(!transforms_to_apply.empty())
         {
-            relativeTransform = transformsToApply.top() * relativeTransform;
-            transformsToApply.pop();
+            relative_transform = transforms_to_apply.top() * relative_transform;
+            transforms_to_apply.pop();
         }
 
-        return relativeTransform;
+        return relative_transform;
     };
 
-    SceneNode* parent1 = s->parent; SceneNode* parent2 = this;
-    Transform oldParentTransform = (s->parent && s->parent->entity) ? getRelativeTransform(parent1) : Transform{};
-    Transform newParentTransform = (entity) ? getRelativeTransform(parent2) : Transform{};
+    SceneNode* parent1 = s->m_parent; SceneNode* parent2 = this;
+    Transform old_parent_transform = (s->m_parent && s->m_parent->m_entity) ? get_relative_transform(parent1) : Transform{};
+    Transform new_parent_transform = (m_entity) ? get_relative_transform(parent2) : Transform{};
 
-    childTransform.resolveParentChange(oldParentTransform, newParentTransform);
+    child_transform.resolve_parent_change(old_parent_transform, new_parent_transform);
     
-    std::function<void (SceneNodePtr&, Transform, Transform)> updateChildren = [&](SceneNodePtr& child, Transform oldPT, Transform newPT)
+    std::function<void (SceneNodePtr&, Transform, Transform)> update_children = [&](SceneNodePtr& child, const Transform& _old_parent_transform, const Transform& _new_parent_transform)
     {
-        auto& cTransform = child->entity->get_component<Transform>();
-        Transform cCopy = cTransform;
+        auto& _child_transform = child->m_entity->get_component<Transform>();
+        Transform _child_copy = _child_transform;
 
-        cTransform.resolveParentChange(oldPT, newPT);
+        _child_transform.resolve_parent_change(_old_parent_transform, _new_parent_transform);
 
         for(auto& c : child->m_children)
         {
-            updateChildren(c, oldPT * cCopy, newPT * cTransform);
+            update_children(c, _old_parent_transform * _child_copy, _new_parent_transform * _child_transform);
         }
     };
 
     for(auto& child : s->m_children)
     {
-        updateChildren(child, oldParentTransform * childCopy, newParentTransform * childTransform);
+        update_children(child, old_parent_transform * child_copy, new_parent_transform * child_transform);
     }
 }
 
 bool SceneNode::exists(const std::string& name) const
 {
-	if (entity && entity->get_name() == name)
+	if (m_entity && m_entity->get_name() == name)
 	{
 		return true;
 	}
 
 	bool found = false;
-	for (auto child : m_children)
+	for (const auto& child : m_children)
 	{
 		found |= child->exists(name);
 	}
@@ -134,33 +134,9 @@ bool SceneNode::remove(SceneNodePtr& node)
 	return false;
 }
 
-// node must exist for this to work
-SceneNode SceneNode::move(SceneNodePtr node)
-{
-//	auto it = m_children.begin();
-//	for (; it != m_children.end(); ++it)
-//	{
-//		if (*it == node)
-//		{
-//			SceneNode sn{ std::move(*it) };
-//			m_children.erase(it);
-//			return sn;
-//		}
-//
-//		if (it->has_children())
-//		{
-//			SceneNode sn = it->move(node);
-//			if (sn.entity)
-//				return sn;
-//		}
-//	}
-//
-//	return SceneNode{};
-}
-
 size_t SceneNode::size() const
 {
-	if (m_children.size() == 0)
+	if (m_children.empty())
 	{
 		return 1;
 	}

@@ -8,18 +8,25 @@
 class Transform final : public Component
 {
 public:
-    Transform() : position(glm::vec3()), uniformScale(1.f), rotateAngle(0.f), rotateAxis(glm::vec3(1.f, 0.f, 0.f)),
-                  positionMatrix(glm::mat4(1.f)), rotationMatrix(glm::mat4(1.f)), scaleMatrix(glm::mat4(1.f)) {}
+    Transform() :
+            m_position(glm::vec3()),
+            m_uniform_scale(1.f),
+            m_rotate_angle(0.f),
+            m_rotate_axis(glm::vec3(1.f, 0.f, 0.f)),
+            m_position_matrix(glm::mat4(1.f)),
+            m_rotation_matrix(glm::mat4(1.f)),
+            m_scale_matrix(glm::mat4(1.f))
+    {}
 	void translate(const glm::vec3& pos);
 	void scale(float s);
 	void rotate(float angle, const glm::vec3& axis);
 
-	[[nodiscard]] const glm::vec3& get_position() const { return position; }
-	[[nodiscard]] const glm::vec3& get_rotate_axis() const { return rotateAxis; }
-	[[nodiscard]] float get_rotate_angle() const { return rotateAngle; }
-	[[nodiscard]] float get_uniform_scale() const { return uniformScale; }
+	[[nodiscard]] const glm::vec3& get_position() const { return m_position; }
+	[[nodiscard]] const glm::vec3& get_rotate_axis() const { return m_rotate_axis; }
+	[[nodiscard]] float get_rotate_angle() const { return m_rotate_angle; }
+	[[nodiscard]] float get_uniform_scale() const { return m_uniform_scale; }
 	[[nodiscard]] glm::mat4 get_transform() const;
-    void resolveParentChange(const Transform& oldParent, const Transform& parent);
+    void resolve_parent_change(const Transform& oldParent, const Transform& parent);
 
 	[[nodiscard]] const char* get_name() const override { return "Transform"; }
 	[[nodiscard]] size_t get_type() const override { return typeid(Transform).hash_code(); }
@@ -29,15 +36,15 @@ public:
 	Transform operator* (const Transform& other) const;
 
 private:
-    void updateTransform();
-    void resolveVectors();
+    void update_transform();
+    void resolve_vectors();
 
-    glm::mat4 positionMatrix;
-    glm::mat4 rotationMatrix;
-    glm::mat4 scaleMatrix;
-    glm::vec3 position;
-    float uniformScale;
-    float rotateAngle;
-	glm::vec3 rotateAxis;
+    glm::vec3 m_position;
+    float m_uniform_scale;
+    float m_rotate_angle;
+	glm::vec3 m_rotate_axis;
+    glm::mat4 m_position_matrix;
+    glm::mat4 m_rotation_matrix;
+    glm::mat4 m_scale_matrix;
 };
 

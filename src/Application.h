@@ -20,7 +20,7 @@ public:
 private:
 	void display_dockspace();
 	void display_menu();
-	void display_fps();
+	static void display_fps();
 
     Scene* currentScene;
     Window m_window;

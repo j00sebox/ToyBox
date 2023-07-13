@@ -23,8 +23,6 @@ private:
 	static void load_skybox(const nlohmann::json& accessor, std::unique_ptr<Skybox>& sky_box);
 	static void load_models(const nlohmann::json& accessor, unsigned int model_count, SceneNodePtr& root, Scene& scene);
 	static SceneNodePtr load_model(const nlohmann::json& accessor, int model_index, int& num_models_checked, Scene& scene);
-    static void load_mesh(nlohmann::json& accessor, MeshComponent& mesh);
-    static void load_material(nlohmann::json& accessor, Material& material);
 	static void serialize_node(nlohmann::json& accessor, int& node_index, const SceneNodePtr& scene_node);
 };
 
