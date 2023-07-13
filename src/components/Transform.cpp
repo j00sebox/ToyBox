@@ -14,12 +14,14 @@ void Transform::translate(const glm::vec3& pos)
 {
     m_position = pos;
     m_position_matrix = glm::translate(glm::mat4(1.f), m_position);
+    m_dirty = true;
 }
 
 void Transform::scale(float s)
 {
     m_uniform_scale = s;
     m_scale_matrix = glm::scale(glm::mat4(1.f), glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
+    m_dirty = true;
 }
 
 void Transform::rotate(float angle, const glm::vec3& axis)
@@ -27,11 +29,18 @@ void Transform::rotate(float angle, const glm::vec3& axis)
     m_rotate_angle = angle;
     m_rotate_axis = axis;
     m_rotation_matrix = glm::rotate(glm::mat4(1.f), glm::radians(m_rotate_angle), m_rotate_axis);
+    m_dirty = true;
 }
 
-glm::mat4 Transform::get_transform() const
+void Transform::recalculate_transform()
 {
-	return m_position_matrix * m_scale_matrix * m_rotation_matrix;
+    m_transform_matrix = m_position_matrix * m_scale_matrix * m_rotation_matrix;
+    m_dirty = false;
+}
+
+const glm::mat4& Transform::get_transform() const
+{
+	return m_transform_matrix;
 }
 
 void Transform::resolve_parent_change(const Transform& oldParent, const Transform& parent)
@@ -65,6 +74,8 @@ void Transform::imgui_render()
 	ImGui::SameLine();
 	ImGui::DragFloat("##z", &m_position.z);
 
+    float prev_angle = m_rotate_angle;
+    glm::vec3 prev_axis = m_rotate_axis;
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
 	ImGui::DragFloat("##angle", &m_rotate_angle);
@@ -79,10 +90,13 @@ void Transform::imgui_render()
 	ImGui::SliderFloat("##k", &m_rotate_axis.z, -1.f, 1.f);
 	glm::normalize(m_rotate_axis);
 
+    float prev_scale = m_uniform_scale;
 	ImGui::Text("\nScale: ");
 	ImGui::InputFloat("uniform scale", &m_uniform_scale);
 
-    update_transform();
+    if(!m_dirty)
+        m_dirty = ( (prev_pos != m_position) || (prev_angle != m_rotate_angle) || (prev_axis != m_rotate_axis) || (prev_scale != m_uniform_scale) );
+    update_matrices();
 }
 
 void Transform::serialize(json& accessor) const
@@ -99,7 +113,7 @@ void Transform::serialize(json& accessor) const
 	accessor["transform"]["scale"] = m_uniform_scale;
 }
 
-void Transform::update_transform()
+void Transform::update_matrices()
 {
     m_position_matrix = glm::translate(glm::mat4(1.f), m_position);
     m_scale_matrix = glm::scale(glm::mat4(1.f), glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
@@ -128,6 +142,7 @@ Transform Transform::operator*(const Transform& other) const
     new_transform.m_rotation_matrix = m_rotation_matrix * other.m_rotation_matrix;
 
     new_transform.resolve_vectors();
+    new_transform.recalculate_transform();
 
 	return new_transform;
 }

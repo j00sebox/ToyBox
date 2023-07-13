@@ -195,6 +195,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
 
     transform.scale(info["scale"]);
 
+    transform.recalculate_transform();
     glm::mat4 model_matrix = transform.get_transform();
     glm::vec3 position = transform.get_position();
     entity.add_component(std::move(transform));

@@ -331,6 +331,10 @@ void Scene::remove_node(SceneNodePtr& node)
 void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transform)
 {
     auto& transform = scene_node->entity()->get_component<Transform>();
+
+    if(transform.is_dirty())
+        transform.recalculate_transform();
+
 	Transform relative_transform = parent_transform * transform;
 
 	if (scene_node->entity()->has_component<MeshComponent>())
