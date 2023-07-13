@@ -39,15 +39,15 @@ private:
     void compile_shaders() const;
 
 	// scene management
-	void update_node(SceneNode& node, const Transform& parent_transform);
-	void remove_node(SceneNode& node);
+	void update_node(SceneNodePtr& node, const Transform& parent_transform);
+	void remove_node(SceneNodePtr& node);
 
     Window* m_window_handle;
 	std::shared_ptr<Camera> m_camera;
 	std::unique_ptr<Skybox> m_skybox;
     std::unique_ptr<Buffer> m_transforms_buffer;
-	SceneNode root;
-	std::queue<SceneNode*> m_nodes_to_remove;
+	SceneNodePtr root;
+	std::queue<SceneNodePtr> m_nodes_to_remove;
 	LightManager m_light_manager;
 	std::vector<RenderObject> m_render_list;
 
@@ -55,7 +55,7 @@ private:
     // TODO: figure out better way
     std::unordered_map<std::string, bool> mesh_used;
 
-    SceneNode* selectedNode = nullptr;
+    SceneNodePtr selectedNode = nullptr;
     glm::vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
 
     friend class Inspector;

@@ -16,7 +16,7 @@
 static std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts);
 static std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts);
 
-void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNode& root)
+void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNodePtr root)
 {
 	if (!strcmp(scene_name, ""))
 		return;
@@ -46,7 +46,7 @@ void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr
 	load_models(models, model_count, root, scene);
 }
 
-void SceneSerializer::save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNode& root)
+void SceneSerializer::save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNodePtr& root)
 {
 	json res_json;
 
@@ -73,7 +73,7 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 	res_json["background_colour"][3] = bg_col.w;
 
 	int node_index = -1; // keeps track of nodes (left to right and depth first)
-	for (const auto& scene_node : root)
+	for (const auto& scene_node : *root)
 	{
 		++node_index;
 		serialize_node(res_json["models"], node_index, scene_node);
@@ -84,33 +84,33 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 	overwrite_file(scene_name, res_json.dump());
 }
 
-void SceneSerializer::serialize_node(json& accessor, int& node_index, const SceneNode& scene_node)
+void SceneSerializer::serialize_node(json& accessor, int& node_index, const SceneNodePtr& scene_node)
 {
-	accessor[node_index]["name"] = scene_node.entity->get_name();
+	accessor[node_index]["name"] = scene_node->entity->get_name();
 
-	if (scene_node.entity->has_component<Material>())
+	if (scene_node->entity->has_component<Material>())
 	{
-		auto& material = scene_node.entity->get_component<Material>();
+		auto& material = scene_node->entity->get_component<Material>();
 		accessor[node_index]["shader"] = ShaderTable::find(material.get_shader());
 	}
 
-	const auto& components = scene_node.entity->get_components();
+	const auto& components = scene_node->entity->get_components();
 
 	for (const auto& c : components)
 	{
 		c->serialize(accessor[node_index]);
 	}
 
-	if (scene_node.has_children())
+	if (scene_node->has_children())
 	{
 		int ch_ind = 0; // keeps track of index of child array
 		int parent_index = node_index;
-		for (const SceneNode& child : scene_node)
+		for (const auto& child : *scene_node)
 		{
 			accessor[parent_index]["children"][ch_ind++] = ++node_index;
 			serialize_node(accessor, node_index, child);
 		}
-		accessor[parent_index]["child_count"] = scene_node.size();
+		accessor[parent_index]["child_count"] = scene_node->size();
 	}
 }
 
@@ -119,17 +119,17 @@ void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>&
     sky_box = std::make_unique<Skybox>(accessor["path"], accessor["image_format"]);
 }
 
-void SceneSerializer::load_models(const json& accessor, unsigned int model_count, SceneNode& root, Scene& scene)
+void SceneSerializer::load_models(const json& accessor, unsigned int model_count, SceneNodePtr& root, Scene& scene)
 {
 	int num_models_checked = 0;
 	while (num_models_checked < model_count)
 	{
-		root.add_child(load_model(accessor, num_models_checked, num_models_checked, scene));
+		root->addChild(load_model(accessor, num_models_checked, num_models_checked, scene));
 	}
 }
 
 // TODO: Make this look less ugly
-SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked, Scene& scene)
+SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked, Scene& scene)
 {
     auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
     {
@@ -328,14 +328,14 @@ SceneNode SceneSerializer::load_model(const json& accessor, int model_index, int
         }
     }
 
-	SceneNode current_node{ std::make_unique<Entity>(std::move(entity)) };
+	SceneNodePtr current_node = std::make_shared<SceneNode>(std::make_unique<Entity>(std::move(entity)));
 
 	int num_children = accessor[model_index].value("child_count", 0);
 
 	for (int i = 0; i < num_children; ++i)
 	{
 		int child_index = accessor[model_index]["children"][i];
-		current_node.add_child(load_model(accessor, child_index, num_models_checked, scene));
+		current_node->addChild(load_model(accessor, child_index, num_models_checked, scene));
 	}
 
 	++num_models_checked;

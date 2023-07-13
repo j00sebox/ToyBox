@@ -12,12 +12,12 @@ public:
     void render();
 
 private:
-    void imguiRender(SceneNode& currentNode);
+    void imguiRender(SceneNodePtr& currentNode);
     void displayComponents();
 
 
-    SceneNode* dragNode = nullptr;
-    SceneNode* dropNode = nullptr;
-    std::queue<SceneNode*> m_nodes_to_remove;
+    SceneNodePtr dragNode = nullptr;
+    SceneNodePtr dropNode = nullptr;
+    std::queue<SceneNodePtr> m_nodes_to_remove;
 };
 

@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "LightManager.h"
 #include "Renderer.h"
-#include "SceneNode.h"
 #include "Entity.h"
 #include "Shader.h"
 #include "Camera.h"
@@ -38,18 +37,18 @@ enum class DirectLightBufferOffsets
 
 LightManager::LightManager() {}
 
-void LightManager::get_lights(const SceneNode& node)
+void LightManager::get_lights(const SceneNodePtr& node)
 {
-	if (node.entity->has_component<PointLight>())
+	if (node->entity->has_component<PointLight>())
 	{
-        m_point_lights.push_back(node.entity);
+        m_point_lights.push_back(node->entity);
 	}
-	else if (node.entity->has_component<DirectionalLight>())
+	else if (node->entity->has_component<DirectionalLight>())
 	{
-        m_direct_light = node.entity;
+        m_direct_light = node->entity;
 	}
 
-	for (const SceneNode& n : node)
+	for (auto& n : *node)
 	{
 		get_lights(n);
 	}
@@ -175,11 +174,11 @@ void LightManager::add_point_light(const SceneNode& node)
     adjust_point_lights_buff();
 }
 
-void LightManager::remove_point_light(const SceneNode& node)
+void LightManager::remove_point_light(const SceneNodePtr& node)
 {
     for (std::list<std::shared_ptr<Entity>>::iterator it = m_point_lights.begin(); it != m_point_lights.end(); ++it)
     {
-        if(node.entity == *it)
+        if(node->entity == *it)
         {
             m_point_lights.erase(it);
             break;

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "SceneNode.h"
 #include "components/Fwd.h"
 
 #include <array>
@@ -16,7 +16,7 @@ class LightManager
 {
 public:
 	LightManager();
-	void get_lights(const SceneNode& node);
+	void get_lights(const SceneNodePtr& node);
     void init_lights();
 	void update_lights(const std::vector<RenderObject>& render_list, const std::shared_ptr<Camera>& camera);
 
@@ -25,7 +25,7 @@ public:
 
     // point lights
     void add_point_light(const SceneNode& node);
-	void remove_point_light(const SceneNode& node);
+	void remove_point_light(const SceneNodePtr& node);
 
 private:
     void adjust_point_lights_buff();

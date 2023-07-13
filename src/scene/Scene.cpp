@@ -20,7 +20,7 @@
 #include <spdlog/fmt/bundled/format.h>
 
 Scene::Scene(Window* window)
-    : m_window_handle(window)
+    : m_window_handle(window), root(std::make_shared<SceneNode>())
 {
 	m_camera = std::make_shared<Camera>();
 }
@@ -59,7 +59,7 @@ void Scene::init()
     m_transforms_buffer->set_data(0, m_camera->camera_look_at());
     m_transforms_buffer->set_data(64, m_camera->get_perspective());
 
-	for (const SceneNode& node : root)
+	for (const auto& node : *root)
 	{
 		m_light_manager.get_lights(node);
 	}
@@ -78,7 +78,7 @@ void Scene::update(float elapsed_time)
 
     while (!m_nodes_to_remove.empty())
     {
-        remove_node(*m_nodes_to_remove.front());
+        remove_node(m_nodes_to_remove.front());
         m_nodes_to_remove.pop();
     }
 
@@ -96,7 +96,7 @@ void Scene::update(float elapsed_time)
         MeshTable::get(mesh_name)->update_instances(instance_matrices);
     }
 
-	for (auto& scene_node : root)
+	for (auto& scene_node : *root)
 	{
 		update_node(scene_node, Transform{});
 	}
@@ -112,7 +112,7 @@ void Scene::add_primitive(const char* name)
 {
 	std::string lookup{ name };
 	int i = 1;
-	while (root.exists(lookup))
+	while (root->exists(lookup))
 	{
 		lookup = std::string(name) + fmt::format(" ({})", i);
 		++i;
@@ -171,7 +171,7 @@ void Scene::add_primitive(const char* name)
     entity.add_component(std::move(mesh_component));
 	entity.add_component(std::move(material_component));
 
-    root.add_child(std::make_shared<Entity>(std::move(entity)));
+    root->add_child(std::make_shared<Entity>(std::move(entity)));
 }
 
 // TODO: remove later
@@ -201,10 +201,10 @@ void Scene::add_model(const char *name)
 {
     std::string lookup{ "model" };
 
-    if(root.exists(lookup))
+    if(root->exists(lookup))
     {
         int i = 1;
-        while (root.exists(lookup))
+        while (root->exists(lookup))
         {
             lookup = std::string(name) + fmt::format(" ({})", i);
             ++i;
@@ -297,7 +297,7 @@ void Scene::add_model(const char *name)
     entity.add_component(std::move(meshComponent));
     entity.add_component(std::move(materialComponent));
 
-    root.add_child(std::make_shared<Entity>(std::move(entity)));
+    root->add_child(std::make_shared<Entity>(std::move(entity)));
 }
 
 void Scene::window_resize(int width, int height)
@@ -308,18 +308,18 @@ void Scene::window_resize(int width, int height)
     m_transforms_buffer->set_data(64, m_camera->get_perspective());
 }
 
-void Scene::remove_node(SceneNode& node)
+void Scene::remove_node(SceneNodePtr& node)
 {
-	if (node.entity->has_component<PointLight>())
+	if (node->entity->has_component<PointLight>())
 	{
 		m_light_manager.remove_point_light(node);
 	}
-    else if(node.entity->has_component<DirectionalLight>())
+    else if(node->entity->has_component<DirectionalLight>())
     {
         m_light_manager.remove_directional_light();
     }
 
-	if (!root.remove(node))
+	if (!root->remove(node))
 	{
 		fatal("Node not apart of current scene tree!");
 	}
@@ -329,15 +329,15 @@ void Scene::remove_node(SceneNode& node)
 	}
 }
 
-void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform)
+void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transform)
 {
-    auto& transform = scene_node.entity->get_component<Transform>();
+    auto& transform = scene_node->entity->get_component<Transform>();
 	Transform relative_transform = parent_transform * transform;
 
-	if (scene_node.entity->has_component<MeshComponent>())
+	if (scene_node->entity->has_component<MeshComponent>())
 	{
-		auto& material_component = scene_node.entity->get_component<MaterialComponent>();
-		auto& mesh_component = scene_node.entity->get_component<MeshComponent>();
+		auto& material_component = scene_node->entity->get_component<MaterialComponent>();
+		auto& mesh_component = scene_node->entity->get_component<MeshComponent>();
 
         if(mesh_component.get_mesh()->is_instanced())
         {
@@ -349,14 +349,14 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
                 mesh_used[mesh_name] = true;
             }
 
-            if (selectedNode && (scene_node == *selectedNode))
+            if (selectedNode && (scene_node == selectedNode))
             {
                 m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, mesh_component, material_component});
             }
         }
 		else
 		{
-            if (selectedNode && (scene_node == *selectedNode))
+            if (selectedNode && (scene_node == selectedNode))
             {
                 m_render_list.emplace_back(RenderObject{RenderCommand::Stencil, relative_transform, mesh_component, material_component});
             }
@@ -367,7 +367,7 @@ void Scene::update_node(SceneNode& scene_node, const Transform& parent_transform
 		}
 	}
 
-	for (SceneNode& node : scene_node)
+	for (auto& node : *scene_node)
 	{
 		update_node(node, relative_transform);
 	}
