@@ -37,7 +37,7 @@ On linux after configuring the project you can build and run using the following
 ```
 cd build
 make
-./toy_box
+./ToyBox
 ```
 ## Controls
 
