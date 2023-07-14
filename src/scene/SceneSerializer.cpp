@@ -157,8 +157,8 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
             verts.push_back(v.normal.x);
             verts.push_back(v.normal.y);
             verts.push_back(v.normal.z);
-            verts.push_back(v.st.x);
-            verts.push_back(v.st.y);
+            verts.push_back(v.uv.x);
+            verts.push_back(v.uv.y);
         }
 
         std::vector<unsigned int> indices = loader.get_indices();

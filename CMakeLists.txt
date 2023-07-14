@@ -37,6 +37,7 @@ add_subdirectory(external/imgui)
 add_subdirectory(external/json)
 add_subdirectory(external/stb)
 add_subdirectory(external/spdlog)
+add_subdirectory(external/assimp)
 
 include(src/CMakeLists.txt)
 add_executable(${PROJECT_NAME} ${SRCS})
@@ -58,6 +59,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC external/json/include
     PUBLIC external/stb
     PUBLIC external/spdlog/include
+    PUBLIC external/assimp/include
 )
 
-target_link_libraries(${PROJECT_NAME} glfw glad imgui stb spdlog)
+target_link_libraries(${PROJECT_NAME} glfw glad imgui stb spdlog assimp)

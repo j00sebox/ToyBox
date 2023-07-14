@@ -9,6 +9,7 @@
 #include "components/MeshComponent.h"
 #include "renderer/Material.h"
 #include "events/EventList.h"
+#include "ModelLoader.h"
 
 // TODO: remove later
 #include "GLTFLoader.h"
@@ -196,9 +197,11 @@ std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
     return vec;
 }
 
-void Scene::add_model(const char *name)
+void Scene::add_model(const char* name)
 {
-    std::string lookup{ "model" };
+    ModelLoader model_loader(name);
+
+    std::string lookup{ model_loader.get_name() };
 
     if(root->exists(lookup))
     {
@@ -215,43 +218,10 @@ void Scene::add_model(const char *name)
 
     Transform transform;
 
-    GLTFLoader loader(name);
-
     if(!MeshTable::exists(name))
     {
-        std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
-        std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
-        std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
-
-        std::vector<Vertex> vertices;
-
-        for (unsigned int i = 0; i < positions.size(); i++)
-        {
-            vertices.push_back({
-                                       positions[i],
-                                       normals[i],
-                                       tex_coords[i]
-                               });
-        }
-
-        std::vector<float> verts;
-
-        for (const Vertex& v : vertices)
-        {
-            verts.push_back(v.position.x);
-            verts.push_back(v.position.y);
-            verts.push_back(v.position.z);
-            verts.push_back(v.normal.x);
-            verts.push_back(v.normal.y);
-            verts.push_back(v.normal.z);
-            verts.push_back(v.st.x);
-            verts.push_back(v.st.y);
-        }
-
-        std::vector<unsigned int> indices = loader.get_indices();
-
         Mesh mesh;
-        mesh.load(verts, indices);
+        model_loader.load_mesh(mesh);
 
         MeshTable::add(name, std::move(mesh));
     }
@@ -266,14 +236,7 @@ void Scene::add_model(const char *name)
     material.set_metallic_property(0.f);
     material.set_roughness(0.f);
 
-    std::string textures[4] = {
-            loader.get_base_color_texture(),
-            loader.get_specular_texture(),
-            loader.get_normal_texture(),
-            loader.get_occlusion_texture()
-    };
-
-    material.load(textures);
+    model_loader.load_material(material);
 
     if(MeshTable::get(name)->is_instanced())
     {

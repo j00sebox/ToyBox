@@ -32,7 +32,7 @@ void TextureBase::make_resident() const
 
 Texture2D::Texture2D(const std::string& file_name, bool gamma_correct)
 {
-	stbi_set_flip_vertically_on_load(0);
+	stbi_set_flip_vertically_on_load(1);
 	m_data = stbi_load(file_name.c_str(), &m_width, &m_height, &m_colour_channels, 0);
 
 	GL_CALL(glGenTextures(1, &m_id));

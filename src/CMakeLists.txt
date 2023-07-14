@@ -29,4 +29,6 @@ list(APPEND SRCS
         ${CMAKE_CURRENT_LIST_DIR}/Window.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Inspector.h
         ${CMAKE_CURRENT_LIST_DIR}/Inspector.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ModelLoader.h
+        ${CMAKE_CURRENT_LIST_DIR}/ModelLoader.cpp
 )
