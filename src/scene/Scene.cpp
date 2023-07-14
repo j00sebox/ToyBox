@@ -11,9 +11,6 @@
 #include "events/EventList.h"
 #include "ModelLoader.h"
 
-// TODO: remove later
-#include "GLTFLoader.h"
-
 #include <imgui_internal.h>
 #include <spdlog/fmt/bundled/format.h>
 
@@ -116,6 +113,8 @@ void Scene::add_primitive(const char* name)
 		++i;
 	}
 
+    ModelLoader model_loader(str_to_primitive_type(name));
+
 	Entity entity;
     entity.set_name(lookup);
 
@@ -124,7 +123,7 @@ void Scene::add_primitive(const char* name)
     if(!MeshTable::exists(name))
     {
         Mesh mesh;
-        mesh.load_primitive(str_to_primitive_type(name));
+        model_loader.load_mesh(mesh);
 
         MeshTable::add(name, std::move(mesh));
     }
@@ -170,31 +169,6 @@ void Scene::add_primitive(const char* name)
 	entity.add_component(std::move(material_component));
 
     root->add_child(SceneNode{std::make_shared<Entity>(std::move(entity))});
-}
-
-// TODO: remove later
-std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)
-{
-    std::vector<glm::vec3> vec;
-    for (unsigned int i = 0; i < flts.size();)
-    {
-        vec.emplace_back(flts[i], flts[i+1], flts[i+2]);
-        i += 3;
-    }
-
-    return vec;
-}
-
-std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
-{
-    std::vector<glm::vec2> vec;
-    for (unsigned int i = 0; i < flts.size();)
-    {
-        vec.emplace_back(flts[i], flts[i+1]);
-        i += 2;
-    }
-
-    return vec;
 }
 
 void Scene::add_model(const char* name)

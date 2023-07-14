@@ -1,22 +1,50 @@
 #include "ModelLoader.h"
 
 ModelLoader::ModelLoader(const char* file_path) :
-    m_scene(importer.ReadFile( file_path,
+    m_scene(m_importer.ReadFile(file_path,
                                aiProcess_CalcTangentSpace       |
                                aiProcess_Triangulate            |
                                aiProcess_JoinIdenticalVertices  |
-                               aiProcess_SortByPType))
+                               aiProcess_SortByPType)),
+   m_primitive_type(PrimitiveTypes::None)
 {
     std::string p(file_path);
     m_base_dir = p.substr(0, (p.find_last_of('/') + 1));
 }
 
+ModelLoader::ModelLoader(PrimitiveTypes primitive_type) :
+    m_scene(nullptr),
+    m_primitive_type(primitive_type)
+{
+}
+
 void ModelLoader::load_mesh(Mesh& mesh)
 {
-    std::vector<float> vertices = get_vertices(m_scene->mMeshes[0]);
-    std::vector<unsigned> indices = get_indices(m_scene->mMeshes[0]);
+    if(m_scene)
+    {
+        std::vector<float> vertices = get_vertices(m_scene->mMeshes[0]);
+        std::vector<unsigned> indices = get_indices(m_scene->mMeshes[0]);
 
-    mesh.load(vertices, indices);
+        mesh.load(vertices, indices);
+    }
+    else
+    {
+        switch (m_primitive_type)
+        {
+            case PrimitiveTypes::None:
+                break;
+            case PrimitiveTypes::Cube:
+            {
+                mesh.load(Cube::vertices, Cube::indices);
+                break;
+            }
+            case PrimitiveTypes::Quad:
+            {
+                mesh.load(Quad::vertices, Quad::indices);
+                break;
+            }
+        }
+    }
 }
 
 void ModelLoader::load_material(Material& material)
