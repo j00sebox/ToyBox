@@ -40,9 +40,6 @@
         {
             "doubleSided" : true,
             "name" : "Default",
-            "normalTexture" : {
-                "index" : 0
-            },
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 1

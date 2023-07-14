@@ -1,5 +1,5 @@
 #include "SceneSerializer.h"
-#include "GLTFLoader.h"
+#include "ModelLoader.h"
 #include "FileOperations.h"
 #include "Entity.h"
 #include "Camera.h"
@@ -12,8 +12,9 @@
 #include "components/MeshComponent.h"
 #include "renderer/Material.h"
 
-static std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts);
-static std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts);
+#include <nlohmann/json.hpp>
+
+using namespace nlohmann;
 
 void SceneSerializer::open(const char* scene_name, Scene& scene, std::shared_ptr<Camera>& camera, std::unique_ptr<Skybox>& sky_box, SceneNodePtr root)
 {
@@ -130,54 +131,6 @@ void SceneSerializer::load_models(const json& accessor, unsigned int model_count
 // TODO: Make this look less ugly
 SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, int& num_models_checked, Scene& scene)
 {
-    auto load_gltf_mesh = [](const GLTFLoader& loader, Mesh& mesh)
-    {
-        std::vector<glm::vec3> positions = floats_to_vec3(loader.get_positions());
-        std::vector<glm::vec3> normals = floats_to_vec3(loader.get_normals());
-        std::vector<glm::vec2> tex_coords = floats_to_vec2(loader.get_tex_coords());
-
-        std::vector<Vertex> vertices;
-
-        for (unsigned int i = 0; i < positions.size(); i++)
-        {
-            vertices.push_back({
-                                       positions[i],
-                                       normals[i],
-                                       tex_coords[i]
-                               });
-        }
-
-        std::vector<float> verts;
-
-        for (const Vertex& v : vertices)
-        {
-            verts.push_back(v.position.x);
-            verts.push_back(v.position.y);
-            verts.push_back(v.position.z);
-            verts.push_back(v.normal.x);
-            verts.push_back(v.normal.y);
-            verts.push_back(v.normal.z);
-            verts.push_back(v.uv.x);
-            verts.push_back(v.uv.y);
-        }
-
-        std::vector<unsigned int> indices = loader.get_indices();
-
-        mesh.load(verts, indices);
-    };
-
-	auto load_gltf_material = [](const GLTFLoader& loader, Material& material)
-	{
-        std::string textures[4] = {
-                loader.get_base_color_texture(),
-                loader.get_specular_texture(),
-                loader.get_normal_texture(),
-                loader.get_occlusion_texture()
-        };
-
-        material.load(textures);
-	};
-
 	Entity entity;
 
 	json model = accessor[model_index];
@@ -240,7 +193,6 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
     if(!model["mesh"].is_null())
     {
         MeshComponent mesh_component;
-        GLTFLoader loader;
 
         json mesh_accessor = model["mesh"];
 
@@ -249,17 +201,10 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
 
         if(!MeshTable::exists(mesh_name))
         {
+            ModelLoader model_loader = (mesh_accessor["mesh_type"] == "primitive") ? ModelLoader{str_to_primitive_type(mesh_name.c_str())} : ModelLoader{mesh_name.c_str()};
             Mesh mesh;
 
-            if(mesh_accessor["mesh_type"] == "gltf")
-            {
-                loader.read_file(mesh_name.c_str());
-                load_gltf_mesh(loader, mesh);
-            }
-            else if(mesh_accessor["mesh_type"] == "primitive")
-            {
-                mesh.load_primitive(str_to_primitive_type(mesh_name.c_str()));
-            }
+            model_loader.load_mesh(mesh);
 
             MeshTable::add(mesh_name, std::move(mesh));
         }
@@ -296,7 +241,8 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
 
                 if(texturing_mode == TexturingMode::MODEL_DEFAULT)
                 {
-                    load_gltf_material(loader, material);
+                    ModelLoader model_loader(mesh_name.c_str());
+                    model_loader.load_material(material);
                 }
                 else
                 {
@@ -340,28 +286,4 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
 
 	++num_models_checked;
 	return current_node;
-}
-
-std::vector<glm::vec2> floats_to_vec2(const std::vector<float>& flts)
-{
-	std::vector<glm::vec2> vec;
-    for (unsigned int i = 0; i < flts.size();)
-    {
-        vec.emplace_back(flts[i], flts[i+1]);
-        i += 2;
-    }
-
-    return vec;
-}
-
-std::vector<glm::vec3> floats_to_vec3(const std::vector<float>& flts)
-{
-    std::vector<glm::vec3> vec;
-    for (unsigned int i = 0; i < flts.size();)
-    {
-        vec.emplace_back(flts[i], flts[i+1], flts[i+2]);
-        i += 3;
-    }
-
-    return vec;
 }
