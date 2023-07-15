@@ -49,7 +49,12 @@ void ModelLoader::load_mesh(Mesh& mesh)
 
 void ModelLoader::load_material(Material& material)
 {
-    if(m_scene->mNumTextures == 0)
+
+    aiString diffuse_texture_path, specular_texture_path, normal_texture_path, occlusion_texture_path;
+    m_scene->mMaterials[0]->GetTexture(aiTextureType_DIFFUSE, 0, &diffuse_texture_path);
+
+    // don't bother to check other textures if no base colour is found
+    if (diffuse_texture_path.length == 0)
     {
         std::string textures[] = {
                 "../resources/textures/white_on_white.jpeg",
@@ -61,8 +66,6 @@ void ModelLoader::load_material(Material& material)
         return;
     }
 
-    aiString diffuse_texture_path, specular_texture_path, normal_texture_path, occlusion_texture_path;
-    m_scene->mMaterials[0]->GetTexture(aiTextureType_DIFFUSE, 0, &diffuse_texture_path);
     m_scene->mMaterials[0]->GetTexture(aiTextureType_SPECULAR, 0, &specular_texture_path);
     m_scene->mMaterials[0]->GetTexture(aiTextureType_NORMALS, 0, &normal_texture_path);
     m_scene->mMaterials[0]->GetTexture(aiTextureType_AMBIENT, 0, &occlusion_texture_path);

@@ -161,6 +161,7 @@ void Renderer::render_pass(const std::vector<RenderObject>& render_list)
                 {
                     ShaderTable::get("flat_colour")->set_uniform_1f("u_outlining_factor", 0.f);
                     stencil_transform.scale(stencil_transform.get_uniform_scale() * (1.f + render_obj.mesh.get_scale_outline_factor())); // scale up a tiny bit to see outline
+                    stencil_transform.recalculate_transform();
                 }
                 else
                     ShaderTable::get("flat_colour")->set_uniform_1f("u_outlining_factor", render_obj.mesh.get_scale_outline_factor());
