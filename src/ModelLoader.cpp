@@ -8,8 +8,8 @@ ModelLoader::ModelLoader(const char* file_path) :
                                aiProcess_SortByPType)),
    m_primitive_type(PrimitiveTypes::None)
 {
-    std::string p(file_path);
-    m_base_dir = p.substr(0, (p.find_last_of('/') + 1));
+    std::string path(file_path);
+    m_base_dir = path.substr(0, (path.find_last_of('/') + 1));
 }
 
 ModelLoader::ModelLoader(PrimitiveTypes primitive_type) :

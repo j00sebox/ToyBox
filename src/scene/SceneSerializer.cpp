@@ -201,10 +201,18 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, int model_index, 
 
         if(!MeshTable::exists(mesh_name))
         {
-            ModelLoader model_loader = (mesh_accessor["mesh_type"] == "primitive") ? ModelLoader{str_to_primitive_type(mesh_name.c_str())} : ModelLoader{mesh_name.c_str()};
             Mesh mesh;
 
-            model_loader.load_mesh(mesh);
+            if ((mesh_accessor["mesh_type"] == "primitive"))
+            {
+                ModelLoader model_loader(str_to_primitive_type(mesh_name.c_str()));
+                model_loader.load_mesh(mesh);
+            }
+            else
+            {
+                ModelLoader model_loader(mesh_name.c_str());
+                model_loader.load_mesh(mesh);
+            }
 
             MeshTable::add(mesh_name, std::move(mesh));
         }
