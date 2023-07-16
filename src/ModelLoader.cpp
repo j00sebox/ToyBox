@@ -10,6 +10,9 @@ ModelLoader::ModelLoader(const char* file_path) :
 {
     std::string path(file_path);
     m_base_dir = path.substr(0, (path.find_last_of('/') + 1));
+
+    if(m_base_dir.empty())
+        m_base_dir = path.substr(0, (path.find_last_of('\\') + 1));
 }
 
 ModelLoader::ModelLoader(PrimitiveTypes primitive_type) :

@@ -182,7 +182,7 @@ void Scene::add_model(const char* name)
         int i = 1;
         while (root->exists(lookup))
         {
-            lookup = std::string(name) + fmt::format(" ({})", i);
+            lookup = std::string(lookup) + fmt::format(" ({})", i);
             ++i;
         }
     }
@@ -210,7 +210,6 @@ void Scene::add_model(const char* name)
     material.set_metallic_property(0.f);
     material.set_roughness(0.f);
 
-    model_loader.load_material(material);
 
     if(MeshTable::get(name)->is_instanced())
     {
@@ -224,9 +223,13 @@ void Scene::add_model(const char* name)
         material.set_shader(ShaderTable::get("default"));
     }
 
-    MaterialTable::add(lookup, std::move(material));
+    if (!MaterialTable::exists(name))
+    {
+        model_loader.load_material(material);
+        MaterialTable::add(name, std::move(material));
+    }
 
-    MaterialComponent materialComponent(MaterialTable::get(lookup));
+    MaterialComponent materialComponent(MaterialTable::get(name));
     materialComponent.set_texturing_mode(TexturingMode::MODEL_DEFAULT);
 
     entity.add_component(std::move(transform));
