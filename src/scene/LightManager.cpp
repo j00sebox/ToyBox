@@ -161,6 +161,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 void LightManager::remove_directional_light()
 {
     m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::active, false);
+    m_direct_light = nullptr;
 }
 
 void LightManager::add_point_light(SceneNode& node)
