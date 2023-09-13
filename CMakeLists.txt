@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.2)
 project(ToyBox CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include)
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/engine)
+set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include)
 
 add_compile_definitions(DEBUG)
 
@@ -30,36 +30,36 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif()
 
-add_subdirectory(external/glfw)
-add_subdirectory(external/glad)
-add_subdirectory(external/glm)
-add_subdirectory(external/imgui)
-add_subdirectory(external/json)
-add_subdirectory(external/stb)
-add_subdirectory(external/spdlog)
-add_subdirectory(external/assimp)
+add_subdirectory(thirdparty/glfw)
+add_subdirectory(thirdparty/glad)
+add_subdirectory(thirdparty/glm)
+add_subdirectory(thirdparty/imgui)
+add_subdirectory(thirdparty/json)
+add_subdirectory(thirdparty/stb)
+add_subdirectory(thirdparty/spdlog)
+add_subdirectory(thirdparty/assimp)
 
-include(src/CMakeLists.txt)
+include(engine/CMakeLists.txt)
 add_executable(${PROJECT_NAME} ${SRCS})
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC src/pch.h)
+target_precompile_headers(${PROJECT_NAME} PUBLIC engine/pch.h)
 
 target_include_directories(${PROJECT_NAME}
-    PUBLIC src
-    PUBLIC src/renderer
-    PUBLIC src/scene
-    PUBLIC src/components
-    PUBLIC src/entities
-    PUBLIC src/events
-    PUBLIC src/profiler
-    PUBLIC external/glfw/include
-    PUBLIC external/glad/include
-    PUBLIC external/glm
-    PUBLIC external/imgui
-    PUBLIC external/json/include
-    PUBLIC external/stb
-    PUBLIC external/spdlog/include
-    PUBLIC external/assimp/include
+    PUBLIC engine
+    PUBLIC engine/renderer
+    PUBLIC engine/scene
+    PUBLIC engine/components
+    PUBLIC engine/entities
+    PUBLIC engine/events
+    PUBLIC engine/profiler
+    PUBLIC thirdparty/glfw/include
+    PUBLIC thirdparty/glad/include
+    PUBLIC thirdparty/glm
+    PUBLIC thirdparty/imgui
+    PUBLIC thirdparty/json/include
+    PUBLIC thirdparty/stb
+    PUBLIC thirdparty/spdlog/include
+    PUBLIC thirdparty/assimp/include
 )
 
 target_link_libraries(${PROJECT_NAME} glfw glad imgui stb spdlog assimp)

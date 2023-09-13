@@ -1,5 +1,0 @@
-list(APPEND SRCS
-    ${CMAKE_CURRENT_LIST_DIR}/EventList.h
-    ${CMAKE_CURRENT_LIST_DIR}/EventList.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/Event.h
-)

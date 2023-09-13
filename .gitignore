@@ -96,4 +96,4 @@ _deps
 cmake-build-debug/
 
 # large models
-resources/large_models
+assets/large_models
