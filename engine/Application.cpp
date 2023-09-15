@@ -16,7 +16,7 @@ void Application::start()
         currentScene->load("../assets/scenes/test.scene");
         currentScene->init();
         auto [width, height] = m_window.get_dimensions();
-        Renderer::init(width, height);
+        StaticRenderer::init(width, height);
     }
 
 	while (m_running)

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Renderer.h"
+#include "StaticRenderer.h"
 #include "GLError.h"
 #include "Shader.h"
 #include "Mesh.h"
@@ -8,7 +8,7 @@
 
 #include <glad/glad.h>
 
-void Renderer::init(int width, int height)
+void StaticRenderer::init(int width, int height)
 {
 	set_viewport(width, height);
 
@@ -26,17 +26,17 @@ void Renderer::init(int width, int height)
     GL_CALL(glStencilMask(0xFF));
 }
 
-void Renderer::set_viewport(int width, int height)
+void StaticRenderer::set_viewport(int width, int height)
 {
 	GL_CALL(glViewport(0, 0, width, height));
 }
 
-void Renderer::set_clear_colour(glm::vec4 colour)
+void StaticRenderer::set_clear_colour(glm::vec4 colour)
 {
 	GL_CALL(glClearColor(colour.x, colour.y, colour.z, colour.w));
 }
 
-void Renderer::draw_elements(const Transform& transform, const Mesh& mesh, const Material& material)
+void StaticRenderer::draw_elements(const Transform& transform, const Mesh& mesh, const Material& material)
 {
     material.get_shader()->set_uniform_mat4f("u_model", transform.get_transform());
     material.get_shader()->set_uniform_4f("u_flat_colour", material.get_colour());
@@ -47,14 +47,14 @@ void Renderer::draw_elements(const Transform& transform, const Mesh& mesh, const
 	GL_CALL(glDrawElements(GL_TRIANGLES, mesh.get_index_count(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::draw_elements_instanced(unsigned int instances, const Mesh& mesh_obj, const Material& material)
+void StaticRenderer::draw_elements_instanced(unsigned int instances, const Mesh& mesh_obj, const Material& material)
 {
     material.bind();
     mesh_obj.bind();
     GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, mesh_obj.get_index_count(), GL_UNSIGNED_INT, nullptr, instances));
 }
 
-void Renderer::draw_skybox(const Skybox& skybox)
+void StaticRenderer::draw_skybox(const Skybox& skybox)
 {
     GL_CALL(glDisable(GL_CULL_FACE));
     GL_CALL(glDepthMask(GL_FALSE));
@@ -65,7 +65,7 @@ void Renderer::draw_skybox(const Skybox& skybox)
     GL_CALL(glEnable(GL_CULL_FACE));
 }
 
-void Renderer::stencil(const Transform& stencil_transform, const Mesh& mesh, const Material& material)
+void StaticRenderer::stencil(const Transform& stencil_transform, const Mesh& mesh, const Material& material)
 {
     GL_CALL(glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE));
 	GL_CALL(glStencilFunc(GL_ALWAYS, 2, 0xFF)); // make all the fragments of the object have a stencil of 1
@@ -88,7 +88,7 @@ void Renderer::stencil(const Transform& stencil_transform, const Mesh& mesh, con
 
 }
 
-void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, unsigned int shadow_width, unsigned int shadow_height, bool using_cubemap)
+void StaticRenderer::shadow_pass(const std::vector<RenderObject> &render_list, unsigned int shadow_width, unsigned int shadow_height, bool using_cubemap)
 {
     GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     GLint viewport_size[4];
@@ -130,7 +130,7 @@ void Renderer::shadow_pass(const std::vector<RenderObject> &render_list, unsigne
 
 }
 
-void Renderer::render_pass(const std::vector<RenderObject>& render_list)
+void StaticRenderer::render_pass(const std::vector<RenderObject>& render_list)
 {
    for(const auto& render_obj : render_list)
    {
@@ -173,7 +173,7 @@ void Renderer::render_pass(const std::vector<RenderObject>& render_list)
    }
 }
 
-void Renderer::clear()
+void StaticRenderer::clear()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 }

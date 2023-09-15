@@ -26,7 +26,7 @@ struct RenderObject
     unsigned instances = 1;
 };
 
-class Renderer
+class StaticRenderer
 {
 public:
 	static void init(int width, int height);

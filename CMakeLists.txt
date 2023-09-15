@@ -38,6 +38,7 @@ add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/stb)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/assimp)
+add_subdirectory(thirdparty/enkiTS)
 
 include(engine/CMakeLists.txt)
 add_executable(${PROJECT_NAME} ${SRCS})
@@ -60,6 +61,8 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC thirdparty/stb
     PUBLIC thirdparty/spdlog/include
     PUBLIC thirdparty/assimp/include
+    PUBLIC thirdparty/vma
+    PUBLIC thirdparty/enkiTS/src
 )
 
-target_link_libraries(${PROJECT_NAME} glfw glad imgui stb spdlog assimp)
+target_link_libraries(${PROJECT_NAME} glfw glad imgui stb spdlog assimp vulkan pthread enkiTS)

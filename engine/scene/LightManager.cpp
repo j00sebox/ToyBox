@@ -1,5 +1,5 @@
 #include "LightManager.h"
-#include "Renderer.h"
+#include "StaticRenderer.h"
 #include "Entity.h"
 #include "Shader.h"
 #include "Camera.h"
@@ -115,7 +115,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
 
                 point_light.bind_shadow_map();
                 auto [width, height] = point_light.get_shadow_dimensions();
-                Renderer::shadow_pass(render_list, width, height, true);
+                StaticRenderer::shadow_pass(render_list, width, height, true);
             }
 		}
 
@@ -152,7 +152,7 @@ void LightManager::update_lights(const std::vector<RenderObject>& render_list, c
             ShaderTable::get("default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
             ShaderTable::get("inst_default")->set_uniform_mat4f("u_light_proj", direct_light.get_light_projection() * direct_light.get_light_view());
             direct_light.bind_shadow_map();
-            Renderer::shadow_pass(render_list);
+            StaticRenderer::shadow_pass(render_list);
             m_direct_light_buffer->set_data((int)DirectLightBufferOffsets::shadow_map, glGetTextureHandleARB(direct_light.get_shadow_map()));
         }
     }

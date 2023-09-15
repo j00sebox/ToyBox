@@ -1,6 +1,6 @@
 #include "Scene.h"
 #include "Entity.h"
-#include "Renderer.h"
+#include "StaticRenderer.h"
 #include "SceneSerializer.h"
 #include "Mesh.h"
 #include "Log.h"
@@ -67,7 +67,7 @@ void Scene::update(float elapsed_time)
 #ifdef DEBUG
     //Timer timer{};
 #endif
-	Renderer::clear();
+	StaticRenderer::clear();
     m_render_list.clear();
     mesh_used.clear();
 
@@ -83,7 +83,7 @@ void Scene::update(float elapsed_time)
 
 	if (m_skybox)
 	{
-		Renderer::draw_skybox(*m_skybox);
+		StaticRenderer::draw_skybox(*m_skybox);
 	}
 
     for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
@@ -99,7 +99,7 @@ void Scene::update(float elapsed_time)
     m_light_manager.update_lights(m_render_list, m_camera);
 
     m_window_handle->bind_viewport();
-    Renderer::render_pass(m_render_list);
+    StaticRenderer::render_pass(m_render_list);
 
 }
 
@@ -242,7 +242,7 @@ void Scene::add_model(const char* name)
 void Scene::window_resize(int width, int height)
 {
 	m_camera->resize(width, height);
-	Renderer::set_viewport(width, height);
+	StaticRenderer::set_viewport(width, height);
     m_transforms_buffer->set_data(0, m_camera->camera_look_at());
     m_transforms_buffer->set_data(64, m_camera->get_perspective());
 }
@@ -319,7 +319,7 @@ void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transf
 void Scene::set_background_colour(glm::vec4 colour)
 {
 	m_clear_colour = colour;
-	Renderer::set_clear_colour(colour);
+	StaticRenderer::set_clear_colour(colour);
 }
 
 // load the standard shaders
