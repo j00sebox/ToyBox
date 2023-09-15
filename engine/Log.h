@@ -10,6 +10,7 @@ void stop_program_();
 #define warn(...)		spdlog::warn(__VA_ARGS__)
 #define error(...)		spdlog::error(__VA_ARGS__)
 #define fatal(...)		{ spdlog::critical(__VA_ARGS__); stop_program_(); }
+#define check(...)      assert(__VA_ARGS__)
 
 
 	

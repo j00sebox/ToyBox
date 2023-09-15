@@ -47,7 +47,7 @@ target_precompile_headers(${PROJECT_NAME} PUBLIC engine/pch.h)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC engine
-    PUBLIC engine/renderer
+#    PUBLIC engine/renderer
     PUBLIC engine/scene
     PUBLIC engine/components
     PUBLIC engine/entities
@@ -65,4 +65,4 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC thirdparty/enkiTS/src
 )
 
-target_link_libraries(${PROJECT_NAME} glfw glad imgui stb spdlog assimp vulkan pthread enkiTS)
+target_link_libraries(${PROJECT_NAME} glfw vulkan imgui stb spdlog assimp pthread enkiTS)
