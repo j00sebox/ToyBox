@@ -27,8 +27,6 @@ namespace DeviceHelper
                 indices.transfer_family = i;
             }
 
-            // it is very likely that these will be the same family
-            // can add logic to prefer queue families that contain both
             vk::Bool32 present_support = false;
             if(device.getSurfaceSupportKHR(i, surface, &present_support) != vk::Result::eSuccess)
             {
@@ -51,10 +49,10 @@ namespace DeviceHelper
     bool check_device_extension_support(vk::PhysicalDevice device, const std::vector<const char*>& required_extensions)
     {
         unsigned extension_count = 0;
-        check(device.enumerateDeviceExtensionProperties(nullptr, &extension_count, nullptr) == vk::Result::eSuccess);
+        if(device.enumerateDeviceExtensionProperties(nullptr, &extension_count, nullptr) != vk::Result::eSuccess) {}
 
         std::vector<vk::ExtensionProperties> available_extensions(extension_count);
-        check(device.enumerateDeviceExtensionProperties(nullptr, &extension_count, available_extensions.data()) == vk::Result::eSuccess);
+        if(device.enumerateDeviceExtensionProperties(nullptr, &extension_count, available_extensions.data()) != vk::Result::eSuccess) {}
 
         std::set<std::string> extensions(required_extensions.begin(), required_extensions.end());
         for(const auto& extension : available_extensions)
@@ -106,8 +104,11 @@ namespace DeviceHelper
 
     vk::PhysicalDevice pick_physical_device(const vk::Instance& instance, const std::vector<const char*>& required_extensions)
     {
-        unsigned device_count = 0;
-        vk::Result result = instance.enumeratePhysicalDevices(&device_count, nullptr);
+        u32 device_count = 0;
+        if(instance.enumeratePhysicalDevices(&device_count, nullptr) != vk::Result::eSuccess)
+        {
+            fatal("Could not enumerate physical devices!");
+        }
 
         if (device_count == 0)
         {
@@ -118,7 +119,9 @@ namespace DeviceHelper
 
         // keeps track of devices and their score to pick the best option
         std::multimap<u32, vk::PhysicalDevice> candidates;
-        result = instance.enumeratePhysicalDevices(&device_count, devices.data());
+        if(instance.enumeratePhysicalDevices(&device_count, devices.data()) != vk::Result::eSuccess) {}
+
+        info(devices.size());
 
         for (const auto& device: devices)
         {

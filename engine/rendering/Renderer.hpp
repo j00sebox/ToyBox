@@ -7,6 +7,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
+#include <iostream>
 
 // FIXME
 class Scene;
@@ -21,6 +22,9 @@ public:
 	void begin_frame();
 	void end_frame();
 
+    // resource creation
+    vk::ImageView create_image_view(const vk::Image& image, vk::Format format, vk::ImageAspectFlags image_aspect);
+
 private:
     GLFWwindow* m_window;
 
@@ -33,6 +37,21 @@ private:
     vk::PhysicalDeviceProperties m_device_properties;
     VmaAllocator m_allocator;
 
+    vk::SwapchainKHR m_swapchain;
+    vk::Format m_swapchain_image_format;
+    vk::Extent2D m_swapchain_extent;
+    std::vector<vk::Image> m_swapchain_images;
+    std::vector<vk::ImageView> m_swapchain_image_views;
+    std::vector<vk::Framebuffer> m_swapchain_framebuffers;
+    vk::RenderPass m_render_pass;
+    vk::DescriptorSetLayout m_descriptor_set_layout;
+    vk::DescriptorSetLayout m_camera_data_layout;
+    vk::DescriptorSetLayout m_texture_set_layout;
+    vk::DescriptorPool m_descriptor_pool;
+    vk::DescriptorPool m_imgui_pool;
+    std::vector<vk::DescriptorSet> m_descriptor_sets;
+
+    std::set<u32> m_queue_indices;
     vk::Queue m_graphics_queue;
     vk::Queue m_present_queue;
     vk::Queue m_transfer_queue;
@@ -65,7 +84,7 @@ private:
     };
 
     [[nodiscard]] bool check_validation_layer_support() const;
-    [[nodiscard]] std::vector<const char*> get_required_extensions() const;
+    [[nodiscard]] static std::vector<const char*> get_required_extensions() ;
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
