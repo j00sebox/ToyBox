@@ -1,4 +1,5 @@
 #pragma once
+#include "Types.hpp"
 
 #include "rendering/Renderer.hpp"
 
@@ -17,4 +18,7 @@ private:
     Scene* m_scene;
 
     bool m_running;
+    f32 m_prev_time;
+
+    f32 get_delta_time();
 };

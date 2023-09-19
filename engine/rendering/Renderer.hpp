@@ -50,6 +50,11 @@ public:
         models.push_back(model);
     }
 
+    void update(f32 delta_time)
+    {
+        camera.update(delta_time);
+    }
+
     void close(Renderer* renderer);
 };
 

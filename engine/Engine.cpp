@@ -55,8 +55,17 @@ void Engine::run()
             continue;
         }
 
+        m_scene->update(get_delta_time());
         m_renderer->render(m_scene);
     }
 
     m_renderer->wait_for_device_idle();
+}
+
+f32 Engine::get_delta_time()
+{
+    f64 time = glfwGetTime() * 1000.0;
+    auto delta_time = (f32)(time - m_prev_time);
+    m_prev_time = (f32)time;
+    return delta_time;
 }
