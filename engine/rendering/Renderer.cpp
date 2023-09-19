@@ -41,6 +41,20 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
     init_depth_resources();
     init_framebuffers();
     init_sync_objects();
+    init_imgui();
+
+    m_null_texture = create_texture({
+        .format = vk::Format::eR8G8B8A8Srgb,
+        .image_src = "../assets/textures/null_texture.png"
+    });
+
+    m_default_sampler = create_sampler({
+        .min_filter = vk::Filter::eLinear,
+        .mag_filter = vk::Filter::eLinear,
+        .u_mode = vk::SamplerAddressMode::eRepeat,
+        .v_mode = vk::SamplerAddressMode::eRepeat,
+        .w_mode = vk::SamplerAddressMode::eRepeat
+    });
 }
 
 Renderer::~Renderer()
@@ -51,10 +65,11 @@ Renderer::~Renderer()
         m_logical_device.destroySemaphore(m_image_available_semaphores[i], nullptr);
         m_logical_device.destroySemaphore(m_render_finished_semaphores[i], nullptr);
         m_logical_device.destroyFence(m_in_flight_fences[i], nullptr);
-        
+
         // uniform buffers
         destroy_buffer(m_camera_buffers[i]);
     }
+    destroy_texture(m_null_texture);
     destroy_sampler(m_default_sampler);
     m_logical_device.destroyDescriptorPool(m_descriptor_pool, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_descriptor_set_layout, nullptr);
@@ -81,7 +96,7 @@ Renderer::~Renderer()
 
 void Renderer::render(Scene* scene)
 {
-
+    
 }
 
 void Renderer::begin_frame()
@@ -166,7 +181,7 @@ TextureHandle Renderer::create_texture(const TextureCreationInfo& texture_creati
         .usage = vk::BufferUsageFlagBits::eTransferSrc,
         .size = (u32)image_size,
         .data = pixels
-   });
+    });
     auto* staging_buffer = static_cast<Buffer*>(m_buffer_pool.access(staging_handle));
 
     stbi_image_free(pixels);
@@ -191,12 +206,11 @@ TextureHandle Renderer::create_texture(const TextureCreationInfo& texture_creati
 
     vmaCreateImage(m_allocator, reinterpret_cast<const VkImageCreateInfo*>(&image_create_info), &memory_info, &texture->vk_image, &texture->vma_allocation, nullptr);
 
-    // TODO: implement these functions
-//    transition_image_layout(texture->vk_image, texture_creation.format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-//
-//    copy_buffer_to_image(staging_buffer->vk_buffer, texture->vk_image, static_cast<u32>(width), static_cast<u32>(height));
-//
-//    transition_image_layout(texture->vk_image, texture_creation.format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+    transition_image_layout(texture->vk_image, texture_creation.format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+
+    copy_buffer_to_image(staging_buffer->vk_buffer, texture->vk_image, static_cast<u32>(width), static_cast<u32>(height));
+
+    transition_image_layout(texture->vk_image, texture_creation.format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 
     texture->vk_image_view = create_image_view(texture->vk_image, texture_creation.format, vk::ImageAspectFlagBits::eColor);
 
@@ -780,14 +794,6 @@ void Renderer::init_descriptor_sets()
     allocInfo.pSetLayouts = &m_texture_set_layout;
 
     check(m_logical_device.allocateDescriptorSets(&allocInfo, &descriptor_set->vk_descriptor_set));
-
-    m_default_sampler = create_sampler({
-        .min_filter = vk::Filter::eLinear,
-        .mag_filter = vk::Filter::eLinear,
-        .u_mode = vk::SamplerAddressMode::eRepeat,
-        .v_mode = vk::SamplerAddressMode::eRepeat,
-        .w_mode = vk::SamplerAddressMode::eRepeat
-    });
 }
 
 void Renderer::init_graphics_pipeline()
@@ -1128,6 +1134,46 @@ void Renderer::init_sync_objects()
     }
 }
 
+void Renderer::init_imgui()
+{
+
+}
+
+vk::CommandBuffer Renderer::begin_single_time_commands()
+{
+    vk::CommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
+    alloc_info.level = vk::CommandBufferLevel::ePrimary;
+    alloc_info.commandPool = m_command_pools[0];
+    alloc_info.commandBufferCount = 1;
+
+    vk::CommandBuffer command_buffer;
+    check(m_logical_device.allocateCommandBuffers(&alloc_info, &command_buffer));
+
+    vk::CommandBufferBeginInfo begin_info{};
+    begin_info.sType = vk::StructureType::eCommandBufferBeginInfo;
+    begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+    check(command_buffer.begin(&begin_info));
+
+    return command_buffer;
+}
+
+void Renderer::end_single_time_commands(vk::CommandBuffer command_buffer)
+{
+    command_buffer.end();
+
+    vk::SubmitInfo  submit_info{};
+    submit_info.sType = vk::StructureType::eSubmitInfo;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &command_buffer;
+
+    check(m_graphics_queue.submit(1, &submit_info, nullptr));
+    m_graphics_queue.waitIdle();
+
+    m_logical_device.freeCommandBuffers(m_command_pools[0], 1, &command_buffer);
+}
+
 void Renderer::cleanup_swapchain()
 {
     for(auto framebuffer : m_swapchain_framebuffers)
@@ -1147,11 +1193,92 @@ void Renderer::cleanup_swapchain()
     m_logical_device.destroySwapchainKHR(m_swapchain, nullptr);
 }
 
+void Renderer::recreate_swapchain()
+{
+
+}
+
 size_t Renderer::pad_uniform_buffer(size_t original_size) const
 {
     size_t alignment = m_device_properties.limits.minUniformBufferOffsetAlignment;
     size_t aligned_size = (alignment + original_size - 1) & ~(alignment - 1);
     return aligned_size;
+}
+
+void Renderer::copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 width, u32 height)
+{
+    vk::CommandBuffer command_buffer = begin_single_time_commands();
+
+    vk::BufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageOffset = vk::Offset3D{0,0,0};
+    region.imageExtent = vk::Extent3D
+    {
+            width,
+            height,
+            1
+    };
+
+    command_buffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &region);
+
+    end_single_time_commands(command_buffer);
+}
+
+void Renderer::transition_image_layout(vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout)
+{
+    vk::CommandBuffer command_buffer = begin_single_time_commands();
+
+    vk::PipelineStageFlags source_stage, destination_stage;
+
+    vk::ImageMemoryBarrier barrier{};
+    barrier.sType = vk::StructureType::eImageMemoryBarrier;
+    barrier.oldLayout = old_layout;
+    barrier.newLayout = new_layout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    if(old_layout == vk::ImageLayout::eUndefined && new_layout == vk::ImageLayout::eTransferDstOptimal)
+    {
+        barrier.srcAccessMask = vk::AccessFlagBits::eNone;
+        barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+        source_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+        destination_stage = vk::PipelineStageFlagBits::eTransfer;
+    }
+    else if(old_layout == vk::ImageLayout::eTransferDstOptimal && new_layout == vk::ImageLayout::eShaderReadOnlyOptimal)
+    {
+        barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+        barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+        source_stage = vk::PipelineStageFlagBits::eTransfer;
+        destination_stage = vk::PipelineStageFlagBits::eFragmentShader;
+    }
+    else
+    {
+        throw std::invalid_argument("unsupported layout transition!");
+    }
+
+    command_buffer.pipelineBarrier(
+            source_stage, destination_stage,
+            vk::DependencyFlags(),
+            nullptr,
+            nullptr,
+            barrier
+    );
+
+    end_single_time_commands(command_buffer);
 }
 
 bool Renderer::check_validation_layer_support() const

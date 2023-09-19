@@ -143,9 +143,16 @@ private:
 	void init_sync_objects();
 	void init_imgui();
 
+    vk::CommandBuffer begin_single_time_commands();
+    void end_single_time_commands(vk::CommandBuffer command_buffer);
+
     void cleanup_swapchain();
     void recreate_swapchain();
     [[nodiscard]] size_t pad_uniform_buffer(size_t original_size) const;
+
+    // image operations
+    void copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 width, u32 height);
+    void transition_image_layout(vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout);
 
     // extensions the device needs to have
     const std::vector<const char*> m_required_device_extensions =
