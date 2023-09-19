@@ -10,6 +10,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <glm/glm.hpp>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
 
 // FIXME: remoooove
 void Scene::close(Renderer* renderer)
@@ -130,6 +133,8 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
 
 Renderer::~Renderer()
 {
+    ImGui_ImplVulkan_Shutdown();
+    m_logical_device.destroyDescriptorPool(m_imgui_pool, nullptr);
     for(i32 i = 0; i < k_max_frames_in_flight; ++i)
     {
         // sync objects
@@ -234,9 +239,9 @@ void Renderer::render(Scene* scene)
         m_scheduler->AddTaskSetToPipe(&extra_draws);
     }
 
-//    m_imgui_commands[m_current_frame].begin(inheritance_info);
-//    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),  m_imgui_commands[m_current_frame].vk_command_buffer);
-//    m_imgui_commands[m_current_frame].end();
+    m_imgui_commands[m_current_frame].begin(inheritance_info);
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),  m_imgui_commands[m_current_frame].vk_command_buffer);
+    m_imgui_commands[m_current_frame].end();
 
     for(u32 i = 0; i < num_recordings; ++i)
     {
@@ -252,7 +257,7 @@ void Renderer::render(Scene* scene)
         m_scheduler->WaitforTask(&extra_draws);
         m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, extra_draws.command_buffer);
     }
-    //m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, &m_imgui_commands[m_current_frame].vk_command_buffer);
+    m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, &m_imgui_commands[m_current_frame].vk_command_buffer);
 
     end_frame();
 
@@ -1392,7 +1397,52 @@ void Renderer::init_sync_objects()
 
 void Renderer::init_imgui()
 {
+    vk::DescriptorPoolSize pool_sizes[] =
+    {
+        { vk::DescriptorType::eSampler, 1000 },
+        { vk::DescriptorType::eCombinedImageSampler, 1000 },
+        { vk::DescriptorType::eSampledImage, 1000 },
+        { vk::DescriptorType::eStorageImage, 1000 },
+        { vk::DescriptorType::eUniformTexelBuffer, 1000 },
+        { vk::DescriptorType::eStorageTexelBuffer, 1000 },
+        { vk::DescriptorType::eUniformBuffer, 1000 },
+        { vk::DescriptorType::eStorageBuffer, 1000 },
+        { vk::DescriptorType::eUniformBufferDynamic, 1000 },
+        { vk::DescriptorType::eStorageBufferDynamic, 1000 },
+        { vk::DescriptorType::eInputAttachment, 1000 }
+    };
 
+    vk::DescriptorPoolCreateInfo pool_create_info{};
+    pool_create_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
+    pool_create_info.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
+    pool_create_info.maxSets = 1000;
+    pool_create_info.poolSizeCount = std::size(pool_sizes);
+    pool_create_info.pPoolSizes = pool_sizes;
+
+    check(m_logical_device.createDescriptorPool(&pool_create_info, nullptr, &m_imgui_pool));
+
+    ImGui::CreateContext();
+
+    ImGui_ImplGlfw_InitForVulkan(m_window, true);
+
+    ImGui_ImplVulkan_InitInfo init_info{};
+    init_info.Instance = m_instance;
+    init_info.PhysicalDevice = m_physical_device;
+    init_info.Device = m_logical_device;
+    init_info.Queue = m_graphics_queue;
+    init_info.DescriptorPool = m_imgui_pool;
+    init_info.MinImageCount = k_max_frames_in_flight;
+    init_info.ImageCount = k_max_frames_in_flight;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+    ImGui_ImplVulkan_Init(&init_info, m_render_pass);
+
+    vk::CommandBuffer upload_fonts = begin_single_time_commands();
+    ImGui_ImplVulkan_CreateFontsTexture(upload_fonts);
+    end_single_time_commands(upload_fonts);
+
+    // clear font textures from cpu data
+    ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 vk::CommandBuffer Renderer::begin_single_time_commands()

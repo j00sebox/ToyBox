@@ -35,7 +35,7 @@ void Camera::resize(int width, int height)
 bool Camera::update(float elapsed_time)
 {
 	// block camera update if imgui menu is in use
-//	if (!ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive())
+	if (!ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive())
 	{
 		if (Input::is_key_pressed(GLFW_KEY_W))
 		{

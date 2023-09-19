@@ -4,6 +4,11 @@
 
 #include "util/ModelLoader.hpp"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
+
 Engine::Engine(u32 width, u32 height) :
     m_running(false)
 {
@@ -54,6 +59,15 @@ void Engine::run()
             m_running = false;
             continue;
         }
+
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::ShowDemoWindow();
+
+        ImGui::End();
+        ImGui::Render();
 
         m_scene->update(get_delta_time());
         m_renderer->render(m_scene);
