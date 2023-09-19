@@ -3,6 +3,7 @@
 #include "GpuResources.hpp"
 #include "CommandBuffer.hpp"
 #include "Memory.hpp"
+
 //#include "scene/Scene.h"
 
 #define GLFW_INCLUDE_VULKAN
@@ -11,8 +12,46 @@
 #include <vk_mem_alloc.h>
 #include <TaskScheduler.h>
 
-// FIXME
-class Scene;
+// FIXME: REMOOOOOVE
+#include <glm/mat4x4.hpp>
+struct Mesh
+{
+    BufferHandle             vertex_buffer;
+    BufferHandle             index_buffer;
+    u32             index_count = 0;
+};
+
+struct Material
+{
+    DescriptorSetHandle descriptor_set;
+    TextureHandle textures[4];
+    SamplerHandle sampler;
+};
+
+struct Model
+{
+    std::vector<Mesh>           meshes;
+    std::vector<Material>       materials;
+    std::vector<glm::mat4>      transforms;
+    glm::mat4       transform{1.f};
+};
+
+class Renderer;
+
+#include "scene/Camera.h"
+class Scene
+{
+public:
+    Camera camera;
+    std::vector<Model> models;
+
+    void add_model(const Model& model)
+    {
+        models.push_back(model);
+    }
+
+    void close(Renderer* renderer);
+};
 
 class Renderer
 {
@@ -23,6 +62,8 @@ public:
 	void render(Scene* scene);
 	void begin_frame();
 	void end_frame();
+
+    void wait_for_device_idle() const { m_logical_device.waitIdle(); }
 
     // resource creation
     BufferHandle create_buffer(const BufferCreationInfo& buffer_creation);
@@ -39,9 +80,20 @@ public:
     void destroy_texture(TextureHandle texture_handle);
     void destroy_sampler(SamplerHandle sampler_handle);
 
+    [[nodiscard]] Buffer* get_buffer(BufferHandle buffer_handle) { return static_cast<Buffer*>(m_buffer_pool.access(buffer_handle)); }
+    [[nodiscard]] const vk::DescriptorSetLayout& get_texture_layout() const { return m_texture_set_layout; }
+    [[nodiscard]] TextureHandle get_null_texture_handle() const { return m_null_texture; }
+    [[nodiscard]] const vk::PipelineLayout& get_pipeline_layout() { return m_pipeline_layout; }
+
+    void update_texture_set(TextureHandle* texture_handles, u32 num_textures);
+
 private:
     GLFWwindow* m_window;
     enki::TaskScheduler* m_scheduler;
+
+    u32 m_current_frame = 0; // current frame index
+    u32 m_current_cb_index = 0; // command buffer to write to
+    u32 m_image_index = 0; // image of the swapchain being used
 
     // constants
     static const u32 k_max_frames_in_flight = 3;

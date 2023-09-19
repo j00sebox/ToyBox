@@ -1,4 +1,4 @@
-#include(${CMAKE_CURRENT_LIST_DIR}/scene/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/scene/CMakeLists.txt)
 #include(${CMAKE_CURRENT_LIST_DIR}/renderer/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/rendering/CMakeLists.txt)
 #include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)

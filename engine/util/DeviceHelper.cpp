@@ -2,7 +2,7 @@
 #include "DeviceHelper.hpp"
 #include "Log.h"
 
-namespace DeviceHelper
+namespace devh
 {
     QueueFamilies find_queue_families(vk::PhysicalDevice device, vk::SurfaceKHR surface)
     {
@@ -48,7 +48,7 @@ namespace DeviceHelper
 
     bool check_device_extension_support(vk::PhysicalDevice device, const std::vector<const char*>& required_extensions)
     {
-        unsigned extension_count = 0;
+        u32 extension_count = 0;
         if(device.enumerateDeviceExtensionProperties(nullptr, &extension_count, nullptr) != vk::Result::eSuccess) {}
 
         std::vector<vk::ExtensionProperties> available_extensions(extension_count);

@@ -11,7 +11,78 @@
 #include <stb_image.h>
 #include <glm/glm.hpp>
 
+// FIXME: remoooove
+void Scene::close(Renderer* renderer)
+{
+    for(auto& model : models)
+    {
+        for(auto& mesh: model.meshes)
+        {
+            renderer->destroy_buffer(mesh.vertex_buffer);
+            renderer->destroy_buffer(mesh.index_buffer);
+        }
+
+        for(auto& material : model.materials)
+        {
+            for(auto& texture : material.textures)
+            {
+                renderer->destroy_texture(texture);
+            }
+        }
+    }
+}
+
 #define check(result) { if(result != vk::Result::eSuccess) { fatal("Error in: %s", __FILE__); } }
+
+struct RecordDrawTask : enki::ITaskSet
+{
+    void init(Renderer* _renderer, vk::CommandBuffer* _command_buffer, const Scene* _scene, u32 _start, u32 _end, DescriptorSet* _camera_data, DescriptorSet* _material_data)
+    {
+        renderer = _renderer;
+        command_buffer = _command_buffer;
+        scene = _scene;
+        start = _start;
+        end = _end;
+        camera_data = _camera_data;
+        material_data = _material_data;
+    }
+
+    void ExecuteRange(enki::TaskSetPartition range, uint32_t threadnum) override
+    {
+        for(u32 i = start; i < end; ++i)
+        {
+            command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 1, 1, &material_data->vk_descriptor_set, 0, nullptr);
+            command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 0, 1, &camera_data->vk_descriptor_set, 0, nullptr);
+
+            for(u32 j = 0; j < scene->models[i].meshes.size(); ++j)
+            {
+                glm::mat4 final_transform = scene->models[i].transform * scene->models[i].transforms[j];
+                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &final_transform);
+                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->models[i].materials[j].textures);
+
+                Buffer* vertex_buffer = renderer->get_buffer(scene->models[i].meshes[j].vertex_buffer);
+                vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
+                vk::DeviceSize offsets[] = {0};
+                command_buffer->bindVertexBuffers(0, 1, vertex_buffers, offsets);
+
+                Buffer* index_buffer = renderer->get_buffer(scene->models[i].meshes[j].index_buffer);
+                command_buffer->bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
+                command_buffer->drawIndexed(scene->models[i].meshes[j].index_count, 1, 0, 0, 0);
+            }
+        }
+        command_buffer->end();
+    }
+
+    vk::CommandBuffer* command_buffer;
+
+private:
+    Renderer* renderer;
+    const Scene* scene;
+    u32 start;
+    u32 end;
+    DescriptorSet* camera_data;
+    DescriptorSet* material_data;
+};
 
 struct CameraData
 {
@@ -96,17 +167,174 @@ Renderer::~Renderer()
 
 void Renderer::render(Scene* scene)
 {
-    
+    CameraData camera_data{};
+    camera_data.view = scene->camera.camera_look_at();
+    camera_data.proj = scene->camera.get_perspective();
+    camera_data.camera_position = scene->camera.get_pos();
+
+    // GLM was originally designed for OpenGL where the Y coordinate of the clip space is inverted,
+    // so we can remedy this by flipping the sign of the Y scaling factor in the projection matrix
+    camera_data.proj[1][1] *= -1;
+
+    auto* camera_buffer = static_cast<Buffer*>(m_buffer_pool.access(m_camera_buffers[m_current_frame]));
+    memcpy(camera_buffer->mapped_data, &camera_data, pad_uniform_buffer(sizeof(camera_data)));
+
+    begin_frame();
+
+    auto* material_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_texture_set));
+    auto* camera_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_camera_sets[m_current_frame]));
+
+    RecordDrawTask record_draw_tasks[m_scheduler->GetNumTaskThreads()];
+    u32 models_per_thread, num_recordings, surplus;
+
+    if (m_scheduler->GetNumTaskThreads() > scene->models.size())
+    {
+        models_per_thread = 1;
+        num_recordings = scene->models.size();
+        surplus = 0;
+    }
+    else
+    {
+        models_per_thread = scene->models.size() / m_scheduler->GetNumTaskThreads();
+        num_recordings = m_scheduler->GetNumTaskThreads();
+        surplus = scene->models.size() % m_scheduler->GetNumTaskThreads();
+    }
+
+    vk::CommandBufferInheritanceInfo inheritance_info{};
+    inheritance_info.renderPass = m_render_pass;
+    inheritance_info.framebuffer = m_swapchain_framebuffers[m_image_index];
+    inheritance_info.subpass = 0;
+
+    u32 start = 0;
+    for(u32 i = 0; i < num_recordings; ++i)
+    {
+        m_command_buffers[m_current_cb_index].begin(inheritance_info);
+        m_command_buffers[m_current_cb_index].bind_pipeline(m_graphics_pipeline);
+
+        // since we specified that the viewport and scissor were dynamic we need to do them now
+        m_command_buffers[m_current_cb_index].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
+        m_command_buffers[m_current_cb_index].set_scissor(m_swapchain_extent);
+
+        record_draw_tasks[i].init(this, &m_command_buffers[m_current_cb_index].vk_command_buffer, scene, start, start + models_per_thread, camera_set, material_set);
+        m_scheduler->AddTaskSetToPipe(&record_draw_tasks[i]);
+
+        start += models_per_thread;
+        m_current_cb_index += k_max_frames_in_flight;
+    }
+
+    RecordDrawTask extra_draws;
+    if(surplus > 0)
+    {
+        m_extra_draw_commands[m_current_frame].begin(inheritance_info);
+        m_extra_draw_commands[m_current_frame].bind_pipeline(m_graphics_pipeline);
+        m_extra_draw_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
+        m_extra_draw_commands[m_current_frame].set_scissor(m_swapchain_extent);
+
+        extra_draws.init(this, &m_extra_draw_commands[m_current_frame].vk_command_buffer, scene, start, start + surplus, camera_set, material_set);
+        m_scheduler->AddTaskSetToPipe(&extra_draws);
+    }
+
+//    m_imgui_commands[m_current_frame].begin(inheritance_info);
+//    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),  m_imgui_commands[m_current_frame].vk_command_buffer);
+//    m_imgui_commands[m_current_frame].end();
+
+    for(u32 i = 0; i < num_recordings; ++i)
+    {
+        m_scheduler->WaitforTask(&record_draw_tasks[i]);
+
+        if(record_draw_tasks[i].command_buffer)
+        {
+            m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, record_draw_tasks[i].command_buffer);
+        }
+    }
+    if(surplus > 0)
+    {
+        m_scheduler->WaitforTask(&extra_draws);
+        m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, extra_draws.command_buffer);
+    }
+    //m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, &m_imgui_commands[m_current_frame].vk_command_buffer);
+
+    end_frame();
+
+    m_current_frame = (m_current_frame + 1) % k_max_frames_in_flight;
+    m_current_cb_index = m_current_frame;
 }
 
 void Renderer::begin_frame()
 {
+    check(m_logical_device.waitForFences(1, &m_in_flight_fences[m_current_frame], true, UINT64_MAX));
 
+    vk::Result result = m_logical_device.acquireNextImageKHR(m_swapchain, UINT64_MAX, m_image_available_semaphores[m_current_frame], nullptr, &m_image_index);
+
+    // if swapchain is not good we immediately recreate and try again in the next frame
+    if(result == vk::Result::eErrorOutOfDateKHR)
+    {
+        recreate_swapchain();
+        return;
+    }
+
+    // need to reset fences to unsignaled
+    // but only reset if we are submitting work
+    check(m_logical_device.resetFences(1, &m_in_flight_fences[m_current_frame]));
+
+    m_primary_command_buffers[m_current_frame].begin();
+//    for(u32 i = 0; i < m_scheduler->GetNumTaskThreads(); ++i)
+//    {
+//        logical_device.resetCommandPool(m_command_pools[i]);
+//    }
+
+    // all functions that record commands can be recognized by their vk::Cmd prefix
+    // they all return void, so no error handling until the recording is finished
+    m_primary_command_buffers[m_current_frame].begin_renderpass(m_render_pass, m_swapchain_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eSecondaryCommandBuffers);
 }
 
 void Renderer::end_frame()
 {
+    m_primary_command_buffers[m_current_frame].end_renderpass();
+    m_primary_command_buffers[m_current_frame].end();
 
+    vk::SubmitInfo submit_info{};
+    submit_info.sType = vk::StructureType::eSubmitInfo;
+
+    // we are specifying what semaphores we want to use and what stage we want to wait on
+    vk::Semaphore wait_semaphores[] = {m_image_available_semaphores[m_current_frame]};
+    vk::PipelineStageFlags wait_stages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+    submit_info.waitSemaphoreCount = 1;
+    submit_info.pWaitSemaphores = wait_semaphores;
+    submit_info.pWaitDstStageMask = wait_stages;
+
+    // which command buffers to submit
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &m_primary_command_buffers[m_current_frame].vk_command_buffer;
+
+    // which semaphores to signal once the command buffer is finished
+    vk::Semaphore signal_semaphores[] = {m_render_finished_semaphores[m_current_frame]};
+    submit_info.signalSemaphoreCount = 1;
+    submit_info.pSignalSemaphores = signal_semaphores;
+
+    check(m_graphics_queue.submit(1, &submit_info, m_in_flight_fences[m_current_frame]));
+
+    // last step is to submit the result back to the swapchain
+    vk::PresentInfoKHR present_info{};
+    present_info.sType = vk::StructureType::ePresentInfoKHR;
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = signal_semaphores;
+
+    vk::SwapchainKHR swapchains[] = {m_swapchain};
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = swapchains;
+    present_info.pImageIndices = &m_image_index;
+
+    // one last optional param
+    // can get an array of vk::Result to check every swapchain to see if presentation was successful
+    present_info.pResults = nullptr;
+
+    vk::Result result = m_present_queue.presentKHR(&present_info);
+
+    if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
+    {
+        recreate_swapchain();
+    }
 }
 
 BufferHandle Renderer::create_buffer(const BufferCreationInfo& buffer_creation)
@@ -359,7 +587,7 @@ void Renderer::create_image(u32 width, u32 height, vk::Format format, vk::ImageT
     vk::MemoryAllocateInfo alloc_info{};
     alloc_info.sType = vk::StructureType::eMemoryAllocateInfo;
     alloc_info.allocationSize = memory_requirements.size;
-    alloc_info.memoryTypeIndex = DeviceHelper::find_memory_type(memory_requirements.memoryTypeBits, properties, m_physical_device);
+    alloc_info.memoryTypeIndex = devh::find_memory_type(memory_requirements.memoryTypeBits, properties, m_physical_device);
 
     check(m_logical_device.allocateMemory(&alloc_info, nullptr, &image_memory));
     m_logical_device.bindImageMemory(image, image_memory, 0);
@@ -427,6 +655,34 @@ void Renderer::destroy_sampler(SamplerHandle sampler_handle)
     auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(sampler_handle));
     m_logical_device.destroySampler(sampler->vk_sampler, nullptr);
     m_sampler_pool.free(sampler_handle);
+}
+
+void Renderer::update_texture_set(TextureHandle* texture_handles, u32 num_textures)
+{
+    auto* texture_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_texture_set));
+
+    // TODO: make it update all at once
+    for(i32 i = 0; i < num_textures; ++i)
+    {
+        auto* texture = static_cast<Texture*>(m_texture_pool.access(texture_handles[i]));
+        auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(m_default_sampler));
+
+        vk::DescriptorImageInfo descriptor_info{};
+        descriptor_info.imageView = texture->vk_image_view;
+        descriptor_info.sampler = sampler->vk_sampler;
+        descriptor_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+        vk::WriteDescriptorSet descriptor_write{};
+        descriptor_write.sType = vk::StructureType::eWriteDescriptorSet;
+        descriptor_write.dstSet = texture_set->vk_descriptor_set;
+        descriptor_write.dstBinding = k_bindless_texture_binding;
+        descriptor_write.dstArrayElement = texture_handles[i].index;
+        descriptor_write.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+        descriptor_write.descriptorCount = 1;
+        descriptor_write.pImageInfo = &descriptor_info;
+
+        m_logical_device.updateDescriptorSets(1, &descriptor_write, 0, nullptr);
+    }
 }
 
 void Renderer::init_instance()
@@ -519,8 +775,8 @@ void Renderer::init_device()
     device_create_info.enabledLayerCount = 0;
 #endif
 
-    m_physical_device = DeviceHelper::pick_physical_device(m_instance, m_required_device_extensions);
-    DeviceHelper::QueueFamilies indices = DeviceHelper::find_queue_families(m_physical_device, m_surface);
+    m_physical_device = devh::pick_physical_device(m_instance, m_required_device_extensions);
+    devh::QueueFamilies indices = devh::find_queue_families(m_physical_device, m_surface);
 
     std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
     std::set<u32> unique_indices = {indices.graphics_family.value(), indices.present_family.value(), indices.transfer_family.value()};
@@ -559,15 +815,15 @@ void Renderer::init_device()
 
 void Renderer::init_swapchain()
 {
-    DeviceHelper::SwapChainSupportDetails swap_chain_support = DeviceHelper::query_swap_chain_support(m_physical_device, m_surface);
+    devh::SwapChainSupportDetails swap_chain_support = devh::query_swap_chain_support(m_physical_device, m_surface);
 
     i32 width, height;
     glfwGetFramebufferSize(m_window, &width, &height);
     vk::Extent2D extent = { static_cast<u32>(width), static_cast<u32>(height) };
 
-    vk::SurfaceFormatKHR surface_format = DeviceHelper::choose_swap_surface_format(swap_chain_support.formats);
-    vk::PresentModeKHR present_mode = DeviceHelper::choose_swap_present_mode(swap_chain_support.present_modes);
-    vk::Extent2D actual_extent = DeviceHelper::choose_swap_extent(swap_chain_support.capabilities, extent);
+    vk::SurfaceFormatKHR surface_format = devh::choose_swap_surface_format(swap_chain_support.formats);
+    vk::PresentModeKHR present_mode = devh::choose_swap_present_mode(swap_chain_support.present_modes);
+    vk::Extent2D actual_extent = devh::choose_swap_extent(swap_chain_support.capabilities, extent);
 
     // 1 extra than the min to avoid GPU hangs
     u32 image_count = swap_chain_support.capabilities.minImageCount + 1;
@@ -587,7 +843,7 @@ void Renderer::init_swapchain()
     create_info.imageArrayLayers = 1; // amount of layers each image consists of
     create_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
 
-    DeviceHelper::QueueFamilies indices = DeviceHelper::find_queue_families(m_physical_device, m_surface);
+    devh::QueueFamilies indices = devh::find_queue_families(m_physical_device, m_surface);
     u32 queue_family_indices[] = { indices.graphics_family.value(), indices.present_family.value() };
 
     if(indices.graphics_family != indices.present_family)
@@ -1017,7 +1273,7 @@ void Renderer::init_graphics_pipeline()
 
 void Renderer::init_command_pools()
 {
-    DeviceHelper::QueueFamilies queue_family_indices = DeviceHelper::find_queue_families(m_physical_device, m_surface);
+    devh::QueueFamilies queue_family_indices = devh::find_queue_families(m_physical_device, m_surface);
 
     vk::CommandPoolCreateInfo pool_create_info{};
     pool_create_info.sType = vk::StructureType::eCommandPoolCreateInfo;

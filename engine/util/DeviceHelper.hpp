@@ -5,7 +5,7 @@
 #include <optional>
 
 // a bunch of helper functions that can extract more information from a device
-namespace DeviceHelper
+namespace devh
 {
     struct QueueFamilies
     {
