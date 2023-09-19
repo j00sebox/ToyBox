@@ -1,9 +1,11 @@
 #define VMA_IMPLEMENTATION
 #include "pch.h"
 #include "Renderer.hpp"
+#include "Vertex.hpp"
 #include "Log.h"
 
 #include "util/DeviceHelper.hpp"
+#include "util/FileOperations.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -55,6 +57,8 @@ Renderer::~Renderer()
     vmaDestroyAllocator(m_allocator);
     cleanup_swapchain();
     m_logical_device.destroyRenderPass(m_render_pass, nullptr);
+    m_logical_device.destroyPipelineLayout(m_pipeline_layout, nullptr);
+    m_logical_device.destroyPipeline(m_graphics_pipeline, nullptr);
     m_logical_device.destroy();
     m_instance.destroySurfaceKHR(m_surface, nullptr);
 #ifdef DEBUG
@@ -325,6 +329,19 @@ vk::ImageView Renderer::create_image_view(const vk::Image& image, vk::Format for
     check(m_logical_device.createImageView(&imageview_create_info, nullptr, &image_view));
 
     return image_view;
+}
+
+vk::ShaderModule Renderer::create_shader_module(const std::vector<char>& code)
+{
+    vk::ShaderModuleCreateInfo create_info{};
+    create_info.sType = vk::StructureType::eShaderModuleCreateInfo;
+    create_info.codeSize = code.size();
+    create_info.pCode = (const u32*)(code.data());
+
+    vk::ShaderModule shader_module;
+    check(m_logical_device.createShaderModule(&create_info, nullptr, &shader_module));
+
+    return shader_module;
 }
 
 void Renderer::destroy_buffer(BufferHandle buffer_handle)
@@ -733,7 +750,221 @@ void Renderer::init_descriptor_sets()
 
 void Renderer::init_graphics_pipeline()
 {
+    bool cache_exists = std::filesystem::exists("pipeline_cache.bin");
+    bool cache_header_valid = false;
 
+    vk::PipelineCache pipeline_cache = nullptr;
+
+    vk::PipelineCacheCreateInfo pipeline_cache_info{};
+    pipeline_cache_info.sType = vk::StructureType::ePipelineCacheCreateInfo;
+
+    if(cache_exists)
+    {
+        std::vector<u8> pipeline_cache_data = fileop::read_binary_file("pipeline_cache.bin");
+
+        // if there is a new driver version there is a chance that it won't be able to make use of the old cache file
+        // need to check some cache header details and compare them to our physical device
+        // if they match, create the cache like normal, otherwise need to overwrite it
+        auto* cache_header = (vk::PipelineCacheHeaderVersionOne*)pipeline_cache_data.data();
+        cache_header_valid = (cache_header->deviceID == m_device_properties.deviceID &&
+                              cache_header->vendorID == m_device_properties.vendorID &&
+                              memcmp(cache_header->pipelineCacheUUID, m_device_properties.pipelineCacheUUID, VK_UUID_SIZE) == 0);
+
+        if(cache_header_valid)
+        {
+            pipeline_cache_info.pInitialData = pipeline_cache_data.data();
+            pipeline_cache_info.initialDataSize = pipeline_cache_data.size();
+        }
+    }
+
+    check(m_logical_device.createPipelineCache(&pipeline_cache_info, nullptr, &pipeline_cache));
+
+    auto vert_shader_code = fileop::read_binary_file("../assets/shaders/vert.spv");
+    auto frag_shader_code = fileop::read_binary_file("../assets/shaders/frag.spv");
+
+    vk::ShaderModule vert_shader_module = create_shader_module(vert_shader_code);
+    vk::ShaderModule frag_shader_module = create_shader_module(frag_shader_code);
+
+    vk::PipelineShaderStageCreateInfo vert_shader_stage_info{};
+    vert_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
+    vert_shader_stage_info.stage = vk::ShaderStageFlagBits::eVertex;
+    vert_shader_stage_info.module = vert_shader_module;
+    vert_shader_stage_info.pName = "main";
+
+    vk::PipelineShaderStageCreateInfo frag_shader_stage_info{};
+    frag_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
+    frag_shader_stage_info.stage = vk::ShaderStageFlagBits::eFragment;
+    frag_shader_stage_info.module = frag_shader_module;
+    frag_shader_stage_info.pName = "main";
+
+    vk::PipelineShaderStageCreateInfo shader_stages[] = {vert_shader_stage_info, frag_shader_stage_info};
+
+    std::vector<vk::DynamicState> dynamic_states =
+    {
+            vk::DynamicState::eViewport,
+            vk::DynamicState::eScissor
+    };
+
+    // the configuration of these values will be ignored, so they can be changed at runtime
+    vk::PipelineDynamicStateCreateInfo dynamic_state{};
+    dynamic_state.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
+    dynamic_state.dynamicStateCount = static_cast<unsigned>(dynamic_states.size());
+    dynamic_state.pDynamicStates = dynamic_states.data();
+
+    auto binding_description = Vertex::get_binding_description();
+    auto attribute_descriptions = Vertex::get_attribute_description();
+
+    vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
+    vertex_input_info.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
+    vertex_input_info.vertexBindingDescriptionCount = 1;
+    vertex_input_info.pVertexBindingDescriptions = &binding_description;
+    vertex_input_info.vertexAttributeDescriptionCount = static_cast<unsigned>(attribute_descriptions.size());
+    vertex_input_info.pVertexAttributeDescriptions = attribute_descriptions.data();
+
+    vk::PipelineInputAssemblyStateCreateInfo input_assembly{};
+    input_assembly.sType = vk::StructureType::ePipelineInputAssemblyStateCreateInfo;
+    input_assembly.topology = vk::PrimitiveTopology::eTriangleList;
+    input_assembly.primitiveRestartEnable = false;
+
+    vk::Viewport viewport{};
+    viewport.x = 0.f;
+    viewport.y = 0.f;
+    viewport.width = (f32)m_swapchain_extent.width;
+    viewport.height = (f32)m_swapchain_extent.height;
+    viewport.minDepth = 0.f;
+    viewport.maxDepth = 1.f;
+
+    vk::Rect2D scissor{};
+    scissor.offset.x = 0;
+    scissor.offset.y = 0;
+    scissor.extent = m_swapchain_extent;
+
+    // since we made viewport and scissor dynamic we don't need to bind them here
+    vk::PipelineViewportStateCreateInfo viewport_state{};
+    viewport_state.sType = vk::StructureType::ePipelineViewportStateCreateInfo;
+    viewport_state.viewportCount = 1;
+    viewport_state.scissorCount = 1;
+
+    vk::PipelineRasterizationStateCreateInfo rasterizer{};
+    rasterizer.sType = vk::StructureType::ePipelineRasterizationStateCreateInfo;
+    rasterizer.depthClampEnable = false;
+    rasterizer.rasterizerDiscardEnable = false;
+    rasterizer.polygonMode = vk::PolygonMode::eFill;
+    rasterizer.lineWidth = 1.f;
+    rasterizer.cullMode = vk::CullModeFlagBits::eBack;
+    rasterizer.frontFace = vk::FrontFace::eCounterClockwise;
+    rasterizer.depthBiasEnable = false;
+    rasterizer.depthBiasConstantFactor = 0.f;
+    rasterizer.depthBiasClamp = 0.f;
+    rasterizer.depthBiasSlopeFactor = 0.f;
+
+    vk::PipelineMultisampleStateCreateInfo multi_sampling{};
+    multi_sampling.sType = vk::StructureType::ePipelineMultisampleStateCreateInfo;
+    multi_sampling.sampleShadingEnable = false;
+    multi_sampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+
+//        multi_sampling.minSampleShading = 1.f;
+//        multi_sampling.pSampleMask = nullptr;
+//        multi_sampling.alphaToCoverageEnable = false;
+//        multi_sampling.alphaToOneEnable = false;
+
+    // if using depth or stencil buffer then they need to be configured
+    // vk::PipelineDepthStencilStateCreateInfo
+
+    // colour blending
+    vk::PipelineColorBlendAttachmentState colour_blend_attachment{};
+    colour_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
+                                             | vk::ColorComponentFlagBits::eG
+                                             | vk::ColorComponentFlagBits::eB
+                                             | vk::ColorComponentFlagBits::eA;
+    colour_blend_attachment.blendEnable = false;
+    colour_blend_attachment.srcColorBlendFactor = vk::BlendFactor::eOne;
+    colour_blend_attachment.dstColorBlendFactor = vk::BlendFactor::eZero;
+    colour_blend_attachment.colorBlendOp = vk::BlendOp::eAdd;
+    colour_blend_attachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+    colour_blend_attachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+    colour_blend_attachment.alphaBlendOp = vk::BlendOp::eAdd;
+
+    vk::PipelineColorBlendStateCreateInfo colour_blending{};
+    colour_blending.sType = vk::StructureType::ePipelineColorBlendStateCreateInfo;
+    colour_blending.logicOpEnable = false;
+    colour_blending.logicOp = vk::LogicOp::eCopy; // optional
+    colour_blending.attachmentCount = 1;
+    colour_blending.pAttachments = &colour_blend_attachment;
+
+    vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
+    depth_stencil.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
+    depth_stencil.depthTestEnable = true;
+    depth_stencil.depthWriteEnable = true;
+    depth_stencil.depthCompareOp = vk::CompareOp::eLess;
+    depth_stencil.depthBoundsTestEnable = false;
+    depth_stencil.minDepthBounds = 0.f;
+    depth_stencil.maxDepthBounds = 1.f;
+    depth_stencil.stencilTestEnable = false;
+
+    vk::PipelineLayoutCreateInfo pipeline_layout_info{};
+    pipeline_layout_info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
+
+    // need to specify the descriptor set layout here
+    pipeline_layout_info.setLayoutCount = 2;
+    vk::DescriptorSetLayout layouts[] = {m_camera_data_layout, m_texture_set_layout};
+    pipeline_layout_info.pSetLayouts = layouts;
+
+    // need to tell the pipeline that there will be a push constant coming in
+    vk::PushConstantRange model_push_constant_info{};
+    model_push_constant_info.offset = 0;
+    model_push_constant_info.size = sizeof(glm::mat4);
+    model_push_constant_info.stageFlags = vk::ShaderStageFlagBits::eVertex;
+
+    vk::PushConstantRange texture_push_constant_info{};
+    texture_push_constant_info.offset = 64;
+    texture_push_constant_info.size = sizeof(glm::uvec4);
+    texture_push_constant_info.stageFlags = vk::ShaderStageFlagBits::eFragment;
+
+    vk::PushConstantRange push_constant_ranges[] = { model_push_constant_info, texture_push_constant_info };
+    pipeline_layout_info.pushConstantRangeCount = 2;
+    pipeline_layout_info.pPushConstantRanges = push_constant_ranges;
+
+    check(m_logical_device.createPipelineLayout(&pipeline_layout_info, nullptr, &m_pipeline_layout));
+
+    vk::GraphicsPipelineCreateInfo pipeline_create_info{};
+    pipeline_create_info.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
+    pipeline_create_info.stageCount = 2;
+    pipeline_create_info.pStages = shader_stages;
+    pipeline_create_info.pVertexInputState = &vertex_input_info;
+    pipeline_create_info.pInputAssemblyState = &input_assembly;
+    pipeline_create_info.pViewportState = &viewport_state;
+    pipeline_create_info.pRasterizationState = &rasterizer;
+    pipeline_create_info.pMultisampleState = &multi_sampling;
+    pipeline_create_info.pDepthStencilState = nullptr; // optional
+    pipeline_create_info.pColorBlendState = &colour_blending;
+    pipeline_create_info.pDynamicState = &dynamic_state;
+    pipeline_create_info.layout = m_pipeline_layout;
+    pipeline_create_info.renderPass = m_render_pass;
+    pipeline_create_info.subpass = 0;
+    pipeline_create_info.pDepthStencilState = &depth_stencil;
+    pipeline_create_info.basePipelineHandle = nullptr;
+    pipeline_create_info.basePipelineIndex = -1;
+
+    check(m_logical_device.createGraphicsPipelines(pipeline_cache, 1, &pipeline_create_info, nullptr, &m_graphics_pipeline));
+
+    if(!cache_exists || !cache_header_valid)
+    {
+        size_t cache_data_size = 0;
+
+        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, nullptr));
+
+        void* cache_data = malloc(cache_data_size);
+
+        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, cache_data));
+
+        fileop::write_binary_file(cache_data, cache_data_size, "pipeline_cache.bin");
+        free(cache_data);
+    }
+
+    m_logical_device.destroyPipelineCache(pipeline_cache, nullptr);
+    m_logical_device.destroyShaderModule(vert_shader_module, nullptr);
+    m_logical_device.destroyShaderModule(frag_shader_module, nullptr);
 }
 
 void Renderer::init_command_pools()

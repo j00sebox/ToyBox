@@ -28,6 +28,7 @@ public:
     SamplerHandle create_sampler(const SamplerCreationInfo& sampler_creation);
     DescriptorSetHandle create_descriptor_set(const DescriptorSetCreationInfo& descriptor_set_creation);
     vk::ImageView create_image_view(const vk::Image& image, vk::Format format, vk::ImageAspectFlags image_aspect);
+    vk::ShaderModule create_shader_module(const std::vector<char>& code);
 
     // resource destruction
     void destroy_buffer(BufferHandle buffer_handle);
