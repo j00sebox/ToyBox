@@ -1,6 +1,5 @@
 #pragma once
-
-#include <stdint.h>
+#include <cstdint>
 
 typedef char                     u8;
 typedef uint16_t                u16;
@@ -14,3 +13,13 @@ typedef int64_t                 i64;
 
 typedef float                   f32;
 typedef double                  f64;
+
+struct ResourceHandle
+{
+    u32 index;
+};
+
+struct BufferHandle : ResourceHandle {};
+struct TextureHandle : ResourceHandle {};
+struct SamplerHandle : ResourceHandle {};
+struct DescriptorSetHandle : ResourceHandle {};

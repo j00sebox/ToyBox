@@ -33,4 +33,6 @@ list(APPEND SRCS
         ${CMAKE_CURRENT_LIST_DIR}/Engine.hpp
         ${CMAKE_CURRENT_LIST_DIR}/Engine.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Types.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/Memory.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/Memory.cpp
 )
