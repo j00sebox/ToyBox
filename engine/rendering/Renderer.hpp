@@ -1,6 +1,7 @@
 #pragma once
 #include "Types.hpp"
 #include "GpuResources.hpp"
+#include "CommandBuffer.hpp"
 #include "Memory.hpp"
 //#include "scene/Scene.h"
 
@@ -8,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
+#include <TaskScheduler.h>
 
 // FIXME
 class Scene;
@@ -15,7 +17,7 @@ class Scene;
 class Renderer
 {
 public:
-    explicit Renderer(GLFWwindow* window);
+    explicit Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler);
     ~Renderer();
 
 	void render(Scene* scene);
@@ -37,11 +39,14 @@ public:
 
 private:
     GLFWwindow* m_window;
+    enki::TaskScheduler* m_scheduler;
 
     // constants
     static const u32 k_max_frames_in_flight = 3;
     const u32 k_max_bindless_resources = 1024;
     const u32 k_max_descriptor_sets = 20;
+    const u32 k_bindless_texture_binding = 10;
+    const u32 k_bindless_image_binding = 11;
 
     vk::Instance m_instance;
     vk::DebugUtilsMessengerEXT m_debug_messenger;
@@ -97,6 +102,17 @@ private:
     ResourcePool m_sampler_pool;
     ResourcePool m_descriptor_set_pool;
 
+    // command pools
+    vk::CommandPool m_main_command_pool;
+    vk::CommandPool m_extra_command_pool;
+    std::vector<vk::CommandPool> m_command_pools;
+
+    // command buffers
+    std::array<CommandBuffer, k_max_frames_in_flight> m_primary_command_buffers;
+    std::vector<CommandBuffer> m_command_buffers;
+    std::array<CommandBuffer, k_max_frames_in_flight> m_extra_draw_commands;
+    std::array<CommandBuffer, k_max_frames_in_flight> m_imgui_commands;
+
     // texture used when loader can't find one
     TextureHandle m_null_texture;
 
@@ -110,13 +126,13 @@ private:
 	void init_device();
 	void init_swapchain();
 	void init_render_pass();
+    void init_descriptor_pools();
+    void init_descriptor_sets();
 	void init_graphics_pipeline();
 	void init_command_pools();
-	void init_depth_resources();
-	void init_framebuffers();
-	void init_descriptor_pools();
-	void init_descriptor_sets();
-	void init_command_buffers();
+    void init_command_buffers();
+    void init_depth_resources();
+    void init_framebuffers();
 	void init_sync_objects();
 	void init_imgui();
 

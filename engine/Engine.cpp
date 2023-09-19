@@ -10,7 +10,13 @@ Engine::Engine(int width, int height) :
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     m_window = glfwCreateWindow(width, height, "ToyBox", nullptr, nullptr);
 
-    m_renderer = new Renderer(m_window);
+    enki::TaskSchedulerConfig scheduler_config;
+    scheduler_config.numTaskThreadsToCreate = 4;
+
+    m_scheduler = new enki::TaskScheduler();
+    m_scheduler->Initialize(scheduler_config);
+
+    m_renderer = new Renderer(m_window, m_scheduler);
 
     //FIXME
     Input::m_window_handle = m_window;

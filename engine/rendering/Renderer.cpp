@@ -20,8 +20,9 @@ struct CameraData
     glm::vec3 camera_position;
 };
 
-Renderer::Renderer(GLFWwindow* window) :
+Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
     m_window(window),
+    m_scheduler(scheduler),
     m_buffer_pool(&m_pool_allocator, 100, sizeof(Buffer)),
     m_texture_pool(&m_pool_allocator, 10, sizeof(Texture)),
     m_sampler_pool(&m_pool_allocator, 10, sizeof(Sampler)),
@@ -54,6 +55,12 @@ Renderer::~Renderer()
     m_logical_device.destroyDescriptorSetLayout(m_descriptor_set_layout, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_camera_data_layout, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_texture_set_layout, nullptr);
+    m_logical_device.destroyCommandPool(m_main_command_pool);
+    m_logical_device.destroyCommandPool(m_extra_command_pool);
+    for(auto& command_pool : m_command_pools)
+    {
+        m_logical_device.destroyCommandPool(command_pool, nullptr);
+    }
     vmaDestroyAllocator(m_allocator);
     cleanup_swapchain();
     m_logical_device.destroyRenderPass(m_render_pass, nullptr);
@@ -696,17 +703,16 @@ void Renderer::init_descriptor_sets()
     }
 
     // bindless texture set layout
-    // FIXME: magic numbers
     vk::DescriptorSetLayoutBinding image_sampler_binding{};
     image_sampler_binding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
     image_sampler_binding.descriptorCount = k_max_bindless_resources;
-    image_sampler_binding.binding = 10; // binding for all bindless textures (paradox)
+    image_sampler_binding.binding = k_bindless_texture_binding; // binding for all bindless textures (paradox)
     image_sampler_binding.stageFlags = vk::ShaderStageFlagBits::eFragment;
 
     vk::DescriptorSetLayoutBinding storage_image_binding{};
     storage_image_binding.descriptorType = vk::DescriptorType::eStorageImage;
     storage_image_binding.descriptorCount = k_max_bindless_resources;
-    storage_image_binding.binding = 11;
+    storage_image_binding.binding = k_bindless_image_binding;
 
     vk::DescriptorSetLayoutBinding bindless_bindings[] = { image_sampler_binding, storage_image_binding };
 
@@ -969,12 +975,72 @@ void Renderer::init_graphics_pipeline()
 
 void Renderer::init_command_pools()
 {
+    DeviceHelper::QueueFamilies queue_family_indices = DeviceHelper::find_queue_families(m_physical_device, m_surface);
 
+    vk::CommandPoolCreateInfo pool_create_info{};
+    pool_create_info.sType = vk::StructureType::eCommandPoolCreateInfo;
+    pool_create_info.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    pool_create_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+
+    check(m_logical_device.createCommandPool(&pool_create_info, nullptr, &m_main_command_pool));
+    check(m_logical_device.createCommandPool(&pool_create_info, nullptr, &m_extra_command_pool));
+
+    m_command_pools.resize(m_scheduler->GetNumTaskThreads());
+
+    for(auto& command_pool : m_command_pools)
+    {
+        check(m_logical_device.createCommandPool(&pool_create_info, nullptr, &command_pool));
+    }
+
+    pool_create_info.queueFamilyIndex = queue_family_indices.transfer_family.value();
 }
 
 void Renderer::init_command_buffers()
 {
+    m_command_buffers.resize(m_command_pools.size() * k_max_frames_in_flight);
 
+    u32 command_buffer_index = 0;
+    for(const auto& command_pool : m_command_pools)
+    {
+        // now need to allocate the secondary command buffers for this pool
+        vk::CommandBufferAllocateInfo secondary_alloc_info{};
+        secondary_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
+        secondary_alloc_info.commandPool = command_pool;
+        secondary_alloc_info.level = vk::CommandBufferLevel::eSecondary;
+        secondary_alloc_info.commandBufferCount = 1;
+
+        for(u32 i = 0; i < k_max_frames_in_flight; ++i)
+        {
+            check(m_logical_device.allocateCommandBuffers(&secondary_alloc_info, &m_command_buffers[i + command_buffer_index].vk_command_buffer));
+        }
+
+        command_buffer_index += k_max_frames_in_flight;
+    }
+
+    vk::CommandBufferAllocateInfo primary_alloc_info{};
+    primary_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
+    primary_alloc_info.commandPool = m_main_command_pool;
+    primary_alloc_info.level = vk::CommandBufferLevel::ePrimary;
+    primary_alloc_info.commandBufferCount = 1;
+
+    vk::CommandBufferAllocateInfo extra_alloc_info{};
+    extra_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
+    extra_alloc_info.commandPool = m_extra_command_pool;
+    extra_alloc_info.level = vk::CommandBufferLevel::eSecondary;
+    extra_alloc_info.commandBufferCount = 1;
+
+    vk::CommandBufferAllocateInfo imgui_alloc_info{};
+    imgui_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
+    imgui_alloc_info.commandPool = m_main_command_pool;
+    imgui_alloc_info.level = vk::CommandBufferLevel::eSecondary;
+    imgui_alloc_info.commandBufferCount = 1;
+
+    for(u32 i = 0; i < k_max_frames_in_flight; ++i)
+    {
+        check(m_logical_device.allocateCommandBuffers(&primary_alloc_info, &m_primary_command_buffers[i].vk_command_buffer));
+        check(m_logical_device.allocateCommandBuffers(&extra_alloc_info, &m_extra_draw_commands[i].vk_command_buffer));
+        check(m_logical_device.allocateCommandBuffers(&imgui_alloc_info, &m_imgui_commands[i].vk_command_buffer));
+    }
 }
 
 void Renderer::init_depth_resources()

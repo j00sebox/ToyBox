@@ -12,6 +12,7 @@ public:
 
 private:
     GLFWwindow* m_window;
+    enki::TaskScheduler* m_scheduler;
     Renderer* m_renderer;
 
     bool m_running;
