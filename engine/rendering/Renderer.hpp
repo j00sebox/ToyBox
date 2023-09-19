@@ -29,6 +29,8 @@ public:
     TextureHandle create_texture(const TextureCreationInfo& texture_creation);
     SamplerHandle create_sampler(const SamplerCreationInfo& sampler_creation);
     DescriptorSetHandle create_descriptor_set(const DescriptorSetCreationInfo& descriptor_set_creation);
+    void create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& image_memory);
+    void create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, VmaAllocation& image_vma);
     vk::ImageView create_image_view(const vk::Image& image, vk::Format format, vk::ImageAspectFlags image_aspect);
     vk::ShaderModule create_shader_module(const std::vector<char>& code);
 
@@ -112,6 +114,11 @@ private:
     std::vector<CommandBuffer> m_command_buffers;
     std::array<CommandBuffer, k_max_frames_in_flight> m_extra_draw_commands;
     std::array<CommandBuffer, k_max_frames_in_flight> m_imgui_commands;
+
+    // sync objects
+    std::array<vk::Semaphore, k_max_frames_in_flight> m_image_available_semaphores;
+    std::array<vk::Semaphore, k_max_frames_in_flight> m_render_finished_semaphores;
+    std::array<vk::Fence, k_max_frames_in_flight> m_in_flight_fences;
 
     // texture used when loader can't find one
     TextureHandle m_null_texture;

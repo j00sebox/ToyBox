@@ -47,6 +47,11 @@ Renderer::~Renderer()
 {
     for(i32 i = 0; i < k_max_frames_in_flight; ++i)
     {
+        // sync objects
+        m_logical_device.destroySemaphore(m_image_available_semaphores[i], nullptr);
+        m_logical_device.destroySemaphore(m_render_finished_semaphores[i], nullptr);
+        m_logical_device.destroyFence(m_in_flight_fences[i], nullptr);
+        
         // uniform buffers
         destroy_buffer(m_camera_buffers[i]);
     }
@@ -313,6 +318,37 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetCreationI
     // m_logical_device.updateDescriptorSets(descriptor_set_creation.num_resources, descriptor_writes, 0, nullptr);
 
     return descriptor_set_handle;
+}
+
+void Renderer::create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& image_memory)
+{
+    vk::ImageCreateInfo image_info{};
+    image_info.sType = vk::StructureType::eImageCreateInfo;
+    image_info.imageType = vk::ImageType::e2D;
+    image_info.extent.width = static_cast<u32>(width);
+    image_info.extent.height = static_cast<u32>(height);
+    image_info.extent.depth = 1;
+    image_info.mipLevels = 1;
+    image_info.arrayLayers = 1;
+    image_info.format = format;
+    image_info.tiling = tiling;
+    image_info.initialLayout = vk::ImageLayout::eUndefined;
+    image_info.usage = usage;
+    image_info.sharingMode = vk::SharingMode::eExclusive;
+    image_info.samples = vk::SampleCountFlagBits::e1;
+
+    check(m_logical_device.createImage(&image_info, nullptr, &image));
+
+    vk::MemoryRequirements memory_requirements;
+    m_logical_device.getImageMemoryRequirements(image, &memory_requirements);
+
+    vk::MemoryAllocateInfo alloc_info{};
+    alloc_info.sType = vk::StructureType::eMemoryAllocateInfo;
+    alloc_info.allocationSize = memory_requirements.size;
+    alloc_info.memoryTypeIndex = DeviceHelper::find_memory_type(memory_requirements.memoryTypeBits, properties, m_physical_device);
+
+    check(m_logical_device.allocateMemory(&alloc_info, nullptr, &image_memory));
+    m_logical_device.bindImageMemory(image, image_memory, 0);
 }
 
 vk::ImageView Renderer::create_image_view(const vk::Image& image, vk::Format format, vk::ImageAspectFlags image_aspect)
@@ -1045,17 +1081,51 @@ void Renderer::init_command_buffers()
 
 void Renderer::init_depth_resources()
 {
+    create_image(m_swapchain_extent.width, m_swapchain_extent.height,
+                 vk::Format::eD32Sfloat, vk::ImageTiling::eOptimal,
+                 vk::ImageUsageFlagBits::eDepthStencilAttachment,
+                 vk::MemoryPropertyFlagBits::eDeviceLocal,
+                 m_depth_image, m_depth_image_memory);
 
+    m_depth_image_view = create_image_view(m_depth_image, vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth);
 }
 
 void Renderer::init_framebuffers()
 {
+    m_swapchain_framebuffers.resize(m_swapchain_image_views.size());
 
+    for(u32 i = 0; i < m_swapchain_image_views.size(); ++i)
+    {
+        std::array<vk::ImageView, 2> attachments = { m_swapchain_image_views[i], m_depth_image_view };
+
+        vk::FramebufferCreateInfo framebuffer_create_info{};
+        framebuffer_create_info.sType = vk::StructureType::eFramebufferCreateInfo;
+        framebuffer_create_info.renderPass = m_render_pass;
+        framebuffer_create_info.attachmentCount = static_cast<unsigned>(attachments.size());
+        framebuffer_create_info.pAttachments = attachments.data();
+        framebuffer_create_info.width = m_swapchain_extent.width;
+        framebuffer_create_info.height = m_swapchain_extent.height;
+        framebuffer_create_info.layers = 1;
+
+        check(m_logical_device.createFramebuffer(&framebuffer_create_info, nullptr, &m_swapchain_framebuffers[i]));
+    }
 }
 
 void Renderer::init_sync_objects()
 {
+    vk::SemaphoreCreateInfo semaphore_create_info{};
+    semaphore_create_info.sType = vk::StructureType::eSemaphoreCreateInfo;
 
+    vk::FenceCreateInfo fence_create_info{};
+    fence_create_info.sType = vk::StructureType::eFenceCreateInfo;
+    fence_create_info.flags = vk::FenceCreateFlagBits::eSignaled;
+
+    for(size_t i = 0; i < k_max_frames_in_flight; ++i)
+    {
+        check(m_logical_device.createSemaphore(&semaphore_create_info, nullptr, &m_image_available_semaphores[i]));
+        check(m_logical_device.createSemaphore(&semaphore_create_info, nullptr, &m_render_finished_semaphores[i]));
+        check(m_logical_device.createFence(&fence_create_info, nullptr, &m_in_flight_fences[i]));
+    }
 }
 
 void Renderer::cleanup_swapchain()
