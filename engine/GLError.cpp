@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GLError.h"
 
-#include "Log.h"
+#include "Log.hpp"
 #include <glad/glad.h>
 
 const char* gl_get_err_str(unsigned int err)

@@ -13,50 +13,50 @@
 #include <TaskScheduler.h>
 
 // FIXME: REMOOOOOVE
-#include <glm/mat4x4.hpp>
-struct Mesh
-{
-    BufferHandle             vertex_buffer;
-    BufferHandle             index_buffer;
-    u32             index_count = 0;
-};
-
-struct Material
-{
-    DescriptorSetHandle descriptor_set;
-    TextureHandle textures[4];
-    SamplerHandle sampler;
-};
-
-struct Model
-{
-    std::vector<Mesh>           meshes;
-    std::vector<Material>       materials;
-    std::vector<glm::mat4>      transforms;
-    glm::mat4       transform{1.f};
-};
-
-class Renderer;
-
-#include "scene/Camera.h"
-class Scene
-{
-public:
-    Camera camera;
-    std::vector<Model> models;
-
-    void add_model(const Model& model)
-    {
-        models.push_back(model);
-    }
-
-    void update(f32 delta_time)
-    {
-        camera.update(delta_time);
-    }
-
-    void close(Renderer* renderer);
-};
+//#include <glm/mat4x4.hpp>
+//struct Mesh
+//{
+//    BufferHandle             vertex_buffer;
+//    BufferHandle             index_buffer;
+//    u32             index_count = 0;
+//};
+//
+//struct Material
+//{
+//    DescriptorSetHandle descriptor_set;
+//    TextureHandle textures[4];
+//    SamplerHandle sampler;
+//};
+//
+//struct Model
+//{
+//    std::vector<Mesh>           meshes;
+//    std::vector<Material>       materials;
+//    std::vector<glm::mat4>      transforms;
+//    glm::mat4                   transform{1.f};
+//};
+//
+//class Renderer;
+//
+//#include "scene/Camera.h"
+//class Scene
+//{
+//public:
+//    Camera camera;
+//    std::vector<Model> models;
+//
+//    void add_model(const Model& model)
+//    {
+//        models.push_back(model);
+//    }
+//
+//    void update(f32 delta_time)
+//    {
+//        camera.update(delta_time);
+//    }
+//
+//    void close(Renderer* renderer);
+//};
 
 class Renderer
 {

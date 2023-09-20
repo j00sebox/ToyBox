@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Buffer.h"
 #include "GLError.h"
-#include "Log.h"
+#include "Log.hpp"
 
 #include <glad/glad.h>
 

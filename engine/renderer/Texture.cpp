@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Texture.h"
 #include "GLError.h"
-#include "Log.h"
+#include "Log.hpp"
 
 #include <glad/glad.h>
 #include <stb_image.h>

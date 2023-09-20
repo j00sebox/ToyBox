@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Window.h"
-#include "Log.h"
+#include "Log.hpp"
 #include "Input.h"
 #include "ViewPort.h"
 #include "EventList.h"

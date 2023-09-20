@@ -1,5 +1,5 @@
 #include "Inspector.h"
-#include "Entity.h"
+#include "Entity.hpp"
 #include "Component.h"
 #include "Input.h"
 

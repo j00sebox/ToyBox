@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Log.h"
+#include "Log.hpp"
 
 #ifdef PLATFORM_LINUX
 #include <csignal>

@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "Renderer.hpp"
 #include "Vertex.hpp"
-#include "Log.h"
+#include "Log.hpp"
 
 #include "util/DeviceHelper.hpp"
 #include "util/FileOperations.hpp"

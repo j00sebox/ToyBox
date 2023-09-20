@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "FrameBuffer.h"
 #include "GLError.h"
-#include "Log.h"
+#include "Log.hpp"
 
 #include <cassert>
 #include <glad/glad.h>

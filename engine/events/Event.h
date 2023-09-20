@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "Log.h"
+#include "Log.hpp"
 
 template<typename R, typename ... Args>
 class Event

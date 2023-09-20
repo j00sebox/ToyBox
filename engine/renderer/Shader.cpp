@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Shader.h"
-#include "Log.h"
+#include "Log.hpp"
 #include "GLError.h"
 
 #include <glad/glad.h>

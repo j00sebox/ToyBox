@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GLTFLoader.h"
 #include "FileOperations.h"
-#include "Log.h"
+#include "Log.hpp"
 
 int get_num_verts(const std::string& type)
 {

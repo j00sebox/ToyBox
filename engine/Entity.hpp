@@ -1,7 +1,6 @@
 #pragma once
 #include "pch.h"
-
-#include "Log.h"
+#include "Log.hpp"
 #include "components/Component.h"
 #include "components/All.h"
 
@@ -26,7 +25,7 @@ public:
 	{
 		if (m_type_map.find(component.get_type()) != m_type_map.end())
 		{
-			if (is_removeable(component.get_type()))
+			if (is_removable(component.get_type()))
 			{
 				size_t index = m_type_map.at(component.get_type());
 
@@ -69,7 +68,7 @@ public:
 	[[nodiscard]] std::vector<std::shared_ptr<Component>>& get_components() { return m_components; }
 
 protected:
-	static bool is_removeable(size_t type_hash)
+	static bool is_removable(size_t type_hash)
 	{
 		return (type_hash == typeid(MeshComponent).hash_code() || type_hash == typeid(MaterialComponent).hash_code() || type_hash == typeid(PointLight).hash_code() || type_hash == typeid(DirectionalLight).hash_code());
 	}

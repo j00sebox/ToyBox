@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Timer.h"
 
-#include "Log.h"
+#include "Log.hpp"
 
 Timer::Timer()
 {

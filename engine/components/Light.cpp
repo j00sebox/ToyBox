@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Light.h"
-#include "ImGuiHelper.h"
-#include "Log.h"
+#include "util/ImGuiHelper.hpp"
+#include "Log.hpp"
 
 #include <imgui.h>
 #include <nlohmann/json.hpp>

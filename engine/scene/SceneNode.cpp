@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "SceneNode.h"
-#include "Entity.h"
+#include "SceneNode.hpp"
+#include "Entity.hpp"
 #include "components/Transform.h"
 
 #include <stack>

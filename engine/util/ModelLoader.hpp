@@ -1,8 +1,8 @@
 #pragma once
 #include "Types.hpp"
-
 #include "rendering/Renderer.hpp"
 #include "rendering/Vertex.hpp"
+#include "scene/SceneNode.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -12,7 +12,7 @@ class ModelLoader
 {
 public:
     explicit ModelLoader(Renderer* renderer, const char* file_path);
-    Model load();
+    void load(SceneNode& scene_node, bool load_material = true);
     void load_node(aiNode* current_node, aiMatrix4x4 relative_transform, Model& model);
     void load_mesh(u32 mesh_index, Mesh& mesh);
     void load_material(u32 material_index, Material& material);

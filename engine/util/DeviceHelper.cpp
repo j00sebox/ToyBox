@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "DeviceHelper.hpp"
-#include "Log.h"
+#include "Log.hpp"
 
 namespace devh
 {

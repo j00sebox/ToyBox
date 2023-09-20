@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "Scene.h"
+#include "Scene.hpp"
 #include "editor/Inspector.h"
 
 class Application

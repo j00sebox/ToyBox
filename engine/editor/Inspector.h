@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Scene.h"
-#include "SceneNode.h"
+#include "Scene.hpp"
+#include "SceneNode.hpp"
 
 #include <queue>
 

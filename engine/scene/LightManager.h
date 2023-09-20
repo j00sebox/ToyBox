@@ -1,5 +1,5 @@
 #pragma once
-#include "SceneNode.h"
+#include "SceneNode.hpp"
 #include "components/Fwd.h"
 
 #include <array>

@@ -3,7 +3,7 @@
 #include "Material.h"
 #include "Shader.h"
 #include "Texture.h"
-#include "ImGuiHelper.h"
+#include "util/ImGuiHelper.hpp"
 
 #include <imgui.h>
 #include <nlohmann/json.hpp>

@@ -16,9 +16,9 @@ ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
         m_base_dir = path.substr(0, (path.find_last_of('\\') + 1));
 }
 
-Model ModelLoader::load()
+void ModelLoader::load(SceneNode& scene_node, bool load_material)
 {
-    Model model;
+    //Model model;
     aiNode* root = m_scene->mRootNode;
     aiMatrix4x4 root_transform = root->mTransformation;
 

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ViewPort.h"
-#include "Log.h"
+#include "Log.hpp"
 #include "EventList.h"
 
 #include <cassert>

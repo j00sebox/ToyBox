@@ -2,6 +2,9 @@
 #include "Engine.hpp"
 #include "Input.h"
 
+#include "rendering/Renderer.hpp"
+#include "scene/Scene.hpp"
+#include "scene/SceneSerializer.hpp"
 #include "util/ModelLoader.hpp"
 
 #include <imgui.h>
@@ -25,14 +28,8 @@ Engine::Engine(u32 width, u32 height) :
 
     m_renderer = new Renderer(m_window, m_scheduler);
     m_scene = new Scene();
-    m_scene->camera.resize(width, height);
-
-    ModelLoader loader(m_renderer, "../assets/models/bunny/scene.gltf");
-
-    Model loaded_model = loader.load();
-    glm::mat4 transform = glm::translate(glm::mat4(1), glm::vec3(0.f, 0.f, -2.0f));
-    loaded_model.transform = transform;
-    m_scene->add_model(loaded_model);
+    m_scene->camera->resize(width, height);
+    load_scene("../assets/scenes/test.scene");
 
     //FIXME
     Input::m_window_handle = m_window;
@@ -45,6 +42,11 @@ Engine::~Engine()
     delete m_renderer;
     glfwDestroyWindow(m_window);
     glfwTerminate();
+}
+
+void Engine::load_scene(const char* scene_name)
+{
+    SceneSerializer::open(scene_name, m_scene, m_renderer);
 }
 
 void Engine::run()
@@ -64,9 +66,30 @@ void Engine::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
+//        static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+//
+//        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+//        ImGui::SetNextWindowPos(viewport->WorkPos);
+//        ImGui::SetNextWindowSize(viewport->WorkSize);
+//        ImGui::SetNextWindowViewport(viewport->ID);
+//        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+//        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+//
+//        bool show_dockspace = true;
+//        ImGui::Begin("DockSpace", &show_dockspace, window_flags);
+//
+//        // submit the dockspace
+//        ImGuiIO& io = ImGui::GetIO();
+//        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+//        {
+//            ImGuiID dockspace_id = ImGui::GetID("DSP_ID");
+//            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+//        }
+//
+//        ImGui::PopStyleVar(2);
+//        ImGui::End();
 
-        ImGui::End();
+        ImGui::ShowDemoWindow();
         ImGui::Render();
 
         m_scene->update(get_delta_time());

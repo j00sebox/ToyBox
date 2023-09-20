@@ -2,7 +2,7 @@
 #include "Material.h"
 #include "Texture.h"
 #include "Shader.h"
-#include "Log.h"
+#include "Log.hpp"
 
 void Material::load(const std::string* const textures)
 {

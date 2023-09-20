@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "Input.h"
 #include "Timer.h"
-#include "Log.h"
+#include "Log.hpp"
 
 #include <imgui.h>
 
