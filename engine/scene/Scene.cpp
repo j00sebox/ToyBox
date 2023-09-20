@@ -87,6 +87,7 @@ void Scene::update(float elapsed_time)
 //    //Timer timer{};
 //#endif
 //	StaticRenderer::clear();
+    std::cout << "update\n";
     m_render_list.clear();
     mesh_used.clear();
 
@@ -291,8 +292,8 @@ void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transf
 {
     auto& transform = scene_node->entity()->get_component<Transform>();
 
-    if(transform.is_dirty())
-        transform.recalculate_transform();
+//    if(transform.is_dirty())
+//        transform.recalculate_transform();
 
 	// Transform relative_transform = parent_transform * transform;
 

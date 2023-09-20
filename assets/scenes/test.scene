@@ -17,41 +17,8 @@
             46.58108139038086
         ]
     },
-    "model_count": 2,
+    "model_count": 1,
     "models": [
-        {
-            "light": {
-                "brightness": 0.1459999978542328,
-                "cast_shadow": true,
-                "colour": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "direction": [
-                    0.0,
-                    20.0,
-                    20.0
-                ],
-                "type": "directional_light"
-            },
-            "name": "Direct Light",
-            "transform": {
-                "rotation": [
-                    0.0,
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": 1.0,
-                "translate": [
-                    0.0,
-                    20.0,
-                    20.0
-                ]
-            }
-        },
         {
             "material": {
                 "properties": {
@@ -80,17 +47,17 @@
                 "outlining_factor": 0.0010000000474974513,
                 "use_scale_outline": false
             },
-            "name": "Bunny",
+            "name": "Ship",
             "transform": {
                 "rotation": [
-                    103.0,
+                    0.0,
                     1.0,
                     0.0,
                     0.0
                 ],
-                "scale": 100.0,
+                "scale": 1.0,
                 "translate": [
-                    0.0,
+                    1.0,
                     0.0,
                     -2.0
                 ]

@@ -18,17 +18,19 @@ ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
         m_base_dir = path.substr(0, (path.find_last_of('\\') + 1));
 }
 
-void ModelLoader::load(SceneNode& scene_node)
+void ModelLoader::load(SceneNode& scene_node, Transform& base_transform)
 {
     //Model model;
     aiNode* root = m_scene->mRootNode;
     aiMatrix4x4 root_transform = root->mTransformation;
 
+    scene_node.entity()->add_component(std::move(base_transform));
+
     if(root->mNumChildren > 0)
     {
         for(u32 i = 0; i < root->mNumChildren; ++i)
         {
-            scene_node.add_child(load_node(root->mChildren[i], root_transform));
+            scene_node.add_child(load_node(root->mChildren[i], base_transform));
         }
     }
     else
@@ -37,8 +39,6 @@ void ModelLoader::load(SceneNode& scene_node)
         Material material{};
         load_mesh(root->mMeshes[0], mesh);
         load_material(root->mMeshes[0], material);
-
-        Transform transform{};
         // transform.transform = aimatrix4x4_to_glmmat4(root_transform);
 
 //        model.meshes.push_back(mesh);
@@ -49,24 +49,23 @@ void ModelLoader::load(SceneNode& scene_node)
         mesh_component.mesh = mesh;
         mesh_component.material = material;
 
-        Entity entity;
-        transform.translate({0.f, 0.f, -2.f});
-        transform.rotate(100.f, {1.f, 0.f, 0.f});
-        transform.scale(10.f);
-        entity.add_component(std::move(transform));
-        entity.add_component(std::move(mesh_component));
-
-        scene_node.set_entity(std::move(entity));
+        scene_node.entity()->add_component(std::move(mesh_component));
     }
 
+    std::cout << "what\n";
  //   return model;
 }
 
-SceneNode ModelLoader::load_node(aiNode* current_node, aiMatrix4x4 relative_transform)
+SceneNode ModelLoader::load_node(aiNode* current_node, Transform relative_transform)
 {
+    static int j = 0;
+    std::cout << j << "\n";
     SceneNode new_node;
     Entity entity;
-    relative_transform *= current_node->mTransformation;
+    relative_transform = relative_transform * aimatrix4x4_to_glmmat4(current_node->mTransformation);
+    Transform transform{};
+    transform = relative_transform;
+    entity.add_component(std::move(transform));
 
     if(current_node->mNumMeshes > 0)
     {
@@ -74,9 +73,6 @@ SceneNode ModelLoader::load_node(aiNode* current_node, aiMatrix4x4 relative_tran
         Material material{};
         load_mesh(current_node->mMeshes[0], mesh);
         load_material(current_node->mMeshes[0], material);
-
-        Transform transform{};
-        transform.transform = aimatrix4x4_to_glmmat4(relative_transform);
 
 //        model.meshes.push_back(mesh);
 //        model.materials.push_back(material);
@@ -86,7 +82,7 @@ SceneNode ModelLoader::load_node(aiNode* current_node, aiMatrix4x4 relative_tran
         mesh_component.mesh = mesh;
         mesh_component.material = material;
 
-        entity.add_component(std::move(transform));
+
         entity.add_component(std::move(mesh_component));
     }
 
@@ -96,7 +92,7 @@ SceneNode ModelLoader::load_node(aiNode* current_node, aiMatrix4x4 relative_tran
     {
         new_node.add_child(load_node(current_node->mChildren[i], relative_transform));
     }
-
+    ++j;
     return new_node;
 }
 
@@ -128,7 +124,7 @@ void ModelLoader::load_material(u32 material_index, Material& material)
     if (diffuse_texture_path.length == 0)
     {
         std::string textures[] = {
-                "../textures/white_on_white.jpeg",
+                "../assets/textures/white_on_white.jpeg",
                 "none",
                 "none",
                 "none"

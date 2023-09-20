@@ -47,6 +47,7 @@ Engine::~Engine()
 void Engine::load_scene(const char* scene_name)
 {
     SceneSerializer::open(scene_name, m_scene, m_renderer);
+    std::cout << "opened scene\n";
 }
 
 void Engine::run()

@@ -36,20 +36,18 @@ struct RecordDrawTask : enki::ITaskSet
             command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 1, 1, &material_data->vk_descriptor_set, 0, nullptr);
             command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 0, 1, &camera_data->vk_descriptor_set, 0, nullptr);
 
-            for(auto& render_object : scene->m_render_list)
-            {
-                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &render_object.transform.get_transform());
-                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), render_object.material.textures);
+            command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &scene->m_render_list[i].transform.get_transform());
+            command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->m_render_list[i].material.textures);
 
-                Buffer* vertex_buffer = renderer->get_buffer(render_object.mesh.vertex_buffer);
-                vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
-                vk::DeviceSize offsets[] = {0};
-                command_buffer->bindVertexBuffers(0, 1, vertex_buffers, offsets);
+            Buffer* vertex_buffer = renderer->get_buffer(scene->m_render_list[i].mesh.vertex_buffer);
+            vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
+            vk::DeviceSize offsets[] = {0};
+            command_buffer->bindVertexBuffers(0, 1, vertex_buffers, offsets);
 
-                Buffer* index_buffer = renderer->get_buffer(render_object.mesh.index_buffer);
-                command_buffer->bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
-                command_buffer->drawIndexed(render_object.mesh.index_count, 1, 0, 0, 0);
-            }
+            Buffer* index_buffer = renderer->get_buffer(scene->m_render_list[i].mesh.index_buffer);
+            command_buffer->bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
+            command_buffer->drawIndexed(scene->m_render_list[i].mesh.index_count, 1, 0, 0, 0);
+
 
 //            for(u32 j = 0; j < scene->models[i].meshes.size(); ++j)
 //            {
@@ -92,7 +90,7 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
     m_window(window),
     m_scheduler(scheduler),
     m_buffer_pool(&m_pool_allocator, 100, sizeof(Buffer)),
-    m_texture_pool(&m_pool_allocator, 10, sizeof(Texture)),
+    m_texture_pool(&m_pool_allocator, 20, sizeof(Texture)),
     m_sampler_pool(&m_pool_allocator, 10, sizeof(Sampler)),
     m_descriptor_set_pool(&m_pool_allocator, 10, sizeof(DescriptorSet))
 {

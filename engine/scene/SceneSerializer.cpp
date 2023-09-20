@@ -138,6 +138,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, 
 	Entity entity;
 
 	json model = accessor[model_index];
+    std::cout << model_index << "\n";
 
     // entity.set_name(model.value("name", "no_name"));
     entity.set_name("no_name");
@@ -157,8 +158,8 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, 
     glm::mat4 model_matrix = transform.get_transform();
     glm::vec3 position = transform.get_position();
 
-
     SceneNode node;
+    node.set_entity(std::move(entity));
 
 //	if (!model["light"].is_null())
 //	{
@@ -229,7 +230,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, 
         mesh_component.m_use_scale_outline = mesh_accessor["use_scale_outline"];
         mesh_component.m_outlining_factor = mesh_accessor["outlining_factor"];
 
-        model_loader.load(node);
+        model_loader.load(node, transform);
 
         //mesh_component.set_mesh(MeshTable::get(mesh_name));
         mesh_component.set_mesh_name(mesh_name);
@@ -296,8 +297,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, 
     }
     else
     {
-        entity.add_component(std::move(transform));
-        node.set_entity(std::move(entity));
+        node.entity()->add_component(std::move(transform));
     }
 
 	SceneNodePtr current_node = std::make_shared<SceneNode>(node);

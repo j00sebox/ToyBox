@@ -23,6 +23,7 @@ public:
 	void scale(float s);
 	void rotate(float angle, const glm::vec3& axis);
     void recalculate_transform();
+    void set_transform(const glm::mat4& transform) { m_transform_matrix = transform; }
 
     [[nodiscard]] bool is_dirty() const { return m_dirty; }
 	[[nodiscard]] const glm::vec3& get_position() const { return m_position; }
@@ -38,8 +39,7 @@ public:
 	void serialize(nlohmann::json& accessor) const override;
 
 	Transform operator* (const Transform& other) const;
-
-    glm::mat4 transform = glm::mat4(1.f);
+    Transform operator* (const glm::mat4& transform) const;
 
 private:
     void update_matrices();

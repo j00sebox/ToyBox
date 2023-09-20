@@ -146,3 +146,9 @@ Transform Transform::operator*(const Transform& other) const
 
 	return new_transform;
 }
+
+Transform Transform::operator*(const glm::mat4& transform) const
+{
+    Transform new_transform{};
+    new_transform.set_transform(new_transform.get_transform() * transform);
+}

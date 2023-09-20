@@ -121,8 +121,6 @@ namespace devh
         std::multimap<u32, vk::PhysicalDevice> candidates;
         if(instance.enumeratePhysicalDevices(&device_count, devices.data()) != vk::Result::eSuccess) {}
 
-        info(devices.size());
-
         for (const auto& device: devices)
         {
             if (is_device_suitable(device, required_extensions))

@@ -53,7 +53,7 @@ void main()
     }
 
     // TODO: dynamic lighting
-    vec3 direct_light_position = vec3(0.0, 0.0, 0.0);
+    vec3 direct_light_position = vec3(0.0, 20.0, 20.0);
     vec3 direct_light_colour = vec3(1.0, 1.0, 1.0);
 
     vec3 ambient = 0.05 * direct_light_colour;
