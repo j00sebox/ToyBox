@@ -3,8 +3,7 @@
 #include "GpuResources.hpp"
 #include "CommandBuffer.hpp"
 #include "Memory.hpp"
-
-//#include "scene/Scene.h"
+#include "scene/Scene.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -12,7 +11,6 @@
 #include <vk_mem_alloc.h>
 #include <TaskScheduler.h>
 
-// FIXME: REMOOOOOVE
 //#include <glm/mat4x4.hpp>
 //struct Mesh
 //{

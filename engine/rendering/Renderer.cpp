@@ -14,27 +14,6 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
 
-// FIXME: remoooove
-void Scene::close(Renderer* renderer)
-{
-    for(auto& model : models)
-    {
-        for(auto& mesh: model.meshes)
-        {
-            renderer->destroy_buffer(mesh.vertex_buffer);
-            renderer->destroy_buffer(mesh.index_buffer);
-        }
-
-        for(auto& material : model.materials)
-        {
-            for(auto& texture : material.textures)
-            {
-                renderer->destroy_texture(texture);
-            }
-        }
-    }
-}
-
 #define check(result) { if(result != vk::Result::eSuccess) { fatal("Error in: %s", __FILE__); } }
 
 struct RecordDrawTask : enki::ITaskSet
@@ -57,21 +36,36 @@ struct RecordDrawTask : enki::ITaskSet
             command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 1, 1, &material_data->vk_descriptor_set, 0, nullptr);
             command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 0, 1, &camera_data->vk_descriptor_set, 0, nullptr);
 
-            for(u32 j = 0; j < scene->models[i].meshes.size(); ++j)
+            for(auto& render_object : scene->m_render_list)
             {
-                glm::mat4 final_transform = scene->models[i].transform * scene->models[i].transforms[j];
-                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &final_transform);
-                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->models[i].materials[j].textures);
+                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &render_object.transform.get_transform());
+                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), render_object.material.textures);
 
-                Buffer* vertex_buffer = renderer->get_buffer(scene->models[i].meshes[j].vertex_buffer);
+                Buffer* vertex_buffer = renderer->get_buffer(render_object.mesh.vertex_buffer);
                 vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
                 vk::DeviceSize offsets[] = {0};
                 command_buffer->bindVertexBuffers(0, 1, vertex_buffers, offsets);
 
-                Buffer* index_buffer = renderer->get_buffer(scene->models[i].meshes[j].index_buffer);
+                Buffer* index_buffer = renderer->get_buffer(render_object.mesh.index_buffer);
                 command_buffer->bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
-                command_buffer->drawIndexed(scene->models[i].meshes[j].index_count, 1, 0, 0, 0);
+                command_buffer->drawIndexed(render_object.mesh.index_count, 1, 0, 0, 0);
             }
+
+//            for(u32 j = 0; j < scene->models[i].meshes.size(); ++j)
+//            {
+//                glm::mat4 final_transform = scene->models[i].transform * scene->models[i].transforms[j];
+//                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &final_transform);
+//                command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->models[i].materials[j].textures);
+//
+//                Buffer* vertex_buffer = renderer->get_buffer(scene->models[i].meshes[j].vertex_buffer);
+//                vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
+//                vk::DeviceSize offsets[] = {0};
+//                command_buffer->bindVertexBuffers(0, 1, vertex_buffers, offsets);
+//
+//                Buffer* index_buffer = renderer->get_buffer(scene->models[i].meshes[j].index_buffer);
+//                command_buffer->bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
+//                command_buffer->drawIndexed(scene->models[i].meshes[j].index_count, 1, 0, 0, 0);
+//            }
         }
         command_buffer->end();
     }
@@ -173,9 +167,9 @@ Renderer::~Renderer()
 void Renderer::render(Scene* scene)
 {
     CameraData camera_data{};
-    camera_data.view = scene->camera.camera_look_at();
-    camera_data.proj = scene->camera.get_perspective();
-    camera_data.camera_position = scene->camera.get_pos();
+    camera_data.view = scene->camera->camera_look_at();
+    camera_data.proj = scene->camera->get_perspective();
+    camera_data.camera_position = scene->camera->get_pos();
 
     // GLM was originally designed for OpenGL where the Y coordinate of the clip space is inverted,
     // so we can remedy this by flipping the sign of the Y scaling factor in the projection matrix
@@ -192,17 +186,17 @@ void Renderer::render(Scene* scene)
     RecordDrawTask record_draw_tasks[m_scheduler->GetNumTaskThreads()];
     u32 models_per_thread, num_recordings, surplus;
 
-    if (m_scheduler->GetNumTaskThreads() > scene->models.size())
+    if (m_scheduler->GetNumTaskThreads() > scene->m_render_list.size())
     {
         models_per_thread = 1;
-        num_recordings = scene->models.size();
+        num_recordings = scene->m_render_list.size();
         surplus = 0;
     }
     else
     {
-        models_per_thread = scene->models.size() / m_scheduler->GetNumTaskThreads();
+        models_per_thread = scene->m_render_list.size() / m_scheduler->GetNumTaskThreads();
         num_recordings = m_scheduler->GetNumTaskThreads();
-        surplus = scene->models.size() % m_scheduler->GetNumTaskThreads();
+        surplus = scene->m_render_list.size() % m_scheduler->GetNumTaskThreads();
     }
 
     vk::CommandBufferInheritanceInfo inheritance_info{};

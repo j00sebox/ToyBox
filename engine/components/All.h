@@ -3,4 +3,4 @@
 #include "components/Transform.h"
 #include "components/MeshComponent.h"
 #include "components/MaterialComponent.h"
-#include "components/Light.h"
+//#include "components/Light.h"

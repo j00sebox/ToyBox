@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "MeshComponent.h"
-#include "Mesh.h"
+// #include "Mesh.h"
 
 #include <imgui.h>
 #include <nlohmann/json.hpp>
@@ -9,12 +9,12 @@ using namespace nlohmann;
 
 void MeshComponent::bind() const
 {
-    m_mesh->bind();
+   // m_mesh->bind();
 }
 
 void MeshComponent::unbind() const
 {
-    m_mesh->unbind();
+   // m_mesh->unbind();
 }
 
 void MeshComponent::imgui_render()
@@ -32,7 +32,7 @@ void MeshComponent::serialize(json& accessor) const
 {
 	accessor["mesh"]["mesh_name"] = m_mesh_name;
     accessor["mesh"]["mesh_type"] = m_mesh_type;
-    accessor["mesh"]["instanced"] = m_mesh->is_instanced();
+    //accessor["mesh"]["instanced"] = m_mesh->is_instanced();
 
     accessor["mesh"]["outlining_factor"] = m_outlining_factor;
     accessor["mesh"]["use_scale_outline"] = m_use_scale_outline;

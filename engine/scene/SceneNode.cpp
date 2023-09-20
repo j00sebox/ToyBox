@@ -15,6 +15,11 @@ SceneNode::~SceneNode()
 	m_entity.reset();
 }
 
+void SceneNode::set_entity(Entity &&e)
+{
+    m_entity = std::make_shared<Entity>(e);
+}
+
 void SceneNode::add_child(SceneNode&& s)
 {
 	m_children.emplace_back(std::make_shared<SceneNode>(std::move(s)));

@@ -5,6 +5,6 @@ list(APPEND SRCS
         ${CMAKE_CURRENT_LIST_DIR}/FileOperations.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ModelLoader.hpp
         ${CMAKE_CURRENT_LIST_DIR}/ModelLoader.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ImguiHelper.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/ImguiHelper.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ImGuiHelper.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/ImGuiHelper.cpp
 )

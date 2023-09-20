@@ -1,8 +1,11 @@
 #pragma once
-#include "pch.h"
-#include "Log.hpp"
+// #include "Log.hpp"
 #include "components/Component.h"
 #include "components/All.h"
+
+#include <string>
+#include <memory>
+#include <unordered_map>
 
 class Entity
 {
@@ -53,7 +56,7 @@ public:
 		size_t type_hash = typeid(T).hash_code();
 		if (m_type_map.find(type_hash) == m_type_map.end())
 		{
-			fatal("Component does not exist!\n");
+			// fatal("Component does not exist!\n");
 		}
 
 		return *dynamic_cast<T*>(m_components[m_type_map.at(type_hash)].get());
@@ -70,7 +73,7 @@ public:
 protected:
 	static bool is_removable(size_t type_hash)
 	{
-		return (type_hash == typeid(MeshComponent).hash_code() || type_hash == typeid(MaterialComponent).hash_code() || type_hash == typeid(PointLight).hash_code() || type_hash == typeid(DirectionalLight).hash_code());
+		return (type_hash == typeid(MeshComponent).hash_code() || type_hash == typeid(MaterialComponent).hash_code()); // || type_hash == typeid(PointLight).hash_code() || type_hash == typeid(DirectionalLight).hash_code());
 	}
 
 	std::string m_name;

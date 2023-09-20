@@ -64,13 +64,13 @@ void Transform::imgui_render()
 
     glm::vec3 prev_pos = m_position;
 	ImGui::Text("\nPosition: ");
-	coloured_label("x", ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f }, button_size);
+	imguih::coloured_label("x", ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f }, button_size);
 	ImGui::SameLine();
 	ImGui::DragFloat("##x", &m_position.x);
-	coloured_label("y", ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f }, button_size);
+    imguih::coloured_label("y", ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f }, button_size);
 	ImGui::SameLine();
 	ImGui::DragFloat("##y", &m_position.y);
-	coloured_label("z", ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f }, button_size);
+    imguih::coloured_label("z", ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f }, button_size);
 	ImGui::SameLine();
 	ImGui::DragFloat("##z", &m_position.z);
 
@@ -79,13 +79,13 @@ void Transform::imgui_render()
 	ImGui::Text("\nRotation: ");
 	ImGui::Text("angle"); ImGui::SameLine();
 	ImGui::DragFloat("##angle", &m_rotate_angle);
-	coloured_label("i", ImVec4{ 0.0f, 0.8f, 0.96f, 1.0f }, button_size);
+    imguih::coloured_label("i", ImVec4{ 0.0f, 0.8f, 0.96f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
 	ImGui::SliderFloat("##i", &m_rotate_axis.x, -1.f, 1.f);
-	coloured_label("j", ImVec4{ 0.84f, 0.78f, 0.1f, 1.0f }, button_size);
+    imguih::coloured_label("j", ImVec4{ 0.84f, 0.78f, 0.1f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
 	ImGui::SliderFloat("##j", &m_rotate_axis.y, -1.f, 1.f);
-	coloured_label("k", ImVec4{ 0.97f, 0.04f, 1.f, 1.0f }, button_size);
+    imguih::coloured_label("k", ImVec4{ 0.97f, 0.04f, 1.f, 1.0f }, button_size);
 	ImGui::SameLine(0.f, 21.f);
 	ImGui::SliderFloat("##k", &m_rotate_axis.z, -1.f, 1.f);
 	glm::normalize(m_rotate_axis);

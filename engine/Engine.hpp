@@ -1,6 +1,9 @@
 #pragma once
 #include "Types.hpp"
 
+#include <GLFW/glfw3.h>
+#include <TaskScheduler.h>
+
 class Renderer;
 class Scene;
 

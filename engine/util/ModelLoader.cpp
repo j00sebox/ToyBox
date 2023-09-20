@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "ModelLoader.hpp"
+#include "Entity.hpp"
+#include "components/MeshComponent.h"
 
 ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
         m_renderer(renderer),
@@ -16,7 +18,7 @@ ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
         m_base_dir = path.substr(0, (path.find_last_of('\\') + 1));
 }
 
-void ModelLoader::load(SceneNode& scene_node, bool load_material)
+void ModelLoader::load(SceneNode& scene_node)
 {
     //Model model;
     aiNode* root = m_scene->mRootNode;
@@ -26,7 +28,7 @@ void ModelLoader::load(SceneNode& scene_node, bool load_material)
     {
         for(u32 i = 0; i < root->mNumChildren; ++i)
         {
-            load_node(root->mChildren[i], root_transform, model);
+            scene_node.add_child(load_node(root->mChildren[i], root_transform));
         }
     }
     else
@@ -36,16 +38,34 @@ void ModelLoader::load(SceneNode& scene_node, bool load_material)
         load_mesh(root->mMeshes[0], mesh);
         load_material(root->mMeshes[0], material);
 
-        model.meshes.push_back(mesh);
-        model.materials.push_back(material);
-        model.transforms.push_back(aimatrix4x4_to_glmmat4(root_transform));
+        Transform transform{};
+        // transform.transform = aimatrix4x4_to_glmmat4(root_transform);
+
+//        model.meshes.push_back(mesh);
+//        model.materials.push_back(material);
+//        model.transforms.push_back(aimatrix4x4_to_glmmat4(relative_transform));
+
+        MeshComponent mesh_component;
+        mesh_component.mesh = mesh;
+        mesh_component.material = material;
+
+        Entity entity;
+        transform.translate({0.f, 0.f, -2.f});
+        transform.rotate(100.f, {1.f, 0.f, 0.f});
+        transform.scale(10.f);
+        entity.add_component(std::move(transform));
+        entity.add_component(std::move(mesh_component));
+
+        scene_node.set_entity(std::move(entity));
     }
 
-    return model;
+ //   return model;
 }
 
-void ModelLoader::load_node(aiNode* current_node, aiMatrix4x4 relative_transform, Model& model)
+SceneNode ModelLoader::load_node(aiNode* current_node, aiMatrix4x4 relative_transform)
 {
+    SceneNode new_node;
+    Entity entity;
     relative_transform *= current_node->mTransformation;
 
     if(current_node->mNumMeshes > 0)
@@ -55,15 +75,29 @@ void ModelLoader::load_node(aiNode* current_node, aiMatrix4x4 relative_transform
         load_mesh(current_node->mMeshes[0], mesh);
         load_material(current_node->mMeshes[0], material);
 
-        model.meshes.push_back(mesh);
-        model.materials.push_back(material);
-        model.transforms.push_back(aimatrix4x4_to_glmmat4(relative_transform));
+        Transform transform{};
+        transform.transform = aimatrix4x4_to_glmmat4(relative_transform);
+
+//        model.meshes.push_back(mesh);
+//        model.materials.push_back(material);
+//        model.transforms.push_back(aimatrix4x4_to_glmmat4(relative_transform));
+
+        MeshComponent mesh_component;
+        mesh_component.mesh = mesh;
+        mesh_component.material = material;
+
+        entity.add_component(std::move(transform));
+        entity.add_component(std::move(mesh_component));
     }
+
+    new_node.set_entity(std::move(entity));
 
     for(u32 i = 0; i < current_node->mNumChildren; ++i)
     {
-        load_node(current_node->mChildren[i], relative_transform, model);
+        new_node.add_child(load_node(current_node->mChildren[i], relative_transform));
     }
+
+    return new_node;
 }
 
 void ModelLoader::load_mesh(u32 mesh_index, Mesh& mesh)

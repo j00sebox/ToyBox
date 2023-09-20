@@ -39,6 +39,8 @@ public:
 
 	Transform operator* (const Transform& other) const;
 
+    glm::mat4 transform = glm::mat4(1.f);
+
 private:
     void update_matrices();
     void resolve_vectors();

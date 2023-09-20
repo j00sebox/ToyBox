@@ -1,11 +1,12 @@
 #pragma once
 
+#include <list>
+#include <vector>
+#include <memory>
+
 class Entity;
 class Transform;
 class SceneSerializer;
-
-#include <list>
-
 class SceneNode;
 typedef std::shared_ptr<SceneNode> SceneNodePtr;
 
@@ -16,6 +17,7 @@ public:
 	explicit SceneNode(std::shared_ptr<Entity>&& e);
     ~SceneNode();
 
+    void set_entity(Entity&& e);
 	void add_child(SceneNode&& s);
     void add_child(SceneNodePtr s);
     void move_child(const SceneNodePtr& s);

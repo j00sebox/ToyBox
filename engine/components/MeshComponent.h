@@ -1,6 +1,6 @@
 #pragma once
-
-#include "renderer/Fwd.h"
+#include "Types.hpp"
+// #include "renderer/Fwd.h"
 #include "components/Component.h"
 #include "Primitives.h"
 
@@ -11,7 +11,7 @@
 class MeshComponent final : public Component
 {
 public:
-    void set_mesh(const std::shared_ptr<Mesh>& mesh) { m_mesh = mesh; }
+    void set_mesh(const std::shared_ptr<Mesh>& _mesh) { m_mesh = _mesh; }
     [[nodiscard]] const std::shared_ptr<Mesh>& get_mesh() const { return m_mesh; }
     [[nodiscard]] const Mesh& get() { return m_mesh.operator*(); }
 
@@ -30,6 +30,8 @@ public:
 	void serialize(nlohmann::json& accessor) const override;
 
     int m_instance_id = -1;
+    Mesh mesh;
+    Material material;
 
 private:
     std::shared_ptr<Mesh> m_mesh;

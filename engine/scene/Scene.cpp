@@ -3,11 +3,11 @@
 // #include "StaticRenderer.h"
 #include "SceneSerializer.hpp"
 //#include "Mesh.h"
-#include "Log.hpp"
+//#include "Log.hpp"
 #include "components/Transform.h"
 // #include "components/Light.h"
 #include "components/MeshComponent.h"
-#include "renderer/Material.h"
+#include "rendering/Renderer.hpp"
 #include "events/EventList.h"
 //#include "ModelLoader.h"
 
@@ -22,15 +22,15 @@ Scene::Scene() :
 
 Scene::~Scene()
 {
-    ShaderTable::release();
+    //ShaderTable::release();
     // MeshTable::release();
-    MaterialTable::release();
+    // MaterialTable::release();
 }
 
 void Scene::load(const char* scene)
 {
     compile_shaders();
-	SceneSerializer::open(scene, *this, camera, m_skybox, root);
+	//SceneSerializer::open(scene, *this, camera, m_skybox, root);
 
 //    for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
 //    {
@@ -38,9 +38,28 @@ void Scene::load(const char* scene)
 //    }
 }
 
+void Scene::close(Renderer* renderer)
+{
+    for (auto& scene_node : *root)
+    {
+        if (scene_node->entity()->has_component<MeshComponent>())
+        {
+            auto& mesh_component = scene_node->entity()->get_component<MeshComponent>();
+
+            renderer->destroy_buffer(mesh_component.mesh.vertex_buffer);
+            renderer->destroy_buffer(mesh_component.mesh.index_buffer);
+
+            for(auto& texture : mesh_component.material.textures)
+            {
+                renderer->destroy_texture(texture);
+            }
+        }
+    }
+}
+
 void Scene::save(const std::string& path)
 {
-	SceneSerializer::save(path.c_str(), *this, camera, m_skybox, root);
+	// SceneSerializer::save(path.c_str(), *this, camera, m_skybox, root);
 }
 
 void Scene::init()
@@ -68,7 +87,7 @@ void Scene::update(float elapsed_time)
 //    //Timer timer{};
 //#endif
 //	StaticRenderer::clear();
-//    m_render_list.clear();
+    m_render_list.clear();
     mesh_used.clear();
 
     while (!m_nodes_to_remove.empty())
@@ -81,10 +100,10 @@ void Scene::update(float elapsed_time)
     camera->update(elapsed_time);
      //   m_transforms_buffer->set_data(0, m_camera->camera_look_at());
 
-	if (m_skybox)
-	{
-		//StaticRenderer::draw_skybox(*m_skybox);
-	}
+//	if (m_skybox)
+//	{
+//		//StaticRenderer::draw_skybox(*m_skybox);
+//	}
 
     for (auto const& [mesh_name, instance_matrices] : instanced_meshes)
     {
@@ -249,14 +268,14 @@ void Scene::update(float elapsed_time)
 
 void Scene::remove_node(SceneNodePtr& node)
 {
-	if (node->entity()->has_component<PointLight>())
-	{
-		m_light_manager.remove_point_light(node);
-	}
-    else if(node->entity()->has_component<DirectionalLight>())
-    {
-        m_light_manager.remove_directional_light();
-    }
+//	if (node->entity()->has_component<PointLight>())
+//	{
+//		m_light_manager.remove_point_light(node);
+//	}
+//    else if(node->entity()->has_component<DirectionalLight>())
+//    {
+//        m_light_manager.remove_directional_light();
+//    }
 
 	if (!root->remove(node))
 	{
@@ -275,12 +294,14 @@ void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transf
     if(transform.is_dirty())
         transform.recalculate_transform();
 
-	Transform relative_transform = parent_transform * transform;
+	// Transform relative_transform = parent_transform * transform;
 
 	if (scene_node->entity()->has_component<MeshComponent>())
 	{
-		auto& material_component = scene_node->entity()->get_component<MaterialComponent>();
+		// auto& material_component = scene_node->entity()->get_component<MaterialComponent>();
 		auto& mesh_component = scene_node->entity()->get_component<MeshComponent>();
+
+        m_render_list.emplace_back(transform, mesh_component.mesh, mesh_component.material);
 
 //        if(mesh_component.get_mesh()->is_instanced())
 //        {
@@ -312,7 +333,7 @@ void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transf
 
 	for (auto& node : *scene_node)
 	{
-		update_node(node, relative_transform);
+		update_node(node, transform);
 	}
 }
 

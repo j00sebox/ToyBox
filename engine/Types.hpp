@@ -23,3 +23,18 @@ struct BufferHandle : ResourceHandle {};
 struct TextureHandle : ResourceHandle {};
 struct SamplerHandle : ResourceHandle {};
 struct DescriptorSetHandle : ResourceHandle {};
+
+// TODO: move somewhere else ?
+struct Material
+{
+    DescriptorSetHandle     descriptor_set;
+    TextureHandle           textures[4];
+    SamplerHandle           sampler;
+};
+
+struct Mesh
+{
+    BufferHandle            vertex_buffer;
+    BufferHandle            index_buffer;
+    u32                     index_count = 0;
+};
