@@ -55,10 +55,11 @@ void ModelLoader::load(SceneNode* scene_node, Transform& base_transform)
 SceneNode* ModelLoader::load_node(aiNode* current_node, Transform relative_transform)
 {
     auto* scene_node = new SceneNode();
-    relative_transform = relative_transform * aimatrix4x4_to_glmmat4(current_node->mTransformation);
     Transform transform{};
-    transform = relative_transform;
-    scene_node->add_component(std::move(transform));
+    // transform = relative_transform;
+    // relative_transform = relative_transform * aimatrix4x4_to_glmmat4(current_node->mTransformation);
+    transform.set_transform(relative_transform.get_transform() * aimatrix4x4_to_glmmat4(current_node->mTransformation));
+
 
     if(current_node->mNumMeshes > 0)
     {
@@ -80,8 +81,9 @@ SceneNode* ModelLoader::load_node(aiNode* current_node, Transform relative_trans
 
     for(u32 i = 0; i < current_node->mNumChildren; ++i)
     {
-        scene_node->add_child(load_node(current_node->mChildren[i], relative_transform));
+        scene_node->add_child(load_node(current_node->mChildren[i], transform));
     }
+    scene_node->add_component(std::move(transform));
     return scene_node;
 }
 
