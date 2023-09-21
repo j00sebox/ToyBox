@@ -1,5 +1,4 @@
 #include "Scene.hpp"
-#include "Entity.hpp"
 // #include "StaticRenderer.h"
 #include "SceneSerializer.hpp"
 //#include "Mesh.h"
@@ -14,8 +13,7 @@
 #include <imgui_internal.h>
 #include <spdlog/fmt/bundled/format.h>
 
-Scene::Scene() :
-    root(std::make_shared<SceneNode>())
+Scene::Scene()
 {
 	camera = std::make_shared<Camera>();
 }
@@ -40,21 +38,33 @@ void Scene::load(const char* scene)
 
 void Scene::close(Renderer* renderer)
 {
-    for (auto& scene_node : *root)
+    for (auto* scene_node : root)
     {
-        if (scene_node->entity()->has_component<MeshComponent>())
+        delete_node(renderer, scene_node);
+    }
+}
+
+void Scene::delete_node(Renderer* renderer, SceneNode* scene_node)
+{
+    if (scene_node->has_component<MeshComponent>())
+    {
+        auto& mesh_component = scene_node->get_component<MeshComponent>();
+
+        renderer->destroy_buffer(mesh_component.mesh.vertex_buffer);
+        renderer->destroy_buffer(mesh_component.mesh.index_buffer);
+
+        for(auto& texture : mesh_component.material.textures)
         {
-            auto& mesh_component = scene_node->entity()->get_component<MeshComponent>();
-
-            renderer->destroy_buffer(mesh_component.mesh.vertex_buffer);
-            renderer->destroy_buffer(mesh_component.mesh.index_buffer);
-
-            for(auto& texture : mesh_component.material.textures)
-            {
-                renderer->destroy_texture(texture);
-            }
+            renderer->destroy_texture(texture);
         }
     }
+
+    for (auto* child_node : scene_node->m_children)
+    {
+        delete_node(renderer, child_node);
+    }
+
+    delete scene_node;
 }
 
 void Scene::save(const std::string& path)
@@ -87,7 +97,6 @@ void Scene::update(float elapsed_time)
 //    //Timer timer{};
 //#endif
 //	StaticRenderer::clear();
-    std::cout << "update\n";
     m_render_list.clear();
     mesh_used.clear();
 
@@ -111,7 +120,7 @@ void Scene::update(float elapsed_time)
         //MeshTable::get(mesh_name)->update_instances(instance_matrices);
     }
 
-	for (auto& scene_node : *root)
+	for (auto& scene_node : root)
 	{
 		update_node(scene_node, Transform{});
 	}
@@ -267,7 +276,7 @@ void Scene::update(float elapsed_time)
 //    m_transforms_buffer->set_data(64, m_camera->get_perspective());
 //}
 
-void Scene::remove_node(SceneNodePtr& node)
+void Scene::remove_node(SceneNode* node)
 {
 //	if (node->entity()->has_component<PointLight>())
 //	{
@@ -278,7 +287,7 @@ void Scene::remove_node(SceneNodePtr& node)
 //        m_light_manager.remove_directional_light();
 //    }
 
-	if (!root->remove(node))
+	if (!root.remove(node))
 	{
 		fatal("Node not apart of current scene tree!");
 	}
@@ -288,19 +297,19 @@ void Scene::remove_node(SceneNodePtr& node)
 	}
 }
 
-void Scene::update_node(SceneNodePtr& scene_node, const Transform& parent_transform)
+void Scene::update_node(SceneNode* scene_node, const Transform& parent_transform)
 {
-    auto& transform = scene_node->entity()->get_component<Transform>();
+    auto& transform = scene_node->get_component<Transform>();
 
 //    if(transform.is_dirty())
 //        transform.recalculate_transform();
 
 	// Transform relative_transform = parent_transform * transform;
 
-	if (scene_node->entity()->has_component<MeshComponent>())
+	if (scene_node->has_component<MeshComponent>())
 	{
 		// auto& material_component = scene_node->entity()->get_component<MaterialComponent>();
-		auto& mesh_component = scene_node->entity()->get_component<MeshComponent>();
+		auto& mesh_component = scene_node->get_component<MeshComponent>();
 
         m_render_list.emplace_back(transform, mesh_component.mesh, mesh_component.material);
 

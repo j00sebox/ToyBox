@@ -68,7 +68,7 @@ public:
 		return (m_type_map.find(typeid(T).hash_code()) != m_type_map.end());
 	}
 
-	[[nodiscard]] std::vector<std::shared_ptr<Component>>& get_components() { return m_components; }
+	[[nodiscard]] const std::vector<std::shared_ptr<Component>>& get_components() const { return m_components; }
 
 protected:
 	static bool is_removable(size_t type_hash)

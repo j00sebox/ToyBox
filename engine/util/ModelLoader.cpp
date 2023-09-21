@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ModelLoader.hpp"
-#include "Entity.hpp"
 #include "components/MeshComponent.h"
 
 ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
@@ -18,19 +17,18 @@ ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
         m_base_dir = path.substr(0, (path.find_last_of('\\') + 1));
 }
 
-void ModelLoader::load(SceneNode& scene_node, Transform& base_transform)
+void ModelLoader::load(SceneNode* scene_node, Transform& base_transform)
 {
     //Model model;
     aiNode* root = m_scene->mRootNode;
     aiMatrix4x4 root_transform = root->mTransformation;
-
-    scene_node.entity()->add_component(std::move(base_transform));
+    // base_transform = base_transform * aimatrix4x4_to_glmmat4(root_transform);
 
     if(root->mNumChildren > 0)
     {
         for(u32 i = 0; i < root->mNumChildren; ++i)
         {
-            scene_node.add_child(load_node(root->mChildren[i], base_transform));
+            scene_node->add_child(load_node(root->mChildren[i], base_transform));
         }
     }
     else
@@ -49,23 +47,18 @@ void ModelLoader::load(SceneNode& scene_node, Transform& base_transform)
         mesh_component.mesh = mesh;
         mesh_component.material = material;
 
-        scene_node.entity()->add_component(std::move(mesh_component));
+        scene_node->add_component(std::move(mesh_component));
     }
-
-    std::cout << "what\n";
  //   return model;
 }
 
-SceneNode ModelLoader::load_node(aiNode* current_node, Transform relative_transform)
+SceneNode* ModelLoader::load_node(aiNode* current_node, Transform relative_transform)
 {
-    static int j = 0;
-    std::cout << j << "\n";
-    SceneNode new_node;
-    Entity entity;
+    auto* scene_node = new SceneNode();
     relative_transform = relative_transform * aimatrix4x4_to_glmmat4(current_node->mTransformation);
     Transform transform{};
     transform = relative_transform;
-    entity.add_component(std::move(transform));
+    scene_node->add_component(std::move(transform));
 
     if(current_node->mNumMeshes > 0)
     {
@@ -82,18 +75,14 @@ SceneNode ModelLoader::load_node(aiNode* current_node, Transform relative_transf
         mesh_component.mesh = mesh;
         mesh_component.material = material;
 
-
-        entity.add_component(std::move(mesh_component));
+        scene_node->add_component(std::move(mesh_component));
     }
-
-    new_node.set_entity(std::move(entity));
 
     for(u32 i = 0; i < current_node->mNumChildren; ++i)
     {
-        new_node.add_child(load_node(current_node->mChildren[i], relative_transform));
+        scene_node->add_child(load_node(current_node->mChildren[i], relative_transform));
     }
-    ++j;
-    return new_node;
+    return scene_node;
 }
 
 void ModelLoader::load_mesh(u32 mesh_index, Mesh& mesh)
@@ -228,26 +217,26 @@ const char* ModelLoader::get_name()
 void ModelLoader::load_texture(Renderer* renderer, const char* texture_path, Material& material)
 {
     material.textures[0] = renderer->create_texture({
-                                                            .format = vk::Format::eR8G8B8A8Srgb,
-                                                            .image_src = texture_path
-                                                    });
+        .format = vk::Format::eR8G8B8A8Srgb,
+        .image_src = texture_path
+    });
 
     material.sampler = renderer->create_sampler({
-                                                        .min_filter = vk::Filter::eLinear,
-                                                        .mag_filter = vk::Filter::eLinear,
-                                                        .u_mode = vk::SamplerAddressMode::eRepeat,
-                                                        .v_mode = vk::SamplerAddressMode::eRepeat,
-                                                        .w_mode = vk::SamplerAddressMode::eRepeat
-                                                });
+        .min_filter = vk::Filter::eLinear,
+        .mag_filter = vk::Filter::eLinear,
+        .u_mode = vk::SamplerAddressMode::eRepeat,
+        .v_mode = vk::SamplerAddressMode::eRepeat,
+        .w_mode = vk::SamplerAddressMode::eRepeat
+    });
 
     material.descriptor_set = renderer->create_descriptor_set({
-                                                                      .resource_handles = { material.textures[0], renderer->get_null_texture_handle(), renderer->get_null_texture_handle(), renderer->get_null_texture_handle() },
-                                                                      .sampler_handles = { material.sampler, material.sampler, material.sampler, material.sampler },
-                                                                      .bindings = {0, 1, 2, 3},
-                                                                      .types = {vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler},
-                                                                      .layout = renderer->get_texture_layout(),
-                                                                      .num_resources = 4
-                                                              });
+        .resource_handles = { material.textures[0], renderer->get_null_texture_handle(), renderer->get_null_texture_handle(), renderer->get_null_texture_handle() },
+        .sampler_handles = { material.sampler, material.sampler, material.sampler, material.sampler },
+        .bindings = {0, 1, 2, 3},
+        .types = {vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler},
+        .layout = renderer->get_texture_layout(),
+        .num_resources = 4
+    });
 }
 
 std::vector<Vertex> ModelLoader::get_vertices(aiMesh* mesh)
@@ -257,10 +246,10 @@ std::vector<Vertex> ModelLoader::get_vertices(aiMesh* mesh)
     for(int i = 0; i < mesh->mNumVertices; ++i)
     {
         vertices.push_back({
-                                   .position   = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z },
-                                   .normals    = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z },
-                                   .uv         = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y }
-                           });
+            .position   = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z },
+            .normals    = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z },
+            .uv         = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y }
+        });
     }
 
     return vertices;
@@ -268,10 +257,10 @@ std::vector<Vertex> ModelLoader::get_vertices(aiMesh* mesh)
 
 std::vector<unsigned> ModelLoader::get_indices(aiMesh* mesh)
 {
-    std::vector<unsigned> indices;
-    for(int i = 0; i < mesh->mNumFaces; ++i)
+    std::vector<u32> indices;
+    for(u32 i = 0; i < mesh->mNumFaces; ++i)
     {
-        for(int j = 0; j < mesh->mFaces[i].mNumIndices; ++j)
+        for(u32 j = 0; j < mesh->mFaces[i].mNumIndices; ++j)
         {
             indices.push_back(mesh->mFaces[i].mIndices[j]);
         }

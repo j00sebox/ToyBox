@@ -18,13 +18,6 @@ class Buffer;
 class Renderer;
 struct RenderObject;
 
-struct Model
-{
-    std::vector<Mesh>           meshes;
-    std::vector<Material>       materials;
-    std::vector<glm::mat4>      transforms;
-    glm::mat4                   transform{1.f};
-};
 
 struct RenderObject
 {
@@ -60,23 +53,24 @@ public:
 
     // LightManager m_light_manager;
     std::vector<RenderObject> m_render_list;
-private:
 
+private:
     static void compile_shaders() {}
 
     // scene management
-	void update_node(SceneNodePtr& node, const Transform& parent_transform);
-    void remove_node(SceneNodePtr& node);
+	void update_node(SceneNode* node, const Transform& parent_transform);
+    void remove_node(SceneNode* node);
+    void delete_node(Renderer* renderer, SceneNode* node);
    // std::unique_ptr<Skybox> m_skybox;
     // std::unique_ptr<Buffer> m_transforms_buffer;
-    SceneNodePtr root;
-    std::queue<SceneNodePtr> m_nodes_to_remove;
+    SceneNode root;
+    std::queue<SceneNode*> m_nodes_to_remove;
 
     std::unordered_map<std::string, std::vector<glm::mat4>> instanced_meshes;
     // TODO: figure out better way
     std::unordered_map<std::string, bool> mesh_used;
 
-    SceneNodePtr selectedNode = nullptr;
+    SceneNode* selectedNode = nullptr;
     glm::vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
 
     friend class Inspector;

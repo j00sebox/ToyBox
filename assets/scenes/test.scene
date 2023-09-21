@@ -42,7 +42,7 @@
             },
             "mesh": {
                 "instanced": false,
-                "mesh_name": "../assets/models/bunny/scene.gltf",
+                "mesh_name": "../assets/models/ship_in_a_bottle/scene.gltf",
                 "mesh_type": "gltf",
                 "outlining_factor": 0.0010000000474974513,
                 "use_scale_outline": false

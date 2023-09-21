@@ -47,10 +47,10 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
 	json models = w_json["models"];
 	u32 model_count = w_json["model_count"];
 
-	load_models(models, model_count, scene->root, scene, renderer);
+	load_models(models, model_count, scene, renderer);
 }
 
-void SceneSerializer::save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box, const SceneNodePtr& root)
+void SceneSerializer::save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box)
 {
 	json res_json;
 
@@ -77,7 +77,7 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 	res_json["background_colour"][3] = bg_col.w;
 
 	int node_index = -1; // keeps track of nodes (left to right and depth first)
-	for (const auto& scene_node : *root)
+	for (auto* scene_node : scene.root)
 	{
 		++node_index;
 		serialize_node(res_json["models"], node_index, scene_node);
@@ -88,9 +88,9 @@ void SceneSerializer::save(const char* scene_name, const Scene& scene, const std
 	fileop::overwrite_file(scene_name, res_json.dump());
 }
 
-void SceneSerializer::serialize_node(json& accessor, int& node_index, const SceneNodePtr& scene_node)
+void SceneSerializer::serialize_node(json& accessor, int& node_index, const SceneNode* scene_node)
 {
-	accessor[node_index]["name"] = scene_node->entity()->get_name();
+	accessor[node_index]["name"] = scene_node->get_name();
 
 //	if (scene_node->entity()->has_component<Material>())
 //	{
@@ -98,7 +98,7 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 //		accessor[node_index]["shader"] = ShaderTable::find(material.get_shader());
 //	}
 
-	const auto& components = scene_node->entity()->get_components();
+	const auto& components = scene_node->get_components();
 
 	for (const auto& c : components)
 	{
@@ -123,25 +123,23 @@ void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>&
     // sky_box = std::make_unique<Skybox>(accessor["path"], accessor["image_format"]);
 }
 
-void SceneSerializer::load_models(const json& accessor, u32 model_count, SceneNodePtr& root, Scene* scene, Renderer* renderer)
+void SceneSerializer::load_models(const json& accessor, u32 model_count, Scene* scene, Renderer* renderer)
 {
 	u32 num_models_checked = 0;
 	while (num_models_checked < model_count)
 	{
-        root->add_child(load_model(accessor, num_models_checked, num_models_checked, scene, renderer));
+        scene->root.add_child(load_model(accessor, num_models_checked, num_models_checked, scene, renderer));
 	}
 }
 
 // TODO: Make this look less ugly
-SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, u32& num_models_checked, Scene* scene, Renderer* renderer)
+SceneNode* SceneSerializer::load_model(const json& accessor, u32 model_index, u32& num_models_checked, Scene* scene, Renderer* renderer)
 {
-	Entity entity;
-
+    auto* current_node = new SceneNode();
 	json model = accessor[model_index];
-    std::cout << model_index << "\n";
 
-    // entity.set_name(model.value("name", "no_name"));
-    entity.set_name("no_name");
+    // entity.set_name();
+    current_node->set_name(model.value("name", "no_name"));
 
 	Transform transform{};
 	json info = model["transform"];
@@ -158,8 +156,6 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, 
     glm::mat4 model_matrix = transform.get_transform();
     glm::vec3 position = transform.get_position();
 
-    SceneNode node;
-    node.set_entity(std::move(entity));
 
 //	if (!model["light"].is_null())
 //	{
@@ -230,7 +226,7 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, 
         mesh_component.m_use_scale_outline = mesh_accessor["use_scale_outline"];
         mesh_component.m_outlining_factor = mesh_accessor["outlining_factor"];
 
-        model_loader.load(node, transform);
+        model_loader.load(current_node, transform);
 
         //mesh_component.set_mesh(MeshTable::get(mesh_name));
         mesh_component.set_mesh_name(mesh_name);
@@ -295,18 +291,14 @@ SceneNodePtr SceneSerializer::load_model(const json& accessor, u32 model_index, 
 //            entity.add_component(std::move(material_component));
 //        }
     }
-    else
-    {
-        node.entity()->add_component(std::move(transform));
-    }
 
-	SceneNodePtr current_node = std::make_shared<SceneNode>(node);
+    current_node->add_component(std::move(transform));
 
-	int num_children = accessor[model_index].value("child_count", 0);
+	u32 num_children = accessor[model_index].value("child_count", 0);
 
-	for (int i = 0; i < num_children; ++i)
+	for (u32 i = 0; i < num_children; ++i)
 	{
-		int child_index = accessor[model_index]["children"][i];
+		u32 child_index = accessor[model_index]["children"][i];
         current_node->add_child(load_model(accessor, child_index, num_models_checked, scene, renderer));
 	}
 

@@ -7,32 +7,32 @@
 
 SceneNode::SceneNode(std::shared_ptr<Entity>&& e)
 {
-    m_entity = std::move(e);
+   // m_entity = std::move(e);
 }
 
 SceneNode::~SceneNode()
 {
-	m_entity.reset();
+	//m_entity.reset();
 }
 
 void SceneNode::set_entity(Entity &&e)
 {
-    m_entity = std::make_shared<Entity>(e);
+    // m_entity = std::make_shared<Entity>(e);
 }
 
 void SceneNode::add_child(SceneNode&& s)
 {
-	m_children.emplace_back(std::make_shared<SceneNode>(std::move(s)));
-    m_children.back()->m_parent = this;
+//	m_children.emplace_back(std::make_shared<SceneNode>(std::move(s)));
+//    m_children.back()->m_parent = this;
 }
 
-void SceneNode::add_child(SceneNodePtr s)
+void SceneNode::add_child(SceneNode* s)
 {
-    m_children.emplace_back(std::move(s));
+    m_children.emplace_back(s);
     m_children.back()->m_parent = this;
 }
 
-void SceneNode::move_child(const SceneNodePtr& s)
+void SceneNode::move_child(SceneNode* s)
 {
     if(this == s->m_parent) return;
 
@@ -49,9 +49,9 @@ void SceneNode::move_child(const SceneNodePtr& s)
     }
 }
 
-void SceneNode::update_transform(const SceneNodePtr& s)
+void SceneNode::update_transform(SceneNode* scene_node)
 {
-    auto& child_transform = s->m_entity->get_component<Transform>();
+    auto& child_transform = scene_node->get_component<Transform>();
     Transform child_copy = child_transform; // needed to convert the nodes transform back to world space
 
     std::stack<Transform> transforms_to_apply;
@@ -61,10 +61,10 @@ void SceneNode::update_transform(const SceneNodePtr& s)
     {
         Transform relative_transform{};
 
-        while(current_parent && current_parent->m_entity)
+        while(current_parent)
         {
-            const auto& transformToApply = current_parent->m_entity->get_component<Transform>();
-            transforms_to_apply.push(transformToApply);
+            const auto& transform_to_apply = current_parent->get_component<Transform>();
+            transforms_to_apply.push(transform_to_apply);
             current_parent = current_parent->m_parent;
         }
 
@@ -77,15 +77,15 @@ void SceneNode::update_transform(const SceneNodePtr& s)
         return relative_transform;
     };
 
-    SceneNode* parent1 = s->m_parent; SceneNode* parent2 = this;
-    Transform old_parent_transform = (s->m_parent && s->m_parent->m_entity) ? get_relative_transform(parent1) : Transform{};
-    Transform new_parent_transform = (m_entity) ? get_relative_transform(parent2) : Transform{};
+    SceneNode* parent1 = scene_node->m_parent; SceneNode* parent2 = this;
+    Transform old_parent_transform = (scene_node->m_parent) ? get_relative_transform(parent1) : Transform{};
+    Transform new_parent_transform = (scene_node->has_component<Transform>()) ? get_relative_transform(parent2) : Transform{};
 
     child_transform.resolve_parent_change(old_parent_transform, new_parent_transform);
     
-    std::function<void (SceneNodePtr&, Transform, Transform)> update_children = [&](SceneNodePtr& child, const Transform& _old_parent_transform, const Transform& _new_parent_transform)
+    std::function<void (SceneNode*, Transform, Transform)> update_children = [&](SceneNode* child, const Transform& _old_parent_transform, const Transform& _new_parent_transform)
     {
-        auto& _child_transform = child->m_entity->get_component<Transform>();
+        auto& _child_transform = child->get_component<Transform>();
         Transform _child_copy = _child_transform;
 
         _child_transform.resolve_parent_change(_old_parent_transform, _new_parent_transform);
@@ -96,7 +96,7 @@ void SceneNode::update_transform(const SceneNodePtr& s)
         }
     };
 
-    for(auto& child : s->m_children)
+    for(auto& child : scene_node->m_children)
     {
         update_children(child, old_parent_transform * child_copy, new_parent_transform * child_transform);
     }
@@ -104,7 +104,7 @@ void SceneNode::update_transform(const SceneNodePtr& s)
 
 bool SceneNode::exists(const std::string& name) const
 {
-	if (m_entity && m_entity->get_name() == name)
+	if (get_name() == name)
 	{
 		return true;
 	}
@@ -118,7 +118,7 @@ bool SceneNode::exists(const std::string& name) const
 	return found;
 }
 
-bool SceneNode::remove(SceneNodePtr& node)
+bool SceneNode::remove(SceneNode* node)
 {
 	auto it = m_children.begin();
 	for (;it != m_children.end(); ++it)
