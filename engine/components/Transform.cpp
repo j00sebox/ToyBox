@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 using namespace nlohmann;
 
@@ -27,20 +28,55 @@ void Transform::scale(float s)
 void Transform::rotate(float angle, const glm::vec3& axis)
 {
     m_rotate_angle = angle;
-    m_rotate_axis = axis;
+    m_rotate_axis = (axis == glm::vec3(0.0)) ? glm::vec3(1.f, 0.f, 0.f) : axis;
     m_rotation_matrix = glm::rotate(glm::mat4(1.f), glm::radians(m_rotate_angle), m_rotate_axis);
     m_dirty = true;
 }
 
 void Transform::recalculate_transform()
 {
-    m_transform_matrix = m_position_matrix * m_scale_matrix * m_rotation_matrix;
+    m_transform_matrix = glm::translate(glm::mat4(1.f), m_position);
+    m_transform_matrix = glm::scale(m_transform_matrix, glm::vec3(m_uniform_scale, m_uniform_scale, m_uniform_scale));
+    m_transform_matrix = glm::rotate(m_transform_matrix, glm::radians(m_rotate_angle), m_rotate_axis);
     m_dirty = false;
 }
 
 const glm::mat4& Transform::get_transform() const
 {
 	return m_transform_matrix;
+}
+
+void Transform::set_transform(const glm::mat4& transform)
+{
+    glm::quat orientation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+
+    glm::vec3 pos;
+    glm::vec3 s;
+    glm::quat rot;
+
+    pos = transform[3];
+    for(int i = 0; i < 3; i++)
+        s[i] = glm::length(glm::vec3(transform[i]));
+    const glm::mat3 rotMtx(
+            glm::vec3(transform[0]) / s[0],
+            glm::vec3(transform[1]) / s[1],
+            glm::vec3(transform[2]) / s[2]);
+    rot = glm::quat_cast(rotMtx);
+
+//    glm::decompose(transform, s, rot, pos, skew, perspective);
+    rot = glm::conjugate(rot);
+
+    translate(pos);
+    rotate(glm::angle(rot), glm::axis(rot));
+    scale(s.x);
+
+    //m_dirty = false;
+
+    //m_transform_matrix = m_position_matrix * m_scale_matrix * m_rotation_matrix;
+
+    // m_transform_matrix = transform;
 }
 
 void Transform::resolve_parent_change(const Transform& oldParent, const Transform& parent)
@@ -95,8 +131,9 @@ void Transform::imgui_render()
 	ImGui::InputFloat("uniform scale", &m_uniform_scale);
 
     if(!m_dirty)
+    {
         m_dirty = ( (prev_pos != m_position) || (prev_angle != m_rotate_angle) || (prev_axis != m_rotate_axis) || (prev_scale != m_uniform_scale) );
-    update_matrices();
+    }
 }
 
 void Transform::serialize(json& accessor) const
@@ -151,4 +188,6 @@ Transform Transform::operator*(const glm::mat4& transform) const
 {
     Transform new_transform{};
     new_transform.set_transform(new_transform.get_transform() * transform);
+
+    return new_transform;
 }

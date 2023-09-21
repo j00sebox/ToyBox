@@ -2,7 +2,7 @@
 
 #include "Window.h"
 #include "Scene.hpp"
-#include "editor/Inspector.h"
+#include "editor/Inspector.hpp"
 
 class Application
 {

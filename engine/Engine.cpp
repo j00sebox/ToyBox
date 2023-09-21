@@ -31,12 +31,15 @@ Engine::Engine(u32 width, u32 height) :
     m_scene->camera->resize(width, height);
     load_scene("../assets/scenes/test.scene");
 
+    m_inspector = new Inspector(m_scene);
+
     //FIXME
     Input::m_window_handle = m_window;
 }
 
 Engine::~Engine()
 {
+    delete m_inspector;
     m_scene->close(m_renderer);
     delete m_scene;
     delete m_renderer;
@@ -47,7 +50,6 @@ Engine::~Engine()
 void Engine::load_scene(const char* scene_name)
 {
     SceneSerializer::open(scene_name, m_scene, m_renderer);
-    std::cout << "opened scene\n";
 }
 
 void Engine::run()
@@ -90,7 +92,7 @@ void Engine::run()
 //        ImGui::PopStyleVar(2);
 //        ImGui::End();
 
-        ImGui::ShowDemoWindow();
+        m_inspector->render();
         ImGui::Render();
 
         m_scene->update(get_delta_time());

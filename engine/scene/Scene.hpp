@@ -22,7 +22,7 @@ struct RenderObject;
 struct RenderObject
 {
    // RenderCommand render_command;
-    Transform transform;
+    glm::mat4 transform;
     Mesh mesh;
     Material material;
     // MaterialComponent material;
@@ -58,7 +58,7 @@ private:
     static void compile_shaders() {}
 
     // scene management
-	void update_node(SceneNode* node, const Transform& parent_transform);
+	void update_node(SceneNode* node, const glm::mat4& parent_transform);
     void remove_node(SceneNode* node);
     void delete_node(Renderer* renderer, SceneNode* node);
    // std::unique_ptr<Skybox> m_skybox;

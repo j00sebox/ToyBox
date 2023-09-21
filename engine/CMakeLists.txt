@@ -4,7 +4,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/rendering/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)
 #include(${CMAKE_CURRENT_LIST_DIR}/events/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/profiler/CMakeLists.txt)
-#include(${CMAKE_CURRENT_LIST_DIR}/editor/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/editor/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/util/CMakeLists.txt)
 
 list(APPEND SRCS

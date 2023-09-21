@@ -19,16 +19,13 @@ ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
 
 void ModelLoader::load(SceneNode* scene_node, Transform& base_transform)
 {
-    //Model model;
     aiNode* root = m_scene->mRootNode;
-    aiMatrix4x4 root_transform = root->mTransformation;
-    // base_transform = base_transform * aimatrix4x4_to_glmmat4(root_transform);
 
     if(root->mNumChildren > 0)
     {
         for(u32 i = 0; i < root->mNumChildren; ++i)
         {
-            scene_node->add_child(load_node(root->mChildren[i], base_transform));
+            scene_node->add_child(load_node(root->mChildren[i]));
         }
     }
     else
@@ -37,11 +34,6 @@ void ModelLoader::load(SceneNode* scene_node, Transform& base_transform)
         Material material{};
         load_mesh(root->mMeshes[0], mesh);
         load_material(root->mMeshes[0], material);
-        // transform.transform = aimatrix4x4_to_glmmat4(root_transform);
-
-//        model.meshes.push_back(mesh);
-//        model.materials.push_back(material);
-//        model.transforms.push_back(aimatrix4x4_to_glmmat4(relative_transform));
 
         MeshComponent mesh_component;
         mesh_component.mesh = mesh;
@@ -49,17 +41,25 @@ void ModelLoader::load(SceneNode* scene_node, Transform& base_transform)
 
         scene_node->add_component(std::move(mesh_component));
     }
- //   return model;
 }
 
-SceneNode* ModelLoader::load_node(aiNode* current_node, Transform relative_transform)
+SceneNode* ModelLoader::load_node(aiNode* current_node)
 {
     auto* scene_node = new SceneNode();
-    Transform transform{};
-    // transform = relative_transform;
-    // relative_transform = relative_transform * aimatrix4x4_to_glmmat4(current_node->mTransformation);
-    transform.set_transform(relative_transform.get_transform() * aimatrix4x4_to_glmmat4(current_node->mTransformation));
+    scene_node->set_name(current_node->mName.C_Str());
 
+    Transform transform{};
+    aiVector3t<f32> pScaling;
+    aiVector3t<f32> pRotationAxis;
+    f32 pRotationAngle;
+    aiVector3t<f32> pPosition;
+    current_node->mTransformation.Decompose(pScaling, pRotationAxis, pRotationAngle, pPosition);
+
+    transform.translate({pPosition.x, pPosition.y, pPosition.z});
+    transform.rotate(glm::degrees(pRotationAngle), {pRotationAxis.x, pRotationAxis.y, pRotationAxis.z});
+    transform.scale(pScaling.x);
+    transform.recalculate_transform();
+    scene_node->add_component(std::move(transform));
 
     if(current_node->mNumMeshes > 0)
     {
@@ -67,10 +67,6 @@ SceneNode* ModelLoader::load_node(aiNode* current_node, Transform relative_trans
         Material material{};
         load_mesh(current_node->mMeshes[0], mesh);
         load_material(current_node->mMeshes[0], material);
-
-//        model.meshes.push_back(mesh);
-//        model.materials.push_back(material);
-//        model.transforms.push_back(aimatrix4x4_to_glmmat4(relative_transform));
 
         MeshComponent mesh_component;
         mesh_component.mesh = mesh;
@@ -81,9 +77,8 @@ SceneNode* ModelLoader::load_node(aiNode* current_node, Transform relative_trans
 
     for(u32 i = 0; i < current_node->mNumChildren; ++i)
     {
-        scene_node->add_child(load_node(current_node->mChildren[i], transform));
+        scene_node->add_child(load_node(current_node->mChildren[i]));
     }
-    scene_node->add_component(std::move(transform));
     return scene_node;
 }
 
@@ -130,10 +125,7 @@ void ModelLoader::load_material(u32 material_index, Material& material)
         material.textures[2] = m_renderer->get_null_texture_handle();
         material.textures[3] = m_renderer->get_null_texture_handle();
 
-        // FIXME
-        TextureHandle texture_handles[] = { material.textures[0], m_renderer->get_null_texture_handle(), m_renderer->get_null_texture_handle(), m_renderer->get_null_texture_handle() };
-        m_renderer->update_texture_set(texture_handles, 4);
-
+        m_renderer->update_texture_set(material.textures, 4);
         return;
     }
 

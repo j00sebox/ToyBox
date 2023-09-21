@@ -120,9 +120,9 @@ void Scene::update(float elapsed_time)
         //MeshTable::get(mesh_name)->update_instances(instance_matrices);
     }
 
-	for (auto& scene_node : root)
+	for (auto* scene_node : root)
 	{
-		update_node(scene_node, Transform{});
+		update_node(scene_node, glm::mat4(1.f));
 	}
 
 //    m_light_manager.update_lights(m_render_list, m_camera);
@@ -297,21 +297,24 @@ void Scene::remove_node(SceneNode* node)
 	}
 }
 
-void Scene::update_node(SceneNode* scene_node, const Transform& parent_transform)
+void Scene::update_node(SceneNode* scene_node, const glm::mat4& parent_transform)
 {
     auto& transform = scene_node->get_component<Transform>();
 
-//    if(transform.is_dirty())
-//        transform.recalculate_transform();
+    if(transform.is_dirty())
+    {
+        transform.recalculate_transform();
+    }
 
-	// Transform relative_transform = parent_transform * transform;
+	glm::mat4 relative_transform = parent_transform * transform.get_transform();
+    // relative_transform.set_transform(parent_transform.get_transform() * transform.get_transform());
 
 	if (scene_node->has_component<MeshComponent>())
 	{
 		// auto& material_component = scene_node->entity()->get_component<MaterialComponent>();
 		auto& mesh_component = scene_node->get_component<MeshComponent>();
 
-        m_render_list.emplace_back(transform, mesh_component.mesh, mesh_component.material);
+        m_render_list.emplace_back(relative_transform, mesh_component.mesh, mesh_component.material);
 
 //        if(mesh_component.get_mesh()->is_instanced())
 //        {
@@ -341,9 +344,9 @@ void Scene::update_node(SceneNode* scene_node, const Transform& parent_transform
 //		}
 	}
 
-	for (auto& node : *scene_node)
+	for (auto* node : scene_node->m_children)
 	{
-		update_node(node, transform);
+		update_node(node, relative_transform);
 	}
 }
 

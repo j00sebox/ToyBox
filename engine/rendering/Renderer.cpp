@@ -36,7 +36,7 @@ struct RecordDrawTask : enki::ITaskSet
             command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 1, 1, &material_data->vk_descriptor_set, 0, nullptr);
             command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 0, 1, &camera_data->vk_descriptor_set, 0, nullptr);
 
-            command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &scene->m_render_list[i].transform.get_transform());
+            command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &scene->m_render_list[i].transform);
             command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->m_render_list[i].material.textures);
 
             Buffer* vertex_buffer = renderer->get_buffer(scene->m_render_list[i].mesh.vertex_buffer);
@@ -1493,7 +1493,18 @@ void Renderer::cleanup_swapchain()
 
 void Renderer::recreate_swapchain()
 {
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(m_window, &width, &height);
+    while (width == 0 || height == 0) {
+        glfwGetFramebufferSize(m_window, &width, &height);
+        glfwWaitEvents();
+    }
 
+    wait_for_device_idle();
+    cleanup_swapchain();
+    init_swapchain();
+    init_depth_resources();
+    init_framebuffers();
 }
 
 size_t Renderer::pad_uniform_buffer(size_t original_size) const

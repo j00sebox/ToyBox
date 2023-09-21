@@ -1,5 +1,6 @@
 #pragma once
 #include "Types.hpp"
+#include "editor/Inspector.hpp"
 
 #include <GLFW/glfw3.h>
 #include <TaskScheduler.h>
@@ -22,6 +23,7 @@ private:
     enki::TaskScheduler* m_scheduler;
     Renderer* m_renderer;
     Scene* m_scene;
+    Inspector* m_inspector;
 
     bool m_running;
     f32 m_prev_time;

@@ -1,4 +1,4 @@
-#include "Inspector.h"
+#include "Inspector.hpp"
 #include "Entity.hpp"
 #include "Component.h"
 #include "Input.h"
@@ -8,10 +8,10 @@
 
 void Inspector::render()
 {
-    ImGui::Begin("Models");
+    ImGui::Begin("Inspector");
     ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 
-    for (auto& sceneNode : *scene->root)
+    for (auto* sceneNode : m_scene->root)
     {
         imguiRender(sceneNode);
     }
@@ -24,13 +24,13 @@ void Inspector::render()
 
     ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
     {
-        if (scene->selectedNode)
+        if (m_scene->selectedNode)
         {
-            char buf[32];
-            strcpy(buf, scene->selectedNode->entity()->get_name().c_str());
+            char buf[64];
+            strcpy(buf, m_scene->selectedNode->get_name().c_str());
             if (ImGui::InputText("##EntityName", buf, IM_ARRAYSIZE(buf)))
             {
-                scene->selectedNode->entity()->set_name(buf);
+                m_scene->selectedNode->set_name(buf);
             }
 
             displayComponents();
@@ -42,45 +42,45 @@ void Inspector::render()
 
     if (dragNode && !dropNode && !Input::is_button_pressed(GLFW_MOUSE_BUTTON_1))
     {
-        dropNode = scene->root;
+        dropNode = &m_scene->root;
     }
 
     if (dragNode && dropNode)
     {
         dropNode->move_child(dragNode);
-        scene->selectedNode = nullptr;
+        m_scene->selectedNode = nullptr;
         dragNode = nullptr;
         dropNode = nullptr;
     }
 }
 
-void Inspector::imguiRender(SceneNodePtr& currentNode)
+void Inspector::imguiRender(SceneNode* currentNode)
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
     if (!currentNode->has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
-    bool opened = ImGui::TreeNodeEx(currentNode->entity()->get_name().c_str(), flags);
+    bool opened = ImGui::TreeNodeEx(currentNode->get_name().c_str(), flags);
 
     if (ImGui::IsItemClicked())
     {
-        scene->selectedNode = currentNode;
+        m_scene->selectedNode = currentNode;
     }
 
     if (ImGui::BeginPopupContextItem())
     {
-        scene->selectedNode = currentNode;
+        m_scene->selectedNode = currentNode;
 
         if (ImGui::MenuItem("Delete"))
         {
-            scene->m_nodes_to_remove.push(currentNode);
+            m_scene->m_nodes_to_remove.push(currentNode);
         }
 
         if (ImGui::BeginMenu("Add Component"))
         {
-            if (ImGui::MenuItem("Point Light"))
-            {
-                scene->selectedNode->entity()->add_component(PointLight{});
-                scene->m_light_manager.add_point_light(*scene->selectedNode);
-            }
+//            if (ImGui::MenuItem("Point Light"))
+//            {
+//                scene->selectedNode->entity()->add_component(PointLight{});
+//                scene->m_light_manager.add_point_light(*scene->selectedNode);
+//            }
 
             ImGui::EndMenu();
         }
@@ -92,7 +92,7 @@ void Inspector::imguiRender(SceneNodePtr& currentNode)
     {
         ImGui::SetDragDropPayload("_TREENODE", nullptr, 0);
         dragNode = currentNode;
-        ImGui::TextUnformatted(currentNode->entity()->get_name().c_str());
+        ImGui::TextUnformatted(currentNode->get_name().c_str());
         ImGui::EndDragDropSource();
     }
 
@@ -107,7 +107,7 @@ void Inspector::imguiRender(SceneNodePtr& currentNode)
 
     if (opened)
     {
-        for (auto& node : *currentNode)
+        for (auto* node : *currentNode)
         {
             imguiRender(node);
         }
@@ -115,9 +115,9 @@ void Inspector::imguiRender(SceneNodePtr& currentNode)
     }
 }
 
-void Inspector::displayComponents()
+void Inspector::displayComponents() const
 {
-    std::vector<std::shared_ptr<Component>> components = scene->selectedNode->entity()->get_components();
+    std::vector<std::shared_ptr<Component>> components = m_scene->selectedNode->get_components();
 
     for (auto& component : components)
     {
@@ -150,13 +150,13 @@ void Inspector::displayComponents()
             }
 
             // FIXME
-            if (remove_component)
-            {
-                if (scene->selectedNode->entity()->has_component<PointLight>())
-                    scene->m_light_manager.remove_point_light(scene->selectedNode);
-
-                scene->selectedNode->entity()->remove_component(*component);
-            }
+//            if (remove_component)
+//            {
+//                if (scene->selectedNode->entity()->has_component<PointLight>())
+//                    scene->m_light_manager.remove_point_light(scene->selectedNode);
+//
+//                scene->selectedNode->entity()->remove_component(*component);
+//            }
 
             component->imgui_render();
             ImGui::TreePop();
