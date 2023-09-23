@@ -5,7 +5,7 @@
 
 struct CommandBuffer
 {
-    void begin();
+    void begin(vk::CommandBufferUsageFlags flags = vk::CommandBufferUsageFlags());
     void begin(vk::CommandBufferInheritanceInfo inheritance_info);
     void begin_renderpass(const vk::RenderPass& renderpass, const vk::Framebuffer& framebuffer, vk::Extent2D swapchain_extent, vk::SubpassContents subpass_contents) const;
     void bind_pipeline(const vk::Pipeline& pipeline) const;

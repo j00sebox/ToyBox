@@ -127,14 +127,14 @@ private:
     ResourcePool m_descriptor_set_pool;
 
     // command pools
-    vk::CommandPool m_command_pool;
     vk::CommandPool m_main_command_pool;
+    vk::CommandPool m_viewport_command_pool;
     vk::CommandPool m_extra_command_pool;
     std::vector<vk::CommandPool> m_command_pools;
 
     // command buffers
     std::array<CommandBuffer, k_max_frames_in_flight> m_main_command_buffers;
-    std::array<CommandBuffer, k_max_frames_in_flight> m_primary_command_buffers;
+    std::array<CommandBuffer, k_max_frames_in_flight> m_viewport_command_buffers;
     std::vector<CommandBuffer> m_command_buffers;
     std::array<CommandBuffer, k_max_frames_in_flight> m_extra_draw_commands;
     std::array<CommandBuffer, k_max_frames_in_flight> m_imgui_commands;
@@ -157,7 +157,7 @@ private:
 	void init_device();
 	void init_swapchain();
     void init_viewport();
-	void init_render_pass();
+	void init_renderpasses();
     void init_descriptor_pools();
     void init_descriptor_sets();
 	void init_graphics_pipeline();

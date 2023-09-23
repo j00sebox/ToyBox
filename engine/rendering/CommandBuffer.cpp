@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "CommandBuffer.hpp"
 
-void CommandBuffer::begin()
+void CommandBuffer::begin(vk::CommandBufferUsageFlags flags)
 {
     vk_command_buffer.reset();
     vk::CommandBufferBeginInfo begin_info{};
     begin_info.sType = vk::StructureType::eCommandBufferBeginInfo;
+    begin_info.flags = flags;
     begin_info.pInheritanceInfo = nullptr; // only relevant to secondary command buffers
 
     if (vk_command_buffer.begin(&begin_info)!= vk::Result::eSuccess)

@@ -81,7 +81,7 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
     init_surface();
     init_device();
     init_swapchain();
-    init_render_pass();
+    init_renderpasses();
     init_descriptor_pools();
     init_descriptor_sets();
     init_graphics_pipeline();
@@ -128,8 +128,8 @@ Renderer::~Renderer()
     m_logical_device.destroyDescriptorSetLayout(m_descriptor_set_layout, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_camera_data_layout, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_texture_set_layout, nullptr);
-    m_logical_device.destroyCommandPool(m_command_pool);
     m_logical_device.destroyCommandPool(m_main_command_pool);
+    m_logical_device.destroyCommandPool(m_viewport_command_pool);
     m_logical_device.destroyCommandPool(m_extra_command_pool);
     for(auto& command_pool : m_command_pools)
     {
@@ -226,18 +226,17 @@ void Renderer::render(Scene* scene)
 
         if(record_draw_tasks[i].command_buffer)
         {
-            m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, record_draw_tasks[i].command_buffer);
+            m_viewport_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, record_draw_tasks[i].command_buffer);
         }
     }
     if(surplus > 0)
     {
         m_scheduler->WaitforTask(&extra_draws);
-        m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, extra_draws.command_buffer);
+        m_viewport_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, extra_draws.command_buffer);
     }
-   // m_primary_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, &m_imgui_commands[m_current_frame].vk_command_buffer);
 
-    m_primary_command_buffers[m_current_frame].end_renderpass();
-    m_primary_command_buffers[m_current_frame].end();
+    m_viewport_command_buffers[m_current_frame].end_renderpass();
+    m_viewport_command_buffers[m_current_frame].end();
 
     m_imgui_commands[m_current_frame].begin();
     m_imgui_commands[m_current_frame].begin_renderpass(m_imgui_renderpass, m_imgui_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
@@ -268,13 +267,13 @@ void Renderer::begin_frame()
     // but only reset if we are submitting work
     check(m_logical_device.resetFences(1, &m_in_flight_fences[m_current_frame]));
 
-//    m_main_command_buffers[m_current_frame].begin();
-//    m_main_command_buffers[m_current_frame].begin_renderpass(m_renderpass, m_swapchain_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
-//    m_main_command_buffers[m_current_frame].bind_pipeline(m_graphics_pipeline);
-//    m_main_command_buffers[m_current_frame].vk_command_buffer.endRenderPass();
-//    m_main_command_buffers[m_current_frame].end();
+    m_main_command_buffers[m_current_frame].begin();
+    m_main_command_buffers[m_current_frame].begin_renderpass(m_renderpass, m_swapchain_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
+    m_main_command_buffers[m_current_frame].bind_pipeline(m_graphics_pipeline);
+    m_main_command_buffers[m_current_frame].vk_command_buffer.endRenderPass();
+    m_main_command_buffers[m_current_frame].end();
 
-    m_primary_command_buffers[m_current_frame].begin();
+    m_viewport_command_buffers[m_current_frame].begin();
 //    for(u32 i = 0; i < m_scheduler->GetNumTaskThreads(); ++i)
 //    {
 //        logical_device.resetCommandPool(m_command_pools[i]);
@@ -282,7 +281,7 @@ void Renderer::begin_frame()
 
     // all functions that record commands can be recognized by their vk::Cmd prefix
     // they all return void, so no error handling until the recording is finished
-    m_primary_command_buffers[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eSecondaryCommandBuffers);
+    m_viewport_command_buffers[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eSecondaryCommandBuffers);
 }
 
 void Renderer::end_frame()
@@ -293,11 +292,11 @@ void Renderer::end_frame()
     // we are specifying what semaphores we want to use and what stage we want to wait on
     vk::Semaphore wait_semaphores[] = {m_image_available_semaphores[m_current_frame]};
     vk::PipelineStageFlags wait_stages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-    vk::CommandBuffer command_buffers_to_submit[] = {m_primary_command_buffers[m_current_frame].vk_command_buffer, m_imgui_commands[m_current_frame].vk_command_buffer};
+    vk::CommandBuffer command_buffers_to_submit[] = {m_main_command_buffers[m_current_frame].vk_command_buffer, m_viewport_command_buffers[m_current_frame].vk_command_buffer, m_imgui_commands[m_current_frame].vk_command_buffer};
     submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores = wait_semaphores;
     submit_info.pWaitDstStageMask = wait_stages;
-    submit_info.commandBufferCount = 2;
+    submit_info.commandBufferCount = 3;
     submit_info.pCommandBuffers = command_buffers_to_submit;
 
     vk::Semaphore signal_semaphores[] = {m_render_finished_semaphores[m_current_frame]};
@@ -867,8 +866,64 @@ void Renderer::init_swapchain()
     }
 }
 
-void Renderer::init_render_pass()
+void Renderer::init_renderpasses()
 {
+    {
+        vk::AttachmentDescription colour_attachment{};
+        colour_attachment.format = m_swapchain_image_format;
+        colour_attachment.samples = vk::SampleCountFlagBits::e1;
+        colour_attachment.loadOp = vk::AttachmentLoadOp::eClear;
+        colour_attachment.storeOp = vk::AttachmentStoreOp::eStore;
+        colour_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        colour_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        colour_attachment.initialLayout = vk::ImageLayout::eUndefined;
+        colour_attachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+
+        vk::AttachmentDescription depth_attachment{};
+        depth_attachment.format = vk::Format::eD32Sfloat;
+        depth_attachment.samples = vk::SampleCountFlagBits::e1;
+        depth_attachment.loadOp = vk::AttachmentLoadOp::eClear;
+        depth_attachment.storeOp = vk::AttachmentStoreOp::eStore;
+        depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        depth_attachment.initialLayout = vk::ImageLayout::eUndefined;
+        depth_attachment.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+        vk::AttachmentReference colour_attachment_ref{};
+        colour_attachment_ref.attachment = 0;
+        colour_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
+
+        vk::AttachmentReference depth_attachment_ref{};
+        depth_attachment_ref.attachment = 1;
+        depth_attachment_ref.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+        vk::SubpassDescription subpass{};
+        subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &colour_attachment_ref;
+        subpass.pDepthStencilAttachment = &depth_attachment_ref;
+
+        vk::SubpassDependency dependency{};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests;
+        dependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests;
+        dependency.srcAccessMask = vk::AccessFlagBits::eNone;
+        dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+        std::array<vk::AttachmentDescription, 2> attachments = {colour_attachment, depth_attachment};
+        vk::RenderPassCreateInfo render_pass_info{};
+        render_pass_info.sType = vk::StructureType::eRenderPassCreateInfo;
+        render_pass_info.attachmentCount = static_cast<u32>(attachments.size());
+        render_pass_info.pAttachments = attachments.data();
+        render_pass_info.subpassCount = 1;
+        render_pass_info.pSubpasses = &subpass;
+        render_pass_info.dependencyCount = 1;
+        render_pass_info.pDependencies = &dependency;
+
+        check(m_logical_device.createRenderPass(&render_pass_info, nullptr, &m_renderpass));
+    }
+
     {
         vk::AttachmentDescription colour_attachment{};
         colour_attachment.format = m_swapchain_image_format;
@@ -904,31 +959,23 @@ void Renderer::init_render_pass()
         subpass.pColorAttachments = &colour_attachment_ref;
         subpass.pDepthStencilAttachment = &depth_attachment_ref;
 
-        vk::SubpassDependency dependency{};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests;
-        dependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests;
-        dependency.srcAccessMask = vk::AccessFlagBits::eNone;
-        dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
         std::array<vk::SubpassDependency, 2> dependencies;
 
         dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
         dependencies[0].dstSubpass = 0;
-        dependencies[0].srcStageMask = vk::PipelineStageFlagBits::eBottomOfPipe; // VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        dependencies[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependencies[0].srcAccessMask = vk::AccessFlagBits::eMemoryRead; // VK_ACCESS_MEMORY_READ_BIT;
-        dependencies[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead; // VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        dependencies[0].dependencyFlags = vk::DependencyFlagBits::eByRegion; // VK_DEPENDENCY_BY_REGION_BIT;
+        dependencies[0].srcStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+        dependencies[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependencies[0].srcAccessMask = vk::AccessFlagBits::eShaderRead;
+        dependencies[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+        dependencies[0].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
         dependencies[1].srcSubpass = 0;
         dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-        dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe; // VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        dependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead; //VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        dependencies[1].dstAccessMask = vk::AccessFlagBits::eMemoryRead; // VK_ACCESS_MEMORY_READ_BIT;
-        dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion; // VK_DEPENDENCY_BY_REGION_BIT;
+        dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+        dependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+        dependencies[1].dstAccessMask = vk::AccessFlagBits::eShaderRead;
+        dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
         std::array<vk::AttachmentDescription, 2> attachments = {colour_attachment, depth_attachment};
         vk::RenderPassCreateInfo render_pass_info{};
@@ -937,10 +984,9 @@ void Renderer::init_render_pass()
         render_pass_info.pAttachments = attachments.data();
         render_pass_info.subpassCount = 1;
         render_pass_info.pSubpasses = &subpass;
-        render_pass_info.dependencyCount = 1;
-        render_pass_info.pDependencies = &dependency; // dependencies.data();
+        render_pass_info.dependencyCount = dependencies.size();
+        render_pass_info.pDependencies = dependencies.data();
 
-        check(m_logical_device.createRenderPass(&render_pass_info, nullptr, &m_renderpass));
         check(m_logical_device.createRenderPass(&render_pass_info, nullptr, &m_viewport_renderpass));
     }
 
@@ -948,7 +994,7 @@ void Renderer::init_render_pass()
         vk::AttachmentDescription colour_attachment{};
         colour_attachment.format = m_swapchain_image_format;
         colour_attachment.samples = vk::SampleCountFlagBits::e1;
-        colour_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
+        colour_attachment.loadOp = vk::AttachmentLoadOp::eClear;
         colour_attachment.storeOp = vk::AttachmentStoreOp::eStore;
         colour_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
         colour_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
@@ -1336,12 +1382,12 @@ void Renderer::init_viewport()
                      vk::MemoryPropertyFlagBits::eDeviceLocal,
                      m_viewport_images[i], m_viewport_memory[i]);
 
-//        vk::CommandBuffer cmd_buffer = begin_single_time_commands();
-//        insert_image_memory_barrier(cmd_buffer, m_viewport_images[i], vk::AccessFlagBits::eTransferRead, vk::AccessFlagBits::eMemoryRead,
-//                                    vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal,
-//                                    vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer,
-//                                    vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
-//        end_single_time_commands(cmd_buffer);
+        vk::CommandBuffer cmd_buffer = begin_single_time_commands();
+        insert_image_memory_barrier(cmd_buffer, m_viewport_images[i], vk::AccessFlagBits::eTransferRead, vk::AccessFlagBits::eMemoryRead,
+                                    vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal,
+                                    vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer,
+                                    vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+        end_single_time_commands(cmd_buffer);
 
         m_viewport_image_views[i] = create_image_view(m_viewport_images[i], vk::Format::eB8G8R8A8Srgb, vk::ImageAspectFlagBits::eColor);
     }
@@ -1356,8 +1402,8 @@ void Renderer::init_command_pools()
     pool_create_info.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
     pool_create_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
 
-    check(m_logical_device.createCommandPool(&pool_create_info, nullptr, &m_command_pool));
     check(m_logical_device.createCommandPool(&pool_create_info, nullptr, &m_main_command_pool));
+    check(m_logical_device.createCommandPool(&pool_create_info, nullptr, &m_viewport_command_pool));
     check(m_logical_device.createCommandPool(&pool_create_info, nullptr, &m_extra_command_pool));
 
     m_command_pools.resize(m_scheduler->GetNumTaskThreads());
@@ -1394,15 +1440,15 @@ void Renderer::init_command_buffers()
 
     vk::CommandBufferAllocateInfo main_alloc_info{};
     main_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
-    main_alloc_info.commandPool = m_command_pool;
+    main_alloc_info.commandPool = m_main_command_pool;
     main_alloc_info.level = vk::CommandBufferLevel::ePrimary;
     main_alloc_info.commandBufferCount = 1;
 
-    vk::CommandBufferAllocateInfo primary_alloc_info{};
-    primary_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
-    primary_alloc_info.commandPool = m_main_command_pool;
-    primary_alloc_info.level = vk::CommandBufferLevel::ePrimary;
-    primary_alloc_info.commandBufferCount = 1;
+    vk::CommandBufferAllocateInfo viewport_commands_alloc_info{};
+    viewport_commands_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
+    viewport_commands_alloc_info.commandPool = m_viewport_command_pool;
+    viewport_commands_alloc_info.level = vk::CommandBufferLevel::ePrimary;
+    viewport_commands_alloc_info.commandBufferCount = 1;
 
     vk::CommandBufferAllocateInfo extra_alloc_info{};
     extra_alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
@@ -1419,7 +1465,7 @@ void Renderer::init_command_buffers()
     for(u32 i = 0; i < k_max_frames_in_flight; ++i)
     {
         check(m_logical_device.allocateCommandBuffers(&main_alloc_info, &m_main_command_buffers[i].vk_command_buffer));
-        check(m_logical_device.allocateCommandBuffers(&primary_alloc_info, &m_primary_command_buffers[i].vk_command_buffer));
+        check(m_logical_device.allocateCommandBuffers(&viewport_commands_alloc_info, &m_viewport_command_buffers[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&extra_alloc_info, &m_extra_draw_commands[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&imgui_alloc_info, &m_imgui_commands[i].vk_command_buffer));
     }
@@ -1648,6 +1694,13 @@ void Renderer::recreate_swapchain()
     init_depth_resources();
     init_viewport();
     init_framebuffers();
+
+    m_viewport_descriptors.resize(m_viewport_image_views.size());
+    auto* default_sampler = static_cast<Sampler*>(m_sampler_pool.access(m_default_sampler));
+    for (u32 i = 0; i < m_viewport_image_views.size(); ++i)
+    {
+        m_viewport_descriptors[i] = ImGui_ImplVulkan_AddTexture(default_sampler->vk_sampler, m_viewport_image_views[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
 }
 
 size_t Renderer::pad_uniform_buffer(size_t original_size) const
@@ -1750,7 +1803,7 @@ void Renderer::insert_image_memory_barrier(vk::CommandBuffer cmd_buffer, vk::Ima
     image_memory_barrier.image = image;
     image_memory_barrier.subresourceRange = subresourceRange;
 
-    cmd_buffer.pipelineBarrier(srcStageMask, dstStageMask, vk::DependencyFlagBits::eDeviceGroup, 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
+    cmd_buffer.pipelineBarrier(srcStageMask, dstStageMask, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
 }
 
 bool Renderer::check_validation_layer_support() const

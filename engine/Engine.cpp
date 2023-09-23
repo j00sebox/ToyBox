@@ -99,11 +99,6 @@ void Engine::run()
 
         m_inspector->render();
         ImGui::Render();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-        }
 
         m_scene->update(get_delta_time());
         m_renderer->render(m_scene);
