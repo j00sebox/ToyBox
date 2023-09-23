@@ -11,51 +11,6 @@
 #include <vk_mem_alloc.h>
 #include <TaskScheduler.h>
 
-//#include <glm/mat4x4.hpp>
-//struct Mesh
-//{
-//    BufferHandle             vertex_buffer;
-//    BufferHandle             index_buffer;
-//    u32             index_count = 0;
-//};
-//
-//struct Material
-//{
-//    DescriptorSetHandle descriptor_set;
-//    TextureHandle textures[4];
-//    SamplerHandle sampler;
-//};
-//
-//struct Model
-//{
-//    std::vector<Mesh>           meshes;
-//    std::vector<Material>       materials;
-//    std::vector<glm::mat4>      transforms;
-//    glm::mat4                   transform{1.f};
-//};
-//
-//class Renderer;
-//
-//#include "scene/Camera.h"
-//class Scene
-//{
-//public:
-//    Camera camera;
-//    std::vector<Model> models;
-//
-//    void add_model(const Model& model)
-//    {
-//        models.push_back(model);
-//    }
-//
-//    void update(f32 delta_time)
-//    {
-//        camera.update(delta_time);
-//    }
-//
-//    void close(Renderer* renderer);
-//};
-
 class Renderer
 {
 public:
@@ -86,7 +41,8 @@ public:
     [[nodiscard]] Buffer* get_buffer(BufferHandle buffer_handle) { return static_cast<Buffer*>(m_buffer_pool.access(buffer_handle)); }
     [[nodiscard]] const vk::DescriptorSetLayout& get_texture_layout() const { return m_texture_set_layout; }
     [[nodiscard]] TextureHandle get_null_texture_handle() const { return m_null_texture; }
-    [[nodiscard]] const vk::PipelineLayout& get_pipeline_layout() { return m_pipeline_layout; }
+    [[nodiscard]] const vk::PipelineLayout& get_pipeline_layout() const { return m_pipeline_layout; }
+    [[nodiscard]] const vk::DescriptorSet& get_current_viewport_image() const { return m_viewport_descriptors[m_current_frame]; };
 
     void update_texture_set(TextureHandle* texture_handles, u32 num_textures);
 
@@ -122,8 +78,11 @@ private:
     std::vector<vk::Image> m_swapchain_images;
     std::vector<vk::ImageView> m_swapchain_image_views;
     std::vector<vk::Framebuffer> m_swapchain_framebuffers;
+    std::vector<vk::Framebuffer> m_viewport_framebuffers;
+    std::vector<vk::Framebuffer> m_imgui_framebuffers;
 
-    vk::RenderPass m_render_pass;
+    vk::RenderPass m_renderpass;
+    vk::RenderPass m_imgui_renderpass;
     vk::PipelineLayout m_pipeline_layout;
     vk::Pipeline m_graphics_pipeline;
 
@@ -150,6 +109,14 @@ private:
     vk::DeviceMemory m_depth_image_memory;
     vk::ImageView m_depth_image_view;
 
+    // viewport
+    std::vector<vk::Image> m_viewport_images;
+    std::vector<vk::DeviceMemory> m_viewport_memory;
+    std::vector<vk::ImageView> m_viewport_image_views;
+    vk::RenderPass m_viewport_renderpass;
+    vk::Pipeline m_viewport_pipeline;
+    std::vector<vk::DescriptorSet> m_viewport_descriptors;
+
     // uniform buffers
     std::array<BufferHandle, k_max_frames_in_flight> m_camera_buffers;
 
@@ -160,11 +127,13 @@ private:
     ResourcePool m_descriptor_set_pool;
 
     // command pools
+    vk::CommandPool m_command_pool;
     vk::CommandPool m_main_command_pool;
     vk::CommandPool m_extra_command_pool;
     std::vector<vk::CommandPool> m_command_pools;
 
     // command buffers
+    std::array<CommandBuffer, k_max_frames_in_flight> m_main_command_buffers;
     std::array<CommandBuffer, k_max_frames_in_flight> m_primary_command_buffers;
     std::vector<CommandBuffer> m_command_buffers;
     std::array<CommandBuffer, k_max_frames_in_flight> m_extra_draw_commands;
@@ -187,6 +156,7 @@ private:
 	void init_surface();
 	void init_device();
 	void init_swapchain();
+    void init_viewport();
 	void init_render_pass();
     void init_descriptor_pools();
     void init_descriptor_sets();
@@ -208,6 +178,15 @@ private:
     // image operations
     void copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 width, u32 height);
     void transition_image_layout(vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout);
+    void insert_image_memory_barrier(vk::CommandBuffer cmd_buffer,
+                                    vk::Image image,
+                                    vk::AccessFlags srcAccessMask,
+                                    vk::AccessFlags dstAccessMask,
+                                    vk::ImageLayout oldImageLayout,
+                                    vk::ImageLayout newImageLayout,
+                                    vk::PipelineStageFlags srcStageMask,
+                                    vk::PipelineStageFlags dstStageMask,
+                                    vk::ImageSubresourceRange subresourceRange);
 
     // extensions the device needs to have
     const std::vector<const char*> m_required_device_extensions =

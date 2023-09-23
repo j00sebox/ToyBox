@@ -69,31 +69,41 @@ void Engine::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-//        static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-//
-//        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-//        ImGui::SetNextWindowPos(viewport->WorkPos);
-//        ImGui::SetNextWindowSize(viewport->WorkSize);
-//        ImGui::SetNextWindowViewport(viewport->ID);
-//        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-//        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-//
-//        bool show_dockspace = true;
-//        ImGui::Begin("DockSpace", &show_dockspace, window_flags);
-//
-//        // submit the dockspace
-//        ImGuiIO& io = ImGui::GetIO();
-//        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-//        {
-//            ImGuiID dockspace_id = ImGui::GetID("DSP_ID");
-//            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-//        }
-//
-//        ImGui::PopStyleVar(2);
-//        ImGui::End();
+        static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+        bool show_dockspace = true;
+        ImGui::Begin("DockSpace", &show_dockspace, window_flags);
+
+        // submit the dockspace
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+        {
+            ImGuiID dockspace_id = ImGui::GetID("DSP_ID");
+            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+        }
+
+        ImGui::PopStyleVar(2);
+        ImGui::End();
+
+        ImGui::Begin("Viewport");
+        ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+        ImGui::Image(m_renderer->get_current_viewport_image(), ImVec2{viewportPanelSize.x, viewportPanelSize.y});
+        ImGui::End();
 
         m_inspector->render();
         ImGui::Render();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
 
         m_scene->update(get_delta_time());
         m_renderer->render(m_scene);

@@ -225,6 +225,6 @@ namespace devh
             }
         }
 
-        return 0;
+        fatal("Could not find suitable memory type!");
     }
 }
