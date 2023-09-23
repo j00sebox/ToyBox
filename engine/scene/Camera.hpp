@@ -1,4 +1,5 @@
 #pragma once
+#include "Types.hpp"
 
 #include <glm/vec3.hpp>
 #include <glm/matrix.hpp>
@@ -30,10 +31,10 @@ public:
 	glm::mat4 camera_look_at();
 
     // true if the camera could be moved
-	bool update(float elapsed_time);
+	bool update(f32 elapsed_time);
 
-	void move_forward(float f);
-	void move_right(float r);
+	void move_forward(f32 f);
+	void move_right(f32 r);
 
 	void set_pos(glm::vec3&& pos);
     void set_forward(glm::vec3&& fwd);
@@ -44,7 +45,7 @@ public:
 	inline const glm::mat4& get_perspective() { return m_perspective; }
 	inline const glm::mat4& get_orthographic() { return m_orthographic; }
 
-	void resize(int width, int height);
+	void resize(u32 width, u32 height);
 	void reset();
 
 private:
@@ -55,10 +56,10 @@ private:
     glm::mat4 m_perspective;
     glm::mat4 m_orthographic;
 
-	int m_screen_width, m_screen_height;
-	float m_near, m_far;
-	float m_fov;
-	float m_speed;
-	float m_sensitivity;
+	u32 m_screen_width, m_screen_height;
+	f32 m_near, m_far;
+	f32 m_fov;
+	f32 m_speed;
+	f32 m_sensitivity;
 	bool m_mouse_down;
 };

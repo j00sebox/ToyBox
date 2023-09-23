@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Camera.hpp"
-#include "Input.h"
+#include "Input.hpp"
 
 #include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
@@ -14,12 +14,12 @@ glm::mat4 Camera::camera_look_at()
 	return glm::lookAt(m_position, m_position + m_forward, m_up);
 }
 
-void Camera::resize(int width, int height)
+void Camera::resize(u32 width, u32 height)
 {
 	m_screen_width = width; m_screen_height = height;
 
-	float aspect_ratio = (float)m_screen_width / (float)m_screen_height;
-    float fov_y = atanf(tanf(glm::radians(m_fov/2)) / aspect_ratio) * 2;
+	f32 aspect_ratio = (f32)m_screen_width / (f32)m_screen_height;
+    f32 fov_y = atanf(tanf(glm::radians(m_fov/2)) / aspect_ratio) * 2;
 
 	// create projection matrices
     m_perspective = glm::perspective(fov_y, aspect_ratio, m_near, m_far);
@@ -32,7 +32,7 @@ void Camera::resize(int width, int height)
 	);
 }
 
-bool Camera::update(float elapsed_time)
+bool Camera::update(f32 elapsed_time)
 {
 	// block camera update if imgui menu is in use
 	if (!ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive())
@@ -74,8 +74,8 @@ bool Camera::update(float elapsed_time)
 
 			auto [x, y] = Input::get_mouse_pos();
 
-			float rotX = elapsed_time * m_sensitivity * (y - (float)(m_screen_height / 2)) / (float)m_screen_width;
-			float rotY = elapsed_time * m_sensitivity * (x - (float)(m_screen_width / 2)) / (float)m_screen_height;
+			f32 rotX = elapsed_time * m_sensitivity * (y - (f32)(m_screen_height / 2)) / (f32)m_screen_width;
+            f32 rotY = elapsed_time * m_sensitivity * (x - (f32)(m_screen_width / 2)) / (f32)m_screen_height;
 
 			// calculate vertical orientation adjustment
 			glm::vec3 new_forward = glm::rotate(m_forward, glm::radians(-rotX), m_right);
@@ -106,12 +106,12 @@ bool Camera::update(float elapsed_time)
     return false;
 }
 
-void Camera::move_forward(float f)
+void Camera::move_forward(f32 f)
 {
 	m_position = m_position + (m_forward * f);
 }
 
-void Camera::move_right(float r)
+void Camera::move_right(f32 r)
 {
 	m_position = m_position + (m_right * r);
 }

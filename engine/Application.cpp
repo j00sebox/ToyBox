@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Application.h"
-#include "Input.h"
+#include "Input.hpp"
 #include "Timer.h"
 #include "Log.hpp"
 

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 #include "Log.hpp"
-#include "Input.h"
+#include "Input.hpp"
 #include "ViewPort.h"
 #include "EventList.h"
 

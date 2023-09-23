@@ -1,7 +1,7 @@
 #include "Inspector.hpp"
 #include "Entity.hpp"
 #include "Component.h"
-#include "Input.h"
+#include "Input.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>

@@ -16,7 +16,7 @@ list(APPEND SRCS
 #        ${CMAKE_CURRENT_LIST_DIR}/GLTFLoader.h
 #        ${CMAKE_CURRENT_LIST_DIR}/ImGuiHelper.h
 #        ${CMAKE_CURRENT_LIST_DIR}/ImGuiHelper.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/Input.h
+        ${CMAKE_CURRENT_LIST_DIR}/Input.hpp
         ${CMAKE_CURRENT_LIST_DIR}/Log.hpp
         ${CMAKE_CURRENT_LIST_DIR}/Log.cpp
 #        ${CMAKE_CURRENT_LIST_DIR}/Window.h

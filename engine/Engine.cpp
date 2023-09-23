@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Engine.hpp"
-#include "Input.h"
+#include "Input.hpp"
 
 #include "rendering/Renderer.hpp"
 #include "scene/Scene.hpp"
