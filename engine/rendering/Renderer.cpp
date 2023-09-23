@@ -153,6 +153,11 @@ Renderer::~Renderer()
 
 void Renderer::render(Scene* scene)
 {
+    if(m_swapchain_recreated)
+    {
+        scene->camera->resize(m_swapchain_extent.width, m_swapchain_extent.height);
+        m_swapchain_recreated = false;
+    }
     CameraData camera_data{};
     camera_data.view = scene->camera->camera_look_at();
     camera_data.proj = scene->camera->get_perspective();
@@ -279,8 +284,7 @@ void Renderer::begin_frame()
 //        logical_device.resetCommandPool(m_command_pools[i]);
 //    }
 
-    // all functions that record commands can be recognized by their vk::Cmd prefix
-    // they all return void, so no error handling until the recording is finished
+    // all secondary buffers will be using this renderpass
     m_viewport_command_buffers[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eSecondaryCommandBuffers);
 }
 
@@ -1576,7 +1580,6 @@ void Renderer::init_imgui()
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-//    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui_ImplGlfw_InitForVulkan(m_window, true);
 
@@ -1701,6 +1704,8 @@ void Renderer::recreate_swapchain()
     {
         m_viewport_descriptors[i] = ImGui_ImplVulkan_AddTexture(default_sampler->vk_sampler, m_viewport_image_views[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
+
+    m_swapchain_recreated = true;
 }
 
 size_t Renderer::pad_uniform_buffer(size_t original_size) const

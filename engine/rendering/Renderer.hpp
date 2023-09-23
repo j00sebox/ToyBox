@@ -53,6 +53,7 @@ private:
     u32 m_current_frame = 0; // current frame index
     u32 m_current_cb_index = 0; // command buffer to write to
     u32 m_image_index = 0; // image of the swapchain being used
+    bool m_swapchain_recreated = false;
 
     // constants
     static const u32 k_max_frames_in_flight = 3;
