@@ -73,6 +73,7 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
     m_buffer_pool(&m_pool_allocator, 100, sizeof(Buffer)),
     m_texture_pool(&m_pool_allocator, 20, sizeof(Texture)),
     m_sampler_pool(&m_pool_allocator, 10, sizeof(Sampler)),
+    m_descriptor_set_layout_pool(&m_pool_allocator, 10, sizeof(DescriptorSetLayout)),
     m_descriptor_set_pool(&m_pool_allocator, 10, sizeof(DescriptorSet))
 {
     init_instance();
@@ -110,7 +111,8 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
 Renderer::~Renderer()
 {
     // TODO: move skybox stuff
-    m_logical_device.destroyDescriptorSetLayout(m_skybox.descriptor_set_layout);
+    // _logical_device.destroyDescriptorSetLayout(m_skybox.descriptor_set_layout);
+    destroy_descriptor_set_layout(m_skybox.descriptor_set_layout);
     m_logical_device.destroyPipelineLayout(m_skybox.pipeline_layout);
     m_logical_device.destroyPipeline(m_skybox.pipeline);
     destroy_texture(m_skybox.cubemap);
@@ -133,9 +135,12 @@ Renderer::~Renderer()
     destroy_sampler(m_default_sampler);
     m_logical_device.destroyDescriptorPool(m_descriptor_pool, nullptr);
     m_logical_device.destroyDescriptorPool(m_normal_descriptor_pool, nullptr);
-    m_logical_device.destroyDescriptorSetLayout(m_descriptor_set_layout, nullptr);
-    m_logical_device.destroyDescriptorSetLayout(m_camera_data_layout, nullptr);
-    m_logical_device.destroyDescriptorSetLayout(m_texture_set_layout, nullptr);
+    // m_logical_device.destroyDescriptorSetLayout(m_descriptor_set_layout, nullptr);
+   // destroy_descriptor_set_layout(m_descriptor_set_layout);
+    destroy_descriptor_set_layout(m_camera_data_layout);
+    destroy_descriptor_set_layout(m_texture_set_layout);
+    // m_logical_device.destroyDescriptorSetLayout(m_camera_data_layout, nullptr);
+    // m_logical_device.destroyDescriptorSetLayout(m_texture_set_layout, nullptr);
     m_logical_device.destroyCommandPool(m_main_command_pool);
     m_logical_device.destroyCommandPool(m_viewport_command_pool);
     m_logical_device.destroyCommandPool(m_extra_command_pool);
@@ -295,8 +300,7 @@ void Renderer::begin_frame()
         return;
     }
 
-    // need to reset fences to unsignaled
-    // but only reset if we are submitting work
+    // need to reset fences to unsignaled, but only reset if we are submitting work
     check(m_logical_device.resetFences(1, &m_in_flight_fences[m_current_frame]));
 
     m_main_command_buffers[m_current_frame].begin();
@@ -307,18 +311,7 @@ void Renderer::begin_frame()
     m_main_command_buffers[m_current_frame].vk_command_buffer.endRenderPass();
     m_main_command_buffers[m_current_frame].end();
 
-
-//    m_skybox_commands[m_current_frame].begin();
-//    m_skybox_commands[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
-//
-//    m_skybox_commands[m_current_frame].vk_command_buffer.endRenderPass();
-//    m_skybox_commands[m_current_frame].end();
-
     m_viewport_command_buffers[m_current_frame].begin();
-//    for(u32 i = 0; i < m_scheduler->GetNumTaskThreads(); ++i)
-//    {
-//        logical_device.resetCommandPool(m_command_pools[i]);
-//    }
 
     // all secondary buffers will be using this renderpass
     m_viewport_command_buffers[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eSecondaryCommandBuffers);
@@ -363,24 +356,24 @@ void Renderer::end_frame()
     }
 }
 
-BufferHandle Renderer::create_buffer(const BufferCreationInfo& buffer_creation)
+BufferHandle Renderer::create_buffer(const BufferConfig& buffer_config)
 {
     BufferHandle handle = (BufferHandle)m_buffer_pool.acquire();
     auto* buffer = static_cast<Buffer*>(m_buffer_pool.access(handle));
 
-    buffer->size = buffer_creation.size;
+    buffer->size = buffer_config.size;
 
     vk::BufferCreateInfo buffer_info{};
     buffer_info.sType = vk::StructureType::eBufferCreateInfo;
-    buffer_info.size = buffer_creation.size;
-    buffer_info.usage = buffer_creation.usage;
+    buffer_info.size = buffer_config.size;
+    buffer_info.usage = buffer_config.usage;
     buffer_info.sharingMode = vk::SharingMode::eExclusive;
 
     VmaAllocationCreateInfo memory_info{};
     memory_info.flags = VMA_ALLOCATION_CREATE_STRATEGY_BEST_FIT_BIT;
     memory_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-    if(buffer_creation.persistent)
+    if(buffer_config.persistent)
     {
         memory_info.flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
     }
@@ -389,15 +382,15 @@ BufferHandle Renderer::create_buffer(const BufferCreationInfo& buffer_creation)
     vmaCreateBuffer(m_allocator, reinterpret_cast<const VkBufferCreateInfo*>(&buffer_info), &memory_info,
                     &buffer->vk_buffer, &buffer->vma_allocation, &allocation_info);
 
-    if(buffer_creation.data)
+    if(buffer_config.data)
     {
         void* data;
         vmaMapMemory(m_allocator, buffer->vma_allocation, &data);
-        memcpy(data, buffer_creation.data, (size_t)buffer_creation.size);
+        memcpy(data, buffer_config.data, (size_t)buffer_config.size);
         vmaUnmapMemory(m_allocator, buffer->vma_allocation);
     }
 
-    if(buffer_creation.persistent)
+    if(buffer_config.persistent)
     {
         buffer->mapped_data = static_cast<u8*>(allocation_info.pMappedData);
     }
@@ -405,11 +398,11 @@ BufferHandle Renderer::create_buffer(const BufferCreationInfo& buffer_creation)
     return handle;
 }
 
-TextureHandle Renderer::create_texture(const TextureCreationInfo& texture_creation)
+TextureHandle Renderer::create_texture(const TextureConfig& texture_config)
 {
-    if(m_texture_map.contains(texture_creation.image_src))
+    if(m_texture_map.contains(texture_config.image_src))
     {
-        return m_texture_map[texture_creation.image_src];
+        return m_texture_map[texture_config.image_src];
     }
 
     TextureHandle handle = (TextureHandle)m_texture_pool.acquire();
@@ -418,13 +411,13 @@ TextureHandle Renderer::create_texture(const TextureCreationInfo& texture_creati
     stbi_set_flip_vertically_on_load(1);
 
     int width, height, channels;
-    stbi_uc* pixels = stbi_load(texture_creation.image_src, &width, &height, &channels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(texture_config.image_src, &width, &height, &channels, STBI_rgb_alpha);
 
     vk::DeviceSize image_size = width * height * 4;
 
     texture->width = width;
     texture->height = height;
-    texture->name = texture_creation.image_src;
+    texture->name = texture_config.image_src;
 
     if(!pixels)
     {
@@ -448,30 +441,30 @@ TextureHandle Renderer::create_texture(const TextureCreationInfo& texture_creati
     image_create_info.extent.depth = 1;
     image_create_info.mipLevels = 1;
     image_create_info.arrayLayers = 1;
-    image_create_info.format = texture_creation.format;
+    image_create_info.format = texture_config.format;
     image_create_info.tiling = vk::ImageTiling::eOptimal;
     image_create_info.initialLayout = vk::ImageLayout::eUndefined;
     image_create_info.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
     image_create_info.sharingMode = vk::SharingMode::eExclusive;
     image_create_info.samples = vk::SampleCountFlagBits::e1;
-    image_create_info.flags = texture_creation.flags;
+    image_create_info.flags = texture_config.flags;
 
     VmaAllocationCreateInfo memory_info{};
     memory_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
     vmaCreateImage(m_allocator, reinterpret_cast<const VkImageCreateInfo*>(&image_create_info), &memory_info, &texture->vk_image, &texture->vma_allocation, nullptr);
 
-    transition_image_layout(texture->vk_image, texture_creation.format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+    transition_image_layout(texture->vk_image, texture_config.format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
     copy_buffer_to_image(staging_buffer->vk_buffer, texture->vk_image, static_cast<u32>(width), static_cast<u32>(height));
 
-    transition_image_layout(texture->vk_image, texture_creation.format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+    transition_image_layout(texture->vk_image, texture_config.format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 
-    texture->vk_image_view = create_image_view(texture->vk_image, vk::ImageViewType::e2D, texture_creation.format, vk::ImageAspectFlagBits::eColor);
+    texture->vk_image_view = create_image_view(texture->vk_image, vk::ImageViewType::e2D, texture_config.format, vk::ImageAspectFlagBits::eColor);
 
     destroy_buffer(staging_handle);
 
-    m_texture_map[texture_creation.image_src] = handle;
+    m_texture_map[texture_config.image_src] = handle;
 
     return handle;
 }
@@ -546,33 +539,29 @@ TextureHandle Renderer::create_cubemap(std::vector<std::string> images)
     return handle;
 }
 
-SamplerHandle Renderer::create_sampler(const SamplerCreationInfo& sampler_creation)
+SamplerHandle Renderer::create_sampler(const SamplerConfig& sampler_config)
 {
     SamplerHandle sampler_handle = (SamplerHandle)m_sampler_pool.acquire();
     auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(sampler_handle));
 
     vk::SamplerCreateInfo sampler_info{};
     sampler_info.sType = vk::StructureType::eSamplerCreateInfo;
-    sampler_info.magFilter = sampler_creation.mag_filter;
-    sampler_info.minFilter = sampler_creation.min_filter;
+    sampler_info.magFilter = sampler_config.mag_filter;
+    sampler_info.minFilter = sampler_config.min_filter;
 
-    sampler_info.addressModeU = sampler_creation.u_mode;
-    sampler_info.addressModeV = sampler_creation.v_mode;
-    sampler_info.addressModeW = sampler_creation.w_mode;
+    sampler_info.addressModeU = sampler_config.u_mode;
+    sampler_info.addressModeV = sampler_config.v_mode;
+    sampler_info.addressModeW = sampler_config.w_mode;
 
     vk::PhysicalDeviceProperties properties{};
     m_physical_device.getProperties(&properties);
 
     sampler_info.anisotropyEnable = true;
     sampler_info.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-
     sampler_info.borderColor = vk::BorderColor::eIntOpaqueBlack;
-
     sampler_info.unnormalizedCoordinates = false;
-
     sampler_info.compareEnable = false;
     sampler_info.compareOp = vk::CompareOp::eAlways;
-
     sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
     sampler_info.mipLodBias = 0.f;
     sampler_info.minLod = 0.f;
@@ -583,7 +572,34 @@ SamplerHandle Renderer::create_sampler(const SamplerCreationInfo& sampler_creati
     return sampler_handle;
 }
 
-DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetCreationInfo& descriptor_set_creation)
+DescriptorSetLayoutHandle Renderer::create_descriptor_set_layout(const DescriptorSetLayoutConfig& descriptor_set_layout_config)
+{
+    DescriptorSetLayoutHandle handle = (DescriptorSetLayoutHandle)m_descriptor_set_layout_pool.acquire();
+    auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(handle));
+
+    vk::DescriptorSetLayoutBinding layout_bindings[descriptor_set_layout_config.num_bindings];
+    for(u32 i = 0; i < descriptor_set_layout_config.num_bindings; ++i)
+    {
+        layout_bindings[i].binding = descriptor_set_layout_config.bindings[i].binding_index;
+        layout_bindings[i].descriptorType = descriptor_set_layout_config.bindings[i].type;
+        layout_bindings[i].descriptorCount = descriptor_set_layout_config.bindings[i].descriptor_count;
+        layout_bindings[i].stageFlags = descriptor_set_layout_config.bindings[i].stage_flags;
+        layout_bindings[i].pImmutableSamplers = nullptr;
+    }
+
+    vk::DescriptorSetLayoutCreateInfo layout_create_info{};
+    layout_create_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
+    layout_create_info.bindingCount = descriptor_set_layout_config.num_bindings;
+    layout_create_info.pBindings = layout_bindings;
+    layout_create_info.flags = descriptor_set_layout_config.flags;
+    layout_create_info.pNext = descriptor_set_layout_config.extension;
+
+    check(m_logical_device.createDescriptorSetLayout(&layout_create_info, nullptr, &descriptor_set_layout->vk_descriptor_set_layout));
+
+    return handle;
+}
+
+DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetConfig& descriptor_set_config)
 {
     DescriptorSetHandle descriptor_set_handle = (DescriptorSetHandle)m_descriptor_set_pool.acquire();
     auto* descriptor_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(descriptor_set_handle));
@@ -592,19 +608,19 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetCreationI
     allocInfo.sType = vk::StructureType::eDescriptorSetAllocateInfo;
     allocInfo.descriptorPool = m_descriptor_pool;
     allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &descriptor_set_creation.layout;
+    allocInfo.pSetLayouts = &descriptor_set_config.layout;
 
     check(m_logical_device.allocateDescriptorSets(&allocInfo, &descriptor_set->vk_descriptor_set));
 
-    vk::WriteDescriptorSet descriptor_writes[descriptor_set_creation.num_resources];
+    vk::WriteDescriptorSet descriptor_writes[descriptor_set_config.num_resources];
 
-    for(int i = 0; i < descriptor_set_creation.num_resources; ++i)
+    for(int i = 0; i < descriptor_set_config.num_resources; ++i)
     {
-        switch(descriptor_set_creation.types[i])
+        switch(descriptor_set_config.types[i])
         {
             case vk::DescriptorType::eUniformBuffer:
             {
-                auto* buffer = static_cast<Buffer*>(m_buffer_pool.access(descriptor_set_creation.resource_handles[i]));
+                auto* buffer = static_cast<Buffer*>(m_buffer_pool.access(descriptor_set_config.resource_handles[i]));
 
                 vk::DescriptorBufferInfo descriptor_info{};
                 descriptor_info.buffer = buffer->vk_buffer;
@@ -613,7 +629,7 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetCreationI
 
                 descriptor_writes[i].sType = vk::StructureType::eWriteDescriptorSet;
                 descriptor_writes[i].dstSet = descriptor_set->vk_descriptor_set;
-                descriptor_writes[i].dstBinding = descriptor_set_creation.bindings[i];
+                descriptor_writes[i].dstBinding = descriptor_set_config.bindings[i];
                 descriptor_writes[i].dstArrayElement = 0;
                 descriptor_writes[i].descriptorType = vk::DescriptorType::eUniformBuffer;
                 descriptor_writes[i].descriptorCount = 1;
@@ -629,8 +645,8 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetCreationI
             }
             case vk::DescriptorType::eCombinedImageSampler:
             {
-                auto* texture = static_cast<Texture*>(m_texture_pool.access(descriptor_set_creation.resource_handles[i]));
-                auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(descriptor_set_creation.sampler_handles[i]));
+                auto* texture = static_cast<Texture*>(m_texture_pool.access(descriptor_set_config.resource_handles[i]));
+                auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(descriptor_set_config.sampler_handles[i]));
 
                 vk::DescriptorImageInfo descriptor_info{};
                 descriptor_info.imageView = texture->vk_image_view;
@@ -639,7 +655,7 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetCreationI
 
                 descriptor_writes[i].sType = vk::StructureType::eWriteDescriptorSet;
                 descriptor_writes[i].dstSet = descriptor_set->vk_descriptor_set; // descriptor set to update
-                descriptor_writes[i].dstBinding = descriptor_set_creation.bindings[i];
+                descriptor_writes[i].dstBinding = descriptor_set_config.bindings[i];
                 descriptor_writes[i].dstArrayElement = 0;
                 descriptor_writes[i].descriptorType = vk::DescriptorType::eCombinedImageSampler;
                 descriptor_writes[i].descriptorCount = 1; // how many array elements to update
@@ -753,6 +769,13 @@ void Renderer::destroy_sampler(SamplerHandle sampler_handle)
     auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(sampler_handle));
     m_logical_device.destroySampler(sampler->vk_sampler, nullptr);
     m_sampler_pool.free(sampler_handle);
+}
+
+void Renderer::destroy_descriptor_set_layout(DescriptorSetLayoutHandle set_layout_handle)
+{
+    auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(set_layout_handle));
+    m_logical_device.destroyDescriptorSetLayout(descriptor_set_layout->vk_descriptor_set_layout, nullptr);
+    m_sampler_pool.free(set_layout_handle);
 }
 
 void Renderer::update_texture_set(TextureHandle* texture_handles, u32 num_textures)
@@ -1200,7 +1223,20 @@ void Renderer::init_descriptor_sets()
     uniform_layout_info.bindingCount = 2;
     uniform_layout_info.pBindings = bindings;
 
-    check(m_logical_device.createDescriptorSetLayout(&uniform_layout_info, nullptr, &m_camera_data_layout))
+    // check(m_logical_device.createDescriptorSetLayout(&uniform_layout_info, nullptr, &m_camera_data_layout))
+
+    m_camera_data_layout = create_descriptor_set_layout({
+        .bindings = {
+            {
+                .binding_index = 0,
+                .type = vk::DescriptorType::eUniformBuffer,
+                .stage_flags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+                .descriptor_count = 1
+            }
+        },
+        .num_bindings = 1
+    });
+    auto* camera_descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_camera_data_layout));
 
     // create the buffers for the view/projection transforms
     u32 camera_buffer_size = pad_uniform_buffer(sizeof(CameraData));
@@ -1224,7 +1260,7 @@ void Renderer::init_descriptor_sets()
             .resource_handles = {m_camera_buffers[i].index},
             .bindings = {0},
             .types = {vk::DescriptorType::eUniformBuffer},
-            .layout = m_camera_data_layout,
+            .layout = camera_descriptor_set_layout->vk_descriptor_set_layout,
             .num_resources = 1,
         });
     }
@@ -1250,7 +1286,6 @@ void Renderer::init_descriptor_sets()
     bindless_layout_create_info.flags = vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPoolEXT;
 
     vk::DescriptorBindingFlags bindless_flags = vk::DescriptorBindingFlagBits::ePartiallyBound | vk::DescriptorBindingFlagBits::eUpdateAfterBind;
-
     vk::DescriptorBindingFlags binding_flags[] = { bindless_flags, bindless_flags };
     vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extended_info{};
     extended_info.sType = vk::StructureType::eDescriptorSetLayoutBindingFlagsCreateInfoEXT;
@@ -1259,7 +1294,28 @@ void Renderer::init_descriptor_sets()
 
     bindless_layout_create_info.pNext = &extended_info;
 
-    check(m_logical_device.createDescriptorSetLayout(&bindless_layout_create_info, nullptr, &m_texture_set_layout));
+   // check(m_logical_device.createDescriptorSetLayout(&bindless_layout_create_info, nullptr, &m_texture_set_layout));
+
+    m_texture_set_layout = create_descriptor_set_layout({
+        .bindings = {
+            {
+                .binding_index = k_bindless_texture_binding,
+                .type = vk::DescriptorType::eCombinedImageSampler,
+                .stage_flags = vk::ShaderStageFlagBits::eFragment,
+                .descriptor_count = k_max_bindless_resources
+            },
+            {
+                .binding_index = k_bindless_image_binding,
+                .type = vk::DescriptorType::eStorageImage,
+               // .stage_flags = vk::ShaderStageFlagBits::eFragment,
+                .descriptor_count = k_max_bindless_resources
+            }
+        },
+        .num_bindings = 2,
+        .flags = vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPoolEXT,
+        .extension = &extended_info
+    });
+    auto* texture_descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_texture_set_layout));
 
     m_texture_set = (DescriptorSetHandle)m_descriptor_set_pool.acquire();
     auto* descriptor_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_texture_set));
@@ -1268,7 +1324,7 @@ void Renderer::init_descriptor_sets()
     allocInfo.sType = vk::StructureType::eDescriptorSetAllocateInfo;
     allocInfo.descriptorPool = m_descriptor_pool;
     allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &m_texture_set_layout;
+    allocInfo.pSetLayouts = &texture_descriptor_set_layout->vk_descriptor_set_layout;
 
     check(m_logical_device.allocateDescriptorSets(&allocInfo, &descriptor_set->vk_descriptor_set));
 }
@@ -1432,7 +1488,9 @@ void Renderer::init_graphics_pipeline()
 
     // need to specify the descriptor set layout here
     pipeline_layout_info.setLayoutCount = 2;
-    vk::DescriptorSetLayout layouts[] = {m_camera_data_layout, m_texture_set_layout};
+    auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_camera_data_layout));
+    auto* texture_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_texture_set_layout));
+    vk::DescriptorSetLayout layouts[] = {descriptor_set_layout->vk_descriptor_set_layout, texture_set_layout->vk_descriptor_set_layout};
     pipeline_layout_info.pSetLayouts = layouts;
 
     // need to tell the pipeline that there will be a push constant coming in
@@ -1497,18 +1555,17 @@ void Renderer::init_graphics_pipeline()
 
 void Renderer::init_skybox()
 {
-    vk::DescriptorSetLayoutBinding cubemap_binding{};
-    cubemap_binding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-    cubemap_binding.descriptorCount = 1;
-    cubemap_binding.binding = 0;
-    cubemap_binding.stageFlags = vk::ShaderStageFlagBits::eFragment;
+    m_skybox.descriptor_set_layout = create_descriptor_set_layout({
+       .bindings = {
+           {
+                .type = vk::DescriptorType::eCombinedImageSampler,
+                .stage_flags = vk::ShaderStageFlagBits::eFragment,
+           }
+       },
+       .num_bindings = 1
+    });
 
-    vk::DescriptorSetLayoutCreateInfo skybox_descriptor_set_layout_info{};
-    skybox_descriptor_set_layout_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
-    skybox_descriptor_set_layout_info.bindingCount = 1;
-    skybox_descriptor_set_layout_info.pBindings = &cubemap_binding;
-
-    check(m_logical_device.createDescriptorSetLayout(&skybox_descriptor_set_layout_info, nullptr, &m_skybox.descriptor_set_layout));
+    auto* skybox_descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_skybox.descriptor_set_layout));
 
     m_skybox.cubemap = create_cubemap({
         "../assets/skyboxes/above_the_clouds/right.jpg",
@@ -1524,7 +1581,7 @@ void Renderer::init_skybox()
         .sampler_handles = {m_default_sampler},
         .bindings = {0},
         .types = {vk::DescriptorType::eCombinedImageSampler},
-        .layout = m_skybox.descriptor_set_layout,
+        .layout = skybox_descriptor_set_layout->vk_descriptor_set_layout,
         .num_resources = 1
     });
 
@@ -1533,9 +1590,9 @@ void Renderer::init_skybox()
 
     vk::DescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-    allocInfo.descriptorPool = m_normal_descriptor_pool;
+    allocInfo.descriptorPool = m_descriptor_pool;
     allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &m_skybox.descriptor_set_layout;
+    allocInfo.pSetLayouts = &skybox_descriptor_set_layout->vk_descriptor_set_layout;
 
     check(m_logical_device.allocateDescriptorSets(&allocInfo, &descriptor_set->vk_descriptor_set));
 
@@ -1739,7 +1796,8 @@ void Renderer::init_skybox()
     vk::PipelineLayoutCreateInfo pipeline_layout_info{};
     pipeline_layout_info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
     pipeline_layout_info.setLayoutCount = 2;
-    vk::DescriptorSetLayout layouts[] = {m_camera_data_layout, m_skybox.descriptor_set_layout};
+    auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_camera_data_layout));
+    vk::DescriptorSetLayout layouts[] = {descriptor_set_layout->vk_descriptor_set_layout, skybox_descriptor_set_layout->vk_descriptor_set_layout};
     pipeline_layout_info.pSetLayouts = layouts;
 
     check(m_logical_device.createPipelineLayout(&pipeline_layout_info, nullptr, &m_skybox.pipeline_layout));

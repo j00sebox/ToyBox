@@ -228,7 +228,7 @@ void ModelLoader::load_texture(Renderer* renderer, const char* texture_path, Mat
         .sampler_handles = { material.sampler, material.sampler, material.sampler, material.sampler },
         .bindings = {0, 1, 2, 3},
         .types = {vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler, vk::DescriptorType::eCombinedImageSampler},
-        .layout = renderer->get_texture_layout(),
+       // .layout = renderer->get_texture_layout(),
         .num_resources = 4
     });
 }

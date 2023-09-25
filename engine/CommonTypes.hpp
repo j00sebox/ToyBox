@@ -22,6 +22,7 @@ struct ResourceHandle
 struct BufferHandle : ResourceHandle {};
 struct TextureHandle : ResourceHandle {};
 struct SamplerHandle : ResourceHandle {};
+struct DescriptorSetLayoutHandle : ResourceHandle {};
 struct DescriptorSetHandle : ResourceHandle {};
 
 // TODO: move somewhere else ?

@@ -4,7 +4,8 @@
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
 
-const u16 k_max_descriptors_per_set = 16;
+const u8                        k_max_descriptor_set_layouts = 8; // max layouts per pipeline
+const u16                       k_max_descriptors_per_set = 16;
 
 struct Buffer
 {
@@ -43,18 +44,32 @@ struct Sampler
     vk::SamplerAddressMode            address_mode_w;
 };
 
-struct DescriptorSet
+struct DescriptorSetLayout
 {
-    vk::DescriptorSet                 vk_descriptor_set;
-
-    u32*                            resources = nullptr;
-    u32*                            samplers = nullptr;
-    u16*                            bindings = nullptr;
-
-    u32                             num_resources;
+    vk::DescriptorSetLayout         vk_descriptor_set_layout;
 };
 
-struct BufferCreationInfo
+struct DescriptorSet
+{
+    vk::DescriptorSet                   vk_descriptor_set;
+
+    u32*                                resources = nullptr;
+    u32*                                samplers = nullptr;
+    u16*                                bindings = nullptr;
+
+    u32                                 num_resources = 0;
+};
+
+struct Pipeline
+{
+    vk::Pipeline                vk_pipeline;
+    vk::PipelineLayout          vk_pipeline_layout;
+
+    vk::PipelineBindPoint       vk_bindpoint = vk::PipelineBindPoint();
+
+};
+
+struct BufferConfig
 {
     vk::BufferUsageFlags            usage;
     u32                             size;
@@ -62,14 +77,14 @@ struct BufferCreationInfo
     void*                           data;
 };
 
-struct TextureCreationInfo
+struct TextureConfig
 {
     vk::Format                      format          = vk::Format::eUndefined;
     vk::ImageCreateFlags            flags           = vk::ImageCreateFlags();
     const char*                     image_src;
 };
 
-struct SamplerCreationInfo
+struct SamplerConfig
 {
     vk::Filter                      min_filter;
     vk::Filter                      mag_filter;
@@ -79,28 +94,30 @@ struct SamplerCreationInfo
     vk::SamplerAddressMode          w_mode;
 };
 
-struct DescriptorSetLayoutCreationInfo
+struct DescriptorSetLayoutConfig
 {
     struct Binding
     {
-
-        vk::DescriptorType          type    = vk::DescriptorType::eMutableVALVE;
-        u16                         start   = 0;
-        u16                         count   = 0;
+        u32                                 binding_index       = 0;
+        vk::DescriptorType                  type                = vk::DescriptorType();
+        vk::ShaderStageFlags                stage_flags         = vk::ShaderStageFlags();
+        u32                                 descriptor_count    = 1;
     };
 
-    Binding                         bindings[k_max_descriptors_per_set];
-    u32                             num_bindings    = 0;
-    u32                             set_index       = 0;
+    Binding                                 bindings[k_max_descriptors_per_set];
+    u32                                     num_bindings        = 0;
+    u32                                     set_index           = 0;
+    vk::DescriptorSetLayoutCreateFlags      flags               = vk::DescriptorSetLayoutCreateFlags();
+    void*                                   extension           = nullptr;
 };
 
-struct DescriptorSetCreationInfo
+struct DescriptorSetConfig
 {
     ResourceHandle                      resource_handles[k_max_descriptors_per_set];
     SamplerHandle                       sampler_handles[k_max_descriptors_per_set];
     u16                                 bindings[k_max_descriptors_per_set];
     vk::DescriptorType                  types[k_max_descriptors_per_set];
 
-    vk::DescriptorSetLayout         layout;
-    u32                             num_resources;
+    vk::DescriptorSetLayout             layout;
+    u32                                 num_resources;
 };
