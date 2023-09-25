@@ -9,6 +9,8 @@ const u16                       k_max_descriptors_per_set = 16;
 const u16                       k_max_shaders = 4;
 const u16                       k_max_vertex_attributes = 6;
 
+const SamplerHandle             k_invalid_sampler_handle = { 0xffffffff };
+
 struct Buffer
 {
     VkBuffer                        vk_buffer;

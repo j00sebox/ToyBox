@@ -38,6 +38,14 @@ void Scene::load(const char* scene)
 
 void Scene::close(Renderer* renderer)
 {
+    if(skybox)
+    {
+        renderer->destroy_descriptor_set_layout(skybox->descriptor_set_layout);
+        renderer->destroy_pipeline(skybox->pipeline);
+        renderer->destroy_texture(skybox->cubemap);
+        renderer->destroy_buffer(skybox->vertex_buffer);
+        renderer->destroy_buffer(skybox->index_buffer);
+    }
     for (auto* scene_node : root)
     {
         delete_node(renderer, scene_node);

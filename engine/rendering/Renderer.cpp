@@ -105,19 +105,11 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
         .w_mode = vk::SamplerAddressMode::eRepeat
     });
 
-    init_skybox();
     init_imgui();
 }
 
 Renderer::~Renderer()
 {
-    // TODO: move skybox stuff
-    destroy_descriptor_set_layout(m_skybox.descriptor_set_layout);
-    destroy_pipeline(m_skybox.pipeline);
-    destroy_texture(m_skybox.cubemap);
-    destroy_buffer(m_skybox.vertex_buffer);
-    destroy_buffer(m_skybox.index_buffer);
-
     ImGui_ImplVulkan_Shutdown();
     m_logical_device.destroyDescriptorPool(m_imgui_pool, nullptr);
     for(i32 i = 0; i < k_max_frames_in_flight; ++i)
@@ -204,24 +196,27 @@ void Renderer::render(Scene* scene)
     inheritance_info.framebuffer = m_viewport_framebuffers[m_image_index];
     inheritance_info.subpass = 0;
 
-    auto* skybox_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_skybox.descriptor_set));
-    auto* skybox_pipeline = static_cast<Pipeline*>(m_pipeline_pool.access(m_skybox.pipeline));
+    if(scene->skybox)
+    {
+        auto* skybox_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(scene->skybox->descriptor_set));
+        auto* skybox_pipeline = static_cast<Pipeline*>(m_pipeline_pool.access(scene->skybox->pipeline));
 
-    m_skybox_commands[m_current_frame].begin(inheritance_info);
-    m_skybox_commands[m_current_frame].bind_pipeline(skybox_pipeline->vk_pipeline);
-    m_skybox_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
-    m_skybox_commands[m_current_frame].set_scissor(m_swapchain_extent);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(skybox_pipeline->vk_bindpoint, skybox_pipeline->vk_pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(skybox_pipeline->vk_bindpoint, skybox_pipeline->vk_pipeline_layout, 1, 1, &skybox_set->vk_descriptor_set, 0, nullptr);
-    Buffer* vertex_buffer = get_buffer(m_skybox.vertex_buffer);
-    vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
-    vk::DeviceSize offsets[] = {0};
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindVertexBuffers(0, 1, vertex_buffers, offsets);
+        m_skybox_commands[m_current_frame].begin(inheritance_info);
+        m_skybox_commands[m_current_frame].bind_pipeline(skybox_pipeline->vk_pipeline);
+        m_skybox_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
+        m_skybox_commands[m_current_frame].set_scissor(m_swapchain_extent);
+        m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(skybox_pipeline->vk_bindpoint, skybox_pipeline->vk_pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
+        m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(skybox_pipeline->vk_bindpoint, skybox_pipeline->vk_pipeline_layout, 1, 1, &skybox_set->vk_descriptor_set, 0, nullptr);
+        Buffer* vertex_buffer = get_buffer(scene->skybox->vertex_buffer);
+        vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
+        vk::DeviceSize offsets[] = {0};
+        m_skybox_commands[m_current_frame].vk_command_buffer.bindVertexBuffers(0, 1, vertex_buffers, offsets);
 
-    Buffer* index_buffer = get_buffer(m_skybox.index_buffer);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
-    m_skybox_commands[m_current_frame].vk_command_buffer.drawIndexed(m_skybox.index_count, 1, 0, 0, 0);
-    m_skybox_commands[m_current_frame].end();
+        Buffer* index_buffer = get_buffer(scene->skybox->index_buffer);
+        m_skybox_commands[m_current_frame].vk_command_buffer.bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
+        m_skybox_commands[m_current_frame].vk_command_buffer.drawIndexed(scene->skybox->index_count, 1, 0, 0, 0);
+        m_skybox_commands[m_current_frame].end();
+    }
 
     u32 start = 0;
     for(u32 i = 0; i < num_recordings; ++i)
@@ -465,7 +460,7 @@ TextureHandle Renderer::create_texture(const TextureConfig& texture_config)
     return handle;
 }
 
-TextureHandle Renderer::create_cubemap(std::vector<std::string> images)
+TextureHandle Renderer::create_cubemap(std::string images[6])
 {
     TextureHandle handle = (TextureHandle)m_texture_pool.acquire();
     auto* cubemap = static_cast<Texture*>(m_texture_pool.access(handle));
@@ -480,6 +475,11 @@ TextureHandle Renderer::create_cubemap(std::vector<std::string> images)
             .size = (u32)image_size * 6,
     });
     auto* staging_buffer = static_cast<Buffer*>(m_buffer_pool.access(staging_handle));
+
+    if(!first_image)
+    {
+        fatal("Could not load texture image!");
+    }
 
     void* data;
     vmaMapMemory(m_allocator, staging_buffer->vma_allocation, &data);
@@ -642,7 +642,7 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetConfig& d
             case vk::DescriptorType::eCombinedImageSampler:
             {
                 auto* texture = static_cast<Texture*>(m_texture_pool.access(descriptor_set_config.resource_handles[i]));
-                auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(descriptor_set_config.sampler_handles[i]));
+                auto* sampler = (descriptor_set_config.sampler_handles[i].index == k_invalid_sampler_handle.index) ? static_cast<Sampler*>(m_sampler_pool.access(m_default_sampler)) : static_cast<Sampler*>(m_sampler_pool.access(descriptor_set_config.sampler_handles[i]));
 
                 vk::DescriptorImageInfo descriptor_info{};
                 descriptor_info.imageView = texture->vk_image_view;
@@ -1677,154 +1677,6 @@ void Renderer::init_graphics_pipeline()
     m_logical_device.destroyPipelineCache(pipeline_cache, nullptr);
     m_logical_device.destroyShaderModule(vert_shader_module, nullptr);
     m_logical_device.destroyShaderModule(frag_shader_module, nullptr);
-}
-
-void Renderer::init_skybox()
-{
-    m_skybox.descriptor_set_layout = create_descriptor_set_layout({
-       .bindings = {
-           {
-                .type = vk::DescriptorType::eCombinedImageSampler,
-                .stage_flags = vk::ShaderStageFlagBits::eFragment,
-           }
-       },
-       .num_bindings = 1
-    });
-    auto* skybox_descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_skybox.descriptor_set_layout));
-
-    m_skybox.cubemap = create_cubemap({
-        "../assets/skyboxes/above_the_clouds/right.jpg",
-        "../assets/skyboxes/above_the_clouds/left.jpg",
-        "../assets/skyboxes/above_the_clouds/top.jpg",
-        "../assets/skyboxes/above_the_clouds/bottom.jpg",
-        "../assets/skyboxes/above_the_clouds/front.jpg",
-        "../assets/skyboxes/above_the_clouds/back.jpg"
-    });
-
-    m_skybox.descriptor_set = create_descriptor_set({
-        .resource_handles = {m_skybox.cubemap},
-        .sampler_handles = {m_default_sampler},
-        .bindings = {0},
-        .types = {vk::DescriptorType::eCombinedImageSampler},
-        .layout = skybox_descriptor_set_layout->vk_descriptor_set_layout,
-        .num_resources = 1
-    });
-
-    std::vector<f32> skybox_verts =
-	{
-		-1.0f, -1.0f,  1.0f,	//        7--------6
-		 1.0f, -1.0f,  1.0f,	//       /|       /|
-		 1.0f, -1.0f, -1.0f,	//      4--------5 |
-		-1.0f, -1.0f, -1.0f,	//      | |      | |
-		-1.0f,  1.0f,  1.0f,	//      | 3------|-2
-		 1.0f,  1.0f,  1.0f,	//      |/       |/
-		 1.0f,  1.0f, -1.0f,	//      0--------1
-		-1.0f,  1.0f, -1.0f
-	};
-
-	std::vector<u32> skybox_indices =
-	{
-		// right
-		1, 2, 6,
-		6, 5, 1,
-
-		// left
-		0, 4, 7,
-		7, 3, 0,
-
-		// top
-		4, 5, 6,
-		6, 7, 4,
-
-		// bottom
-		0, 3, 2,
-		2, 1, 0,
-
-		// back
-		0, 1, 5,
-		5, 4, 0,
-
-		// front
-		3, 7, 6,
-		6, 2, 3
-	};
-
-    m_skybox.vertex_buffer = create_buffer({
-        .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        .size = (u32)(sizeof(skybox_verts[0]) * skybox_verts.size()),
-        .data = skybox_verts.data()
-    });
-
-    m_skybox.index_count = skybox_indices.size();
-    m_skybox.index_buffer = create_buffer({
-        .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        .size = (u32)(sizeof(skybox_indices[0]) * skybox_indices.size()),
-        .data = skybox_indices.data()
-    });
-
-    PipelineConfig pipeline_config{
-        .renderPass = m_viewport_renderpass
-    };
-
-    pipeline_config.set_rasterizer({
-       .polygon_mode = vk::PolygonMode::eFill,
-       .cull_mode = vk::CullModeFlagBits::eFront,
-       .front_face = vk::FrontFace::eCounterClockwise
-    });
-
-    pipeline_config.set_binding_description({
-        .binding = 0,
-        .stride = sizeof(glm::vec3)
-    });
-
-    pipeline_config.set_input_assembly(vk::PrimitiveTopology::eTriangleList);
-
-    pipeline_config.add_shader_stage({
-        .shader_file = "../assets/shaders/skybox/vert.spv",
-        .stage_flags = vk::ShaderStageFlagBits::eVertex
-    });
-
-    pipeline_config.add_shader_stage({
-        .shader_file = "../assets/shaders/skybox/frag.spv",
-        .stage_flags = vk::ShaderStageFlagBits::eFragment
-    });
-
-    pipeline_config.add_vertex_attribute({
-        .location = 0,
-        .format = vk::Format::eR32G32B32Sfloat,
-        .offset = 0
-    });
-
-    pipeline_config.add_descriptor_set_layout(m_camera_data_layout);
-    pipeline_config.add_descriptor_set_layout(m_skybox.descriptor_set_layout);
-
-    vk::PipelineColorBlendAttachmentState colour_blend_attachment{};
-    colour_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
-                                             | vk::ColorComponentFlagBits::eG
-                                             | vk::ColorComponentFlagBits::eB
-                                             | vk::ColorComponentFlagBits::eA;
-    colour_blend_attachment.blendEnable = false;
-    colour_blend_attachment.srcColorBlendFactor = vk::BlendFactor::eOne;
-    colour_blend_attachment.dstColorBlendFactor = vk::BlendFactor::eZero;
-    colour_blend_attachment.colorBlendOp = vk::BlendOp::eAdd;
-    colour_blend_attachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
-    colour_blend_attachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
-    colour_blend_attachment.alphaBlendOp = vk::BlendOp::eAdd;
-
-    vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
-    depth_stencil.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
-    depth_stencil.depthTestEnable = false;
-    depth_stencil.depthWriteEnable = false;
-    depth_stencil.depthCompareOp = vk::CompareOp::eLess;
-    depth_stencil.depthBoundsTestEnable = false;
-    depth_stencil.minDepthBounds = 0.f;
-    depth_stencil.maxDepthBounds = 1.f;
-    depth_stencil.stencilTestEnable = false;
-
-    pipeline_config.add_colour_attachment(colour_blend_attachment);
-    pipeline_config.add_depth_stencil_attachment(depth_stencil);
-
-    m_skybox.pipeline = create_pipeline(pipeline_config);
 }
 
 void Renderer::init_viewport()

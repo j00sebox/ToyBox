@@ -28,6 +28,17 @@ struct RenderObject
     // unsigned instances = 1;
 };
 
+struct Skybox
+{
+    BufferHandle                    vertex_buffer;
+    BufferHandle                    index_buffer;
+    u32                             index_count;
+    TextureHandle                   cubemap;
+    DescriptorSetHandle             descriptor_set;
+    DescriptorSetLayoutHandle       descriptor_set_layout;
+    PipelineHandle                  pipeline;
+};
+
 class Scene
 {
 public:
@@ -41,14 +52,13 @@ public:
 	void update(f32 elapsed_time);
 	void add_primitive(const char* name) {}
     void add_model(const char* name) {}
-	// void window_resize(int width, int height);
     static void recompile_shaders() {}
 
 	void set_background_colour(glm::vec4 colour);
 	[[nodiscard]] const glm::vec4& get_background_colour() const { return m_clear_colour; }
 
-    // Window* m_window_handle;
     std::shared_ptr<Camera> camera;
+    std::shared_ptr<Skybox> skybox;
 
     // LightManager m_light_manager;
     std::vector<RenderObject> m_render_list;

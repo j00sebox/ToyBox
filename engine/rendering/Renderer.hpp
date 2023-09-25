@@ -11,18 +11,6 @@
 #include <vk_mem_alloc.h>
 #include <TaskScheduler.h>
 
-// TODO: move somewhere else
-struct Skybox
-{
-    BufferHandle                    vertex_buffer;
-    BufferHandle                    index_buffer;
-    u32                             index_count;
-    TextureHandle                   cubemap;
-    DescriptorSetHandle             descriptor_set;
-    DescriptorSetLayoutHandle       descriptor_set_layout;
-    PipelineHandle                  pipeline;
-};
-
 class Renderer
 {
 public:
@@ -37,7 +25,7 @@ public:
     // resource creation
     BufferHandle create_buffer(const BufferConfig& buffer_config);
     TextureHandle create_texture(const TextureConfig& texture_config);
-    TextureHandle create_cubemap(std::vector<std::string> images);
+    TextureHandle create_cubemap(std::string images[6]);
     SamplerHandle create_sampler(const SamplerConfig& sampler_config);
     DescriptorSetLayoutHandle create_descriptor_set_layout(const DescriptorSetLayoutConfig& descriptor_set_layout_config);
     DescriptorSetHandle create_descriptor_set(const DescriptorSetConfig& descriptor_set_config);
@@ -55,9 +43,12 @@ public:
     void destroy_pipeline(PipelineHandle pipeline_handle);
 
     [[nodiscard]] Buffer* get_buffer(BufferHandle buffer_handle) { return static_cast<Buffer*>(m_buffer_pool.access(buffer_handle)); }
+    [[nodiscard]] DescriptorSetLayout* get_descriptor_set_layout(DescriptorSetLayoutHandle descriptor_set_layout) { return static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(descriptor_set_layout)); }
     // [[nodiscard]] const vk::DescriptorSetLayout& get_texture_layout() const { return m_texture_set_layout; }
     [[nodiscard]] TextureHandle get_null_texture_handle() const { return m_null_texture; }
     [[nodiscard]] const vk::PipelineLayout& get_pipeline_layout() const { return m_pipeline_layout; }
+    [[nodiscard]] DescriptorSetLayoutHandle get_camera_data_layout() const { return m_camera_data_layout; }
+    [[nodiscard]] vk::RenderPass get_viewport_renderpass() const { return m_viewport_renderpass; }
     [[nodiscard]] const vk::DescriptorSet& get_current_viewport_image() const { return m_viewport_descriptors[m_current_frame]; };
 
     void update_texture_set(TextureHandle* texture_handles, u32 num_textures);
@@ -173,9 +164,6 @@ private:
 
     std::map<std::string, TextureHandle> m_texture_map;
 
-    // TODO: remove
-    Skybox m_skybox;
-
     void init_instance();
 	void init_surface();
 	void init_device();
@@ -190,7 +178,6 @@ private:
     void init_depth_resources();
     void init_framebuffers();
     void init_sync_objects();
-    void init_skybox();
     void init_imgui();
 
     vk::CommandBuffer begin_single_time_commands();

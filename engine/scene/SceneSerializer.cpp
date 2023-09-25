@@ -7,18 +7,39 @@
 #include "Scene.hpp"
 #include "SceneNode.hpp"
 // #include "Mesh.h"
+#include "rendering/Renderer.hpp"
 #include "components/Transform.h"
-#include "util/FileOperations.hpp"
 // #include "components/Light.h"
 //#include "components/MeshComponent.h"
 //#include "renderer/Material.h"
-
-#include "rendering/Renderer.hpp"
+#include "util/FileOperations.hpp"
 #include "util/ModelLoader.hpp"
 
 #include <nlohmann/json.hpp>
 
+enum class ImageFormat
+{
+    JPG = 0,
+    PNG
+};
+
+const char* image_extension(ImageFormat fmt)
+{
+    switch (fmt)
+    {
+        case ImageFormat::JPG:
+            return ".jpg";
+
+        case ImageFormat::PNG:
+            return ".png";
+    }
+
+    return "";
+}
+
 using namespace nlohmann;
+
+
 
 void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* renderer)
 {
@@ -27,7 +48,7 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
 
 	std::string src = fileop::file_to_string(scene_name);
 
-	json w_json = json::parse(src);                                            
+	json w_json = json::parse(src);
 
 	json camera_accessor = w_json["camera"];
 	json camera_pos = camera_accessor["position"];
@@ -41,17 +62,10 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
         scene->set_background_colour({bg_col[0], bg_col[1], bg_col[2], bg_col[3]});
     }
 
-//    if(!w_json["skybox"].is_null())
-//    {
-//        std::string dir = w_json["skybox"];
-////        m_faces[0] = dir + "right.jpg";
-////        m_faces[1] = dir + "left.jpg";
-////        m_faces[2] = dir + "top.jpg";
-////        m_faces[3] = dir + "bottom.jpg";
-////        m_faces[4] = dir + "front.jpg";
-////        m_faces[5] = dir + "back.jpg";
-//    }
-        // load_skybox(w_json["skybox"], sky_box);
+    if(!w_json["skybox"].is_null())
+    {
+        scene->skybox = std::make_shared<Skybox>(load_skybox(w_json["skybox"], renderer));
+    }
 
 	json models = w_json["models"];
 	u32 model_count = w_json["model_count"];
@@ -127,10 +141,159 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 	}
 }
 
-//void SceneSerializer::load_skybox(const json& accessor,)
-//{
-//    // sky_box = std::make_unique<Skybox>(accessor["path"], accessor["image_format"]);
-//}
+Skybox SceneSerializer::load_skybox(const json& accessor, Renderer* renderer)
+{
+    Skybox skybox{};
+
+    std::string dir = accessor["path"];
+    const char* img_ext = image_extension(accessor["image_format"]);
+    std::string faces[6] = {
+        dir + "right" + img_ext,
+        dir + "left" + img_ext,
+        dir + "top" + img_ext,
+        dir + "bottom" + img_ext,
+        dir + "front" + img_ext,
+        dir + "back" + img_ext
+    };
+
+    skybox.cubemap = renderer->create_cubemap(faces);
+    skybox.descriptor_set_layout = renderer->create_descriptor_set_layout({
+        .bindings = {
+            {
+                .type = vk::DescriptorType::eCombinedImageSampler,
+                .stage_flags = vk::ShaderStageFlagBits::eFragment,
+            }
+        },
+        .num_bindings = 1
+    });
+    auto* skybox_descriptor_set_layout = renderer->get_descriptor_set_layout(skybox.descriptor_set_layout);
+    skybox.descriptor_set = renderer->create_descriptor_set({
+            .resource_handles = {skybox.cubemap},
+            .sampler_handles = {k_invalid_sampler_handle},
+            .bindings = {0},
+            .types = {vk::DescriptorType::eCombinedImageSampler},
+            .layout = skybox_descriptor_set_layout->vk_descriptor_set_layout,
+            .num_resources = 1
+    });
+
+    std::vector<f32> skybox_verts =
+    {
+        -1.0f, -1.0f,  1.0f,	//        7--------6
+        1.0f, -1.0f,  1.0f,	    //       /|       /|
+        1.0f, -1.0f, -1.0f,	    //      4--------5 |
+        -1.0f, -1.0f, -1.0f,	//      | |      | |
+        -1.0f,  1.0f,  1.0f,	//      | 3------|-2
+        1.0f,  1.0f,  1.0f,	    //      |/       |/
+        1.0f,  1.0f, -1.0f, 	//      0--------1
+        -1.0f,  1.0f, -1.0f
+    };
+
+    std::vector<u32> skybox_indices =
+    {
+        // right
+        1, 2, 6,
+        6, 5, 1,
+
+        // left
+        0, 4, 7,
+        7, 3, 0,
+
+        // top
+        4, 5, 6,
+        6, 7, 4,
+
+        // bottom
+        0, 3, 2,
+        2, 1, 0,
+
+        // back
+        0, 1, 5,
+        5, 4, 0,
+
+        // front
+        3, 7, 6,
+        6, 2, 3
+    };
+
+    skybox.vertex_buffer = renderer->create_buffer({
+        .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        .size = (u32)(sizeof(skybox_verts[0]) * skybox_verts.size()),
+        .data = skybox_verts.data()
+    });
+
+    skybox.index_count = skybox_indices.size();
+    skybox.index_buffer = renderer->create_buffer({
+        .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        .size = (u32)(sizeof(skybox_indices[0]) * skybox_indices.size()),
+        .data = skybox_indices.data()
+    });
+
+    PipelineConfig pipeline_config{
+            .renderPass = renderer->get_viewport_renderpass()
+    };
+
+    pipeline_config.set_rasterizer({
+        .polygon_mode = vk::PolygonMode::eFill,
+        .cull_mode = vk::CullModeFlagBits::eFront,
+        .front_face = vk::FrontFace::eCounterClockwise
+    });
+
+    pipeline_config.set_binding_description({
+        .binding = 0,
+        .stride = sizeof(glm::vec3)
+    });
+
+    pipeline_config.set_input_assembly(vk::PrimitiveTopology::eTriangleList);
+
+    pipeline_config.add_shader_stage({
+        .shader_file = "../assets/shaders/skybox/vert.spv",
+        .stage_flags = vk::ShaderStageFlagBits::eVertex
+    });
+
+    pipeline_config.add_shader_stage({
+         .shader_file = "../assets/shaders/skybox/frag.spv",
+         .stage_flags = vk::ShaderStageFlagBits::eFragment
+    });
+
+    pipeline_config.add_vertex_attribute({
+        .location = 0,
+        .format = vk::Format::eR32G32B32Sfloat,
+        .offset = 0
+    });
+
+    pipeline_config.add_descriptor_set_layout(renderer->get_camera_data_layout());
+    pipeline_config.add_descriptor_set_layout(skybox.descriptor_set_layout);
+
+    vk::PipelineColorBlendAttachmentState colour_blend_attachment{};
+    colour_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
+                                             | vk::ColorComponentFlagBits::eG
+                                             | vk::ColorComponentFlagBits::eB
+                                             | vk::ColorComponentFlagBits::eA;
+    colour_blend_attachment.blendEnable = false;
+    colour_blend_attachment.srcColorBlendFactor = vk::BlendFactor::eOne;
+    colour_blend_attachment.dstColorBlendFactor = vk::BlendFactor::eZero;
+    colour_blend_attachment.colorBlendOp = vk::BlendOp::eAdd;
+    colour_blend_attachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+    colour_blend_attachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+    colour_blend_attachment.alphaBlendOp = vk::BlendOp::eAdd;
+
+    vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
+    depth_stencil.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
+    depth_stencil.depthTestEnable = false;
+    depth_stencil.depthWriteEnable = false;
+    depth_stencil.depthCompareOp = vk::CompareOp::eLess;
+    depth_stencil.depthBoundsTestEnable = false;
+    depth_stencil.minDepthBounds = 0.f;
+    depth_stencil.maxDepthBounds = 1.f;
+    depth_stencil.stencilTestEnable = false;
+
+    pipeline_config.add_colour_attachment(colour_blend_attachment);
+    pipeline_config.add_depth_stencil_attachment(depth_stencil);
+
+    skybox.pipeline = renderer->create_pipeline(pipeline_config);
+
+    return skybox;
+}
 
 void SceneSerializer::load_models(const json& accessor, u32 model_count, Scene* scene, Renderer* renderer)
 {

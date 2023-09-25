@@ -8,8 +8,8 @@
 #include <vector>
 #include <nlohmann/json_fwd.hpp>
 
+struct Skybox;
 class Camera;
-class Skybox;
 class Scene;
 class Renderer;
 
@@ -20,7 +20,7 @@ public:
 	static void save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box);
 
 private:
-	static void load_skybox(const nlohmann::json& accessor, std::unique_ptr<Skybox>& sky_box);
+	static Skybox load_skybox(const nlohmann::json& accessor, Renderer* renderer);
 	static void load_models(const nlohmann::json& accessor, u32 model_count, Scene* scene, Renderer* renderer);
 	static SceneNode* load_model(const nlohmann::json& accessor, u32 model_index, u32& num_models_checked, Scene* scene, Renderer* renderer);
 	static void serialize_node(nlohmann::json& accessor, int& node_index, const SceneNode* scene_node);
