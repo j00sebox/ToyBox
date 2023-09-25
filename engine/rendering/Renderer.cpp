@@ -204,6 +204,24 @@ void Renderer::render(Scene* scene)
     inheritance_info.framebuffer = m_viewport_framebuffers[m_image_index];
     inheritance_info.subpass = 0;
 
+    auto* skybox_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_skybox.descriptor_set));
+
+    m_skybox_commands[m_current_frame].begin(inheritance_info);
+    m_skybox_commands[m_current_frame].bind_pipeline(m_skybox.pipeline);
+    m_skybox_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
+    m_skybox_commands[m_current_frame].set_scissor(m_swapchain_extent);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 1, 1, &skybox_set->vk_descriptor_set, 0, nullptr);
+    Buffer* vertex_buffer = get_buffer(m_skybox.vertex_buffer);
+    vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
+    vk::DeviceSize offsets[] = {0};
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindVertexBuffers(0, 1, vertex_buffers, offsets);
+
+    Buffer* index_buffer = get_buffer(m_skybox.index_buffer);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
+    m_skybox_commands[m_current_frame].vk_command_buffer.drawIndexed(m_skybox.index_count, 1, 0, 0, 0);
+    m_skybox_commands[m_current_frame].end();
+
     u32 start = 0;
     for(u32 i = 0; i < num_recordings; ++i)
     {
@@ -233,6 +251,7 @@ void Renderer::render(Scene* scene)
         m_scheduler->AddTaskSetToPipe(&extra_draws);
     }
 
+    m_viewport_command_buffers[m_current_frame].vk_command_buffer.executeCommands(1, &m_skybox_commands[m_current_frame].vk_command_buffer);
     for(u32 i = 0; i < num_recordings; ++i)
     {
         m_scheduler->WaitforTask(&record_draw_tasks[i]);
@@ -288,26 +307,12 @@ void Renderer::begin_frame()
     m_main_command_buffers[m_current_frame].vk_command_buffer.endRenderPass();
     m_main_command_buffers[m_current_frame].end();
 
-    auto* skybox_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_skybox.descriptor_set));
-    auto* camera_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_camera_sets[m_current_frame]));
 
-    m_skybox_commands[m_current_frame].begin();
-    m_skybox_commands[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
-    m_skybox_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
-    m_skybox_commands[m_current_frame].set_scissor(m_swapchain_extent);
-    m_skybox_commands[m_current_frame].bind_pipeline(m_skybox.pipeline);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 1, 1, &skybox_set->vk_descriptor_set, 0, nullptr);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
-    Buffer* vertex_buffer = get_buffer(m_skybox.vertex_buffer);
-    vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
-    vk::DeviceSize offsets[] = {0};
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindVertexBuffers(0, 1, vertex_buffers, offsets);
-
-    Buffer* index_buffer = get_buffer(m_skybox.index_buffer);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
-    m_skybox_commands[m_current_frame].vk_command_buffer.drawIndexed(m_skybox.index_count, 1, 0, 0, 0);
-    m_skybox_commands[m_current_frame].vk_command_buffer.endRenderPass();
-    m_skybox_commands[m_current_frame].end();
+//    m_skybox_commands[m_current_frame].begin();
+//    m_skybox_commands[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
+//
+//    m_skybox_commands[m_current_frame].vk_command_buffer.endRenderPass();
+//    m_skybox_commands[m_current_frame].end();
 
     m_viewport_command_buffers[m_current_frame].begin();
 //    for(u32 i = 0; i < m_scheduler->GetNumTaskThreads(); ++i)
@@ -327,11 +332,11 @@ void Renderer::end_frame()
     // we are specifying what semaphores we want to use and what stage we want to wait on
     vk::Semaphore wait_semaphores[] = {m_image_available_semaphores[m_current_frame]};
     vk::PipelineStageFlags wait_stages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-    vk::CommandBuffer command_buffers_to_submit[] = {m_main_command_buffers[m_current_frame].vk_command_buffer, m_skybox_commands[m_current_frame].vk_command_buffer, m_viewport_command_buffers[m_current_frame].vk_command_buffer, m_imgui_commands[m_current_frame].vk_command_buffer};
+    vk::CommandBuffer command_buffers_to_submit[] = {m_main_command_buffers[m_current_frame].vk_command_buffer, m_viewport_command_buffers[m_current_frame].vk_command_buffer, m_imgui_commands[m_current_frame].vk_command_buffer};
     submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores = wait_semaphores;
     submit_info.pWaitDstStageMask = wait_stages;
-    submit_info.commandBufferCount = 4;
+    submit_info.commandBufferCount = 3;
     submit_info.pCommandBuffers = command_buffers_to_submit;
 
     vk::Semaphore signal_semaphores[] = {m_render_finished_semaphores[m_current_frame]};
@@ -476,6 +481,7 @@ TextureHandle Renderer::create_cubemap(std::vector<std::string> images)
     TextureHandle handle = (TextureHandle)m_texture_pool.acquire();
     auto* cubemap = static_cast<Texture*>(m_texture_pool.access(handle));
 
+    stbi_set_flip_vertically_on_load(true);
     i32 width, height, channels;
     stbi_uc* first_image = stbi_load(images[0].c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -493,6 +499,7 @@ TextureHandle Renderer::create_cubemap(std::vector<std::string> images)
 
     for(u32 i = 1; i < 6; ++i)
     {
+        stbi_set_flip_vertically_on_load(false);
         stbi_uc* pixels = stbi_load(images[i].c_str(), &width, &height, &channels, STBI_rgb_alpha);
         if(!pixels[i])
         {
@@ -1033,7 +1040,7 @@ void Renderer::init_renderpasses()
         vk::AttachmentDescription colour_attachment{};
         colour_attachment.format = m_swapchain_image_format;
         colour_attachment.samples = vk::SampleCountFlagBits::e1;
-        colour_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
+        colour_attachment.loadOp = vk::AttachmentLoadOp::eClear;
         colour_attachment.storeOp = vk::AttachmentStoreOp::eStore;
         colour_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
         colour_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
@@ -1504,12 +1511,12 @@ void Renderer::init_skybox()
     check(m_logical_device.createDescriptorSetLayout(&skybox_descriptor_set_layout_info, nullptr, &m_skybox.descriptor_set_layout));
 
     m_skybox.cubemap = create_cubemap({
-        "../assets/skyboxes/above_the_clouds/front.jpg",
-        "../assets/skyboxes/above_the_clouds/back.jpg",
-        "../assets/skyboxes/above_the_clouds/left.jpg",
         "../assets/skyboxes/above_the_clouds/right.jpg",
+        "../assets/skyboxes/above_the_clouds/left.jpg",
         "../assets/skyboxes/above_the_clouds/top.jpg",
-        "../assets/skyboxes/above_the_clouds/bottom.jpg"
+        "../assets/skyboxes/above_the_clouds/bottom.jpg",
+        "../assets/skyboxes/above_the_clouds/front.jpg",
+        "../assets/skyboxes/above_the_clouds/back.jpg"
     });
 
     m_skybox.descriptor_set = create_descriptor_set({
@@ -1721,8 +1728,8 @@ void Renderer::init_skybox()
 
     vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
     depth_stencil.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
-    depth_stencil.depthTestEnable = true;
-    depth_stencil.depthWriteEnable = true;
+    depth_stencil.depthTestEnable = false;
+    depth_stencil.depthWriteEnable = false;
     depth_stencil.depthCompareOp = vk::CompareOp::eLess;
     depth_stencil.depthBoundsTestEnable = false;
     depth_stencil.minDepthBounds = 0.f;
@@ -1861,7 +1868,7 @@ void Renderer::init_command_buffers()
         check(m_logical_device.allocateCommandBuffers(&main_alloc_info, &m_main_command_buffers[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&viewport_commands_alloc_info, &m_viewport_command_buffers[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&extra_alloc_info, &m_extra_draw_commands[i].vk_command_buffer));
-        check(m_logical_device.allocateCommandBuffers(&viewport_commands_alloc_info, &m_skybox_commands[i].vk_command_buffer));
+        check(m_logical_device.allocateCommandBuffers(&extra_alloc_info, &m_skybox_commands[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&imgui_alloc_info, &m_imgui_commands[i].vk_command_buffer));
     }
 }
