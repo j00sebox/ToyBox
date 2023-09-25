@@ -20,8 +20,7 @@ struct Skybox
     TextureHandle                   cubemap;
     DescriptorSetHandle             descriptor_set;
     DescriptorSetLayoutHandle       descriptor_set_layout;
-    vk::PipelineLayout              pipeline_layout;
-    vk::Pipeline                    pipeline;
+    PipelineHandle                  pipeline;
 };
 
 class Renderer
@@ -42,6 +41,7 @@ public:
     SamplerHandle create_sampler(const SamplerConfig& sampler_config);
     DescriptorSetLayoutHandle create_descriptor_set_layout(const DescriptorSetLayoutConfig& descriptor_set_layout_config);
     DescriptorSetHandle create_descriptor_set(const DescriptorSetConfig& descriptor_set_config);
+    PipelineHandle create_pipeline(const PipelineConfig& pipeline_config);
     void create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& image_memory);
     void create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, VmaAllocation& image_vma);
     vk::ImageView create_image_view(const vk::Image& image, vk::ImageViewType image_view_type, vk::Format format, vk::ImageAspectFlags image_aspect, u32 layer_count = 1);
@@ -52,6 +52,7 @@ public:
     void destroy_texture(TextureHandle texture_handle);
     void destroy_sampler(SamplerHandle sampler_handle);
     void destroy_descriptor_set_layout(DescriptorSetLayoutHandle set_layout_handle);
+    void destroy_pipeline(PipelineHandle pipeline_handle);
 
     [[nodiscard]] Buffer* get_buffer(BufferHandle buffer_handle) { return static_cast<Buffer*>(m_buffer_pool.access(buffer_handle)); }
     // [[nodiscard]] const vk::DescriptorSetLayout& get_texture_layout() const { return m_texture_set_layout; }
@@ -143,6 +144,7 @@ private:
     ResourcePool m_sampler_pool;
     ResourcePool m_descriptor_set_layout_pool;
     ResourcePool m_descriptor_set_pool;
+    ResourcePool m_pipeline_pool;
 
     // command pools
     vk::CommandPool m_main_command_pool;

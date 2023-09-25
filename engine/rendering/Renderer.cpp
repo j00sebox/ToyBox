@@ -74,7 +74,8 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
     m_texture_pool(&m_pool_allocator, 20, sizeof(Texture)),
     m_sampler_pool(&m_pool_allocator, 10, sizeof(Sampler)),
     m_descriptor_set_layout_pool(&m_pool_allocator, 10, sizeof(DescriptorSetLayout)),
-    m_descriptor_set_pool(&m_pool_allocator, 10, sizeof(DescriptorSet))
+    m_descriptor_set_pool(&m_pool_allocator, 10, sizeof(DescriptorSet)),
+    m_pipeline_pool(&m_pool_allocator, 10, sizeof(Pipeline))
 {
     init_instance();
     init_surface();
@@ -111,10 +112,8 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
 Renderer::~Renderer()
 {
     // TODO: move skybox stuff
-    // _logical_device.destroyDescriptorSetLayout(m_skybox.descriptor_set_layout);
     destroy_descriptor_set_layout(m_skybox.descriptor_set_layout);
-    m_logical_device.destroyPipelineLayout(m_skybox.pipeline_layout);
-    m_logical_device.destroyPipeline(m_skybox.pipeline);
+    destroy_pipeline(m_skybox.pipeline);
     destroy_texture(m_skybox.cubemap);
     destroy_buffer(m_skybox.vertex_buffer);
     destroy_buffer(m_skybox.index_buffer);
@@ -135,12 +134,8 @@ Renderer::~Renderer()
     destroy_sampler(m_default_sampler);
     m_logical_device.destroyDescriptorPool(m_descriptor_pool, nullptr);
     m_logical_device.destroyDescriptorPool(m_normal_descriptor_pool, nullptr);
-    // m_logical_device.destroyDescriptorSetLayout(m_descriptor_set_layout, nullptr);
-   // destroy_descriptor_set_layout(m_descriptor_set_layout);
     destroy_descriptor_set_layout(m_camera_data_layout);
     destroy_descriptor_set_layout(m_texture_set_layout);
-    // m_logical_device.destroyDescriptorSetLayout(m_camera_data_layout, nullptr);
-    // m_logical_device.destroyDescriptorSetLayout(m_texture_set_layout, nullptr);
     m_logical_device.destroyCommandPool(m_main_command_pool);
     m_logical_device.destroyCommandPool(m_viewport_command_pool);
     m_logical_device.destroyCommandPool(m_extra_command_pool);
@@ -210,13 +205,14 @@ void Renderer::render(Scene* scene)
     inheritance_info.subpass = 0;
 
     auto* skybox_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_skybox.descriptor_set));
+    auto* skybox_pipeline = static_cast<Pipeline*>(m_pipeline_pool.access(m_skybox.pipeline));
 
     m_skybox_commands[m_current_frame].begin(inheritance_info);
-    m_skybox_commands[m_current_frame].bind_pipeline(m_skybox.pipeline);
+    m_skybox_commands[m_current_frame].bind_pipeline(skybox_pipeline->vk_pipeline);
     m_skybox_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
     m_skybox_commands[m_current_frame].set_scissor(m_swapchain_extent);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
-    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 1, 1, &skybox_set->vk_descriptor_set, 0, nullptr);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(skybox_pipeline->vk_bindpoint, skybox_pipeline->vk_pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(skybox_pipeline->vk_bindpoint, skybox_pipeline->vk_pipeline_layout, 1, 1, &skybox_set->vk_descriptor_set, 0, nullptr);
     Buffer* vertex_buffer = get_buffer(m_skybox.vertex_buffer);
     vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
     vk::DeviceSize offsets[] = {0};
@@ -673,6 +669,128 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetConfig& d
     return descriptor_set_handle;
 }
 
+PipelineHandle Renderer::create_pipeline(const PipelineConfig& pipeline_config)
+{
+    PipelineHandle handle = (PipelineHandle)m_pipeline_pool.acquire();
+    auto* pipeline = static_cast<Pipeline*>(m_pipeline_pool.access(handle));
+
+    pipeline->vk_bindpoint = vk::PipelineBindPoint::eGraphics;
+
+    vk::PipelineShaderStageCreateInfo shader_create_infos[pipeline_config.shader_count];
+    vk::ShaderModule shader_modules[pipeline_config.shader_count];
+    for(u32 i = 0; i < pipeline_config.shader_count; ++i)
+    {
+        auto shader_code = fileop::read_binary_file(pipeline_config.shader_stages[i].shader_file);
+        shader_modules[i] = create_shader_module(shader_code);
+
+        shader_create_infos[i].sType = vk::StructureType::ePipelineShaderStageCreateInfo;
+        shader_create_infos[i].stage = pipeline_config.shader_stages[i].stage_flags;
+        shader_create_infos[i].module = shader_modules[i];
+        shader_create_infos[i].pName = pipeline_config.shader_stages[i].entry_point;
+    }
+
+    vk::VertexInputAttributeDescription attribute_descriptions[pipeline_config.vertex_attribute_count];
+    for(u32 i = 0; i < pipeline_config.vertex_attribute_count; ++i)
+    {
+        attribute_descriptions[i].binding = pipeline_config.vertex_binding_description.binding;
+        attribute_descriptions[i].location = pipeline_config.vertex_attributes[i].location;
+        attribute_descriptions[i].format = pipeline_config.vertex_attributes[i].format;
+        attribute_descriptions[i].offset = pipeline_config.vertex_attributes[i].offset;
+    }
+
+    vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
+    vertex_input_info.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
+    vertex_input_info.vertexBindingDescriptionCount = 1;
+    vertex_input_info.pVertexBindingDescriptions = &pipeline_config.vertex_binding_description;
+    vertex_input_info.vertexAttributeDescriptionCount = pipeline_config.vertex_attribute_count;
+    vertex_input_info.pVertexAttributeDescriptions = attribute_descriptions;
+
+    std::array<vk::DynamicState, 2> dynamic_states =
+    {
+            vk::DynamicState::eViewport,
+            vk::DynamicState::eScissor
+    };
+
+    // the configuration of these values will be ignored, so they can be changed at runtime
+    vk::PipelineDynamicStateCreateInfo dynamic_state{};
+    dynamic_state.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
+    dynamic_state.dynamicStateCount = static_cast<u32>(dynamic_states.size());
+    dynamic_state.pDynamicStates = dynamic_states.data();
+
+    vk::Viewport viewport{};
+    viewport.x = 0.f;
+    viewport.y = 0.f;
+    viewport.width = (f32)m_swapchain_extent.width;
+    viewport.height = (f32)m_swapchain_extent.height;
+    viewport.minDepth = 0.f;
+    viewport.maxDepth = 1.f;
+
+    vk::Rect2D scissor{};
+    scissor.offset.x = 0;
+    scissor.offset.y = 0;
+    scissor.extent = m_swapchain_extent;
+
+    // since we made viewport and scissor dynamic we don't need to bind them here
+    vk::PipelineViewportStateCreateInfo viewport_state{};
+    viewport_state.sType = vk::StructureType::ePipelineViewportStateCreateInfo;
+    viewport_state.viewportCount = 1;
+    viewport_state.scissorCount = 1;
+
+    vk::PipelineMultisampleStateCreateInfo multi_sampling{};
+    multi_sampling.sType = vk::StructureType::ePipelineMultisampleStateCreateInfo;
+    multi_sampling.sampleShadingEnable = false;
+    multi_sampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+
+    vk::PipelineColorBlendStateCreateInfo colour_blending{};
+    colour_blending.sType = vk::StructureType::ePipelineColorBlendStateCreateInfo;
+    colour_blending.logicOpEnable = false;
+    colour_blending.logicOp = vk::LogicOp::eCopy;
+    colour_blending.attachmentCount = pipeline_config.colour_attachment_count;
+    colour_blending.pAttachments = pipeline_config.colour_attachments;
+
+    vk::PipelineLayoutCreateInfo pipeline_layout_create_info{};
+    pipeline_layout_create_info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
+    pipeline_layout_create_info.setLayoutCount = pipeline_config.descriptor_set_layout_count;
+
+    vk::DescriptorSetLayout descriptor_set_layouts[pipeline_config.descriptor_set_layout_count];
+    for(u32 i = 0; i < pipeline_config.descriptor_set_layout_count; ++i)
+    {
+        auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(pipeline_config.descriptor_set_layouts[i]));
+        descriptor_set_layouts[i] = descriptor_set_layout->vk_descriptor_set_layout;
+    }
+
+    pipeline_layout_create_info.pSetLayouts = descriptor_set_layouts;
+
+    check(m_logical_device.createPipelineLayout(&pipeline_layout_create_info, nullptr, &pipeline->vk_pipeline_layout));
+
+    vk::GraphicsPipelineCreateInfo pipeline_create_info{};
+    pipeline_create_info.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
+    pipeline_create_info.stageCount = pipeline_config.shader_count;
+    pipeline_create_info.pStages = shader_create_infos;
+    pipeline_create_info.pVertexInputState = &vertex_input_info;
+    pipeline_create_info.pInputAssemblyState = &pipeline_config.pipeline_input_assembly;
+    pipeline_create_info.pViewportState = &viewport_state;
+    pipeline_create_info.pRasterizationState = &pipeline_config.rasterization;
+    pipeline_create_info.pMultisampleState = &multi_sampling;
+    pipeline_create_info.pColorBlendState = &colour_blending;
+    pipeline_create_info.pDynamicState = &dynamic_state;
+    pipeline_create_info.layout = pipeline->vk_pipeline_layout;
+    pipeline_create_info.renderPass = m_viewport_renderpass;
+    pipeline_create_info.subpass = 0;
+    pipeline_create_info.pDepthStencilState = &pipeline_config.depth_stencil_attachment;
+    pipeline_create_info.basePipelineHandle = nullptr;
+    pipeline_create_info.basePipelineIndex = -1;
+
+    check(m_logical_device.createGraphicsPipelines(nullptr, 1, &pipeline_create_info, nullptr, &pipeline->vk_pipeline));
+
+    for(u32 i = 0; i < pipeline_config.shader_count; ++i)
+    {
+        m_logical_device.destroyShaderModule(shader_modules[i]);
+    }
+
+    return handle;
+}
+
 void Renderer::create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& image_memory)
 {
     vk::ImageCreateInfo image_info{};
@@ -775,7 +893,15 @@ void Renderer::destroy_descriptor_set_layout(DescriptorSetLayoutHandle set_layou
 {
     auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(set_layout_handle));
     m_logical_device.destroyDescriptorSetLayout(descriptor_set_layout->vk_descriptor_set_layout, nullptr);
-    m_sampler_pool.free(set_layout_handle);
+    m_descriptor_set_layout_pool.free(set_layout_handle);
+}
+
+void Renderer::destroy_pipeline(PipelineHandle pipeline_handle)
+{
+    auto* pipeline = static_cast<Pipeline*>(m_pipeline_pool.access(pipeline_handle));
+    m_logical_device.destroyPipelineLayout(pipeline->vk_pipeline_layout);
+    m_logical_device.destroyPipeline(pipeline->vk_pipeline);
+    m_pipeline_pool.free(pipeline_handle);
 }
 
 void Renderer::update_texture_set(TextureHandle* texture_handles, u32 num_textures)
@@ -1564,7 +1690,6 @@ void Renderer::init_skybox()
        },
        .num_bindings = 1
     });
-
     auto* skybox_descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_skybox.descriptor_set_layout));
 
     m_skybox.cubemap = create_cubemap({
@@ -1584,37 +1709,6 @@ void Renderer::init_skybox()
         .layout = skybox_descriptor_set_layout->vk_descriptor_set_layout,
         .num_resources = 1
     });
-
-    m_skybox.descriptor_set = (DescriptorSetHandle)m_descriptor_set_pool.acquire();
-    auto* descriptor_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_skybox.descriptor_set));
-
-    vk::DescriptorSetAllocateInfo allocInfo = {};
-    allocInfo.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-    allocInfo.descriptorPool = m_descriptor_pool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &skybox_descriptor_set_layout->vk_descriptor_set_layout;
-
-    check(m_logical_device.allocateDescriptorSets(&allocInfo, &descriptor_set->vk_descriptor_set));
-
-    vk::WriteDescriptorSet descriptor_writes[1];
-
-    auto* texture = static_cast<Texture*>(m_texture_pool.access(m_skybox.cubemap));
-    auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(m_default_sampler));
-
-    vk::DescriptorImageInfo descriptor_info{};
-    descriptor_info.imageView = texture->vk_image_view;
-    descriptor_info.sampler = sampler->vk_sampler;
-    descriptor_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-
-    descriptor_writes[0].sType = vk::StructureType::eWriteDescriptorSet;
-    descriptor_writes[0].dstSet = descriptor_set->vk_descriptor_set; // descriptor set to update
-    descriptor_writes[0].dstBinding = 0;
-    descriptor_writes[0].dstArrayElement = 0;
-    descriptor_writes[0].descriptorType = vk::DescriptorType::eCombinedImageSampler;
-    descriptor_writes[0].descriptorCount = 1; // how many array elements to update
-    descriptor_writes[0].pImageInfo = &descriptor_info;
-
-    m_logical_device.updateDescriptorSets(1, &descriptor_writes[0], 0, nullptr);
 
     std::vector<f32> skybox_verts =
 	{
@@ -1668,100 +1762,41 @@ void Renderer::init_skybox()
         .data = skybox_indices.data()
     });
 
-    auto vert_shader_code = fileop::read_binary_file("../assets/shaders/skybox/vert.spv");
-    auto frag_shader_code = fileop::read_binary_file("../assets/shaders/skybox/frag.spv");
-
-    vk::ShaderModule vert_shader_module = create_shader_module(vert_shader_code);
-    vk::ShaderModule frag_shader_module = create_shader_module(frag_shader_code);
-
-    vk::PipelineShaderStageCreateInfo vert_shader_stage_info{};
-    vert_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
-    vert_shader_stage_info.stage = vk::ShaderStageFlagBits::eVertex;
-    vert_shader_stage_info.module = vert_shader_module;
-    vert_shader_stage_info.pName = "main";
-
-    vk::PipelineShaderStageCreateInfo frag_shader_stage_info{};
-    frag_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
-    frag_shader_stage_info.stage = vk::ShaderStageFlagBits::eFragment;
-    frag_shader_stage_info.module = frag_shader_module;
-    frag_shader_stage_info.pName = "main";
-
-    vk::PipelineShaderStageCreateInfo shader_stages[] = {vert_shader_stage_info, frag_shader_stage_info};
-
-    std::vector<vk::DynamicState> dynamic_states =
-    {
-            vk::DynamicState::eViewport,
-            vk::DynamicState::eScissor
+    PipelineConfig pipeline_config{
+        .renderPass = m_viewport_renderpass
     };
 
-    // the configuration of these values will be ignored, so they can be changed at runtime
-    vk::PipelineDynamicStateCreateInfo dynamic_state{};
-    dynamic_state.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
-    dynamic_state.dynamicStateCount = static_cast<u32>(dynamic_states.size());
-    dynamic_state.pDynamicStates = dynamic_states.data();
+    pipeline_config.set_rasterizer({
+       .polygon_mode = vk::PolygonMode::eFill,
+       .cull_mode = vk::CullModeFlagBits::eFront,
+       .front_face = vk::FrontFace::eCounterClockwise
+    });
 
-    vk::VertexInputBindingDescription binding_desc{};
-    binding_desc.binding = 0; // index of binding in array
-    binding_desc.stride = sizeof(glm::vec3); // number of bytes between entries
-    binding_desc.inputRate = vk::VertexInputRate::eVertex; // move to the next entry after each vertex
+    pipeline_config.set_binding_description({
+        .binding = 0,
+        .stride = sizeof(glm::vec3)
+    });
 
-    vk::VertexInputAttributeDescription attribute_description{};
-    attribute_description.binding = 0;
-    attribute_description.location = 0;
-    attribute_description.format = vk::Format::eR32G32B32Sfloat;
-    attribute_description.offset = 0;
+    pipeline_config.set_input_assembly(vk::PrimitiveTopology::eTriangleList);
 
-    auto binding_description = Vertex::get_binding_description();
-    auto attribute_descriptions = Vertex::get_attribute_description();
+    pipeline_config.add_shader_stage({
+        .shader_file = "../assets/shaders/skybox/vert.spv",
+        .stage_flags = vk::ShaderStageFlagBits::eVertex
+    });
 
-    vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
-    vertex_input_info.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
-    vertex_input_info.vertexBindingDescriptionCount = 1;
-    vertex_input_info.pVertexBindingDescriptions = &binding_desc;
-    vertex_input_info.vertexAttributeDescriptionCount = 1; //static_cast<u32>(attribute_descriptions.size());
-    vertex_input_info.pVertexAttributeDescriptions = &attribute_description;
+    pipeline_config.add_shader_stage({
+        .shader_file = "../assets/shaders/skybox/frag.spv",
+        .stage_flags = vk::ShaderStageFlagBits::eFragment
+    });
 
-    vk::PipelineInputAssemblyStateCreateInfo input_assembly{};
-    input_assembly.sType = vk::StructureType::ePipelineInputAssemblyStateCreateInfo;
-    input_assembly.topology = vk::PrimitiveTopology::eTriangleList;
-    input_assembly.primitiveRestartEnable = false;
+    pipeline_config.add_vertex_attribute({
+        .location = 0,
+        .format = vk::Format::eR32G32B32Sfloat,
+        .offset = 0
+    });
 
-    vk::Viewport viewport{};
-    viewport.x = 0.f;
-    viewport.y = 0.f;
-    viewport.width = (f32)m_swapchain_extent.width;
-    viewport.height = (f32)m_swapchain_extent.height;
-    viewport.minDepth = 0.f;
-    viewport.maxDepth = 1.f;
-
-    vk::Rect2D scissor{};
-    scissor.offset.x = 0;
-    scissor.offset.y = 0;
-    scissor.extent = m_swapchain_extent;
-
-    // since we made viewport and scissor dynamic we don't need to bind them here
-    vk::PipelineViewportStateCreateInfo viewport_state{};
-    viewport_state.sType = vk::StructureType::ePipelineViewportStateCreateInfo;
-    viewport_state.viewportCount = 1;
-    viewport_state.scissorCount = 1;
-
-    vk::PipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = vk::StructureType::ePipelineRasterizationStateCreateInfo;
-    rasterizer.depthClampEnable = false;
-    rasterizer.rasterizerDiscardEnable = false;
-    rasterizer.polygonMode = vk::PolygonMode::eFill;
-    rasterizer.lineWidth = 1.f;
-    rasterizer.cullMode = vk::CullModeFlagBits::eFront;
-    rasterizer.frontFace = vk::FrontFace::eCounterClockwise;
-    rasterizer.depthBiasEnable = false;
-    rasterizer.depthBiasConstantFactor = 0.f;
-    rasterizer.depthBiasClamp = 0.f;
-    rasterizer.depthBiasSlopeFactor = 0.f;
-
-    vk::PipelineMultisampleStateCreateInfo multi_sampling{};
-    multi_sampling.sType = vk::StructureType::ePipelineMultisampleStateCreateInfo;
-    multi_sampling.sampleShadingEnable = false;
-    multi_sampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+    pipeline_config.add_descriptor_set_layout(m_camera_data_layout);
+    pipeline_config.add_descriptor_set_layout(m_skybox.descriptor_set_layout);
 
     vk::PipelineColorBlendAttachmentState colour_blend_attachment{};
     colour_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
@@ -1776,13 +1811,6 @@ void Renderer::init_skybox()
     colour_blend_attachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
     colour_blend_attachment.alphaBlendOp = vk::BlendOp::eAdd;
 
-    vk::PipelineColorBlendStateCreateInfo colour_blending{};
-    colour_blending.sType = vk::StructureType::ePipelineColorBlendStateCreateInfo;
-    colour_blending.logicOpEnable = false;
-    colour_blending.logicOp = vk::LogicOp::eCopy;
-    colour_blending.attachmentCount = 1;
-    colour_blending.pAttachments = &colour_blend_attachment;
-
     vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
     depth_stencil.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
     depth_stencil.depthTestEnable = false;
@@ -1793,38 +1821,10 @@ void Renderer::init_skybox()
     depth_stencil.maxDepthBounds = 1.f;
     depth_stencil.stencilTestEnable = false;
 
-    vk::PipelineLayoutCreateInfo pipeline_layout_info{};
-    pipeline_layout_info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
-    pipeline_layout_info.setLayoutCount = 2;
-    auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_camera_data_layout));
-    vk::DescriptorSetLayout layouts[] = {descriptor_set_layout->vk_descriptor_set_layout, skybox_descriptor_set_layout->vk_descriptor_set_layout};
-    pipeline_layout_info.pSetLayouts = layouts;
+    pipeline_config.add_colour_attachment(colour_blend_attachment);
+    pipeline_config.add_depth_stencil_attachment(depth_stencil);
 
-    check(m_logical_device.createPipelineLayout(&pipeline_layout_info, nullptr, &m_skybox.pipeline_layout));
-
-    vk::GraphicsPipelineCreateInfo pipeline_create_info{};
-    pipeline_create_info.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
-    pipeline_create_info.stageCount = 2;
-    pipeline_create_info.pStages = shader_stages;
-    pipeline_create_info.pVertexInputState = &vertex_input_info;
-    pipeline_create_info.pInputAssemblyState = &input_assembly;
-    pipeline_create_info.pViewportState = &viewport_state;
-    pipeline_create_info.pRasterizationState = &rasterizer;
-    pipeline_create_info.pMultisampleState = &multi_sampling;
-    pipeline_create_info.pDepthStencilState = nullptr; // optional
-    pipeline_create_info.pColorBlendState = &colour_blending;
-    pipeline_create_info.pDynamicState = &dynamic_state;
-    pipeline_create_info.layout = m_skybox.pipeline_layout;
-    pipeline_create_info.renderPass = m_viewport_renderpass;
-    pipeline_create_info.subpass = 0;
-    pipeline_create_info.pDepthStencilState = &depth_stencil;
-    pipeline_create_info.basePipelineHandle = nullptr;
-    pipeline_create_info.basePipelineIndex = -1;
-
-    check(m_logical_device.createGraphicsPipelines(nullptr, 1, &pipeline_create_info, nullptr, &m_skybox.pipeline));
-
-    m_logical_device.destroyShaderModule(vert_shader_module, nullptr);
-    m_logical_device.destroyShaderModule(frag_shader_module, nullptr);
+    m_skybox.pipeline = create_pipeline(pipeline_config);
 }
 
 void Renderer::init_viewport()
