@@ -158,7 +158,6 @@ CubeMap::CubeMap(const std::string& dir, ImageFormat fmt)
     m_faces[4] = dir + "front" + img_ext;
     m_faces[5] = dir + "back" + img_ext;
 
-
 	GL_CALL(glGenTextures(1, &m_id));
 	GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, m_id));
 	GL_CALL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));

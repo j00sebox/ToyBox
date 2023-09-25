@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.hpp"
+#include "CommonTypes.hpp"
 // #include "components/Fwd.h"
 // #include "Material.h"
 #include "SceneNode.hpp"

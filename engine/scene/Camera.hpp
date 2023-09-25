@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.hpp"
+#include "CommonTypes.hpp"
 
 #include <glm/vec3.hpp>
 #include <glm/matrix.hpp>

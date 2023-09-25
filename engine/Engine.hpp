@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.hpp"
+#include "CommonTypes.hpp"
 #include "editor/Inspector.hpp"
 
 #include <GLFW/glfw3.h>

@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.hpp"
+#include "CommonTypes.hpp"
 #include "rendering/Renderer.hpp"
 #include "rendering/Vertex.hpp"
 #include "scene/SceneNode.hpp"

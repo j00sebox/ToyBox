@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.hpp"
+#include "CommonTypes.hpp"
 
 #include <vulkan/vulkan.hpp>
 #include <optional>

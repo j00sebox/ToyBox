@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.hpp"
+#include "CommonTypes.hpp"
 // #include "Window.h"
 #include "Camera.hpp"
 // #include "Skybox.h"
@@ -17,7 +17,6 @@ class Entity;
 class Buffer;
 class Renderer;
 struct RenderObject;
-
 
 struct RenderObject
 {

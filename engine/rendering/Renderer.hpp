@@ -1,6 +1,6 @@
 #pragma once
-#include "Types.hpp"
-#include "GpuResources.hpp"
+#include "CommonTypes.hpp"
+#include "RenderTypes.hpp"
 #include "CommandBuffer.hpp"
 #include "Memory.hpp"
 #include "scene/Scene.hpp"
@@ -11,6 +11,20 @@
 #include <vk_mem_alloc.h>
 #include <TaskScheduler.h>
 
+// TODO: move somewhere else
+struct Skybox
+{
+    BufferHandle                vertex_buffer;
+    BufferHandle                index_buffer;
+    u32                         index_count;
+    TextureHandle               cubemap;
+    DescriptorSetHandle         descriptor_set;
+    vk::DescriptorSetLayout     descriptor_set_layout;
+    vk::RenderPass              renderpass;
+    vk::PipelineLayout          pipeline_layout;
+    vk::Pipeline                pipeline;
+};
+
 class Renderer
 {
 public:
@@ -20,17 +34,17 @@ public:
 	void render(Scene* scene);
 	void begin_frame();
 	void end_frame();
-
     void wait_for_device_idle() const { m_logical_device.waitIdle(); }
 
     // resource creation
     BufferHandle create_buffer(const BufferCreationInfo& buffer_creation);
     TextureHandle create_texture(const TextureCreationInfo& texture_creation);
+    TextureHandle create_cubemap(std::vector<std::string> images);
     SamplerHandle create_sampler(const SamplerCreationInfo& sampler_creation);
     DescriptorSetHandle create_descriptor_set(const DescriptorSetCreationInfo& descriptor_set_creation);
     void create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& image_memory);
     void create_image(u32 width, u32 height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, VmaAllocation& image_vma);
-    vk::ImageView create_image_view(const vk::Image& image, vk::Format format, vk::ImageAspectFlags image_aspect);
+    vk::ImageView create_image_view(const vk::Image& image, vk::ImageViewType image_view_type, vk::Format format, vk::ImageAspectFlags image_aspect, u32 layer_count = 1);
     vk::ShaderModule create_shader_module(const std::vector<char>& code);
 
     // resource destruction
@@ -94,6 +108,7 @@ private:
 
     std::vector<vk::DescriptorSet> m_descriptor_sets;
     vk::DescriptorPool m_descriptor_pool;
+    vk::DescriptorPool m_normal_descriptor_pool;
     vk::DescriptorPool m_imgui_pool;
 
     // descriptors
@@ -138,6 +153,7 @@ private:
     std::array<CommandBuffer, k_max_frames_in_flight> m_viewport_command_buffers;
     std::vector<CommandBuffer> m_command_buffers;
     std::array<CommandBuffer, k_max_frames_in_flight> m_extra_draw_commands;
+    std::array<CommandBuffer, k_max_frames_in_flight> m_skybox_commands;
     std::array<CommandBuffer, k_max_frames_in_flight> m_imgui_commands;
 
     // sync objects
@@ -153,6 +169,9 @@ private:
 
     std::map<std::string, TextureHandle> m_texture_map;
 
+    // TODO: remove
+    Skybox m_skybox;
+
     void init_instance();
 	void init_surface();
 	void init_device();
@@ -166,8 +185,9 @@ private:
     void init_command_buffers();
     void init_depth_resources();
     void init_framebuffers();
-	void init_sync_objects();
-	void init_imgui();
+    void init_sync_objects();
+    void init_skybox();
+    void init_imgui();
 
     vk::CommandBuffer begin_single_time_commands();
     void end_single_time_commands(vk::CommandBuffer command_buffer);
@@ -177,8 +197,8 @@ private:
     [[nodiscard]] size_t pad_uniform_buffer(size_t original_size) const;
 
     // image operations
-    void copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 width, u32 height);
-    void transition_image_layout(vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout);
+    void copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 width, u32 height, u32 layer_count = 1);
+    void transition_image_layout(vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout, u32 layer_count = 1);
     void insert_image_memory_barrier(vk::CommandBuffer cmd_buffer,
                                     vk::Image image,
                                     vk::AccessFlags srcAccessMask,

@@ -3,13 +3,11 @@
 #include "Renderer.hpp"
 #include "Vertex.hpp"
 #include "Log.hpp"
-
 #include "util/DeviceHelper.hpp"
 #include "util/FileOperations.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include <glm/glm.hpp>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -31,11 +29,11 @@ struct RecordDrawTask : enki::ITaskSet
 
     void ExecuteRange(enki::TaskSetPartition range, uint32_t threadnum) override
     {
+        command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 1, 1, &material_data->vk_descriptor_set, 0, nullptr);
+        command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 0, 1, &camera_data->vk_descriptor_set, 0, nullptr);
+
         for(u32 i = start; i < end; ++i)
         {
-            command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 1, 1, &material_data->vk_descriptor_set, 0, nullptr);
-            command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 0, 1, &camera_data->vk_descriptor_set, 0, nullptr);
-
             command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &scene->m_render_list[i].transform);
             command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->m_render_list[i].material.textures);
 
@@ -105,11 +103,20 @@ Renderer::Renderer(GLFWwindow* window, enki::TaskScheduler* scheduler) :
         .w_mode = vk::SamplerAddressMode::eRepeat
     });
 
+    init_skybox();
     init_imgui();
 }
 
 Renderer::~Renderer()
 {
+    // TODO: move skybox stuff
+    m_logical_device.destroyDescriptorSetLayout(m_skybox.descriptor_set_layout);
+    m_logical_device.destroyPipelineLayout(m_skybox.pipeline_layout);
+    m_logical_device.destroyPipeline(m_skybox.pipeline);
+    destroy_texture(m_skybox.cubemap);
+    destroy_buffer(m_skybox.vertex_buffer);
+    destroy_buffer(m_skybox.index_buffer);
+
     ImGui_ImplVulkan_Shutdown();
     m_logical_device.destroyDescriptorPool(m_imgui_pool, nullptr);
     for(i32 i = 0; i < k_max_frames_in_flight; ++i)
@@ -125,6 +132,7 @@ Renderer::~Renderer()
     destroy_texture(m_null_texture);
     destroy_sampler(m_default_sampler);
     m_logical_device.destroyDescriptorPool(m_descriptor_pool, nullptr);
+    m_logical_device.destroyDescriptorPool(m_normal_descriptor_pool, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_descriptor_set_layout, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_camera_data_layout, nullptr);
     m_logical_device.destroyDescriptorSetLayout(m_texture_set_layout, nullptr);
@@ -274,9 +282,32 @@ void Renderer::begin_frame()
 
     m_main_command_buffers[m_current_frame].begin();
     m_main_command_buffers[m_current_frame].begin_renderpass(m_renderpass, m_swapchain_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
+    m_main_command_buffers[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
+    m_main_command_buffers[m_current_frame].set_scissor(m_swapchain_extent);
     m_main_command_buffers[m_current_frame].bind_pipeline(m_graphics_pipeline);
     m_main_command_buffers[m_current_frame].vk_command_buffer.endRenderPass();
     m_main_command_buffers[m_current_frame].end();
+
+    auto* skybox_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_skybox.descriptor_set));
+    auto* camera_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_camera_sets[m_current_frame]));
+
+    m_skybox_commands[m_current_frame].begin();
+    m_skybox_commands[m_current_frame].begin_renderpass(m_viewport_renderpass, m_viewport_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
+    m_skybox_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
+    m_skybox_commands[m_current_frame].set_scissor(m_swapchain_extent);
+    m_skybox_commands[m_current_frame].bind_pipeline(m_skybox.pipeline);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 1, 1, &skybox_set->vk_descriptor_set, 0, nullptr);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_skybox.pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
+    Buffer* vertex_buffer = get_buffer(m_skybox.vertex_buffer);
+    vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
+    vk::DeviceSize offsets[] = {0};
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindVertexBuffers(0, 1, vertex_buffers, offsets);
+
+    Buffer* index_buffer = get_buffer(m_skybox.index_buffer);
+    m_skybox_commands[m_current_frame].vk_command_buffer.bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
+    m_skybox_commands[m_current_frame].vk_command_buffer.drawIndexed(m_skybox.index_count, 1, 0, 0, 0);
+    m_skybox_commands[m_current_frame].vk_command_buffer.endRenderPass();
+    m_skybox_commands[m_current_frame].end();
 
     m_viewport_command_buffers[m_current_frame].begin();
 //    for(u32 i = 0; i < m_scheduler->GetNumTaskThreads(); ++i)
@@ -296,11 +327,11 @@ void Renderer::end_frame()
     // we are specifying what semaphores we want to use and what stage we want to wait on
     vk::Semaphore wait_semaphores[] = {m_image_available_semaphores[m_current_frame]};
     vk::PipelineStageFlags wait_stages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-    vk::CommandBuffer command_buffers_to_submit[] = {m_main_command_buffers[m_current_frame].vk_command_buffer, m_viewport_command_buffers[m_current_frame].vk_command_buffer, m_imgui_commands[m_current_frame].vk_command_buffer};
+    vk::CommandBuffer command_buffers_to_submit[] = {m_main_command_buffers[m_current_frame].vk_command_buffer, m_skybox_commands[m_current_frame].vk_command_buffer, m_viewport_command_buffers[m_current_frame].vk_command_buffer, m_imgui_commands[m_current_frame].vk_command_buffer};
     submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores = wait_semaphores;
     submit_info.pWaitDstStageMask = wait_stages;
-    submit_info.commandBufferCount = 3;
+    submit_info.commandBufferCount = 4;
     submit_info.pCommandBuffers = command_buffers_to_submit;
 
     vk::Semaphore signal_semaphores[] = {m_render_finished_semaphores[m_current_frame]};
@@ -418,6 +449,7 @@ TextureHandle Renderer::create_texture(const TextureCreationInfo& texture_creati
     image_create_info.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
     image_create_info.sharingMode = vk::SharingMode::eExclusive;
     image_create_info.samples = vk::SampleCountFlagBits::e1;
+    image_create_info.flags = texture_creation.flags;
 
     VmaAllocationCreateInfo memory_info{};
     memory_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -430,11 +462,79 @@ TextureHandle Renderer::create_texture(const TextureCreationInfo& texture_creati
 
     transition_image_layout(texture->vk_image, texture_creation.format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 
-    texture->vk_image_view = create_image_view(texture->vk_image, texture_creation.format, vk::ImageAspectFlagBits::eColor);
+    texture->vk_image_view = create_image_view(texture->vk_image, vk::ImageViewType::e2D, texture_creation.format, vk::ImageAspectFlagBits::eColor);
 
     destroy_buffer(staging_handle);
 
     m_texture_map[texture_creation.image_src] = handle;
+
+    return handle;
+}
+
+TextureHandle Renderer::create_cubemap(std::vector<std::string> images)
+{
+    TextureHandle handle = (TextureHandle)m_texture_pool.acquire();
+    auto* cubemap = static_cast<Texture*>(m_texture_pool.access(handle));
+
+    i32 width, height, channels;
+    stbi_uc* first_image = stbi_load(images[0].c_str(), &width, &height, &channels, STBI_rgb_alpha);
+
+    vk::DeviceSize image_size = width * height * 4;
+    BufferHandle staging_handle = create_buffer({
+            .usage = vk::BufferUsageFlagBits::eTransferSrc,
+            .size = (u32)image_size * 6,
+    });
+    auto* staging_buffer = static_cast<Buffer*>(m_buffer_pool.access(staging_handle));
+
+    void* data;
+    vmaMapMemory(m_allocator, staging_buffer->vma_allocation, &data);
+    memcpy(data, first_image, image_size);
+    stbi_image_free(first_image);
+
+    for(u32 i = 1; i < 6; ++i)
+    {
+        stbi_uc* pixels = stbi_load(images[i].c_str(), &width, &height, &channels, STBI_rgb_alpha);
+        if(!pixels[i])
+        {
+            fatal("failed to load texture image!");
+        }
+        memcpy((u8*)data + (image_size * i), pixels, image_size);
+        stbi_image_free(pixels);
+    }
+    vmaUnmapMemory(m_allocator, staging_buffer->vma_allocation);
+
+    vk::Format format = vk::Format::eR8G8B8A8Srgb;
+
+    vk::ImageCreateInfo image_create_info{};
+    image_create_info.sType = vk::StructureType::eImageCreateInfo;
+    image_create_info.imageType = vk::ImageType::e2D;
+    image_create_info.extent.width = static_cast<u32>(width);
+    image_create_info.extent.height = static_cast<u32>(height);
+    image_create_info.extent.depth = 1;
+    image_create_info.mipLevels = 1;
+    image_create_info.arrayLayers = 6;
+    image_create_info.format = format;
+    image_create_info.tiling = vk::ImageTiling::eOptimal;
+    image_create_info.initialLayout = vk::ImageLayout::eUndefined;
+    image_create_info.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
+    image_create_info.sharingMode = vk::SharingMode::eExclusive;
+    image_create_info.samples = vk::SampleCountFlagBits::e1;
+    image_create_info.flags = vk::ImageCreateFlagBits::eCubeCompatible;
+
+    VmaAllocationCreateInfo memory_info{};
+    memory_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+    vmaCreateImage(m_allocator, reinterpret_cast<const VkImageCreateInfo*>(&image_create_info), &memory_info, &cubemap->vk_image, &cubemap->vma_allocation, nullptr);
+
+    transition_image_layout(cubemap->vk_image, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, 6);
+
+    copy_buffer_to_image(staging_buffer->vk_buffer, cubemap->vk_image, static_cast<u32>(width), static_cast<u32>(height), 6);
+
+    transition_image_layout(cubemap->vk_image, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, 6);
+
+    cubemap->vk_image_view = create_image_view(cubemap->vk_image, vk::ImageViewType::eCube, format, vk::ImageAspectFlagBits::eColor, 6);
+
+    destroy_buffer(staging_handle);
 
     return handle;
 }
@@ -506,12 +606,10 @@ DescriptorSetHandle Renderer::create_descriptor_set(const DescriptorSetCreationI
 
                 descriptor_writes[i].sType = vk::StructureType::eWriteDescriptorSet;
                 descriptor_writes[i].dstSet = descriptor_set->vk_descriptor_set;
-                descriptor_writes[i].dstBinding = descriptor_set_creation.bindings[i]; // index binding
+                descriptor_writes[i].dstBinding = descriptor_set_creation.bindings[i];
                 descriptor_writes[i].dstArrayElement = 0;
-
                 descriptor_writes[i].descriptorType = vk::DescriptorType::eUniformBuffer;
-                descriptor_writes[i].descriptorCount = 1; // how many array elements to update
-
+                descriptor_writes[i].descriptorCount = 1;
                 descriptor_writes[i].pBufferInfo = &descriptor_info;
 
                 // used for descriptors that reference image data
@@ -583,12 +681,12 @@ void Renderer::create_image(u32 width, u32 height, vk::Format format, vk::ImageT
     m_logical_device.bindImageMemory(image, image_memory, 0);
 }
 
-vk::ImageView Renderer::create_image_view(const vk::Image& image, vk::Format format, vk::ImageAspectFlags image_aspect)
+vk::ImageView Renderer::create_image_view(const vk::Image& image, vk::ImageViewType image_view_type, vk::Format format, vk::ImageAspectFlags image_aspect, u32 layer_count)
 {
     vk::ImageViewCreateInfo imageview_create_info{};
     imageview_create_info.sType = vk::StructureType::eImageViewCreateInfo;
     imageview_create_info.image = image;
-    imageview_create_info.viewType = vk::ImageViewType::e2D;
+    imageview_create_info.viewType = image_view_type;
     imageview_create_info.format = format;
     imageview_create_info.components.r = vk::ComponentSwizzle::eIdentity;
     imageview_create_info.components.g = vk::ComponentSwizzle::eIdentity;
@@ -598,7 +696,7 @@ vk::ImageView Renderer::create_image_view(const vk::Image& image, vk::Format for
     imageview_create_info.subresourceRange.baseMipLevel = 0;
     imageview_create_info.subresourceRange.levelCount = 1;
     imageview_create_info.subresourceRange.baseArrayLayer = 0;
-    imageview_create_info.subresourceRange.layerCount = 1;
+    imageview_create_info.subresourceRange.layerCount = layer_count;
 
     vk::ImageView image_view;
     check(m_logical_device.createImageView(&imageview_create_info, nullptr, &image_view));
@@ -637,7 +735,10 @@ void Renderer::destroy_texture(TextureHandle texture_handle)
     m_logical_device.destroyImageView(texture->vk_image_view, nullptr);
     vmaDestroyImage(m_allocator, texture->vk_image, texture->vma_allocation);
     m_texture_pool.free(texture_handle);
-    m_texture_map.erase(texture->name);
+    if(texture->name)
+    {
+        m_texture_map.erase(texture->name);
+    }
 }
 
 void Renderer::destroy_sampler(SamplerHandle sampler_handle)
@@ -866,7 +967,7 @@ void Renderer::init_swapchain()
 
     for(size_t i = 0; i < m_swapchain_images.size(); ++i)
     {
-        m_swapchain_image_views[i] = create_image_view(m_swapchain_images[i], m_swapchain_image_format, vk::ImageAspectFlagBits::eColor);
+        m_swapchain_image_views[i] = create_image_view(m_swapchain_images[i], vk::ImageViewType::e2D, m_swapchain_image_format, vk::ImageAspectFlagBits::eColor);
     }
 }
 
@@ -932,7 +1033,7 @@ void Renderer::init_renderpasses()
         vk::AttachmentDescription colour_attachment{};
         colour_attachment.format = m_swapchain_image_format;
         colour_attachment.samples = vk::SampleCountFlagBits::e1;
-        colour_attachment.loadOp = vk::AttachmentLoadOp::eClear;
+        colour_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
         colour_attachment.storeOp = vk::AttachmentStoreOp::eStore;
         colour_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
         colour_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
@@ -1052,6 +1153,21 @@ void Renderer::init_descriptor_pools()
     pool_create_info.pPoolSizes = pool_sizes;
 
     check(m_logical_device.createDescriptorPool(&pool_create_info, nullptr, &m_descriptor_pool));
+
+    vk::DescriptorPoolSize normal_pool_sizes[] =
+    {
+        { vk::DescriptorType::eUniformBuffer, 10 },
+        { vk::DescriptorType::eCombinedImageSampler, 10 },
+        { vk::DescriptorType::eStorageImage, 10 }
+    };
+
+    vk::DescriptorPoolCreateInfo normal_pool_create_info{};
+    normal_pool_create_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
+    normal_pool_create_info.maxSets = 10;
+    normal_pool_create_info.poolSizeCount = sizeof(normal_pool_sizes) / sizeof(vk::DescriptorPoolSize);
+    normal_pool_create_info.pPoolSizes = normal_pool_sizes;
+
+    check(m_logical_device.createDescriptorPool(&pool_create_info, nullptr, &m_normal_descriptor_pool));
 }
 
 void Renderer::init_descriptor_sets()
@@ -1372,6 +1488,280 @@ void Renderer::init_graphics_pipeline()
     m_logical_device.destroyShaderModule(frag_shader_module, nullptr);
 }
 
+void Renderer::init_skybox()
+{
+    vk::DescriptorSetLayoutBinding cubemap_binding{};
+    cubemap_binding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+    cubemap_binding.descriptorCount = 1;
+    cubemap_binding.binding = 0;
+    cubemap_binding.stageFlags = vk::ShaderStageFlagBits::eFragment;
+
+    vk::DescriptorSetLayoutCreateInfo skybox_descriptor_set_layout_info{};
+    skybox_descriptor_set_layout_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
+    skybox_descriptor_set_layout_info.bindingCount = 1;
+    skybox_descriptor_set_layout_info.pBindings = &cubemap_binding;
+
+    check(m_logical_device.createDescriptorSetLayout(&skybox_descriptor_set_layout_info, nullptr, &m_skybox.descriptor_set_layout));
+
+    m_skybox.cubemap = create_cubemap({
+        "../assets/skyboxes/above_the_clouds/front.jpg",
+        "../assets/skyboxes/above_the_clouds/back.jpg",
+        "../assets/skyboxes/above_the_clouds/left.jpg",
+        "../assets/skyboxes/above_the_clouds/right.jpg",
+        "../assets/skyboxes/above_the_clouds/top.jpg",
+        "../assets/skyboxes/above_the_clouds/bottom.jpg"
+    });
+
+    m_skybox.descriptor_set = create_descriptor_set({
+        .resource_handles = {m_skybox.cubemap},
+        .sampler_handles = {m_default_sampler},
+        .bindings = {0},
+        .types = {vk::DescriptorType::eCombinedImageSampler},
+        .layout = m_skybox.descriptor_set_layout,
+        .num_resources = 1
+    });
+
+    m_skybox.descriptor_set = (DescriptorSetHandle)m_descriptor_set_pool.acquire();
+    auto* descriptor_set = static_cast<DescriptorSet*>(m_descriptor_set_pool.access(m_skybox.descriptor_set));
+
+    vk::DescriptorSetAllocateInfo allocInfo = {};
+    allocInfo.sType = vk::StructureType::eDescriptorSetAllocateInfo;
+    allocInfo.descriptorPool = m_normal_descriptor_pool;
+    allocInfo.descriptorSetCount = 1;
+    allocInfo.pSetLayouts = &m_skybox.descriptor_set_layout;
+
+    check(m_logical_device.allocateDescriptorSets(&allocInfo, &descriptor_set->vk_descriptor_set));
+
+    vk::WriteDescriptorSet descriptor_writes[1];
+
+    auto* texture = static_cast<Texture*>(m_texture_pool.access(m_skybox.cubemap));
+    auto* sampler = static_cast<Sampler*>(m_sampler_pool.access(m_default_sampler));
+
+    vk::DescriptorImageInfo descriptor_info{};
+    descriptor_info.imageView = texture->vk_image_view;
+    descriptor_info.sampler = sampler->vk_sampler;
+    descriptor_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+    descriptor_writes[0].sType = vk::StructureType::eWriteDescriptorSet;
+    descriptor_writes[0].dstSet = descriptor_set->vk_descriptor_set; // descriptor set to update
+    descriptor_writes[0].dstBinding = 0;
+    descriptor_writes[0].dstArrayElement = 0;
+    descriptor_writes[0].descriptorType = vk::DescriptorType::eCombinedImageSampler;
+    descriptor_writes[0].descriptorCount = 1; // how many array elements to update
+    descriptor_writes[0].pImageInfo = &descriptor_info;
+
+    m_logical_device.updateDescriptorSets(1, &descriptor_writes[0], 0, nullptr);
+
+    std::vector<f32> skybox_verts =
+	{
+		-1.0f, -1.0f,  1.0f,	//        7--------6
+		 1.0f, -1.0f,  1.0f,	//       /|       /|
+		 1.0f, -1.0f, -1.0f,	//      4--------5 |
+		-1.0f, -1.0f, -1.0f,	//      | |      | |
+		-1.0f,  1.0f,  1.0f,	//      | 3------|-2
+		 1.0f,  1.0f,  1.0f,	//      |/       |/
+		 1.0f,  1.0f, -1.0f,	//      0--------1
+		-1.0f,  1.0f, -1.0f
+	};
+
+	std::vector<u32> skybox_indices =
+	{
+		// right
+		1, 2, 6,
+		6, 5, 1,
+
+		// left
+		0, 4, 7,
+		7, 3, 0,
+
+		// top
+		4, 5, 6,
+		6, 7, 4,
+
+		// bottom
+		0, 3, 2,
+		2, 1, 0,
+
+		// back
+		0, 1, 5,
+		5, 4, 0,
+
+		// front
+		3, 7, 6,
+		6, 2, 3
+	};
+
+    m_skybox.vertex_buffer = create_buffer({
+        .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        .size = (u32)(sizeof(skybox_verts[0]) * skybox_verts.size()),
+        .data = skybox_verts.data()
+    });
+
+    m_skybox.index_count = skybox_indices.size();
+    m_skybox.index_buffer = create_buffer({
+        .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        .size = (u32)(sizeof(skybox_indices[0]) * skybox_indices.size()),
+        .data = skybox_indices.data()
+    });
+
+    auto vert_shader_code = fileop::read_binary_file("../assets/shaders/skybox/vert.spv");
+    auto frag_shader_code = fileop::read_binary_file("../assets/shaders/skybox/frag.spv");
+
+    vk::ShaderModule vert_shader_module = create_shader_module(vert_shader_code);
+    vk::ShaderModule frag_shader_module = create_shader_module(frag_shader_code);
+
+    vk::PipelineShaderStageCreateInfo vert_shader_stage_info{};
+    vert_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
+    vert_shader_stage_info.stage = vk::ShaderStageFlagBits::eVertex;
+    vert_shader_stage_info.module = vert_shader_module;
+    vert_shader_stage_info.pName = "main";
+
+    vk::PipelineShaderStageCreateInfo frag_shader_stage_info{};
+    frag_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
+    frag_shader_stage_info.stage = vk::ShaderStageFlagBits::eFragment;
+    frag_shader_stage_info.module = frag_shader_module;
+    frag_shader_stage_info.pName = "main";
+
+    vk::PipelineShaderStageCreateInfo shader_stages[] = {vert_shader_stage_info, frag_shader_stage_info};
+
+    std::vector<vk::DynamicState> dynamic_states =
+    {
+            vk::DynamicState::eViewport,
+            vk::DynamicState::eScissor
+    };
+
+    // the configuration of these values will be ignored, so they can be changed at runtime
+    vk::PipelineDynamicStateCreateInfo dynamic_state{};
+    dynamic_state.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
+    dynamic_state.dynamicStateCount = static_cast<u32>(dynamic_states.size());
+    dynamic_state.pDynamicStates = dynamic_states.data();
+
+    vk::VertexInputBindingDescription binding_desc{};
+    binding_desc.binding = 0; // index of binding in array
+    binding_desc.stride = sizeof(glm::vec3); // number of bytes between entries
+    binding_desc.inputRate = vk::VertexInputRate::eVertex; // move to the next entry after each vertex
+
+    vk::VertexInputAttributeDescription attribute_description{};
+    attribute_description.binding = 0;
+    attribute_description.location = 0;
+    attribute_description.format = vk::Format::eR32G32B32Sfloat;
+    attribute_description.offset = 0;
+
+    auto binding_description = Vertex::get_binding_description();
+    auto attribute_descriptions = Vertex::get_attribute_description();
+
+    vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
+    vertex_input_info.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
+    vertex_input_info.vertexBindingDescriptionCount = 1;
+    vertex_input_info.pVertexBindingDescriptions = &binding_desc;
+    vertex_input_info.vertexAttributeDescriptionCount = 1; //static_cast<u32>(attribute_descriptions.size());
+    vertex_input_info.pVertexAttributeDescriptions = &attribute_description;
+
+    vk::PipelineInputAssemblyStateCreateInfo input_assembly{};
+    input_assembly.sType = vk::StructureType::ePipelineInputAssemblyStateCreateInfo;
+    input_assembly.topology = vk::PrimitiveTopology::eTriangleList;
+    input_assembly.primitiveRestartEnable = false;
+
+    vk::Viewport viewport{};
+    viewport.x = 0.f;
+    viewport.y = 0.f;
+    viewport.width = (f32)m_swapchain_extent.width;
+    viewport.height = (f32)m_swapchain_extent.height;
+    viewport.minDepth = 0.f;
+    viewport.maxDepth = 1.f;
+
+    vk::Rect2D scissor{};
+    scissor.offset.x = 0;
+    scissor.offset.y = 0;
+    scissor.extent = m_swapchain_extent;
+
+    // since we made viewport and scissor dynamic we don't need to bind them here
+    vk::PipelineViewportStateCreateInfo viewport_state{};
+    viewport_state.sType = vk::StructureType::ePipelineViewportStateCreateInfo;
+    viewport_state.viewportCount = 1;
+    viewport_state.scissorCount = 1;
+
+    vk::PipelineRasterizationStateCreateInfo rasterizer{};
+    rasterizer.sType = vk::StructureType::ePipelineRasterizationStateCreateInfo;
+    rasterizer.depthClampEnable = false;
+    rasterizer.rasterizerDiscardEnable = false;
+    rasterizer.polygonMode = vk::PolygonMode::eFill;
+    rasterizer.lineWidth = 1.f;
+    rasterizer.cullMode = vk::CullModeFlagBits::eFront;
+    rasterizer.frontFace = vk::FrontFace::eCounterClockwise;
+    rasterizer.depthBiasEnable = false;
+    rasterizer.depthBiasConstantFactor = 0.f;
+    rasterizer.depthBiasClamp = 0.f;
+    rasterizer.depthBiasSlopeFactor = 0.f;
+
+    vk::PipelineMultisampleStateCreateInfo multi_sampling{};
+    multi_sampling.sType = vk::StructureType::ePipelineMultisampleStateCreateInfo;
+    multi_sampling.sampleShadingEnable = false;
+    multi_sampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+
+    vk::PipelineColorBlendAttachmentState colour_blend_attachment{};
+    colour_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
+                                             | vk::ColorComponentFlagBits::eG
+                                             | vk::ColorComponentFlagBits::eB
+                                             | vk::ColorComponentFlagBits::eA;
+    colour_blend_attachment.blendEnable = false;
+    colour_blend_attachment.srcColorBlendFactor = vk::BlendFactor::eOne;
+    colour_blend_attachment.dstColorBlendFactor = vk::BlendFactor::eZero;
+    colour_blend_attachment.colorBlendOp = vk::BlendOp::eAdd;
+    colour_blend_attachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+    colour_blend_attachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+    colour_blend_attachment.alphaBlendOp = vk::BlendOp::eAdd;
+
+    vk::PipelineColorBlendStateCreateInfo colour_blending{};
+    colour_blending.sType = vk::StructureType::ePipelineColorBlendStateCreateInfo;
+    colour_blending.logicOpEnable = false;
+    colour_blending.logicOp = vk::LogicOp::eCopy;
+    colour_blending.attachmentCount = 1;
+    colour_blending.pAttachments = &colour_blend_attachment;
+
+    vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
+    depth_stencil.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
+    depth_stencil.depthTestEnable = true;
+    depth_stencil.depthWriteEnable = true;
+    depth_stencil.depthCompareOp = vk::CompareOp::eLess;
+    depth_stencil.depthBoundsTestEnable = false;
+    depth_stencil.minDepthBounds = 0.f;
+    depth_stencil.maxDepthBounds = 1.f;
+    depth_stencil.stencilTestEnable = false;
+
+    vk::PipelineLayoutCreateInfo pipeline_layout_info{};
+    pipeline_layout_info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
+    pipeline_layout_info.setLayoutCount = 2;
+    vk::DescriptorSetLayout layouts[] = {m_camera_data_layout, m_skybox.descriptor_set_layout};
+    pipeline_layout_info.pSetLayouts = layouts;
+
+    check(m_logical_device.createPipelineLayout(&pipeline_layout_info, nullptr, &m_skybox.pipeline_layout));
+
+    vk::GraphicsPipelineCreateInfo pipeline_create_info{};
+    pipeline_create_info.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
+    pipeline_create_info.stageCount = 2;
+    pipeline_create_info.pStages = shader_stages;
+    pipeline_create_info.pVertexInputState = &vertex_input_info;
+    pipeline_create_info.pInputAssemblyState = &input_assembly;
+    pipeline_create_info.pViewportState = &viewport_state;
+    pipeline_create_info.pRasterizationState = &rasterizer;
+    pipeline_create_info.pMultisampleState = &multi_sampling;
+    pipeline_create_info.pDepthStencilState = nullptr; // optional
+    pipeline_create_info.pColorBlendState = &colour_blending;
+    pipeline_create_info.pDynamicState = &dynamic_state;
+    pipeline_create_info.layout = m_skybox.pipeline_layout;
+    pipeline_create_info.renderPass = m_viewport_renderpass;
+    pipeline_create_info.subpass = 0;
+    pipeline_create_info.pDepthStencilState = &depth_stencil;
+    pipeline_create_info.basePipelineHandle = nullptr;
+    pipeline_create_info.basePipelineIndex = -1;
+
+    check(m_logical_device.createGraphicsPipelines(nullptr, 1, &pipeline_create_info, nullptr, &m_skybox.pipeline));
+
+    m_logical_device.destroyShaderModule(vert_shader_module, nullptr);
+    m_logical_device.destroyShaderModule(frag_shader_module, nullptr);
+}
+
 void Renderer::init_viewport()
 {
     m_viewport_images.resize(m_swapchain_images.size());
@@ -1393,7 +1783,7 @@ void Renderer::init_viewport()
                                     vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
         end_single_time_commands(cmd_buffer);
 
-        m_viewport_image_views[i] = create_image_view(m_viewport_images[i], vk::Format::eB8G8R8A8Srgb, vk::ImageAspectFlagBits::eColor);
+        m_viewport_image_views[i] = create_image_view(m_viewport_images[i], vk::ImageViewType::e2D, vk::Format::eB8G8R8A8Srgb, vk::ImageAspectFlagBits::eColor);
     }
 }
 
@@ -1471,6 +1861,7 @@ void Renderer::init_command_buffers()
         check(m_logical_device.allocateCommandBuffers(&main_alloc_info, &m_main_command_buffers[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&viewport_commands_alloc_info, &m_viewport_command_buffers[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&extra_alloc_info, &m_extra_draw_commands[i].vk_command_buffer));
+        check(m_logical_device.allocateCommandBuffers(&viewport_commands_alloc_info, &m_skybox_commands[i].vk_command_buffer));
         check(m_logical_device.allocateCommandBuffers(&imgui_alloc_info, &m_imgui_commands[i].vk_command_buffer));
     }
 }
@@ -1483,7 +1874,7 @@ void Renderer::init_depth_resources()
                  vk::MemoryPropertyFlagBits::eDeviceLocal,
                  m_depth_image, m_depth_image_memory);
 
-    m_depth_image_view = create_image_view(m_depth_image, vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth);
+    m_depth_image_view = create_image_view(m_depth_image, vk::ImageViewType::e2D, vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth);
 }
 
 void Renderer::init_framebuffers()
@@ -1616,7 +2007,7 @@ vk::CommandBuffer Renderer::begin_single_time_commands()
     vk::CommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = vk::StructureType::eCommandBufferAllocateInfo;
     alloc_info.level = vk::CommandBufferLevel::ePrimary;
-    alloc_info.commandPool = m_command_pools[0];
+    alloc_info.commandPool = m_main_command_pool;
     alloc_info.commandBufferCount = 1;
 
     vk::CommandBuffer command_buffer;
@@ -1643,7 +2034,7 @@ void Renderer::end_single_time_commands(vk::CommandBuffer command_buffer)
     check(m_graphics_queue.submit(1, &submit_info, nullptr));
     m_graphics_queue.waitIdle();
 
-    m_logical_device.freeCommandBuffers(m_command_pools[0], 1, &command_buffer);
+    m_logical_device.freeCommandBuffers(m_main_command_pool, 1, &command_buffer);
 }
 
 void Renderer::cleanup_swapchain()
@@ -1715,7 +2106,7 @@ size_t Renderer::pad_uniform_buffer(size_t original_size) const
     return aligned_size;
 }
 
-void Renderer::copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 width, u32 height)
+void Renderer::copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 width, u32 height, u32 layer_count)
 {
     vk::CommandBuffer command_buffer = begin_single_time_commands();
 
@@ -1726,7 +2117,7 @@ void Renderer::copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 widt
     region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
     region.imageSubresource.mipLevel = 0;
     region.imageSubresource.baseArrayLayer = 0;
-    region.imageSubresource.layerCount = 1;
+    region.imageSubresource.layerCount = layer_count;
     region.imageOffset = vk::Offset3D{0,0,0};
     region.imageExtent = vk::Extent3D
     {
@@ -1740,7 +2131,7 @@ void Renderer::copy_buffer_to_image(vk::Buffer buffer, vk::Image image, u32 widt
     end_single_time_commands(command_buffer);
 }
 
-void Renderer::transition_image_layout(vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout)
+void Renderer::transition_image_layout(vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout, u32 layer_count)
 {
     vk::CommandBuffer command_buffer = begin_single_time_commands();
 
@@ -1757,7 +2148,7 @@ void Renderer::transition_image_layout(vk::Image image, vk::Format format, vk::I
     barrier.subresourceRange.baseMipLevel = 0;
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
-    barrier.subresourceRange.layerCount = 1;
+    barrier.subresourceRange.layerCount = layer_count;
 
     if(old_layout == vk::ImageLayout::eUndefined && new_layout == vk::ImageLayout::eTransferDstOptimal)
     {

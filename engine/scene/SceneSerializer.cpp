@@ -3,7 +3,7 @@
 // #include "ModelLoader.h"
 #include "Entity.hpp"
 #include "Camera.hpp"
-#include "Skybox.h"
+//#include "Skybox.h"
 #include "Scene.hpp"
 #include "SceneNode.hpp"
 // #include "Mesh.h"
@@ -42,7 +42,16 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
     }
 
 //    if(!w_json["skybox"].is_null())
-//        load_skybox(w_json["skybox"], sky_box);
+//    {
+//        std::string dir = w_json["skybox"];
+////        m_faces[0] = dir + "right.jpg";
+////        m_faces[1] = dir + "left.jpg";
+////        m_faces[2] = dir + "top.jpg";
+////        m_faces[3] = dir + "bottom.jpg";
+////        m_faces[4] = dir + "front.jpg";
+////        m_faces[5] = dir + "back.jpg";
+//    }
+        // load_skybox(w_json["skybox"], sky_box);
 
 	json models = w_json["models"];
 	u32 model_count = w_json["model_count"];
@@ -118,10 +127,10 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 	}
 }
 
-void SceneSerializer::load_skybox(const json& accessor, std::unique_ptr<Skybox>& sky_box)
-{
-    // sky_box = std::make_unique<Skybox>(accessor["path"], accessor["image_format"]);
-}
+//void SceneSerializer::load_skybox(const json& accessor,)
+//{
+//    // sky_box = std::make_unique<Skybox>(accessor["path"], accessor["image_format"]);
+//}
 
 void SceneSerializer::load_models(const json& accessor, u32 model_count, Scene* scene, Renderer* renderer)
 {

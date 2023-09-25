@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.hpp"
+#include "CommonTypes.hpp"
 
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
@@ -65,7 +65,7 @@ struct BufferCreationInfo
 struct TextureCreationInfo
 {
     vk::Format                      format          = vk::Format::eUndefined;
-
+    vk::ImageCreateFlags            flags           = vk::ImageCreateFlags();
     const char*                     image_src;
 };
 
