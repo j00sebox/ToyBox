@@ -229,7 +229,8 @@ Skybox SceneSerializer::load_skybox(const json& accessor, Renderer* renderer)
     });
 
     PipelineConfig pipeline_config{
-            .renderPass = renderer->get_viewport_renderpass()
+            .renderPass = renderer->get_viewport_renderpass(),
+            .pipeline_cache_location = "skybox_pipeline_cache.bin"
     };
 
     pipeline_config.set_rasterizer({

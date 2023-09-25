@@ -45,6 +45,11 @@ void PipelineConfig::add_descriptor_set_layout(DescriptorSetLayoutHandle descrip
     descriptor_set_layouts[descriptor_set_layout_count++] = descriptor_set_layout_handle;
 }
 
+void PipelineConfig::add_push_constant(vk::PushConstantRange push_constant_config)
+{
+    push_constants[push_constant_count++] = push_constant_config;
+}
+
 void PipelineConfig::add_colour_attachment(const vk::PipelineColorBlendAttachmentState& colour_blend_attachment)
 {
     colour_attachments[colour_attachment_count++] = colour_blend_attachment;

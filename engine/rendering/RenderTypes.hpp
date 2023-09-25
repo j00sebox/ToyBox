@@ -154,6 +154,7 @@ struct VertexAttribute
     u32                 offset           = 0;
 };
 
+// FIXME: magic numbers
 struct PipelineConfig
 {
     ShaderStageConfig                                       shader_stages[k_max_shaders];
@@ -164,12 +165,17 @@ struct PipelineConfig
     vk::PipelineColorBlendAttachmentState                   colour_attachments[2];
     vk::PipelineDepthStencilStateCreateInfo                 depth_stencil_attachment = vk::PipelineDepthStencilStateCreateInfo{};
     DescriptorSetLayoutHandle                               descriptor_set_layouts[k_max_descriptor_set_layouts];
+    vk::PushConstantRange                                   push_constants[6];
     vk::RenderPass                                          renderPass;
 
     u32                                                     shader_count = 0;
     u32                                                     vertex_attribute_count = 0;
     u32                                                     colour_attachment_count = 0;
     u32                                                     descriptor_set_layout_count = 0;
+    u32                                                     push_constant_count = 0;
+
+    // will create the given cache file if it doesn't currently exist
+    const char*                                             pipeline_cache_location = nullptr;
 
     void set_rasterizer(const RasterizationConfig& rasterization_config);
     void set_binding_description(const VertexBindingDescription& vertex_binding_description);
@@ -177,6 +183,7 @@ struct PipelineConfig
     void add_shader_stage(const ShaderStageConfig& shader_config);
     void add_vertex_attribute(const VertexAttribute& attribute);
     void add_descriptor_set_layout(DescriptorSetLayoutHandle descriptor_set_layout_handle);
+    void add_push_constant(vk::PushConstantRange push_constant_config);
     void add_colour_attachment(const vk::PipelineColorBlendAttachmentState& colour_blend_attachment);
     void add_depth_stencil_attachment(const vk::PipelineDepthStencilStateCreateInfo& depth_stencil_create_info);
 };

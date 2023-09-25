@@ -29,13 +29,10 @@ struct RecordDrawTask : enki::ITaskSet
 
     void ExecuteRange(enki::TaskSetPartition range, uint32_t threadnum) override
     {
-        command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 1, 1, &material_data->vk_descriptor_set, 0, nullptr);
-        command_buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, renderer->get_pipeline_layout(), 0, 1, &camera_data->vk_descriptor_set, 0, nullptr);
-
         for(u32 i = start; i < end; ++i)
         {
-            command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &scene->m_render_list[i].transform);
-            command_buffer->pushConstants(renderer->get_pipeline_layout(), vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->m_render_list[i].material.textures);
+            command_buffer->pushConstants(pipeline_layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &scene->m_render_list[i].transform);
+            command_buffer->pushConstants(pipeline_layout, vk::ShaderStageFlagBits::eFragment, 64, sizeof(glm::uvec4), scene->m_render_list[i].material.textures);
 
             Buffer* vertex_buffer = renderer->get_buffer(scene->m_render_list[i].mesh.vertex_buffer);
             vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
@@ -50,6 +47,7 @@ struct RecordDrawTask : enki::ITaskSet
     }
 
     vk::CommandBuffer* command_buffer;
+    vk::PipelineLayout pipeline_layout;
 
 private:
     Renderer* renderer;
@@ -141,8 +139,10 @@ Renderer::~Renderer()
     m_logical_device.destroyRenderPass(m_viewport_renderpass, nullptr);
     m_logical_device.destroyRenderPass(m_imgui_renderpass, nullptr);
     m_logical_device.destroyPipelineLayout(m_pipeline_layout, nullptr);
-    m_logical_device.destroyPipeline(m_graphics_pipeline, nullptr);
-    m_logical_device.destroyPipeline(m_viewport_pipeline, nullptr);
+    destroy_pipeline(m_graphics_pipeline);
+    destroy_pipeline(m_viewport_pipeline);
+    // m_logical_device.destroyPipeline(m_graphics_pipeline, nullptr);
+    // m_logical_device.destroyPipeline(m_viewport_pipeline, nullptr);
     m_logical_device.destroy();
     m_instance.destroySurfaceKHR(m_surface, nullptr);
 #ifdef DEBUG
@@ -218,17 +218,23 @@ void Renderer::render(Scene* scene)
         m_skybox_commands[m_current_frame].end();
     }
 
+    auto* viewport_pipeline = static_cast<Pipeline*>(m_pipeline_pool.access(m_viewport_pipeline));
+
     u32 start = 0;
     for(u32 i = 0; i < num_recordings; ++i)
     {
         m_command_buffers[m_current_cb_index].begin(inheritance_info);
-        m_command_buffers[m_current_cb_index].bind_pipeline(m_viewport_pipeline);
+        m_command_buffers[m_current_cb_index].bind_pipeline(viewport_pipeline->vk_pipeline);
 
         // since we specified that the viewport and scissor were dynamic we need to do them now
         m_command_buffers[m_current_cb_index].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
         m_command_buffers[m_current_cb_index].set_scissor(m_swapchain_extent);
 
+        m_command_buffers[m_current_cb_index].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, viewport_pipeline->vk_pipeline_layout, 1, 1, &material_set->vk_descriptor_set, 0, nullptr);
+        m_command_buffers[m_current_cb_index].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, viewport_pipeline->vk_pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
+
         record_draw_tasks[i].init(this, &m_command_buffers[m_current_cb_index].vk_command_buffer, scene, start, start + models_per_thread, camera_set, material_set);
+        record_draw_tasks[i].pipeline_layout = viewport_pipeline->vk_pipeline_layout;
         m_scheduler->AddTaskSetToPipe(&record_draw_tasks[i]);
 
         start += models_per_thread;
@@ -239,11 +245,15 @@ void Renderer::render(Scene* scene)
     if(surplus > 0)
     {
         m_extra_draw_commands[m_current_frame].begin(inheritance_info);
-        m_extra_draw_commands[m_current_frame].bind_pipeline(m_viewport_pipeline);
+        m_extra_draw_commands[m_current_frame].bind_pipeline(viewport_pipeline->vk_pipeline);
         m_extra_draw_commands[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
         m_extra_draw_commands[m_current_frame].set_scissor(m_swapchain_extent);
 
+        m_extra_draw_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, viewport_pipeline->vk_pipeline_layout, 1, 1, &material_set->vk_descriptor_set, 0, nullptr);
+        m_extra_draw_commands[m_current_frame].vk_command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, viewport_pipeline->vk_pipeline_layout, 0, 1, &camera_set->vk_descriptor_set, 0, nullptr);
+
         extra_draws.init(this, &m_extra_draw_commands[m_current_frame].vk_command_buffer, scene, start, start + surplus, camera_set, material_set);
+        extra_draws.pipeline_layout = viewport_pipeline->vk_pipeline_layout;
         m_scheduler->AddTaskSetToPipe(&extra_draws);
     }
 
@@ -298,7 +308,8 @@ void Renderer::begin_frame()
     m_main_command_buffers[m_current_frame].begin_renderpass(m_renderpass, m_swapchain_framebuffers[m_image_index], m_swapchain_extent, vk::SubpassContents::eInline);
     m_main_command_buffers[m_current_frame].set_viewport(m_swapchain_extent.width, m_swapchain_extent.height);
     m_main_command_buffers[m_current_frame].set_scissor(m_swapchain_extent);
-    m_main_command_buffers[m_current_frame].bind_pipeline(m_graphics_pipeline);
+    auto* graphics_pipeline = static_cast<Pipeline*>(m_pipeline_pool.access(m_graphics_pipeline));
+    m_main_command_buffers[m_current_frame].bind_pipeline(graphics_pipeline->vk_pipeline);
     m_main_command_buffers[m_current_frame].vk_command_buffer.endRenderPass();
     m_main_command_buffers[m_current_frame].end();
 
@@ -676,6 +687,34 @@ PipelineHandle Renderer::create_pipeline(const PipelineConfig& pipeline_config)
 
     pipeline->vk_bindpoint = vk::PipelineBindPoint::eGraphics;
 
+    bool cache_exists = (pipeline_config.pipeline_cache_location && std::filesystem::exists(pipeline_config.pipeline_cache_location));
+    bool cache_header_valid = false;
+    vk::PipelineCache pipeline_cache = nullptr;
+
+    vk::PipelineCacheCreateInfo pipeline_cache_info{};
+    pipeline_cache_info.sType = vk::StructureType::ePipelineCacheCreateInfo;
+
+    if(cache_exists)
+    {
+        std::vector<u8> pipeline_cache_data = fileop::read_binary_file(pipeline_config.pipeline_cache_location);
+
+        // if there is a new driver version there is a chance that it won't be able to make use of the old cache file
+        // need to check some cache header details and compare them to our physical device
+        // if they match, create the cache like normal, otherwise need to overwrite it
+        auto* cache_header = (vk::PipelineCacheHeaderVersionOne*)pipeline_cache_data.data();
+        cache_header_valid = (cache_header->deviceID == m_device_properties.deviceID &&
+                              cache_header->vendorID == m_device_properties.vendorID &&
+                              memcmp(cache_header->pipelineCacheUUID, m_device_properties.pipelineCacheUUID, VK_UUID_SIZE) == 0);
+
+        if(cache_header_valid)
+        {
+            pipeline_cache_info.pInitialData = pipeline_cache_data.data();
+            pipeline_cache_info.initialDataSize = pipeline_cache_data.size();
+        }
+    }
+
+    check(m_logical_device.createPipelineCache(&pipeline_cache_info, nullptr, &pipeline_cache));
+
     vk::PipelineShaderStageCreateInfo shader_create_infos[pipeline_config.shader_count];
     vk::ShaderModule shader_modules[pipeline_config.shader_count];
     for(u32 i = 0; i < pipeline_config.shader_count; ++i)
@@ -758,8 +797,13 @@ PipelineHandle Renderer::create_pipeline(const PipelineConfig& pipeline_config)
         auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(pipeline_config.descriptor_set_layouts[i]));
         descriptor_set_layouts[i] = descriptor_set_layout->vk_descriptor_set_layout;
     }
-
     pipeline_layout_create_info.pSetLayouts = descriptor_set_layouts;
+
+    if(pipeline_config.push_constant_count > 0)
+    {
+        pipeline_layout_create_info.pushConstantRangeCount = pipeline_config.push_constant_count;
+        pipeline_layout_create_info.pPushConstantRanges = pipeline_config.push_constants;
+    }
 
     check(m_logical_device.createPipelineLayout(&pipeline_layout_create_info, nullptr, &pipeline->vk_pipeline_layout));
 
@@ -781,7 +825,23 @@ PipelineHandle Renderer::create_pipeline(const PipelineConfig& pipeline_config)
     pipeline_create_info.basePipelineHandle = nullptr;
     pipeline_create_info.basePipelineIndex = -1;
 
-    check(m_logical_device.createGraphicsPipelines(nullptr, 1, &pipeline_create_info, nullptr, &pipeline->vk_pipeline));
+    check(m_logical_device.createGraphicsPipelines(pipeline_cache, 1, &pipeline_create_info, nullptr, &pipeline->vk_pipeline));
+
+    if(pipeline_config.pipeline_cache_location && (!cache_exists || !cache_header_valid))
+    {
+        size_t cache_data_size = 0;
+
+        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, nullptr));
+
+        void* cache_data = malloc(cache_data_size);
+
+        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, cache_data));
+
+        fileop::write_binary_file(cache_data, cache_data_size, pipeline_config.pipeline_cache_location);
+        free(cache_data);
+    }
+
+    m_logical_device.destroyPipelineCache(pipeline_cache, nullptr);
 
     for(u32 i = 0; i < pipeline_config.shader_count; ++i)
     {
@@ -1457,128 +1517,48 @@ void Renderer::init_descriptor_sets()
 
 void Renderer::init_graphics_pipeline()
 {
-    bool cache_exists = std::filesystem::exists("pipeline_cache.bin");
-    bool cache_header_valid = false;
-
-    vk::PipelineCache pipeline_cache = nullptr;
-
-    vk::PipelineCacheCreateInfo pipeline_cache_info{};
-    pipeline_cache_info.sType = vk::StructureType::ePipelineCacheCreateInfo;
-
-    if(cache_exists)
-    {
-        std::vector<u8> pipeline_cache_data = fileop::read_binary_file("pipeline_cache.bin");
-
-        // if there is a new driver version there is a chance that it won't be able to make use of the old cache file
-        // need to check some cache header details and compare them to our physical device
-        // if they match, create the cache like normal, otherwise need to overwrite it
-        auto* cache_header = (vk::PipelineCacheHeaderVersionOne*)pipeline_cache_data.data();
-        cache_header_valid = (cache_header->deviceID == m_device_properties.deviceID &&
-                              cache_header->vendorID == m_device_properties.vendorID &&
-                              memcmp(cache_header->pipelineCacheUUID, m_device_properties.pipelineCacheUUID, VK_UUID_SIZE) == 0);
-
-        if(cache_header_valid)
-        {
-            pipeline_cache_info.pInitialData = pipeline_cache_data.data();
-            pipeline_cache_info.initialDataSize = pipeline_cache_data.size();
-        }
-    }
-
-    check(m_logical_device.createPipelineCache(&pipeline_cache_info, nullptr, &pipeline_cache));
-
-    auto vert_shader_code = fileop::read_binary_file("../assets/shaders/vert.spv");
-    auto frag_shader_code = fileop::read_binary_file("../assets/shaders/frag.spv");
-
-    vk::ShaderModule vert_shader_module = create_shader_module(vert_shader_code);
-    vk::ShaderModule frag_shader_module = create_shader_module(frag_shader_code);
-
-    vk::PipelineShaderStageCreateInfo vert_shader_stage_info{};
-    vert_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
-    vert_shader_stage_info.stage = vk::ShaderStageFlagBits::eVertex;
-    vert_shader_stage_info.module = vert_shader_module;
-    vert_shader_stage_info.pName = "main";
-
-    vk::PipelineShaderStageCreateInfo frag_shader_stage_info{};
-    frag_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
-    frag_shader_stage_info.stage = vk::ShaderStageFlagBits::eFragment;
-    frag_shader_stage_info.module = frag_shader_module;
-    frag_shader_stage_info.pName = "main";
-
-    vk::PipelineShaderStageCreateInfo shader_stages[] = {vert_shader_stage_info, frag_shader_stage_info};
-
-    std::vector<vk::DynamicState> dynamic_states =
-    {
-            vk::DynamicState::eViewport,
-            vk::DynamicState::eScissor
+    PipelineConfig pipeline_config{
+        .renderPass = m_renderpass,
+        .pipeline_cache_location = "graphics_pipeline_cache.bin"
     };
 
-    // the configuration of these values will be ignored, so they can be changed at runtime
-    vk::PipelineDynamicStateCreateInfo dynamic_state{};
-    dynamic_state.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
-    dynamic_state.dynamicStateCount = static_cast<u32>(dynamic_states.size());
-    dynamic_state.pDynamicStates = dynamic_states.data();
+    pipeline_config.set_rasterizer({
+       .polygon_mode = vk::PolygonMode::eFill,
+       .cull_mode = vk::CullModeFlagBits::eBack,
+       .front_face = vk::FrontFace::eCounterClockwise
+    });
 
-    auto binding_description = Vertex::get_binding_description();
+    pipeline_config.set_binding_description({
+        .binding = 0,
+        .stride = sizeof(Vertex)
+    });
+
+    pipeline_config.set_input_assembly(vk::PrimitiveTopology::eTriangleList);
+
+    pipeline_config.add_shader_stage({
+        .shader_file = "../assets/shaders/vert.spv",
+        .stage_flags = vk::ShaderStageFlagBits::eVertex
+    });
+
+    pipeline_config.add_shader_stage({
+        .shader_file = "../assets/shaders/frag.spv",
+        .stage_flags = vk::ShaderStageFlagBits::eFragment
+    });
+
     auto attribute_descriptions = Vertex::get_attribute_description();
 
-    vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
-    vertex_input_info.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
-    vertex_input_info.vertexBindingDescriptionCount = 1;
-    vertex_input_info.pVertexBindingDescriptions = &binding_description;
-    vertex_input_info.vertexAttributeDescriptionCount = static_cast<u32>(attribute_descriptions.size());
-    vertex_input_info.pVertexAttributeDescriptions = attribute_descriptions.data();
+    for(auto attribute_description : attribute_descriptions)
+    {
+        pipeline_config.add_vertex_attribute({
+            .location = attribute_description.location,
+            .format = attribute_description.format,
+            .offset = attribute_description.offset
+        });
+    }
 
-    vk::PipelineInputAssemblyStateCreateInfo input_assembly{};
-    input_assembly.sType = vk::StructureType::ePipelineInputAssemblyStateCreateInfo;
-    input_assembly.topology = vk::PrimitiveTopology::eTriangleList;
-    input_assembly.primitiveRestartEnable = false;
+    pipeline_config.add_descriptor_set_layout(m_camera_data_layout);
+    pipeline_config.add_descriptor_set_layout(m_texture_set_layout);
 
-    vk::Viewport viewport{};
-    viewport.x = 0.f;
-    viewport.y = 0.f;
-    viewport.width = (f32)m_swapchain_extent.width;
-    viewport.height = (f32)m_swapchain_extent.height;
-    viewport.minDepth = 0.f;
-    viewport.maxDepth = 1.f;
-
-    vk::Rect2D scissor{};
-    scissor.offset.x = 0;
-    scissor.offset.y = 0;
-    scissor.extent = m_swapchain_extent;
-
-    // since we made viewport and scissor dynamic we don't need to bind them here
-    vk::PipelineViewportStateCreateInfo viewport_state{};
-    viewport_state.sType = vk::StructureType::ePipelineViewportStateCreateInfo;
-    viewport_state.viewportCount = 1;
-    viewport_state.scissorCount = 1;
-
-    vk::PipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = vk::StructureType::ePipelineRasterizationStateCreateInfo;
-    rasterizer.depthClampEnable = false;
-    rasterizer.rasterizerDiscardEnable = false;
-    rasterizer.polygonMode = vk::PolygonMode::eFill;
-    rasterizer.lineWidth = 1.f;
-    rasterizer.cullMode = vk::CullModeFlagBits::eBack;
-    rasterizer.frontFace = vk::FrontFace::eCounterClockwise;
-    rasterizer.depthBiasEnable = false;
-    rasterizer.depthBiasConstantFactor = 0.f;
-    rasterizer.depthBiasClamp = 0.f;
-    rasterizer.depthBiasSlopeFactor = 0.f;
-
-    vk::PipelineMultisampleStateCreateInfo multi_sampling{};
-    multi_sampling.sType = vk::StructureType::ePipelineMultisampleStateCreateInfo;
-    multi_sampling.sampleShadingEnable = false;
-    multi_sampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
-
-//        multi_sampling.minSampleShading = 1.f;
-//        multi_sampling.pSampleMask = nullptr;
-//        multi_sampling.alphaToCoverageEnable = false;
-//        multi_sampling.alphaToOneEnable = false;
-
-    // if using depth or stencil buffer then they need to be configured
-    // vk::PipelineDepthStencilStateCreateInfo
-
-    // colour blending
     vk::PipelineColorBlendAttachmentState colour_blend_attachment{};
     colour_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
                                              | vk::ColorComponentFlagBits::eG
@@ -1592,13 +1572,6 @@ void Renderer::init_graphics_pipeline()
     colour_blend_attachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
     colour_blend_attachment.alphaBlendOp = vk::BlendOp::eAdd;
 
-    vk::PipelineColorBlendStateCreateInfo colour_blending{};
-    colour_blending.sType = vk::StructureType::ePipelineColorBlendStateCreateInfo;
-    colour_blending.logicOpEnable = false;
-    colour_blending.logicOp = vk::LogicOp::eCopy; // optional
-    colour_blending.attachmentCount = 1;
-    colour_blending.pAttachments = &colour_blend_attachment;
-
     vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
     depth_stencil.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
     depth_stencil.depthTestEnable = true;
@@ -1609,17 +1582,9 @@ void Renderer::init_graphics_pipeline()
     depth_stencil.maxDepthBounds = 1.f;
     depth_stencil.stencilTestEnable = false;
 
-    vk::PipelineLayoutCreateInfo pipeline_layout_info{};
-    pipeline_layout_info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
+    pipeline_config.add_colour_attachment(colour_blend_attachment);
+    pipeline_config.add_depth_stencil_attachment(depth_stencil);
 
-    // need to specify the descriptor set layout here
-    pipeline_layout_info.setLayoutCount = 2;
-    auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_camera_data_layout));
-    auto* texture_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_texture_set_layout));
-    vk::DescriptorSetLayout layouts[] = {descriptor_set_layout->vk_descriptor_set_layout, texture_set_layout->vk_descriptor_set_layout};
-    pipeline_layout_info.pSetLayouts = layouts;
-
-    // need to tell the pipeline that there will be a push constant coming in
     vk::PushConstantRange model_push_constant_info{};
     model_push_constant_info.offset = 0;
     model_push_constant_info.size = sizeof(glm::mat4);
@@ -1630,53 +1595,211 @@ void Renderer::init_graphics_pipeline()
     texture_push_constant_info.size = sizeof(glm::uvec4);
     texture_push_constant_info.stageFlags = vk::ShaderStageFlagBits::eFragment;
 
-    vk::PushConstantRange push_constant_ranges[] = { model_push_constant_info, texture_push_constant_info };
-    pipeline_layout_info.pushConstantRangeCount = 2;
-    pipeline_layout_info.pPushConstantRanges = push_constant_ranges;
+    pipeline_config.add_push_constant(model_push_constant_info);
+    pipeline_config.add_push_constant(texture_push_constant_info);
 
-    check(m_logical_device.createPipelineLayout(&pipeline_layout_info, nullptr, &m_pipeline_layout));
+    m_graphics_pipeline = create_pipeline(pipeline_config);
 
-    vk::GraphicsPipelineCreateInfo pipeline_create_info{};
-    pipeline_create_info.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
-    pipeline_create_info.stageCount = 2;
-    pipeline_create_info.pStages = shader_stages;
-    pipeline_create_info.pVertexInputState = &vertex_input_info;
-    pipeline_create_info.pInputAssemblyState = &input_assembly;
-    pipeline_create_info.pViewportState = &viewport_state;
-    pipeline_create_info.pRasterizationState = &rasterizer;
-    pipeline_create_info.pMultisampleState = &multi_sampling;
-    pipeline_create_info.pDepthStencilState = nullptr; // optional
-    pipeline_create_info.pColorBlendState = &colour_blending;
-    pipeline_create_info.pDynamicState = &dynamic_state;
-    pipeline_create_info.layout = m_pipeline_layout;
-    pipeline_create_info.renderPass = m_renderpass;
-    pipeline_create_info.subpass = 0;
-    pipeline_create_info.pDepthStencilState = &depth_stencil;
-    pipeline_create_info.basePipelineHandle = nullptr;
-    pipeline_create_info.basePipelineIndex = -1;
+    pipeline_config.renderPass = m_viewport_renderpass;
+    pipeline_config.pipeline_cache_location = "viewport_pipeline_cache.bin";
+    m_viewport_pipeline = create_pipeline(pipeline_config);
 
-    check(m_logical_device.createGraphicsPipelines(pipeline_cache, 1, &pipeline_create_info, nullptr, &m_graphics_pipeline));
-
-    pipeline_create_info.renderPass = m_viewport_renderpass;
-    check(m_logical_device.createGraphicsPipelines(nullptr, 1, &pipeline_create_info, nullptr, &m_viewport_pipeline));
-
-    if(!cache_exists || !cache_header_valid)
-    {
-        size_t cache_data_size = 0;
-
-        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, nullptr));
-
-        void* cache_data = malloc(cache_data_size);
-
-        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, cache_data));
-
-        fileop::write_binary_file(cache_data, cache_data_size, "pipeline_cache.bin");
-        free(cache_data);
-    }
-
-    m_logical_device.destroyPipelineCache(pipeline_cache, nullptr);
-    m_logical_device.destroyShaderModule(vert_shader_module, nullptr);
-    m_logical_device.destroyShaderModule(frag_shader_module, nullptr);
+//    bool cache_exists = std::filesystem::exists("pipeline_cache.bin");
+//    bool cache_header_valid = false;
+//
+//    vk::PipelineCache pipeline_cache = nullptr;
+//
+//    vk::PipelineCacheCreateInfo pipeline_cache_info{};
+//    pipeline_cache_info.sType = vk::StructureType::ePipelineCacheCreateInfo;
+//
+//    if(cache_exists)
+//    {
+//        std::vector<u8> pipeline_cache_data = fileop::read_binary_file("pipeline_cache.bin");
+//
+//        // if there is a new driver version there is a chance that it won't be able to make use of the old cache file
+//        // need to check some cache header details and compare them to our physical device
+//        // if they match, create the cache like normal, otherwise need to overwrite it
+//        auto* cache_header = (vk::PipelineCacheHeaderVersionOne*)pipeline_cache_data.data();
+//        cache_header_valid = (cache_header->deviceID == m_device_properties.deviceID &&
+//                              cache_header->vendorID == m_device_properties.vendorID &&
+//                              memcmp(cache_header->pipelineCacheUUID, m_device_properties.pipelineCacheUUID, VK_UUID_SIZE) == 0);
+//
+//        if(cache_header_valid)
+//        {
+//            pipeline_cache_info.pInitialData = pipeline_cache_data.data();
+//            pipeline_cache_info.initialDataSize = pipeline_cache_data.size();
+//        }
+//    }
+//
+//    check(m_logical_device.createPipelineCache(&pipeline_cache_info, nullptr, &pipeline_cache));
+//
+//    auto vert_shader_code = fileop::read_binary_file("../assets/shaders/vert.spv");
+//    auto frag_shader_code = fileop::read_binary_file("../assets/shaders/frag.spv");
+//
+//    vk::ShaderModule vert_shader_module = create_shader_module(vert_shader_code);
+//    vk::ShaderModule frag_shader_module = create_shader_module(frag_shader_code);
+//
+//    vk::PipelineShaderStageCreateInfo vert_shader_stage_info{};
+//    vert_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
+//    vert_shader_stage_info.stage = vk::ShaderStageFlagBits::eVertex;
+//    vert_shader_stage_info.module = vert_shader_module;
+//    vert_shader_stage_info.pName = "main";
+//
+//    vk::PipelineShaderStageCreateInfo frag_shader_stage_info{};
+//    frag_shader_stage_info.sType = vk::StructureType::ePipelineShaderStageCreateInfo;
+//    frag_shader_stage_info.stage = vk::ShaderStageFlagBits::eFragment;
+//    frag_shader_stage_info.module = frag_shader_module;
+//    frag_shader_stage_info.pName = "main";
+//
+//    vk::PipelineShaderStageCreateInfo shader_stages[] = {vert_shader_stage_info, frag_shader_stage_info};
+//
+//    std::vector<vk::DynamicState> dynamic_states =
+//    {
+//            vk::DynamicState::eViewport,
+//            vk::DynamicState::eScissor
+//    };
+//
+//    // the configuration of these values will be ignored, so they can be changed at runtime
+//    vk::PipelineDynamicStateCreateInfo dynamic_state{};
+//    dynamic_state.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
+//    dynamic_state.dynamicStateCount = static_cast<u32>(dynamic_states.size());
+//    dynamic_state.pDynamicStates = dynamic_states.data();
+//
+//    auto binding_description = Vertex::get_binding_description();
+//    // auto attribute_descriptions = Vertex::get_attribute_description();
+//
+//    vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
+//    vertex_input_info.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
+//    vertex_input_info.vertexBindingDescriptionCount = 1;
+//    vertex_input_info.pVertexBindingDescriptions = &binding_description;
+//    vertex_input_info.vertexAttributeDescriptionCount = static_cast<u32>(attribute_descriptions.size());
+//    vertex_input_info.pVertexAttributeDescriptions = attribute_descriptions.data();
+//
+//    vk::PipelineInputAssemblyStateCreateInfo input_assembly{};
+//    input_assembly.sType = vk::StructureType::ePipelineInputAssemblyStateCreateInfo;
+//    input_assembly.topology = vk::PrimitiveTopology::eTriangleList;
+//    input_assembly.primitiveRestartEnable = false;
+//
+//    vk::Viewport viewport{};
+//    viewport.x = 0.f;
+//    viewport.y = 0.f;
+//    viewport.width = (f32)m_swapchain_extent.width;
+//    viewport.height = (f32)m_swapchain_extent.height;
+//    viewport.minDepth = 0.f;
+//    viewport.maxDepth = 1.f;
+//
+//    vk::Rect2D scissor{};
+//    scissor.offset.x = 0;
+//    scissor.offset.y = 0;
+//    scissor.extent = m_swapchain_extent;
+//
+//    // since we made viewport and scissor dynamic we don't need to bind them here
+//    vk::PipelineViewportStateCreateInfo viewport_state{};
+//    viewport_state.sType = vk::StructureType::ePipelineViewportStateCreateInfo;
+//    viewport_state.viewportCount = 1;
+//    viewport_state.scissorCount = 1;
+//
+//    vk::PipelineRasterizationStateCreateInfo rasterizer{};
+//    rasterizer.sType = vk::StructureType::ePipelineRasterizationStateCreateInfo;
+//    rasterizer.depthClampEnable = false;
+//    rasterizer.rasterizerDiscardEnable = false;
+//    rasterizer.polygonMode = vk::PolygonMode::eFill;
+//    rasterizer.lineWidth = 1.f;
+//    rasterizer.cullMode = vk::CullModeFlagBits::eBack;
+//    rasterizer.frontFace = vk::FrontFace::eCounterClockwise;
+//    rasterizer.depthBiasEnable = false;
+//    rasterizer.depthBiasConstantFactor = 0.f;
+//    rasterizer.depthBiasClamp = 0.f;
+//    rasterizer.depthBiasSlopeFactor = 0.f;
+//
+//    vk::PipelineMultisampleStateCreateInfo multi_sampling{};
+//    multi_sampling.sType = vk::StructureType::ePipelineMultisampleStateCreateInfo;
+//    multi_sampling.sampleShadingEnable = false;
+//    multi_sampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+//
+////        multi_sampling.minSampleShading = 1.f;
+////        multi_sampling.pSampleMask = nullptr;
+////        multi_sampling.alphaToCoverageEnable = false;
+////        multi_sampling.alphaToOneEnable = false;
+//
+//    // if using depth or stencil buffer then they need to be configured
+//    // vk::PipelineDepthStencilStateCreateInfo
+//
+//    vk::PipelineColorBlendStateCreateInfo colour_blending{};
+//    colour_blending.sType = vk::StructureType::ePipelineColorBlendStateCreateInfo;
+//    colour_blending.logicOpEnable = false;
+//    colour_blending.logicOp = vk::LogicOp::eCopy; // optional
+//    colour_blending.attachmentCount = 1;
+//    colour_blending.pAttachments = &colour_blend_attachment;
+//
+//    vk::PipelineLayoutCreateInfo pipeline_layout_info{};
+//    pipeline_layout_info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
+//
+//    // need to specify the descriptor set layout here
+//    pipeline_layout_info.setLayoutCount = 2;
+//    auto* descriptor_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_camera_data_layout));
+//    auto* texture_set_layout = static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(m_texture_set_layout));
+//    vk::DescriptorSetLayout layouts[] = {descriptor_set_layout->vk_descriptor_set_layout, texture_set_layout->vk_descriptor_set_layout};
+//    pipeline_layout_info.pSetLayouts = layouts;
+//
+//    // need to tell the pipeline that there will be a push constant coming in
+//    vk::PushConstantRange model_push_constant_info{};
+//    model_push_constant_info.offset = 0;
+//    model_push_constant_info.size = sizeof(glm::mat4);
+//    model_push_constant_info.stageFlags = vk::ShaderStageFlagBits::eVertex;
+//
+//    vk::PushConstantRange texture_push_constant_info{};
+//    texture_push_constant_info.offset = 64;
+//    texture_push_constant_info.size = sizeof(glm::uvec4);
+//    texture_push_constant_info.stageFlags = vk::ShaderStageFlagBits::eFragment;
+//
+//    vk::PushConstantRange push_constant_ranges[] = { model_push_constant_info, texture_push_constant_info };
+//    pipeline_layout_info.pushConstantRangeCount = 2;
+//    pipeline_layout_info.pPushConstantRanges = push_constant_ranges;
+//
+//    check(m_logical_device.createPipelineLayout(&pipeline_layout_info, nullptr, &m_pipeline_layout));
+//
+//    vk::GraphicsPipelineCreateInfo pipeline_create_info{};
+//    pipeline_create_info.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
+//    pipeline_create_info.stageCount = 2;
+//    pipeline_create_info.pStages = shader_stages;
+//    pipeline_create_info.pVertexInputState = &vertex_input_info;
+//    pipeline_create_info.pInputAssemblyState = &input_assembly;
+//    pipeline_create_info.pViewportState = &viewport_state;
+//    pipeline_create_info.pRasterizationState = &rasterizer;
+//    pipeline_create_info.pMultisampleState = &multi_sampling;
+//    pipeline_create_info.pDepthStencilState = nullptr; // optional
+//    pipeline_create_info.pColorBlendState = &colour_blending;
+//    pipeline_create_info.pDynamicState = &dynamic_state;
+//    pipeline_create_info.layout = m_pipeline_layout;
+//    pipeline_create_info.renderPass = m_renderpass;
+//    pipeline_create_info.subpass = 0;
+//    pipeline_create_info.pDepthStencilState = &depth_stencil;
+//    pipeline_create_info.basePipelineHandle = nullptr;
+//    pipeline_create_info.basePipelineIndex = -1;
+//
+//    //check(m_logical_device.createGraphicsPipelines(pipeline_cache, 1, &pipeline_create_info, nullptr, &m_graphics_pipeline));
+//
+//    pipeline_create_info.renderPass = m_viewport_renderpass;
+//    check(m_logical_device.createGraphicsPipelines(nullptr, 1, &pipeline_create_info, nullptr, &m_viewport_pipeline));
+//
+//    if(!cache_exists || !cache_header_valid)
+//    {
+//        size_t cache_data_size = 0;
+//
+//        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, nullptr));
+//
+//        void* cache_data = malloc(cache_data_size);
+//
+//        check(m_logical_device.getPipelineCacheData(pipeline_cache, &cache_data_size, cache_data));
+//
+//        fileop::write_binary_file(cache_data, cache_data_size, "pipeline_cache.bin");
+//        free(cache_data);
+//    }
+//
+//    m_logical_device.destroyPipelineCache(pipeline_cache, nullptr);
+//    m_logical_device.destroyShaderModule(vert_shader_module, nullptr);
+//    m_logical_device.destroyShaderModule(frag_shader_module, nullptr);
 }
 
 void Renderer::init_viewport()

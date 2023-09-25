@@ -92,7 +92,8 @@ private:
     vk::RenderPass m_renderpass;
     vk::RenderPass m_imgui_renderpass;
     vk::PipelineLayout m_pipeline_layout;
-    vk::Pipeline m_graphics_pipeline;
+    //vk::Pipeline m_graphics_pipeline;
+    PipelineHandle m_graphics_pipeline;
 
     // descriptor set layouts
     DescriptorSetLayoutHandle m_descriptor_set_layout;
@@ -123,7 +124,7 @@ private:
     std::vector<vk::DeviceMemory> m_viewport_memory;
     std::vector<vk::ImageView> m_viewport_image_views;
     vk::RenderPass m_viewport_renderpass;
-    vk::Pipeline m_viewport_pipeline;
+    PipelineHandle m_viewport_pipeline;
     std::vector<vk::DescriptorSet> m_viewport_descriptors;
 
     // uniform buffers
