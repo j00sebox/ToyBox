@@ -13,7 +13,7 @@ void CommandBuffer::begin(vk::CommandBufferUsageFlags flags)
     {
         throw std::runtime_error("failed to begin recording of framebuffer!");
     }
-    m_is_recording = true;
+    is_recording = true;
 }
 
 void CommandBuffer::begin(vk::CommandBufferInheritanceInfo inheritance_info)
@@ -26,7 +26,7 @@ void CommandBuffer::begin(vk::CommandBufferInheritanceInfo inheritance_info)
 
     vk_command_buffer.begin(secondary_begin_info);
 
-    m_is_recording = true;
+    is_recording = true;
 }
 
 void CommandBuffer::begin_renderpass(const vk::RenderPass& renderpass, const vk::Framebuffer& framebuffer, vk::Extent2D swapchain_extent, vk::SubpassContents subpass_contents) const
@@ -50,9 +50,9 @@ void CommandBuffer::begin_renderpass(const vk::RenderPass& renderpass, const vk:
     vk_command_buffer.beginRenderPass(&renderpass_begin_info, subpass_contents);
 }
 
-void CommandBuffer::bind_pipeline(const vk::Pipeline& pipeline) const
+void CommandBuffer::bind_pipeline(const Pipeline* pipeline) const
 {
-    vk_command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+    vk_command_buffer.bindPipeline(pipeline->vk_bindpoint, pipeline->vk_pipeline);
 }
 
 void CommandBuffer::set_viewport(u32 width, u32 height) const
@@ -75,6 +75,41 @@ void CommandBuffer::set_scissor(vk::Extent2D extent) const
     vk_command_buffer.setScissor(0, 1, &scissor);
 }
 
+void CommandBuffer::bind_descriptor_set(const Pipeline* pipeline, u32 set, u32 descriptor_count, const DescriptorSet* descriptor_set) const
+{
+    vk_command_buffer.bindDescriptorSets(pipeline->vk_bindpoint,
+                                         pipeline->vk_pipeline_layout,
+                                         set, descriptor_count,
+                                         &descriptor_set->vk_descriptor_set,
+                                         0, nullptr);
+}
+
+void CommandBuffer::push_constants(const Pipeline *pipeline, vk::ShaderStageFlagBits shader_stage, u32 offset, size_t size, const void *data) const
+{
+    vk_command_buffer.pushConstants(pipeline->vk_pipeline_layout,
+                                      shader_stage,
+                                      offset,
+                                      size,
+                                      data);
+}
+
+void CommandBuffer::bind_vertex_buffer(Buffer* vertex_buffer) const
+{
+    vk::Buffer vertex_buffers[] = {vertex_buffer->vk_buffer};
+    vk::DeviceSize offsets[] = {0};
+    vk_command_buffer.bindVertexBuffers(0, 1, vertex_buffers, offsets);
+}
+
+void CommandBuffer::bind_index_buffer(Buffer* index_buffer) const
+{
+    vk_command_buffer.bindIndexBuffer(index_buffer->vk_buffer, 0, vk::IndexType::eUint32);
+}
+
+void CommandBuffer::draw_indexed(u32 index_count) const
+{
+    vk_command_buffer.drawIndexed(index_count, 1, 0, 0, 0);
+}
+
 void CommandBuffer::end_renderpass() const
 {
     vk_command_buffer.endRenderPass();
@@ -82,9 +117,14 @@ void CommandBuffer::end_renderpass() const
 
 void CommandBuffer::end()
 {
-    if(m_is_recording)
+    if(is_recording)
     {
         vk_command_buffer.end();
-        m_is_recording = false;
+        is_recording = false;
     }
+}
+
+void CommandBuffer::execute_command(const CommandBuffer* command_buffer) const
+{
+    vk_command_buffer.executeCommands(1, &command_buffer->vk_command_buffer);
 }

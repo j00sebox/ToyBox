@@ -44,9 +44,7 @@ public:
 
     [[nodiscard]] Buffer* get_buffer(BufferHandle buffer_handle) { return static_cast<Buffer*>(m_buffer_pool.access(buffer_handle)); }
     [[nodiscard]] DescriptorSetLayout* get_descriptor_set_layout(DescriptorSetLayoutHandle descriptor_set_layout) { return static_cast<DescriptorSetLayout*>(m_descriptor_set_layout_pool.access(descriptor_set_layout)); }
-    // [[nodiscard]] const vk::DescriptorSetLayout& get_texture_layout() const { return m_texture_set_layout; }
     [[nodiscard]] TextureHandle get_null_texture_handle() const { return m_null_texture; }
-    [[nodiscard]] const vk::PipelineLayout& get_pipeline_layout() const { return m_pipeline_layout; }
     [[nodiscard]] DescriptorSetLayoutHandle get_camera_data_layout() const { return m_camera_data_layout; }
     [[nodiscard]] vk::RenderPass get_viewport_renderpass() const { return m_viewport_renderpass; }
     [[nodiscard]] const vk::DescriptorSet& get_current_viewport_image() const { return m_viewport_descriptors[m_current_frame]; };
@@ -91,12 +89,9 @@ private:
 
     vk::RenderPass m_renderpass;
     vk::RenderPass m_imgui_renderpass;
-    vk::PipelineLayout m_pipeline_layout;
-    //vk::Pipeline m_graphics_pipeline;
     PipelineHandle m_graphics_pipeline;
 
     // descriptor set layouts
-    DescriptorSetLayoutHandle m_descriptor_set_layout;
     DescriptorSetLayoutHandle m_texture_set_layout;
     DescriptorSetLayoutHandle m_camera_data_layout;
 
@@ -169,14 +164,14 @@ private:
 	void init_surface();
 	void init_device();
 	void init_swapchain();
-    void init_viewport();
 	void init_renderpasses();
     void init_descriptor_pools();
     void init_descriptor_sets();
-	void init_graphics_pipeline();
-	void init_command_pools();
+    void init_graphics_pipeline();
+    void init_command_pools();
     void init_command_buffers();
     void init_depth_resources();
+    void init_viewport();
     void init_framebuffers();
     void init_sync_objects();
     void init_imgui();
