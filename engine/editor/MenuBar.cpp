@@ -64,12 +64,12 @@ void MenuBar::display_add_dropdown()
 {
     if (ImGui::MenuItem("Cube"))
     {
-        // currentScene->add_primitive("cube");
+        SceneSerializer::load_primitive(&m_current_scene->root, "cube");
     }
 
     if (ImGui::MenuItem("Quad"))
     {
-        // currentScene->add_primitive("quad");
+        SceneSerializer::load_primitive(&m_current_scene->root, "quad");
     }
 
     if (ImGui::BeginMenu("Open Model"))

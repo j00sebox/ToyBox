@@ -358,12 +358,6 @@ void Scene::update_node(SceneNode* scene_node, const glm::mat4& parent_transform
 	}
 }
 
-void Scene::set_background_colour(glm::vec4 colour)
-{
-	m_clear_colour = colour;
-	//StaticRenderer::set_clear_colour(colour);
-}
-
 //// load the standard shaders
 //void Scene::compile_shaders()
 //{

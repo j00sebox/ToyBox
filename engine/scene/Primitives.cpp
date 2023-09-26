@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Primitives.h"
+#include "Primitives.hpp"
 
 #include <cstring>
 
@@ -32,7 +32,7 @@ PrimitiveTypes str_to_primitive_type(const char* name)
 	return PrimitiveTypes::None;
 }
 
-const std::vector<float> Cube::vertices = {
+const std::vector<Vertex> Cube::vertices = {
 		//        7--------6
         //       /|       /|
         //      4--------5 |
@@ -41,46 +41,46 @@ const std::vector<float> Cube::vertices = {
         //      |/       |/
         //      0--------1
 
-        // postion          normal              tex coords
+        // position          normal              tex coords
 
         // front
-        -1.f, -1.f, 1.f,    0.f, 0.f, 1.f,      0.f, 0.f,
-        1.f, -1.f, 1.f,     0.f, 0.f, 1.f,      1.f, 0.f,
-        1.f, 1.f, 1.f,      0.f, 0.f, 1.f,      1.f, 1.f,
-        -1.f, 1.f, 1.f,     0.f, 0.f, 1.f,      0.f, 1.f,
+        { {-1.f, -1.f, 1.f},  {0.f, 0.f, 1.f},  {0.f, 0.f} },
+        { { 1.f, -1.f, 1.f},  {0.f, 0.f, 1.f},  {1.f, 0.f} },
+        { { 1.f,  1.f, 1.f},  {0.f, 0.f, 1.f},  {1.f, 1.f} },
+        { {-1.f,  1.f, 1.f},  {0.f, 0.f, 1.f},  {0.f, 1.f} },
 
         // back
-        1.f, -1.f, -1.f,    0.f, 0.f, -1.f,     0.f, 0.f,
-        -1.f, -1.f, -1.f,   0.f, 0.f, -1.f,     1.f, 0.f,
-        -1.f, 1.f,  -1.f,   0.f, 0.f, -1.f,     1.f, 1.f,
-        1.f, 1.f, -1.f,     0.f, 0.f, -1.f,     0.f, 1.f,
+        { { 1.f, -1.f, -1.f}, {0.f, 0.f, -1.f}, {0.f, 0.f} },
+        { {-1.f, -1.f, -1.f}, {0.f, 0.f, -1.f}, {1.f, 0.f} },
+        { {-1.f,  1.f, -1.f}, {0.f, 0.f, -1.f}, {1.f, 1.f} },
+        { { 1.f,  1.f, -1.f}, {0.f, 0.f, -1.f}, {0.f, 1.f} },
 
         // right
-        1.f, -1.f, 1.f,     1.f, 0.f, 0.f,      0.f, 0.f,
-        1.f, -1.f, -1.f,    1.f, 0.f, 0.f,      1.f, 0.f,
-        1.f, 1.f, -1.f,     1.f, 0.f, 0.f,      1.f, 1.f,
-        1.f, 1.f, 1.f,      1.f, 0.f, 0.f,      0.f, 1.f,
+        { {1.f, -1.f,  1.f}, {1.f, 0.f, 0.f}, {0.f, 0.f} },
+        { {1.f, -1.f, -1.f}, {1.f, 0.f, 0.f}, {1.f, 0.f} },
+        { {1.f,  1.f, -1.f}, {1.f, 0.f, 0.f}, {1.f, 1.f} },
+        { {1.f,  1.f,  1.f}, {1.f, 0.f, 0.f}, {0.f, 1.f} },
 
         // left
-        -1.f, -1.f, -1.f,   -1.f, 0.f, 0.f,     0.f, 0.f,
-        -1.f, -1.f, 1.f,    -1.f, 0.f, 0.f,     1.f, 0.f,
-        -1.f, 1.f, 1.f,      -1.f, 0.f, 0.f,    1.f, 1.f,
-        -1.f, 1.f, -1.f,    -1.f, 0.f, 0.f,     0.f, 1.f,
+        { {-1.f, -1.f, -1.f}, {-1.f, 0.f, 0.f}, {0.f, 0.f} },
+        { {-1.f, -1.f,  1.f}, {-1.f, 0.f, 0.f}, {1.f, 0.f} },
+        { {-1.f,  1.f,  1.f}, {-1.f, 0.f, 0.f}, {1.f, 1.f} },
+        { {-1.f,  1.f, -1.f}, {-1.f, 0.f, 0.f}, {0.f, 1.f} },
 
         // top
-        -1.f, 1.f, 1.f,      0.f, 1.f, 0.f,     0.f, 0.f,
-        1.f, 1.f, 1.f,       0.f, 1.f, 0.f,     0.f, 1.f,
-        1.f, 1.f, -1.f,     0.f, 1.f, 0.f,      1.f, 1.f,
-        -1.f, 1.f, -1.f,    0.f, 1.f, 0.f,      0.f, 1.f,
+        { {-1.f, 1.f,  1.f}, {0.f, 1.f, 0.f}, {0.f, 0.f} },
+        { { 1.f, 1.f,  1.f}, {0.f, 1.f, 0.f}, {0.f, 1.f} },
+        { { 1.f, 1.f, -1.f}, {0.f, 1.f, 0.f}, {1.f, 1.f} },
+        { {-1.f, 1.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, 1.f} },
 
         // bottom
-        1.f, -1.f, 1.f,     0.f, -1.f, 0.f,     0.f, 0.f,
-        -1.f, -1.f, 1.f,    0.f, -1.f, 0.f,     1.f, 0.f,
-        -1.f, -1.f, -1.f,   0.f, -1.f, 0.f,     1.f, 1.f,
-        1.f, -1.f, -1.f,    0.f, -1.f, 0.f,     0.f, 1.f
+        { { 1.f, -1.f,  1.f}, {0.f, -1.f, 0.f}, {0.f, 0.f} },
+        { {-1.f, -1.f,  1.f}, {0.f, -1.f, 0.f}, {1.f, 0.f} },
+        { {-1.f, -1.f, -1.f}, {0.f, -1.f, 0.f}, {1.f, 1.f} },
+        { { 1.f, -1.f, -1.f}, {0.f, -1.f, 0.f}, {0.f, 1.f} }
 };
 
-const std::vector<unsigned int> Cube::indices = {
+const std::vector<u32> Cube::indices = {
 
         // front
         0, 1, 2,
@@ -107,11 +107,11 @@ const std::vector<unsigned int> Cube::indices = {
         20, 22, 23
 };
 
-const std::vector<float> Quad::vertices = {
-		-0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 0.f,
-		-0.5f,	0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
-		 0.5f,  0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f, 1.f,
-		 0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f, 0.f
+const std::vector<Vertex> Quad::vertices = {
+        { {-0.5f, -0.5f, -0.5f}, {0.f, 0.f, 1.f}, {0.f, 0.f} },
+        { {-0.5f,  0.5f, -0.5f}, {0.f, 0.f, 1.f}, {0.f, 1.f} },
+        { { 0.5f,  0.5f, -0.5f}, {0.f, 0.f, 1.f}, {1.f, 1.f} },
+        { { 0.5f, -0.5f, -0.5f}, {0.f, 0.f, 1.f}, {1.f, 0.f} }
 };
 
 const std::vector<unsigned int> Quad::indices = {

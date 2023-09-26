@@ -2,7 +2,7 @@
 #include "CommonTypes.hpp"
 // #include "renderer/Fwd.h"
 #include "components/Component.h"
-#include "Primitives.h"
+#include "Primitives.hpp"
 
 #include <string>
 #include <glm/vec2.hpp>

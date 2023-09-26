@@ -9,7 +9,7 @@ list(APPEND SRCS
     ${CMAKE_CURRENT_LIST_DIR}/SceneSerializer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Skybox.h
     ${CMAKE_CURRENT_LIST_DIR}/Skybox.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/Primitives.h
+        ${CMAKE_CURRENT_LIST_DIR}/Primitives.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Primitives.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Camera.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Camera.cpp

@@ -6,6 +6,7 @@
 //#include "Skybox.h"
 #include "Scene.hpp"
 #include "SceneNode.hpp"
+#include "Primitives.hpp"
 // #include "Mesh.h"
 #include "rendering/Renderer.hpp"
 #include "components/Transform.h"
@@ -39,6 +40,8 @@ const char* image_extension(ImageFormat fmt)
 
 using namespace nlohmann;
 
+Renderer* SceneSerializer::m_renderer = nullptr;
+
 void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* renderer)
 {
 	if (!strcmp(scene_name, ""))
@@ -46,6 +49,7 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
         return;
     }
 
+    m_renderer = renderer;
 	std::string src = fileop::file_to_string(scene_name);
 
 	json w_json = json::parse(src);
@@ -64,7 +68,7 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
 	json models = w_json["models"];
 	u32 model_count = w_json["model_count"];
 
-	load_models(models, model_count, scene, renderer);
+    load_nodes(models, model_count, scene, renderer);
 }
 
 void SceneSerializer::save(const char* scene_name, const Scene* scene)
@@ -290,17 +294,17 @@ Skybox SceneSerializer::load_skybox(const json& accessor, Renderer* renderer)
     return skybox;
 }
 
-void SceneSerializer::load_models(const json& accessor, u32 model_count, Scene* scene, Renderer* renderer)
+void SceneSerializer::load_nodes(const nlohmann::json &accessor, u32 model_count, Scene* scene, Renderer* renderer)
 {
 	u32 num_models_checked = 0;
 	while (num_models_checked < model_count)
 	{
-        scene->root.add_child(load_model(accessor, num_models_checked, num_models_checked, scene, renderer));
+        scene->root.add_child(load_node(accessor, num_models_checked, num_models_checked, scene, renderer));
 	}
 }
 
 // TODO: Make this look less ugly
-SceneNode* SceneSerializer::load_model(const json& accessor, u32 model_index, u32& num_models_checked, Scene* scene, Renderer* renderer)
+SceneNode* SceneSerializer::load_node(const nlohmann::json &accessor, u32 model_index, u32& num_models_checked, Scene* scene, Renderer* renderer)
 {
     auto* current_node = new SceneNode();
 	json model = accessor[model_index];
@@ -472,9 +476,61 @@ SceneNode* SceneSerializer::load_model(const json& accessor, u32 model_index, u3
 	for (u32 i = 0; i < num_children; ++i)
 	{
 		u32 child_index = accessor[model_index]["children"][i];
-        current_node->add_child(load_model(accessor, child_index, num_models_checked, scene, renderer));
+        current_node->add_child(load_node(accessor, child_index, num_models_checked, scene, renderer));
 	}
 
 	++num_models_checked;
 	return current_node;
+}
+
+void SceneSerializer::load_model(SceneNode* scene_node, const char* model_path)
+{
+
+}
+
+void SceneSerializer::load_primitive(SceneNode* scene_node, const char* primitive_name)
+{
+    std::vector<Vertex> vertices;
+    std::vector<u32> indices;
+    switch (str_to_primitive_type(primitive_name))
+    {
+        case PrimitiveTypes::None:
+        {
+            break;
+        }
+        case PrimitiveTypes::Cube:
+        {
+            vertices = Cube::vertices;
+            indices = Cube::indices;
+            break;
+        }
+        case PrimitiveTypes::Quad:
+        {
+            vertices = Quad::vertices;
+            indices = Quad::indices;
+            break;
+        }
+    }
+
+    Transform transform{};
+    MeshComponent mesh_component{};
+    mesh_component.mesh.vertex_buffer = m_renderer->create_buffer({
+        .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        .size = (u32)(sizeof(vertices[0]) * vertices.size()),
+        .data = vertices.data()
+    });
+
+    mesh_component.mesh.index_count = indices.size();
+    mesh_component.mesh.index_buffer = m_renderer->create_buffer({
+        .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        .size = (u32)(sizeof(indices[0]) * indices.size()),
+        .data = indices.data()
+    });
+
+    auto* new_node = new SceneNode();
+    new_node->set_name(primitive_name);
+    mesh_component.set_mesh_name(primitive_name);
+    new_node->add_component(std::move(transform));
+    new_node->add_component(std::move(mesh_component));
+    scene_node->add_child(new_node);
 }

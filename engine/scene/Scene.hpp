@@ -20,12 +20,9 @@ struct RenderObject;
 
 struct RenderObject
 {
-   // RenderCommand render_command;
     glm::mat4 transform;
     Mesh mesh;
     Material material;
-    // MaterialComponent material;
-    // unsigned instances = 1;
 };
 
 struct Skybox
@@ -56,25 +53,20 @@ public:
     void add_model(const char* name) {}
     static void recompile_shaders() {}
 
-	void set_background_colour(glm::vec4 colour);
-	[[nodiscard]] const glm::vec4& get_background_colour() const { return m_clear_colour; }
-
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Skybox> skybox;
 
     // LightManager m_light_manager;
     std::vector<RenderObject> m_render_list;
+    SceneNode root;
 
 private:
-    static void compile_shaders() {}
 
+    static void compile_shaders() {}
     // scene management
 	void update_node(SceneNode* node, const glm::mat4& parent_transform);
     void remove_node(SceneNode* node);
     void delete_node(Renderer* renderer, SceneNode* node);
-   // std::unique_ptr<Skybox> m_skybox;
-    // std::unique_ptr<Buffer> m_transforms_buffer;
-    SceneNode root;
     std::queue<SceneNode*> m_nodes_to_remove;
 
     std::unordered_map<std::string, std::vector<glm::mat4>> instanced_meshes;
@@ -82,7 +74,6 @@ private:
     std::unordered_map<std::string, bool> mesh_used;
 
     SceneNode* selectedNode = nullptr;
-    glm::vec4 m_clear_colour = { 0.f, 0.f, 0.f, 1.f};
 
     friend class Inspector;
     friend class SceneSerializer;
