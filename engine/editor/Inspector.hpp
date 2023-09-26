@@ -8,7 +8,8 @@ class Inspector
 {
 public:
     Inspector(Scene* scene) : m_scene(scene) {}
-    void render();
+
+    void display();
 
 private:
     Scene* m_scene;
@@ -16,7 +17,7 @@ private:
     SceneNode* dropNode = nullptr;
     std::queue<SceneNode*> m_nodes_to_remove;
 
-    void imguiRender(SceneNode* currentNode);
-    void displayComponents() const;
+    void display_node(SceneNode* currentNode);
+    void display_components() const;
 };
 

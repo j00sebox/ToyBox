@@ -31,7 +31,9 @@ Engine::Engine(u32 width, u32 height) :
     m_scene->camera->resize(width, height);
     load_scene("../assets/scenes/test.scene");
 
+    m_menu_bar = new MenuBar();
     m_inspector = new Inspector(m_scene);
+    m_diagnostics_window = new Diagnostics();
 
     //FIXME
     Input::m_window_handle = m_window;
@@ -39,7 +41,9 @@ Engine::Engine(u32 width, u32 height) :
 
 Engine::~Engine()
 {
+    delete m_menu_bar;
     delete m_inspector;
+    delete m_diagnostics_window;
     m_scene->close(m_renderer);
     delete m_scene;
     delete m_renderer;
@@ -97,7 +101,9 @@ void Engine::run()
         ImGui::Image(m_renderer->get_current_viewport_image(), ImVec2{viewportPanelSize.x, viewportPanelSize.y});
         ImGui::End();
 
-        m_inspector->render();
+        m_menu_bar->display();
+        m_inspector->display();
+        m_diagnostics_window->display();
         ImGui::Render();
 
         m_scene->update(get_delta_time());

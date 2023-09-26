@@ -6,14 +6,14 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-void Inspector::render()
+void Inspector::display()
 {
     ImGui::Begin("Inspector");
     ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 
     for (auto* sceneNode : m_scene->root)
     {
-        imguiRender(sceneNode);
+        display_node(sceneNode);
     }
 
     ImGui::EndChild();
@@ -33,7 +33,7 @@ void Inspector::render()
                 m_scene->selectedNode->set_name(buf);
             }
 
-            displayComponents();
+            display_components();
         }
     }
     ImGui::EndChild();
@@ -54,7 +54,7 @@ void Inspector::render()
     }
 }
 
-void Inspector::imguiRender(SceneNode* currentNode)
+void Inspector::display_node(SceneNode* currentNode)
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
     if (!currentNode->has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
@@ -109,13 +109,13 @@ void Inspector::imguiRender(SceneNode* currentNode)
     {
         for (auto* node : *currentNode)
         {
-            imguiRender(node);
+            display_node(node);
         }
         ImGui::TreePop();
     }
 }
 
-void Inspector::displayComponents() const
+void Inspector::display_components() const
 {
     std::vector<std::shared_ptr<Component>> components = m_scene->selectedNode->get_components();
 
