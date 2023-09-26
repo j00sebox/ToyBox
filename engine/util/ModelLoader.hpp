@@ -12,7 +12,7 @@ class ModelLoader
 {
 public:
     explicit ModelLoader(Renderer* renderer, const char* file_path);
-    void load(SceneNode* scene_node, Transform& base_transform);
+    void load(SceneNode* scene_node);
     SceneNode* load_node(aiNode* current_node);
     void load_mesh(u32 mesh_index, Mesh& mesh);
     void load_material(u32 material_index, Material& material);
@@ -29,5 +29,6 @@ private:
     Renderer* m_renderer;
     Assimp::Importer m_importer;
     const aiScene* m_scene;
+    const char* m_file_path;
     std::string m_base_dir;
 };

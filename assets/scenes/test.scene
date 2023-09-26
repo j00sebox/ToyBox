@@ -1,105 +1,52 @@
 {
-    "background_colour": [
-        0.0,
-        0.029629647731781006,
-        0.023703716695308685,
-        1.0
-    ],
     "camera": {
         "forward": [
-            0.39833253622055054,
-            -0.6629260182380676,
-            -0.6339245438575745
+            0.5100647211074829,
+            -0.5402201414108276,
+            -0.6693249940872192
         ],
         "position": [
-            -44.792381286621094,
-            46.6485710144043,
-            46.58108139038086
+            -85.38947296142578,
+            62.83229064941406,
+            50.57678985595703
         ]
     },
     "model_count": 2,
     "models": [
         {
-            "material": {
-                "properties": {
-                    "colour": [
-                        0.8872548937797546,
-                        0.4088331460952759,
-                        0.4088331460952759,
-                        1.0
-                    ],
-                    "metallic_property": 0.46399998664855957,
-                    "roughness": 0.0
-                },
-                "shader": "default",
-                "textures": {
-                    "base_colour": "../assets/textures/white_on_white.jpeg",
-                    "normal_map": "",
-                    "occlusion": "",
-                    "specular": ""
-                },
-                "texturing_mode": 0
-            },
             "mesh": {
-                "instanced": false,
                 "mesh_name": "../assets/models/bunny/scene.gltf",
-                "mesh_type": "gltf",
-                "outlining_factor": 0.0010000000474974513,
-                "use_scale_outline": false
+                "mesh_type": "",
+                "outlining_factor": 0.019999999552965164,
+                "use_scale_outline": true
             },
             "name": "Bunny",
             "transform": {
                 "rotation": [
-                    0.0,
+                    86.0,
                     1.0,
                     0.0,
                     0.0
                 ],
-                "scale": 0.1,
+                "scale": 100.0,
                 "translate": [
-                    1.0,
+                    -40.0,
                     0.0,
                     -25.0
                 ]
             }
         },
         {
-            "material": {
-                "properties": {
-                    "colour": [
-                        0.8872548937797546,
-                        0.4088331460952759,
-                        0.4088331460952759,
-                        1.0
-                    ],
-                    "metallic_property": 0.46399998664855957,
-                    "roughness": 0.0
-                },
-                "shader": "default",
-                "textures": {
-                    "base_colour": "../assets/textures/white_on_white.jpeg",
-                    "normal_map": "",
-                    "occlusion": "",
-                    "specular": ""
-                },
-                "texturing_mode": 0
-            },
-            "mesh": {
-                "instanced": false,
-                "mesh_name": "../assets/models/ship_in_a_bottle/scene.gltf",
-                "mesh_type": "gltf",
-                "outlining_factor": 0.0010000000474974513,
-                "use_scale_outline": false
-            },
+            "model_root_path": "../assets/models/ship_in_a_bottle/scene.gltf",
             "name": "Ship",
             "transform": {
                 "rotation": [
                     145.0,
-                    -0.4,
+                    -0.4000000059604645,
                     1.0,
-                    0.7
+                    0.699999988079071
                 ],
-                "scale": 0.1,
+                "scale": 0.10000000149011612,
                 "translate": [
                     1.0,
                     0.0,

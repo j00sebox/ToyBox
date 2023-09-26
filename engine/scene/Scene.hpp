@@ -37,6 +37,8 @@ struct Skybox
     DescriptorSetHandle             descriptor_set;
     DescriptorSetLayoutHandle       descriptor_set_layout;
     PipelineHandle                  pipeline;
+
+    std::string                     resource_path;
 };
 
 class Scene

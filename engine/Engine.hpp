@@ -13,7 +13,7 @@ class Scene;
 class Engine
 {
 public:
-    Engine(u32 width, u32 height);
+    Engine(i32 width, i32 height);
     ~Engine();
 
     void load_scene(const char* scene_name);

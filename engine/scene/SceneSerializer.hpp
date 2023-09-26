@@ -17,7 +17,7 @@ class SceneSerializer
 {
 public:
 	static void open(const char* scene_name, Scene* scene, Renderer* renderer);
-	static void save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box);
+	static void save(const char* scene_name,  const Scene* scene);
 
 private:
 	static Skybox load_skybox(const nlohmann::json& accessor, Renderer* renderer);

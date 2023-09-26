@@ -39,12 +39,12 @@ const char* image_extension(ImageFormat fmt)
 
 using namespace nlohmann;
 
-
-
 void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* renderer)
 {
 	if (!strcmp(scene_name, ""))
-		return;
+    {
+        return;
+    }
 
 	std::string src = fileop::file_to_string(scene_name);
 
@@ -55,12 +55,6 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
     json camera_fwd = camera_accessor["forward"];
 	scene->camera->set_pos(glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]));
     scene->camera->set_forward(glm::vec3(camera_fwd[0], camera_fwd[1], camera_fwd[2]));
-
-    if(!w_json["background_colour"].is_null())
-    {
-        json bg_col = w_json["background_colour"];
-        scene->set_background_colour({bg_col[0], bg_col[1], bg_col[2], bg_col[3]});
-    }
 
     if(!w_json["skybox"].is_null())
     {
@@ -73,40 +67,33 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
 	load_models(models, model_count, scene, renderer);
 }
 
-void SceneSerializer::save(const char* scene_name, const Scene& scene, const std::shared_ptr<Camera>& camera, const std::unique_ptr<Skybox>& sky_box)
+void SceneSerializer::save(const char* scene_name, const Scene* scene)
 {
 	json res_json;
 
-//	if (sky_box)
-//	{
-//		res_json["skybox"]["path"] = sky_box->get_resource_path();
-//        res_json["skybox"]["image_format"] = (int)sky_box->get_image_format();
-//	}
+	if (scene->skybox)
+	{
+		res_json["skybox"]["path"] = scene->skybox->resource_path;
+        res_json["skybox"]["image_format"] = 0; // FIXME
+	}
 
-	glm::vec3 camera_pos = camera->get_pos();
+	glm::vec3 camera_pos = scene->camera->get_pos();
 	res_json["camera"]["position"][0] = camera_pos.x;
 	res_json["camera"]["position"][1] = camera_pos.y;
 	res_json["camera"]["position"][2] = camera_pos.z;
 
-    glm::vec3 camera_fwd = camera->get_forward();
+    glm::vec3 camera_fwd = scene->camera->get_forward();
     res_json["camera"]["forward"][0] = camera_fwd.x;
     res_json["camera"]["forward"][1] = camera_fwd.y;
     res_json["camera"]["forward"][2] = camera_fwd.z;
 
-	glm::vec4 bg_col = scene.get_background_colour();
-	res_json["background_colour"][0] = bg_col.x;
-	res_json["background_colour"][1] = bg_col.y;
-	res_json["background_colour"][2] = bg_col.z;
-	res_json["background_colour"][3] = bg_col.w;
-
-	int node_index = -1; // keeps track of nodes (left to right and depth first)
-	for (auto* scene_node : scene.root)
+	i32 node_index = -1; // keeps track of nodes (left to right and depth first)
+	for (auto* scene_node : scene->root)
 	{
-		++node_index;
-		serialize_node(res_json["models"], node_index, scene_node);
+		serialize_node(res_json["models"], ++node_index, scene_node);
 	}
 
-	res_json["model_count"] = node_index + 1;
+	res_json["model_count"] = ++node_index;
 
 	fileop::overwrite_file(scene_name, res_json.dump());
 }
@@ -120,19 +107,24 @@ void SceneSerializer::serialize_node(json& accessor, int& node_index, const Scen
 //		auto& material = scene_node->entity()->get_component<Material>();
 //		accessor[node_index]["shader"] = ShaderTable::find(material.get_shader());
 //	}
-
 	const auto& components = scene_node->get_components();
 
-	for (const auto& c : components)
+	for (const auto& component : components)
 	{
-		c->serialize(accessor[node_index]);
+		component->serialize(accessor[node_index]);
 	}
+
+    if(scene_node->is_model_root)
+    {
+        accessor[node_index]["model_root_path"] = scene_node->model_path.c_str();
+        return;
+    }
 
 	if (scene_node->has_children())
 	{
 		int ch_ind = 0; // keeps track of index of child array
 		int parent_index = node_index;
-		for (const auto& child : *scene_node)
+		for (const auto& child : scene_node->children)
 		{
 			accessor[parent_index]["children"][ch_ind++] = ++node_index;
 			serialize_node(accessor, node_index, child);
@@ -155,6 +147,8 @@ Skybox SceneSerializer::load_skybox(const json& accessor, Renderer* renderer)
         dir + "front" + img_ext,
         dir + "back" + img_ext
     };
+
+    skybox.resource_path = dir.c_str();
 
     skybox.cubemap = renderer->create_cubemap(faces);
     skybox.descriptor_set_layout = renderer->create_descriptor_set_layout({
@@ -311,7 +305,6 @@ SceneNode* SceneSerializer::load_model(const json& accessor, u32 model_index, u3
     auto* current_node = new SceneNode();
 	json model = accessor[model_index];
 
-    // entity.set_name();
     current_node->set_name(model.value("name", "no_name"));
 
 	Transform transform{};
@@ -367,6 +360,13 @@ SceneNode* SceneSerializer::load_model(const json& accessor, u32 model_index, u3
 //		}
 //	}
 
+    if(!model["model_root_path"].is_null())
+    {
+        std::string model_path = model["model_root_path"];
+        ModelLoader model_loader(renderer, model_path.c_str());
+        model_loader.load(current_node);
+    }
+
     if(!model["mesh"].is_null())
     {
         MeshComponent mesh_component;
@@ -399,10 +399,10 @@ SceneNode* SceneSerializer::load_model(const json& accessor, u32 model_index, u3
         mesh_component.m_use_scale_outline = mesh_accessor["use_scale_outline"];
         mesh_component.m_outlining_factor = mesh_accessor["outlining_factor"];
 
-        model_loader.load(current_node, transform);
+        model_loader.load(current_node);
 
         //mesh_component.set_mesh(MeshTable::get(mesh_name));
-        mesh_component.set_mesh_name(mesh_name);
+
 
 //        if(mesh_accessor["instanced"])
 //        {

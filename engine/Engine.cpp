@@ -12,8 +12,9 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
 
-Engine::Engine(u32 width, u32 height) :
-    m_running(false)
+Engine::Engine(i32 width, i32 height) :
+    m_running(false),
+    m_prev_time(0.f)
 {
     glfwInit();
 
@@ -31,7 +32,7 @@ Engine::Engine(u32 width, u32 height) :
     m_scene->camera->resize(width, height);
     load_scene("../assets/scenes/test.scene");
 
-    m_menu_bar = new MenuBar();
+    m_menu_bar = new MenuBar(m_scene);
     m_inspector = new Inspector(m_scene);
     m_diagnostics_window = new Diagnostics();
 

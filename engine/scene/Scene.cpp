@@ -67,7 +67,7 @@ void Scene::delete_node(Renderer* renderer, SceneNode* scene_node)
         }
     }
 
-    for (auto* child_node : scene_node->m_children)
+    for (auto* child_node : scene_node->children)
     {
         delete_node(renderer, child_node);
     }
@@ -352,7 +352,7 @@ void Scene::update_node(SceneNode* scene_node, const glm::mat4& parent_transform
 //		}
 	}
 
-	for (auto* node : scene_node->m_children)
+	for (auto* node : scene_node->children)
 	{
 		update_node(node, relative_transform);
 	}

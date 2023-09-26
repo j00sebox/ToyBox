@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MenuBar.hpp"
+#include "scene/SceneSerializer.hpp"
 
 #include <imgui.h>
 
@@ -51,7 +52,7 @@ void MenuBar::display_scene_dropdown()
         if (ImGui::Button("Save As"))
         {
             std::string path = std::string("../assets/scenes/") + std::string(buf);
-            // currentScene->save(path);
+            SceneSerializer::save(path.c_str(), m_current_scene);
         }
 
         ImGui::EndMenu();

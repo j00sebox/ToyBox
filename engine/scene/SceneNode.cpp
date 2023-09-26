@@ -5,11 +5,6 @@
 
 #include <stack>
 
-SceneNode::SceneNode(std::shared_ptr<Entity>&& e)
-{
-   // m_entity = std::move(e);
-}
-
 SceneNode::~SceneNode()
 {
 	//m_entity.reset();
@@ -28,22 +23,22 @@ void SceneNode::add_child(SceneNode&& s)
 
 void SceneNode::add_child(SceneNode* s)
 {
-    m_children.emplace_back(s);
-    m_children.back()->m_parent = this;
+    children.emplace_back(s);
+    children.back()->parent = this;
 }
 
 void SceneNode::move_child(SceneNode* s)
 {
-    if(this == s->m_parent) return;
+    if(this == s->parent) return;
 
-    for (auto it = s->m_parent->m_children.begin(); it != s->m_parent->m_children.end(); ++it)
+    for (auto it = s->parent->children.begin(); it != s->parent->children.end(); ++it)
     {
         if (*it == s)
         {
-            SceneNode* old_parent = s->m_parent;
+            SceneNode* old_parent = s->parent;
             update_transform(s);
             add_child(s);
-            old_parent->m_children.erase(it);
+            old_parent->children.erase(it);
             break;
         }
     }
@@ -65,7 +60,7 @@ void SceneNode::update_transform(SceneNode* scene_node)
         {
             const auto& transform_to_apply = current_parent->get_component<Transform>();
             transforms_to_apply.push(transform_to_apply);
-            current_parent = current_parent->m_parent;
+            current_parent = current_parent->parent;
         }
 
         while(!transforms_to_apply.empty())
@@ -77,8 +72,8 @@ void SceneNode::update_transform(SceneNode* scene_node)
         return relative_transform;
     };
 
-    SceneNode* parent1 = scene_node->m_parent; SceneNode* parent2 = this;
-    Transform old_parent_transform = (scene_node->m_parent) ? get_relative_transform(parent1) : Transform{};
+    SceneNode* parent1 = scene_node->parent; SceneNode* parent2 = this;
+    Transform old_parent_transform = (scene_node->parent) ? get_relative_transform(parent1) : Transform{};
     Transform new_parent_transform = (scene_node->has_component<Transform>()) ? get_relative_transform(parent2) : Transform{};
 
     child_transform.resolve_parent_change(old_parent_transform, new_parent_transform);
@@ -90,13 +85,13 @@ void SceneNode::update_transform(SceneNode* scene_node)
 
         _child_transform.resolve_parent_change(_old_parent_transform, _new_parent_transform);
 
-        for(auto& c : child->m_children)
+        for(auto& c : child->children)
         {
             update_children(c, _old_parent_transform * _child_copy, _new_parent_transform * _child_transform);
         }
     };
 
-    for(auto& child : scene_node->m_children)
+    for(auto& child : scene_node->children)
     {
         update_children(child, old_parent_transform * child_copy, new_parent_transform * child_transform);
     }
@@ -110,7 +105,7 @@ bool SceneNode::exists(const std::string& name) const
 	}
 
 	bool found = false;
-	for (const auto& child : m_children)
+	for (const auto& child : children)
 	{
 		found |= child->exists(name);
 	}
@@ -120,12 +115,12 @@ bool SceneNode::exists(const std::string& name) const
 
 bool SceneNode::remove(SceneNode* node)
 {
-	auto it = m_children.begin();
-	for (;it != m_children.end(); ++it)
+	auto it = children.begin();
+	for (; it != children.end(); ++it)
 	{
 		if (*it == node)
 		{
-			m_children.erase(it);
+			children.erase(it);
 			return true;
 		}
 
@@ -141,13 +136,13 @@ bool SceneNode::remove(SceneNode* node)
 
 size_t SceneNode::size() const
 {
-	if (m_children.empty())
+	if (children.empty())
 	{
 		return 1;
 	}
 
 	size_t sz = 0;
-	for (const auto& child : m_children)
+	for (const auto& child : children)
 	{
 		sz += child->size();
 	}

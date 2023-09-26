@@ -8,21 +8,27 @@ ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
                                     aiProcess_CalcTangentSpace       |
                                     aiProcess_Triangulate            |
                                     aiProcess_JoinIdenticalVertices  |
-                                    aiProcess_SortByPType))
+                                    aiProcess_SortByPType)),
+        m_file_path(file_path)
 {
     std::string path(file_path);
     m_base_dir = path.substr(0, (path.find_last_of('/') + 1));
 
     if(m_base_dir.empty())
+    {
         m_base_dir = path.substr(0, (path.find_last_of('\\') + 1));
+    }
 }
 
-void ModelLoader::load(SceneNode* scene_node, Transform& base_transform)
+void ModelLoader::load(SceneNode* scene_node)
 {
     aiNode* root = m_scene->mRootNode;
 
     if(root->mNumChildren > 0)
     {
+        scene_node->is_model_root = true;
+        scene_node->model_path = m_file_path;
+
         for(u32 i = 0; i < root->mNumChildren; ++i)
         {
             scene_node->add_child(load_node(root->mChildren[i]));
@@ -39,6 +45,7 @@ void ModelLoader::load(SceneNode* scene_node, Transform& base_transform)
         mesh_component.mesh = mesh;
         mesh_component.material = material;
 
+        mesh_component.set_mesh_name(m_file_path);
         scene_node->add_component(std::move(mesh_component));
     }
 }
@@ -47,6 +54,7 @@ SceneNode* ModelLoader::load_node(aiNode* current_node)
 {
     auto* scene_node = new SceneNode();
     scene_node->set_name(current_node->mName.C_Str());
+    scene_node->is_locked = true;
 
     Transform transform{};
     aiVector3t<f32> pScaling;
