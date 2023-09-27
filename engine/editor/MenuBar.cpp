@@ -82,7 +82,7 @@ void MenuBar::display_add_dropdown(Scene* current_scene, Renderer* renderer)
             if (ImGui::Button("Open"))
             {
                 std::string path = std::string(buf);
-                // currentScene->add_model(path.c_str());
+                SceneSerializer::load_model(current_scene->root, path.c_str(), renderer);
             }
             ImGui::EndMenu();
         }

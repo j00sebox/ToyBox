@@ -370,11 +370,7 @@ SceneNode* SceneSerializer::load_node(const nlohmann::json &accessor, u32 model_
 
     if(!model["mesh"].is_null())
     {
-        MeshComponent mesh_component;
-
         json mesh_accessor = model["mesh"];
-
-        mesh_component.m_mesh_type = mesh_accessor["mesh_type"];
         std::string mesh_name = mesh_accessor["mesh_name"];
 
 //        if(!MeshTable::exists(mesh_name))
@@ -395,12 +391,10 @@ SceneNode* SceneSerializer::load_node(const nlohmann::json &accessor, u32 model_
 //            MeshTable::add(mesh_name, std::move(mesh));
 //        }
 
-        ModelLoader model_loader(renderer, mesh_name.c_str());
-
-        mesh_component.m_use_scale_outline = mesh_accessor["use_scale_outline"];
-        mesh_component.m_outlining_factor = mesh_accessor["outlining_factor"];
-
-        model_loader.load(current_node);
+        load_model(current_node, mesh_name.c_str(), renderer);
+//
+//        ModelLoader model_loader(renderer, mesh_name.c_str());
+//        model_loader.load(current_node);
 
         //mesh_component.set_mesh(MeshTable::get(mesh_name));
 
@@ -480,9 +474,10 @@ SceneNode* SceneSerializer::load_node(const nlohmann::json &accessor, u32 model_
 	return current_node;
 }
 
-void SceneSerializer::load_model(SceneNode* scene_node, const char* model_path)
+void SceneSerializer::load_model(SceneNode* scene_node, const char* model_path, Renderer* renderer)
 {
-
+    ModelLoader model_loader(renderer, model_path);
+    model_loader.load(scene_node);
 }
 
 void SceneSerializer::load_primitive(SceneNode* scene_node, const char* primitive_name, Renderer* renderer)

@@ -19,7 +19,7 @@ public:
 	static void open(const char* scene_name, Scene* scene, Renderer* renderer);
 	static void save(const char* scene_name,  const Scene* scene);
 
-    static void load_model(SceneNode* scene_node, const char* model_path);
+    static void load_model(SceneNode* scene_node, const char* model_path, Renderer* renderer);
     static void load_primitive(SceneNode* scene_node, const char* primitive_name, Renderer* renderer);
 
 private:
