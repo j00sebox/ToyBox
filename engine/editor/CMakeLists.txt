@@ -1,4 +1,6 @@
 list(APPEND SRCS
+        ${CMAKE_CURRENT_LIST_DIR}/Editor.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/Editor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Inspector.hpp
         ${CMAKE_CURRENT_LIST_DIR}/Inspector.cpp
         ${CMAKE_CURRENT_LIST_DIR}/MenuBar.hpp

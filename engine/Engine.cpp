@@ -1,11 +1,9 @@
 #include "pch.h"
 #include "Engine.hpp"
 #include "Input.hpp"
-
 #include "rendering/Renderer.hpp"
 #include "scene/Scene.hpp"
 #include "scene/SceneSerializer.hpp"
-#include "util/ModelLoader.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -32,9 +30,7 @@ Engine::Engine(i32 width, i32 height) :
     m_scene->camera->resize(width, height);
     load_scene("../assets/scenes/test.scene");
 
-    m_menu_bar = new MenuBar(m_scene);
-    m_inspector = new Inspector(m_scene);
-    m_diagnostics_window = new Diagnostics();
+    m_editor = new Editor(m_scene, m_renderer);
 
     //FIXME
     Input::m_window_handle = m_window;
@@ -42,9 +38,7 @@ Engine::Engine(i32 width, i32 height) :
 
 Engine::~Engine()
 {
-    delete m_menu_bar;
-    delete m_inspector;
-    delete m_diagnostics_window;
+    delete m_editor;
     m_scene->close(m_renderer);
     delete m_scene;
     delete m_renderer;
@@ -102,9 +96,7 @@ void Engine::run()
         ImGui::Image(m_renderer->get_current_viewport_image(), ImVec2{viewportPanelSize.x, viewportPanelSize.y});
         ImGui::End();
 
-        m_menu_bar->display();
-        m_inspector->display();
-        m_diagnostics_window->display();
+        m_editor->display();
         ImGui::Render();
 
         m_scene->update(get_delta_time());

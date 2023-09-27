@@ -16,10 +16,12 @@
 Scene::Scene()
 {
 	camera = std::make_shared<Camera>();
+    root = new SceneNode();
 }
 
 Scene::~Scene()
 {
+    delete root;
     //ShaderTable::release();
     // MeshTable::release();
     // MaterialTable::release();
@@ -46,7 +48,7 @@ void Scene::close(Renderer* renderer)
         renderer->destroy_buffer(skybox->vertex_buffer);
         renderer->destroy_buffer(skybox->index_buffer);
     }
-    for (auto* scene_node : root)
+    for (auto* scene_node : root->children)
     {
         delete_node(renderer, scene_node);
     }
@@ -128,7 +130,7 @@ void Scene::update(float elapsed_time)
         //MeshTable::get(mesh_name)->update_instances(instance_matrices);
     }
 
-	for (auto* scene_node : root)
+	for (auto* scene_node : root->children)
 	{
 		update_node(scene_node, glm::mat4(1.f));
 	}
@@ -295,7 +297,7 @@ void Scene::remove_node(SceneNode* node)
 //        m_light_manager.remove_directional_light();
 //    }
 
-	if (!root.remove(node))
+	if (!root->remove(node))
 	{
 		fatal("Node not apart of current scene tree!");
 	}

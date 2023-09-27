@@ -40,8 +40,6 @@ const char* image_extension(ImageFormat fmt)
 
 using namespace nlohmann;
 
-Renderer* SceneSerializer::m_renderer = nullptr;
-
 void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* renderer)
 {
 	if (!strcmp(scene_name, ""))
@@ -49,7 +47,6 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
         return;
     }
 
-    m_renderer = renderer;
 	std::string src = fileop::file_to_string(scene_name);
 
 	json w_json = json::parse(src);
@@ -92,7 +89,7 @@ void SceneSerializer::save(const char* scene_name, const Scene* scene)
     res_json["camera"]["forward"][2] = camera_fwd.z;
 
 	i32 node_index = -1; // keeps track of nodes (left to right and depth first)
-	for (auto* scene_node : scene->root)
+	for (auto* scene_node : scene->root->children)
 	{
 		serialize_node(res_json["models"], ++node_index, scene_node);
 	}
@@ -299,7 +296,7 @@ void SceneSerializer::load_nodes(const nlohmann::json &accessor, u32 model_count
 	u32 num_models_checked = 0;
 	while (num_models_checked < model_count)
 	{
-        scene->root.add_child(load_node(accessor, num_models_checked, num_models_checked, scene, renderer));
+        scene->root->add_child(load_node(accessor, num_models_checked, num_models_checked, scene, renderer));
 	}
 }
 
@@ -488,7 +485,7 @@ void SceneSerializer::load_model(SceneNode* scene_node, const char* model_path)
 
 }
 
-void SceneSerializer::load_primitive(SceneNode* scene_node, const char* primitive_name)
+void SceneSerializer::load_primitive(SceneNode* scene_node, const char* primitive_name, Renderer* renderer)
 {
     std::vector<Vertex> vertices;
     std::vector<u32> indices;
@@ -514,14 +511,14 @@ void SceneSerializer::load_primitive(SceneNode* scene_node, const char* primitiv
 
     Transform transform{};
     MeshComponent mesh_component{};
-    mesh_component.mesh.vertex_buffer = m_renderer->create_buffer({
+    mesh_component.mesh.vertex_buffer = renderer->create_buffer({
         .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
         .size = (u32)(sizeof(vertices[0]) * vertices.size()),
         .data = vertices.data()
     });
 
     mesh_component.mesh.index_count = indices.size();
-    mesh_component.mesh.index_buffer = m_renderer->create_buffer({
+    mesh_component.mesh.index_buffer = renderer->create_buffer({
         .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
         .size = (u32)(sizeof(indices[0]) * indices.size()),
         .data = indices.data()

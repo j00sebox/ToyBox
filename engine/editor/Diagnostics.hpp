@@ -1,8 +1,7 @@
 #pragma once
 
-class Diagnostics
+struct Diagnostics
 {
-public:
     void display();
 
 private:

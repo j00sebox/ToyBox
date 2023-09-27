@@ -4,20 +4,16 @@
 
 #include <queue>
 
-class Inspector
+struct Inspector
 {
-public:
-    Inspector(Scene* scene) : m_scene(scene) {}
-
-    void display();
+    void display(Scene* scene);
 
 private:
-    Scene* m_scene;
-    SceneNode* dragNode = nullptr;
-    SceneNode* dropNode = nullptr;
-    std::queue<SceneNode*> m_nodes_to_remove;
+    SceneNode* drag_node = nullptr;
+    SceneNode* drop_node = nullptr;
+    std::queue<SceneNode*> nodes_to_remove;
 
-    void display_node(SceneNode* currentNode);
-    void display_components() const;
+    void display_node(Scene* scene, SceneNode* currentNode);
+    void display_components(SceneNode* selected_node) const;
 };
 

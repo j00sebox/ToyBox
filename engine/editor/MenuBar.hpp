@@ -1,18 +1,12 @@
 #pragma once
-
 #include "scene/Scene.hpp"
 
-class MenuBar
+struct MenuBar
 {
-public:
-    explicit MenuBar(Scene* current_scene) : m_current_scene(current_scene) {}
-
-    void display();
+    void display(Scene* scene, Renderer* renderer);
 
 private:
-    Scene* m_current_scene;
-
-    void display_scene_dropdown();
-    void display_add_dropdown();
+    static void display_scene_dropdown(const Scene* scene);
+    static void display_add_dropdown(Scene* scene, Renderer* renderer);
     void display_settings_dropdown();
 };

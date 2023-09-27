@@ -4,19 +4,19 @@
 
 #include <imgui.h>
 
-void MenuBar::display()
+void MenuBar::display(Scene* scene, Renderer* renderer)
 {
     ImGui::Begin("Menu", (bool*)true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("Scene"))
         {
-            display_scene_dropdown();
+            display_scene_dropdown(scene);
         }
 
         if (ImGui::BeginMenu("Add"))
         {
-            display_add_dropdown();
+            display_add_dropdown(scene, renderer);
         }
 
         if (ImGui::BeginMenu("Settings"))
@@ -28,7 +28,7 @@ void MenuBar::display()
     ImGui::End();
 }
 
-void MenuBar::display_scene_dropdown()
+void MenuBar::display_scene_dropdown(const Scene* current_scene)
 {
     if (ImGui::BeginMenu("Open"))
     {
@@ -52,7 +52,7 @@ void MenuBar::display_scene_dropdown()
         if (ImGui::Button("Save As"))
         {
             std::string path = std::string("../assets/scenes/") + std::string(buf);
-            SceneSerializer::save(path.c_str(), m_current_scene);
+            SceneSerializer::save(path.c_str(), current_scene);
         }
 
         ImGui::EndMenu();
@@ -60,16 +60,16 @@ void MenuBar::display_scene_dropdown()
     ImGui::EndMenu();
 }
 
-void MenuBar::display_add_dropdown()
+void MenuBar::display_add_dropdown(Scene* current_scene, Renderer* renderer)
 {
     if (ImGui::MenuItem("Cube"))
     {
-        SceneSerializer::load_primitive(&m_current_scene->root, "cube");
+        SceneSerializer::load_primitive(current_scene->root, "cube", renderer);
     }
 
     if (ImGui::MenuItem("Quad"))
     {
-        SceneSerializer::load_primitive(&m_current_scene->root, "quad");
+        SceneSerializer::load_primitive(current_scene->root, "quad", renderer);
     }
 
     if (ImGui::BeginMenu("Open Model"))

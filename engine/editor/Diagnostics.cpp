@@ -6,7 +6,7 @@
 void Diagnostics::display()
 {
     ImGui::Begin("Diagnostics");
-   // display_fps();
+    display_fps();
     ImGui::End();
 }
 

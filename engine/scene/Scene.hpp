@@ -58,7 +58,7 @@ public:
 
     // LightManager m_light_manager;
     std::vector<RenderObject> m_render_list;
-    SceneNode root;
+    SceneNode* root;
 
 private:
 

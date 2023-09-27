@@ -20,9 +20,7 @@ public:
 	static void save(const char* scene_name,  const Scene* scene);
 
     static void load_model(SceneNode* scene_node, const char* model_path);
-    static void load_primitive(SceneNode* scene_node, const char* primitive_name);
-
-    static Renderer* m_renderer;
+    static void load_primitive(SceneNode* scene_node, const char* primitive_name, Renderer* renderer);
 
 private:
     static Skybox load_skybox(const nlohmann::json& accessor, Renderer* renderer);

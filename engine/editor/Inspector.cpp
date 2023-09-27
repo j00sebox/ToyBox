@@ -1,19 +1,18 @@
 #include "Inspector.hpp"
-#include "Entity.hpp"
 #include "Component.h"
 #include "Input.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 
-void Inspector::display()
+void Inspector::display(Scene* scene)
 {
     ImGui::Begin("Inspector");
     ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 
-    for (auto* sceneNode : m_scene->root)
+    for (auto* sceneNode : scene->root->children)
     {
-        display_node(sceneNode);
+        display_node(scene, sceneNode);
     }
 
     ImGui::EndChild();
@@ -24,37 +23,37 @@ void Inspector::display()
 
     ImGui::BeginChild("##RightSide", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true);
     {
-        if (m_scene->selectedNode)
+        if (scene->selectedNode)
         {
             char buf[64];
-            strcpy(buf, m_scene->selectedNode->get_name().c_str());
+            strcpy(buf, scene->selectedNode->get_name().c_str());
             if (ImGui::InputText("##EntityName", buf, IM_ARRAYSIZE(buf)))
             {
-                m_scene->selectedNode->set_name(buf);
+                scene->selectedNode->set_name(buf);
             }
 
-            display_components();
+            display_components(scene->selectedNode);
         }
     }
     ImGui::EndChild();
 
     ImGui::End();
 
-    if (dragNode && !dropNode && !Input::is_button_pressed(GLFW_MOUSE_BUTTON_1))
+    if (drag_node && !drop_node && !Input::is_button_pressed(GLFW_MOUSE_BUTTON_1))
     {
-        dropNode = &m_scene->root;
+        drop_node = scene->root;
     }
 
-    if (dragNode && dropNode)
+    if (drag_node && drop_node)
     {
-        dropNode->move_child(dragNode);
-        m_scene->selectedNode = nullptr;
-        dragNode = nullptr;
-        dropNode = nullptr;
+        drop_node->move_child(drag_node);
+        scene->selectedNode = nullptr;
+        drag_node = nullptr;
+        drop_node = nullptr;
     }
 }
 
-void Inspector::display_node(SceneNode* currentNode)
+void Inspector::display_node(Scene* scene, SceneNode* currentNode)
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_AllowItemOverlap;
     if (!currentNode->has_children()) flags |= ImGuiTreeNodeFlags_Leaf;
@@ -62,16 +61,16 @@ void Inspector::display_node(SceneNode* currentNode)
 
     if (ImGui::IsItemClicked())
     {
-        m_scene->selectedNode = currentNode;
+        scene->selectedNode = currentNode;
     }
 
     if (ImGui::BeginPopupContextItem())
     {
-        m_scene->selectedNode = currentNode;
+        scene->selectedNode = currentNode;
 
         if (ImGui::MenuItem("Delete"))
         {
-            m_scene->m_nodes_to_remove.push(currentNode);
+            scene->m_nodes_to_remove.push(currentNode);
         }
 
         if (ImGui::BeginMenu("Add Component"))
@@ -91,7 +90,7 @@ void Inspector::display_node(SceneNode* currentNode)
     if (ImGui::BeginDragDropSource())
     {
         ImGui::SetDragDropPayload("_TREENODE", nullptr, 0);
-        dragNode = currentNode;
+        drag_node = currentNode;
         ImGui::TextUnformatted(currentNode->get_name().c_str());
         ImGui::EndDragDropSource();
     }
@@ -100,7 +99,7 @@ void Inspector::display_node(SceneNode* currentNode)
     {
         if (ImGui::AcceptDragDropPayload("_TREENODE"))
         {
-            dropNode = currentNode;
+            drop_node = currentNode;
         }
         ImGui::EndDragDropTarget();
     }
@@ -109,15 +108,15 @@ void Inspector::display_node(SceneNode* currentNode)
     {
         for (auto* node : *currentNode)
         {
-            display_node(node);
+            display_node(scene, node);
         }
         ImGui::TreePop();
     }
 }
 
-void Inspector::display_components() const
+void Inspector::display_components(SceneNode* selected_node) const
 {
-    std::vector<std::shared_ptr<Component>> components = m_scene->selectedNode->get_components();
+    std::vector<std::shared_ptr<Component>> components = selected_node->get_components();
 
     for (auto& component : components)
     {
