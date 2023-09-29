@@ -1,4 +1,5 @@
 #pragma once
+#include "CommonTypes.hpp"
 
 #include <chrono>
 
@@ -8,7 +9,10 @@ public:
 	Timer();
 	~Timer();
 
+    f32 stop();
+
 private:
 	std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
+    bool m_stopped = false;
 };
 

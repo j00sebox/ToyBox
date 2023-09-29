@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "ModelLoader.hpp"
+#include "Log.hpp"
 #include "components/MeshComponent.h"
+#include "profiler/Timer.hpp"
 
 ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
         m_renderer(renderer),
@@ -22,6 +24,7 @@ ModelLoader::ModelLoader(Renderer* renderer, const char* file_path) :
 
 void ModelLoader::load(SceneNode* scene_node)
 {
+    Timer timer;
     aiNode* root = m_scene->mRootNode;
 
     if(root->mNumChildren > 0)
@@ -48,6 +51,8 @@ void ModelLoader::load(SceneNode* scene_node)
         mesh_component.set_mesh_name(m_file_path);
         scene_node->add_component(std::move(mesh_component));
     }
+
+    info("Model {} Loaded in {} ms", m_file_path, timer.stop());
 }
 
 SceneNode* ModelLoader::load_node(aiNode* current_node)

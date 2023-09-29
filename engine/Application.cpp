@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Application.h"
 #include "Input.hpp"
-#include "Timer.h"
+#include "Timer.hpp"
 #include "Log.hpp"
 
 #include <imgui.h>

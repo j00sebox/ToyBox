@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "Engine.hpp"
 #include "Input.hpp"
+#include "Log.hpp"
 #include "rendering/Renderer.hpp"
 #include "scene/Scene.hpp"
 #include "scene/SceneSerializer.hpp"
+#include "profiler/Timer.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -14,6 +16,7 @@ Engine::Engine(i32 width, i32 height) :
     m_running(false),
     m_prev_time(0.f)
 {
+    Timer timer;
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -34,6 +37,8 @@ Engine::Engine(i32 width, i32 height) :
 
     //FIXME
     Input::m_window_handle = m_window;
+
+    info("Startup Time: {} ms", timer.stop());
 }
 
 Engine::~Engine()
