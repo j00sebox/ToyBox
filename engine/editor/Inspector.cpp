@@ -10,9 +10,9 @@ void Inspector::display(Scene* scene)
     ImGui::Begin("Inspector");
     ImGui::BeginChild("##LeftSide", ImVec2(200, ImGui::GetContentRegionAvail().y), true);
 
-    for (auto* sceneNode : scene->root->children)
+    for (auto* scene_node : scene->root->children)
     {
-        display_node(scene, sceneNode);
+        display_node(scene, scene_node);
     }
 
     ImGui::EndChild();

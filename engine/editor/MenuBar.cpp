@@ -3,6 +3,7 @@
 #include "scene/SceneSerializer.hpp"
 
 #include <imgui.h>
+#include <spdlog/fmt/bundled/format.h>
 
 void MenuBar::display(Scene* scene, Renderer* renderer)
 {
@@ -82,7 +83,11 @@ void MenuBar::display_add_dropdown(Scene* current_scene, Renderer* renderer)
             if (ImGui::Button("Open"))
             {
                 std::string path = std::string(buf);
-                SceneSerializer::load_model(current_scene->root, path.c_str(), renderer);
+                auto* new_node = new SceneNode();
+                SceneSerializer::load_model(new_node, path.c_str(), renderer);
+                new_node->set_name("model (1)");
+                new_node->add_component(Transform{});
+                current_scene->root->add_child(new_node);
             }
             ImGui::EndMenu();
         }
