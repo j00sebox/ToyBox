@@ -49,23 +49,23 @@ void SceneSerializer::open(const char* scene_name, Scene* scene, Renderer* rende
 
 	std::string src = fileop::file_to_string(scene_name);
 
-	json w_json = json::parse(src);
+	json scene_json = json::parse(src);
 
-	json camera_accessor = w_json["camera"];
+	json camera_accessor = scene_json["camera"];
 	json camera_pos = camera_accessor["position"];
     json camera_fwd = camera_accessor["forward"];
 	scene->camera->set_pos(glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]));
     scene->camera->set_forward(glm::vec3(camera_fwd[0], camera_fwd[1], camera_fwd[2]));
 
-    if(!w_json["skybox"].is_null())
+    if(!scene_json["skybox"].is_null())
     {
-        scene->skybox = std::make_shared<Skybox>(load_skybox(w_json["skybox"], renderer));
+        scene->skybox = std::make_shared<Skybox>(load_skybox(scene_json["skybox"], renderer));
     }
 
-	json models = w_json["models"];
-	u32 model_count = w_json["model_count"];
+	json nodes = scene_json["nodes"];
+	u32 node_count = scene_json["node_count"];
 
-    load_nodes(models, model_count, scene, renderer);
+    load_nodes(nodes, node_count, scene, renderer);
 }
 
 void SceneSerializer::save(const char* scene_name, const Scene* scene)
@@ -91,10 +91,10 @@ void SceneSerializer::save(const char* scene_name, const Scene* scene)
 	i32 node_index = -1; // keeps track of nodes (left to right and depth first)
 	for (auto* scene_node : scene->root->children)
 	{
-		serialize_node(res_json["models"], ++node_index, scene_node);
+		serialize_node(res_json["nodes"], ++node_index, scene_node);
 	}
 
-	res_json["model_count"] = ++node_index;
+	res_json["node_count"] = ++node_index;
 
 	fileop::overwrite_file(scene_name, res_json.dump());
 }
@@ -519,10 +519,8 @@ void SceneSerializer::load_primitive(SceneNode* scene_node, const char* primitiv
         .data = indices.data()
     });
 
-    auto* new_node = new SceneNode();
-    new_node->set_name(primitive_name);
+    scene_node->set_name(primitive_name);
     mesh_component.set_mesh_name(primitive_name);
-    new_node->add_component(std::move(transform));
-    new_node->add_component(std::move(mesh_component));
-    scene_node->add_child(new_node);
+    scene_node->add_component(std::move(transform));
+    scene_node->add_component(std::move(mesh_component));
 }

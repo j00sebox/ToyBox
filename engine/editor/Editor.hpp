@@ -14,6 +14,7 @@ public:
         m_renderer(renderer) {}
     void display();
 
+
 private:
     Scene* m_scene;
     Renderer* m_renderer;

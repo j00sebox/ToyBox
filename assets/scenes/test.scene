@@ -11,12 +11,12 @@
             50.57678985595703
         ]
     },
-    "model_count": 2,
-    "models": [
+    "node_count": 2,
+    "nodes": [
         {
             "mesh": {
                 "mesh_name": "../assets/models/bunny/scene.gltf",
-                "mesh_type": "",
+                "mesh_type": "model",
                 "outlining_factor": 0.019999999552965164,
                 "use_scale_outline": true
             },

@@ -65,12 +65,18 @@ void MenuBar::display_add_dropdown(Scene* current_scene, Renderer* renderer)
 {
     if (ImGui::MenuItem("Cube"))
     {
-        SceneSerializer::load_primitive(current_scene->root, "cube", renderer);
+        auto* new_node = new SceneNode();
+        SceneSerializer::load_primitive(new_node, "cube", renderer);
+        set_unique_name(new_node, current_scene->root);
+        current_scene->root->add_child(new_node);
     }
 
     if (ImGui::MenuItem("Quad"))
     {
-        SceneSerializer::load_primitive(current_scene->root, "quad", renderer);
+        auto* new_node = new SceneNode();
+        SceneSerializer::load_primitive(new_node, "quad", renderer);
+        set_unique_name(new_node, current_scene->root);
+        current_scene->root->add_child(new_node);
     }
 
     if (ImGui::BeginMenu("Open Model"))
@@ -85,7 +91,7 @@ void MenuBar::display_add_dropdown(Scene* current_scene, Renderer* renderer)
                 std::string path = std::string(buf);
                 auto* new_node = new SceneNode();
                 SceneSerializer::load_model(new_node, path.c_str(), renderer);
-                new_node->set_name("model (1)");
+                set_unique_name(new_node, current_scene->root);
                 new_node->add_component(Transform{});
                 current_scene->root->add_child(new_node);
             }
@@ -123,4 +129,37 @@ void MenuBar::display_settings_dropdown()
         ImGui::EndMenu();
     }
     ImGui::EndMenu();
+}
+
+bool MenuBar::name_exists(const std::string& name, const SceneNode* scene_node)
+{
+    if(name == scene_node->get_name())
+    {
+        return true;
+    }
+
+    for(auto* child_node : scene_node->children)
+    {
+        if(name_exists(name, child_node))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void MenuBar::set_unique_name(SceneNode* scene_node, const SceneNode* root)
+{
+    if(name_exists(scene_node->get_name(), root))
+    {
+        u32 index = 1;
+        std::string unique_name = scene_node->get_name() + fmt::format(" ({})", index);
+        while(name_exists(unique_name, root))
+        {
+            unique_name = scene_node->get_name() + fmt::format(" ({})", index);
+            ++index;
+        }
+        scene_node->set_name(unique_name);
+    }
 }

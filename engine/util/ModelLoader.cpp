@@ -31,6 +31,7 @@ void ModelLoader::load(SceneNode* scene_node)
     {
         scene_node->is_model_root = true;
         scene_node->model_path = m_file_path;
+        scene_node->set_name(root->mName.C_Str());
 
         for(u32 i = 0; i < root->mNumChildren; ++i)
         {
@@ -50,6 +51,7 @@ void ModelLoader::load(SceneNode* scene_node)
 
         mesh_component.set_mesh_name(m_file_path);
         scene_node->add_component(std::move(mesh_component));
+        scene_node->set_name(root->mName.C_Str());
     }
 
     info("Model {} Loaded in {} ms", m_file_path, timer.stop());

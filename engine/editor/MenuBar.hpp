@@ -11,4 +11,5 @@ private:
     void display_settings_dropdown();
 
     bool name_exists(const std::string& name, const SceneNode* scene_node);
+    void set_unique_name(SceneNode* scene_node, const SceneNode* root);
 };
